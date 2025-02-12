@@ -1,8 +1,4 @@
-@layer openprops, normalize, utils, theme, components.base, components.has-deps, custom;
-
-
-/* Custom Additions */
-@import "opbeta/utilities.css" layer(custom);
+@layer openprops, normalize, utils, theme, components.base, components.has-deps;
 
 /*
 * Open Props
@@ -23,7 +19,6 @@
 
 /* Theme */
 @import "./theme.css";
-
 
 /*
 * Components
