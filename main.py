@@ -4,7 +4,7 @@ from fasthtml.common import *
 
 # Add this near the top of your file, after your imports
 DEFAULT_THEME = {
-    'theme_color_scheme': 'system',
+    'theme_color_scheme': 'dark',
     'theme_hue': 210,
     'theme_rotate': 0,
     'theme_chroma': 0.89,
