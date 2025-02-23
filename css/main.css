@@ -49,6 +49,7 @@
 @import "./text/typography.css";
 
 /*** Has dependencies */
+@import "./actions/tab-buttons.css";
 @import "./actions/button-group.css";
 @import "./data-display/accordion.css";
 @import "./data-display/list.css";
