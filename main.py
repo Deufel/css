@@ -4,12 +4,12 @@ from fasthtml.common import *
 
 # Add this near the top of your file, after your imports
 DEFAULT_THEME = {
-    'theme_color_scheme': 'dark',
+    'theme_color_scheme': 'light',
     'theme_hue': 210,
     'theme_rotate': 0,
     'theme_chroma': 0.89,
     'theme_root_size': 100,
-    'theme_button_radius': '--radius-round'
+    'theme_button_radius': '--radius-2'
 }
 
 # Add this near your DEFAULT_THEME at the top
