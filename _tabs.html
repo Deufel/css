@@ -1,0 +1,28 @@
+<article id="articleTabs" popover="auto" class="card outlined scroll-stable" >
+        <h1 class="flex-center">Tabs</h1>
+        <h4>Underlined</h4>
+
+        <nav class="flex-center tabs underlined">
+          <div role="tablist" aria-label="Underlined tabs"  hx-on::after-request="htmx.takeClass(event.target, 'selected')">
+            <button id="underlined-tab-1" role="tab" aria-controls="tabpanel-1" aria-selected="true" tabindex="0" hx-get="#test">
+              Profile
+            </button>
+            <button id="underlined-tab-2" role="tab" aria-controls="tabpanel-2" aria-selected="false" tabindex="-1" hx-get="#test">
+              Settings
+            </button>
+            <button id="underlined-tab-3" role="tab" aria-controls="tabpanel-3" aria-selected="false" tabindex="-1" hx-get="#test">
+              Notifications
+            </button>
+          </div>
+        </nav>
+        <p>This is a bit modified becuase it is much easier to change the classes then the aria-selected="true" so i need to figure out how to do that - TODO -</p>
+
+        <h4>Filled</h4>
+        <nav class="flex-center tabs filled">
+          <div role="tablist" aria-label="Filled tabs" hx-on::after-request="htmx.takeClass(event.target, 'selected')">
+            <button hx-get="#test"  id="filled-tab-1" role="tab" aria-controls="tabpanel-1" aria-selected="true" tabindex="0" > Korg </button>
+            <button hx-get="#test"  id="filled-tab-2" role="tab" aria-controls="tabpanel-2" aria-selected="false" tabindex="-1" > Yamaha </button>
+            <button hx-get="#test"  id="filled-tab-3" role="tab" aria-controls="tabpanel-3" aria-selected="false" tabindex="-1" > Roland </button>
+          </div>
+        </nav>
+    </article>

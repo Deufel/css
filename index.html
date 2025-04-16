@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Internal JS-->
+    <script src="layout.js"></script>
+    <!-- External JS -->
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <!-- Poly Fills -->
+    <script src="https://cdn.jsdelivr.net/npm/css-anchor-positioning-polyfill@0.2.0/dist/index.min.js"></script>
+
+    <title>Patchwork CSS</title>
+</head>
+
+
+<body class="dashboard padding">
+    <header class="flex-spread padding">
+        <span class="flex">
+            <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 512 512"> <path fill="currentColor" d="M153.9 51.5c-34.6 0-65.87 4.45-87.79 11.3c-10.96 3.43-19.55 7.51-24.76 11.37c-5.22 3.85-6.41 6.7-6.41 8.33s1.19 4.48 6.41 8.33c5.21 3.86 13.8 7.94 24.76 11.37c21.92 6.8 53.19 11.3 87.79 11.3s65.9-4.5 87.8-11.3c11-3.43 19.6-7.51 24.8-11.37c5.2-3.85 6.4-6.7 6.4-8.33s-1.2-4.48-6.4-8.33c-5.2-3.86-13.8-7.94-24.8-11.37c-21.9-6.85-53.2-11.3-87.8-11.3M388 70.48c-2.5 0-5 0-7.5.16c-20.2 1.15-42.3 7.56-63.1 15.43c-12.5 4.72-24.5 9.98-35.3 15.03c-1.5 1.5-3.2 2.9-4.9 4.2q-7.65 5.55-18.3 9.9v17.9c13.5-7.4 38.1-20.1 64.8-30.2c19.9-7.5 40.8-13.32 57.8-14.29c17-.98 28.9 2.5 35.4 11.69c6 8.5 5 14.1-.7 23.4c-5.6 9.3-16.8 20.2-29.5 31.6c-12.6 11.3-26.5 23.2-37.4 36.4s-19.2 28.2-18.2 45.2c1.5 24.8 21.4 48.3 39.9 67.4c18.4 19 36.5 32.9 36.5 32.9l11-14.2s-17.2-13.3-34.6-31.2c-17.4-18-33.9-41.4-34.8-56v-.1c-.7-10.3 4.6-21.1 14.1-32.5c9.5-11.5 22.8-23 35.6-34.6c12.8-11.5 25.1-22.8 32.9-35.6c7.7-12.8 9.7-29.2-.2-43.11c-9.8-13.91-26.1-19.1-43.5-19.41M153.9 74.5a48 8 0 0 1 48 8a48 8 0 0 1-48 8a48 8 0 0 1-48-8a48 8 0 0 1 48-8m-87 46.7v10.6c58.3 14 116 13 174 6.9v-17.5c-23.6 6.5-53.9 10.3-87 10.3c-33.2 0-63.38-3.8-87-10.3m0 29.1v24.4c62.9 2.9 119.7-3.4 174-13.9v-4.1c-57.1 6-115 7-174-6.4m174 28.7c-54 10.3-111.1 16.5-174 13.8v18.7c64 1.5 123.2-2.5 174-15.9zm0 35.3c-52 12.9-111.1 16.6-174 15.2v3.2c61.5 8.4 120.8 13.8 174 10.8zm-174 36.5v8.9c53.3 17 112.9 17.8 174 16.9v-15.1c-54.1 2.9-113.2-2.3-174-10.7m0 27.7v31.8c52.7 3.4 102.8-3.5 152.2-15.5c-52 .4-103.9-1.7-152.2-16.3m174 29.4c-55.7 14.7-113.1 24.3-174 20.5v16c57.6.2 114.8-1 174-14.2zm221.7 19a20.5 40.99 51.48 0 0-32.8 14.1a20.5 40.99 51.48 0 0-.2.1l-.6.6a20.5 40.99 51.48 0 0-8.9 8.5L265.9 497.5l176.3-115.9a20.5 40.99 51.48 0 0 13.1-8.5a20.5 40.99 51.48 0 0 19.3-41.5a20.5 40.99 51.48 0 0-12-4.7M452.5 342a10.25 20.5 51.48 0 1 .1 0a10.25 20.5 51.48 0 1 6 2.3a10.25 20.5 51.48 0 1-9.7 20.8a10.25 20.5 51.48 0 1-22.4 4.8a10.25 20.5 51.48 0 1 9.6-20.8a10.25 20.5 51.48 0 1 16.4-7.1m-211.6 6.6c-59.9 12.8-117.3 14-173.99 13.8c0 0 .41.9 3.71 2.8c3.91 2.2 10.75 4.6 19.24 6.5c16.94 3.8 40.54 5.8 64.04 5.8s47.1-2 64-5.8c8.5-1.9 15.4-4.3 19.3-6.5c3.4-2 3.7-3 3.7-2.8zM49.17 365.5c-3.1 1.6-5.74 3.1-7.82 4.7c-5.22 3.8-6.41 6.7-6.41 8.3s1.19 4.5 6.41 8.3c5.21 3.9 13.8 8 24.76 11.4c21.92 6.8 53.19 11.3 87.79 11.3s65.9-4.5 87.8-11.3c11-3.4 19.6-7.5 24.8-11.4c5.2-3.8 6.4-6.7 6.4-8.3s-1.2-4.5-6.4-8.3c-2.1-1.6-4.7-3.2-7.9-4.7c-1.2 6.9-6.7 12-12.5 15.3c-6.6 3.8-14.7 6.4-24.3 8.5c-19 4.2-43.4 6.2-67.9 6.2s-48.9-2-67.95-6.2c-9.51-2.1-17.68-4.7-24.26-8.5c-5.79-3.2-11.27-8.4-12.52-15.3" /> </svg>
+            <h3>Patchwork</h3>
+        </span>
+        <button hx-get="_tabs.html" hx-target="main" class="button outlined elevated">Tabs?</button>
+        <div>
+            <button id="nav-drawer-btn" popovertarget="nav" class="button hide-above-md " data-toggle-button>Nav</button>
+            <button id="aside-drawer-btn" popovertarget="aside" class="button">Aside</button>
+            <button id="footer-drawer-btn" popovertarget="footer" class="button">Footer</button>
+        </div>
+    </header>
+
+    <nav id="nav" popover="auto" data-layout="mobile-popover" class=" scroll-stable">
+        <ul class="list push-last">
+            <li>
+                <button id="article-test-btn" popovertarget="articleButton" class="button text">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-mouse-pointer-icon lucide-square-mouse-pointer"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></svg>
+                    <div class="text inset">Buttons</div>
+                </button>
+            </li>
+            <li>
+                <button id="article-test-btn" popovertarget="articleChip" class="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag-icon lucide-tag"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+                    <div class="text inset">Chip</div>
+                </button>
+            </li>
+
+            <li>
+            <button id="aside-drawer-btn" popovertarget="articleTabs" class="text button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16"> <path fill="currentColor" fill-rule="evenodd" d="M3.999 3.5h.242c.559 0 1.049.37 1.202.907l.171.598A2.75 2.75 0 0 0 8.26 7h5.24v4a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 11V5a1.5 1.5 0 0 1 1.499-1.5m9.501 2h-1.242a1.25 1.25 0 0 1-1.201-.907l-.171-.598a3 3 0 0 0-.195-.495H12A1.5 1.5 0 0 1 13.5 5zM8.241 2H4a3 3 0 0 0-.457.035A3 3 0 0 0 2 2.764A3 3 0 0 0 1 5v6a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3zM7 3.5h1.242c.559 0 1.049.37 1.202.907l.171.598q.075.261.195.495H8.26a1.25 1.25 0 0 1-1.202-.907l-.171-.598A3 3 0 0 0 6.69 3.5z" clip-rule="evenodd" /> </svg>
+                <div class="text inset">Tabs</div>
+
+            </button>
+            </li>
+            <li>
+                <button id="aside-drawer-btn" popovertarget="articleToggle" class="text button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-toggle-right-icon lucide-toggle-right"><rect width="20" height="12" x="2" y="6" rx="6" ry="6"/><circle cx="16" cy="12" r="2"/></svg>
+                    <div class="text inset">Toggle</div>
+                </button>
+            </li>
+            <li>
+                <button id="aside-drawer-btn" popovertarget="articleUtils" class="text button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-utility-pole-icon lucide-utility-pole"><path d="M12 2v20"/><path d="M2 5h20"/><path d="M3 3v2"/><path d="M7 3v2"/><path d="M17 3v2"/><path d="M21 3v2"/><path d="m19 5-7 7-7-7"/></svg>
+                    <div class="text inset">Utilities</div>
+                </button>
+            </li>
+            <li>
+                    <button id="aside-drawer-btn" popovertarget="articleAccordian" class="text button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-collapse-icon lucide-list-collapse"><path d="m3 10 2.5-2.5L3 5"/><path d="m3 19 2.5-2.5L3 14"/><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/></svg>
+                        <div class="text inset">Accordian</div>
+                    </button>
+                </li>
+            <li>
+                <button id="aside-drawer-btn" popovertarget="asideSettings" class="text button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <div class="text inset">Settings</div>
+                </button>
+            </li>
+
+        </ul>
+    </nav>
+
+    <aside id="aside" popover="auto">
+    <h2> Welcome Back </h2>
+    <form class="grid padding margin">
+    <label class="field filled small">
+        <span class="label">Email</span>
+        <input type="email" placeholder="name@email.com" />
+    </label>
+    <label class="field filled small">
+        <span class="label">Password</span>
+        <input type="password" placeholder="Password" />
+    </label>
+        <button class="button elevated small"> Sign In</button>
+    </form>
+</aside>
+
+    <aside id="asideSettings" popover="auto">
+        <h2> Settings </h2>
+        <div class="hue-control">
+          <label for="palette-hue">Base Hue (oklch degrees)</label>
+          <input type="range" id="palette-hue" min="0" max="360" value="200">
+          <div class="hue-display">
+            <span class="color-preview" id="hue-preview"></span>
+            <span id="hue-value">200</span>
+          </div>
+        </div>
+
+        <script>
+          // Elements
+          const paletteHue = document.getElementById('palette-hue');
+          const hueValue = document.getElementById('hue-value');
+          const huePreview = document.getElementById('hue-preview');
+
+          // Initial setup
+          updateHuePreview(paletteHue.value);
+
+          // Event listener
+          paletteHue.addEventListener('input', function() {
+            const newHue = this.value;
+            hueValue.textContent = newHue;
+            updateHuePreview(newHue);
+
+            // Update CSS variable globally
+            document.documentElement.style.setProperty('--palette-hue', newHue);
+          });
+
+          function updateHuePreview(hue) {
+            // Use a fixed chroma value for preview
+            const chroma = 0.15;
+            huePreview.style.backgroundColor = `oklch(0.6 ${chroma} ${hue})`;
+          }
+        </script>
+
+        <div class="theme-mode">
+          <label>
+            <input type="radio" name="theme" value="light" checked> Light
+          </label>
+          <label>
+            <input type="radio" name="theme" value="dark"> Dark
+          </label>
+          <label>
+            <input type="radio" name="theme" value="auto"> Auto
+          </label>
+        </div>
+
+        <style>
+          .theme-mode {
+            display: flex;
+            gap: 1rem;
+          }
+        </style>
+
+        <script>
+          // Get radios
+          const radios = document.querySelectorAll('input[name="theme"]');
+
+          // Add listeners
+          radios.forEach(radio => {
+            radio.addEventListener('change', e => {
+              if (e.target.checked) {
+                // Remove existing theme classes
+                document.documentElement.classList.remove('light', 'dark');
+
+                if (e.target.value === 'auto') {
+                  // Check system preference
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
+                } else {
+                  // Apply selected theme
+                  document.documentElement.classList.add(e.target.value);
+                }
+              }
+            });
+          });
+
+          // Initial setup - trigger change on checked radio
+          document.querySelector('input[name="theme"]:checked').dispatchEvent(new Event('change'));
+        </script>
+
+        <Ul class="list">
+
+            <li class="border-top">
+                <label for="v-16" class="switch">
+                    <div class="text"> <p>Dark Mode</p></div>
+                    <div class="end"><input role="switch" type="checkbox"></div>
+                </label>
+            </li>
+
+            <li class="border-top">
+                <label for="v-16" class="switch">
+                    <div class="text"> <p>Email Notifications</p></div>
+                    <div class="end"><input role="switch" type="checkbox"></div>
+                </label>
+            </li>
+        </Ul>
+    </aside>
+
+    <footer id="footer" popover="auto" class="rich-text dynamic-grid" style=" --grid-cols-lg-custom: 4;  --grid-cols-md-custom: 3;  --grid-cols-sm-custom: 4; ">
+    <a class="flex-center">Blog</a>
+    <a class="flex-center">Privacy Policy</a>
+    <a class="flex-center">Terms of Service</a>
+    <a class="flex-center">Contact Us</a>
+    <a class="flex-center">Careers</a>
+    <a class="flex-center">Legal</a>
+</footer>
+
+    <main class="card outlined scroll-stable" id="main">
+    <h1>Welcome to Patchwork</h1>
+    <p>This is just a colection of usefull css, This is not web page I'm just using a popover to make it feel like one.
+    <kbd class="chip"> F12</kbd> for all the source code</p>
+
+    <h4> Inspiration</h4>
+    <a href="https://open-props-ui.netlify.app/">Open Props UI</a>
+    <a href="https://open-props.style/">Open Props</a>
+    <a href="https://nerdy.dev/notebook/index.html">Nerdy Notebook</a>
+
+    <div class="rich-text dynamic-grid" style=" --grid-cols-lg-custom: 6;  --grid-cols-md-custom: 3;  --grid-cols-sm-custom: 2; ">
+        <div>
+        </div>
+    </main>
+
+    <article id="articleButton" popover="auto" class="card outlined scroll-stable" >
+        <h1 class="flex-center">Buttons</h1>
+        <div>
+            <h4>Large</h4>
+            <button class="button large">default</button>
+            <button class="button large elevated">elevated</button>
+            <button class="button outlined large">Outlined</button>
+            <button class="button filled large">Filled</button>
+            <button class="button outlined elevated large">Outlined Elevated</button>
+            <button class="button filled elevated large">Filled Elevated</button>
+        </div>
+        <div>
+            <h4>Default</h4>
+            <button class="button ">default</button>
+            <button class="button  elevated">elevated</button>
+            <button class="button outlined ">Outlined</button>
+            <button class="button filled ">Filled</button>
+            <button class="button outlined elevated ">Outlined Elevated</button>
+            <button class="button filled elevated ">Filled Elevated</button>
+        </div>
+        <div>
+            <h4>Small</h4>
+            <button class="button small">Default</button>
+            <button class="button  elevated small">Elevated</button>
+            <button class="button outlined small">Outlined</button>
+            <button class="button filled small">Filled</button>
+            <button class="button outlined elevated small">Outlined Elevated</button>
+            <button class="button filled elevated small">Filled Elevated</button>
+        </div>
+        <div>
+            <h4>Text</h4>
+            <button class="button">Text</button>
+            <button class="button" disabled>Disabled</button>
+            <a href="#" class="button">Link</a>
+        </div>
+        <div>
+            <h4>Icon Button</h4>
+            <button class="button outlined">
+                Bird
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bird-icon lucide-bird"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg>
+            </button>
+            <button class="button outlined">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bird-icon lucide-bird"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg>
+                Bird
+            </button>
+        </div>
+        <div>
+            <h4>Icon-Button</h4>
+            <button class="icon-button" aria-label="Bird">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-icon lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+            </button>
+            <button class="icon-button outlined" aria-label="Bird">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-icon lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+            </button>
+        </div>
+
+        <div>
+            <h4>Using the normal button class for an Icon Button</h4>
+            <button class="button" aria-label="Bird">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-icon lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+            </button>
+            <button class="button outlined" aria-label="Bird">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-icon lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+            </button>
+        </div>
+
+        <div>
+            <h4>Button Group</h4>
+            <div role="group" class="button-group">
+                <button class="button outlined ">Outlined</button>
+                <button class="button filled ">Filled</button>
+            </div>
+
+            <div role="group" class="button-group">
+                <button class="button outlined">
+                    Bird
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bird-icon lucide-bird"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg>
+                </button>
+                <button class="button filled">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bird-icon lucide-bird"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg>
+                    Bird
+                </button>
+            </div>
+
+
+            <div>
+                <h4>Somoe other defaults incase you need them Group</h4>
+                <p> Q: how there work with just having the color in the calss?  A: because these classes are in the theme.css </p>
+                <div class="button-group" role="group">
+                    <button class="button red filled">Red Button</button>
+                    <button class="button green filled">Green Button</button>
+                    <button class="button blue filled">Blue Outlined Button</button>
+                    <button class="button orange filled">Orange Button</button>
+                </div>
+                <hr>
+                <div class="button-group" role="group">
+                    <button class="button red outlined">Red Button</button>
+                    <button class="button green outlined">Green Button</button>
+                    <button class="button blue outlined ">Blue Outlined Button</button>
+                    <button class="button orange outlined elevated">Orange Button</button>
+                </div>
+            </div>
+        </div>
+    </article>
+
+
+    <article id="articleChip" popover="auto" class="card outlined scroll-stable" >
+        <h1 class="flex-center">Chip</h1>
+        <div>
+            <h4> in a Div</h4>
+            <div class="chip small">
+                <span class="text">Small</span>
+            </div>
+
+            <div class="chip">
+                <span class="text">Default</span>
+            </div>
+
+            <h4> in a A</h4>
+            <a href="#" class="chip">
+                <span class="text">Without icon</span>
+            </a href="#">
+
+
+            <a href="#" class="chip">
+                <span class="text">With icon</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-land-plot-icon lucide-land-plot"><path d="m12 8 6-3-6-3v10"/><path d="m8 11.99-5.5 3.14a1 1 0 0 0 0 1.74l8.5 4.86a2 2 0 0 0 2 0l8.5-4.86a1 1 0 0 0 0-1.74L16 12"/><path d="m6.49 12.85 11.02 6.3"/><path d="M17.51 12.85 6.5 19.15"/></svg>
+            </a href="#">
+
+            <p> Chips can go in a Div, a Link, Anchor</p>
+
+
+
+        </div>
+    </article>
+
+    <article id="articleTabs" popover="auto" class="card outlined scroll-stable" >
+        <h1 class="flex-center">Tabs</h1>
+        <h4>Underlined</h4>
+
+        <nav class="flex-center tabs underlined">
+          <div role="tablist" aria-label="Underlined tabs"  hx-on::after-request="htmx.takeClass(event.target, 'selected')">
+            <button id="underlined-tab-1" role="tab" aria-controls="tabpanel-1" aria-selected="true" tabindex="0" hx-get="#test">
+              Profile
+            </button>
+            <button id="underlined-tab-2" role="tab" aria-controls="tabpanel-2" aria-selected="false" tabindex="-1" hx-get="#test">
+              Settings
+            </button>
+            <button id="underlined-tab-3" role="tab" aria-controls="tabpanel-3" aria-selected="false" tabindex="-1" hx-get="#test">
+              Notifications
+            </button>
+          </div>
+        </nav>
+        <p>This is a bit modified becuase it is much easier to change the classes then the aria-selected="true" so i need to figure out how to do that - TODO -</p>
+
+        <h4>Filled</h4>
+        <nav class="flex-center tabs filled">
+          <div role="tablist" aria-label="Filled tabs" hx-on::after-request="htmx.takeClass(event.target, 'selected')">
+            <button hx-get="#test"  id="filled-tab-1" role="tab" aria-controls="tabpanel-1" aria-selected="true" tabindex="0" > Korg </button>
+            <button hx-get="#test"  id="filled-tab-2" role="tab" aria-controls="tabpanel-2" aria-selected="false" tabindex="-1" > Yamaha </button>
+            <button hx-get="#test"  id="filled-tab-3" role="tab" aria-controls="tabpanel-3" aria-selected="false" tabindex="-1" > Roland </button>
+          </div>
+        </nav>
+    </article>
+
+    <article id="articleUtils" popover="auto" class="card outlined scroll-stable" >
+        <h1 class="flex-center">Things I Have found usefull</h1>
+        <h4 class="gradient-text">A usefull effect may be to much? ? []</h4>
+    </article>
+
+    <article id="articleAccordian" popover="auto" class="card outlined scroll-stable" >
+        <h1 class="flex-center">Acordian</h1>
+        <details class="card">
+          <summary id="summary-id" aria-controls="content-id">Accordion title</summary>
+          <div
+            id="content-id"
+            class="content"
+            role="region"
+            aria-labelledby="summary-id"
+          >
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sodales,
+              nulla sit amet porttitor rhoncus, lacus ex vestibulum libero, ac mollis
+              neque ante id justo. Nam tempor euismod nisi ac ornare. Pellentesque id
+              sapien lacinia, venenatis est aliquam, dignissim elit. Suspendisse
+              potenti. Cras ut ante in libero tempus sodales sed quis dolor.
+            </p>
+          </div>
+        </details>
+    </article>
+
+    <article id="articleToggle" popover="auto" class="card outlined scroll-stable" >
+        <h1 class="flex-center">Toggle Group</h1>
+
+
+        <div class="flex-center">
+            <div role="group" class="toggle-button-group" hx-on::after-request="htmx.takeClass(event.target, 'selected')">
+                <button class="selected" aria-label="Walking" hx-get="#nothing">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"> <path fill="currentColor" d="M13 6.5A2.25 2.25 0 1 0 13 2a2.25 2.25 0 0 0 0 4.5m-2.639-.081c.185.045.35.146.493.272a3.24 3.24 0 0 0 2.904.72c.186-.044.379-.056.564-.01l.132.033a1.5 1.5 0 0 1 .919.673l1.332 2.177a1 1 0 0 0 .657.46l1.431.285a1.5 1.5 0 0 1-.587 2.942l-2.504-.5a1.5 1.5 0 0 1-.986-.688l-.183-.3a.54.54 0 0 0-.966.09a1.5 1.5 0 0 0 .17 1.389l.994 1.433a1.5 1.5 0 0 1 .265.767l.25 4.25a1.5 1.5 0 0 1-2.995.176l-.2-3.391a1 1 0 0 0-.247-.602l-.851-.968a.88.88 0 0 0-1.477.252L7.39 21.061a1.5 1.5 0 0 1-2.783-1.122l3.076-7.634q.02-.081.052-.162l.565-1.47a.469.469 0 0 0-.865-.362l-1.268 2.806a1.5 1.5 0 0 1-2.735-1.232l1.624-3.61a1.5 1.5 0 0 1 .846-.792l3.075-1.14a1.5 1.5 0 0 1 .883-.049z" /></svg>
+                </button>
+                <button data-v-81fefc60="" aria-label="Cycling" hx-get="#nothing">
+                    <svg data-v-81fefc60="" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12.75 3a.75.75 0 0 0 0 1.5h1.427l.955 3.5H8.5V5.75A.75.75 0 0 0 7.75 5h-3a.75.75 0 0 0 0 1.5H7v2.188L6.698 10.5a4.25 4.25 0 1 0 4.298 4.065l4.656-4.657l.274 1.003a4.25 4.25 0 1 0 1.447-.394l-1.9-6.964A.75.75 0 0 0 14.75 3zm3.58 9.394l.696 2.553a.75.75 0 1 0 1.448-.394L17.777 12a2.75 2.75 0 1 1-1.447.394m-5.765.48a4.26 4.26 0 0 0-2.387-2.128L8.385 9.5h5.554zm-2.64-.611c.71.336 1.254.968 1.471 1.737h-1.76zm-1.48-.246l-.435 2.61a.75.75 0 0 0 .74.873h2.646a2.751 2.751 0 1 1-2.95-3.483"></path></svg>
+                </button>
+                <button data-v-81fefc60="" aria-label="Commuting" hx-get="#nothing">
+                    <svg data-v-81fefc60="" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M16.25 3A3.75 3.75 0 0 1 20 6.75v9a3.75 3.75 0 0 1-2.89 3.651l2.462 1.172a.75.75 0 0 1-.55 1.392l-.095-.038L13.83 19.5h-3.661l-5.097 2.427a.75.75 0 1 1-.645-1.354L6.89 19.4A3.75 3.75 0 0 1 4 15.75v-9A3.75 3.75 0 0 1 7.75 3zM8 15a1 1 0 1 0 0 2a1 1 0 0 0 0-2m8 0a1 1 0 1 0 0 2a1 1 0 0 0 0-2m.25-10.5h-8.5A2.25 2.25 0 0 0 5.5 6.75v5.75h13V6.75a2.25 2.25 0 0 0-2.25-2.25m-3 1.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1 0-1.5z"></path></svg>
+                </button>
+            </div>
+            <div class="chip multiline">
+                <div class="text">
+                    <code style="display: block;">role="group" class="toggle-button-group"</code>
+                    <code style="margin-left: var(--size-3);">&ltbutton class="selected" aria-label="Walking"&gt ...</code>
+                </div>
+            </div>
+            <p>Note: I put a but of HTMX js on this so that it would send an htmx event and I could move the active state the important lines of code are on the parent div and then adding a dummy hx-get on the items..</p>
+        </div>
+    </article>
+
+</body>
