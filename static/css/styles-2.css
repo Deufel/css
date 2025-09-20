@@ -3339,31 +3339,6 @@
             user-select: none;
         }
 
-        /* Custom arrow */
-        /* summary {
-      align-items: center;
-      background-color: inherit;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      list-style: none;
-      padding-block: var(--size-3);
-      user-select: none;
-
-      &::marker,
-      &::-webkit-details-marker {
-        display: none;
-      }
-
-      svg {
-        transition: rotate 0.2s ease-out;
-      }
-    }
-
-    &[open] > summary svg {
-      rotate: 180deg;
-    } */
-
         & > .content {
             margin-block-start: 0;
             padding-block: var(--size-2) var(--size-3);
