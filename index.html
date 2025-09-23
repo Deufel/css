@@ -1,463 +1,53 @@
 <!DOCTYPE html>
 <html lang="en" data-signals="{themeMode: 'dark', fontScale: 'md', theme-color: 'cyan', layoutWidth: 'fullwidth'}">
-<head>
-    <meta charset="UTF-8">
-    <title>Popover Drawer System</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    
-    <style>
-        /* ===== POPOVER DRAWER SYSTEM CSS ===== */
-        :root {
-            --drawer-backdrop-color: rgba(0, 0, 0, 0.5);
-            --drawer-background: #ffffff;
-            --drawer-border-color: #e0e0e0;
-            --drawer-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            --drawer-border-radius: 12px;
-            --drawer-animation-duration: 0.3s;
-            --drawer-animation-easing: cubic-bezier(0.25, 0, 0.3, 1);
-            --gap-size: 16px;
-        }
+    <head>
+        <meta charset="UTF-8">
+        <title>Some Usefull CSS</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <!-- CSS -->
+        <link id="styles" rel="stylesheet" href="static/css/styles.css">
+        <link id="drawer-styles" rel="stylesheet" href="static/css/drawer.css">
 
-        [data-theme-mode="dark"] {
-            --drawer-background: #1a1a1a;
-            --drawer-border-color: #404040;
-        }
+        <!-- Web Components -->
+        <script type="module" src="static/wc/code-viewer.js"></script>
 
-        /* Reset and base styles */
-        * {
-            box-sizing: border-box;
-        }
+        <!-- Vendor -->
+        <!-- <script type="module" src="vendor/datastar.js"></script> -->
+        <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
 
-        body {
-            margin: 0;
-            font-family: system-ui, sans-serif;
-            background: var(--drawer-background);
-            color: #333;
-            display: grid;
-            grid-template:
-                "header header header" auto
-                "nav main aside" 1fr
-                "footer footer footer" auto
-                / auto 1fr auto;
-            min-height: 100vh;
-            gap: var(--gap-size);
-            padding: var(--gap-size);
-        }
+    </head>
 
-        [data-theme-mode="dark"] body {
-            color: #fff;
-        }
-
-        header { grid-area: header; }
-        nav { grid-area: nav; }
-        main { grid-area: main; }
-        aside { grid-area: aside; }
-        footer { grid-area: footer; }
-
-        /* Base popover styles */
-        [popover] {
-            border: none;
-            padding: var(--gap-size);
-            margin: 0;
-            outline: none;
-            background: var(--drawer-background);
-            border: 1px solid var(--drawer-border-color);
-            box-shadow: var(--drawer-shadow);
-            color: inherit;
-            
-            /* Position popovers in the top layer */
-            position: fixed;
-            inset: 0;
-            
-            /* Default hidden state */
-            opacity: 0;
-            transform: scale(0.95);
-            
-            /* Transitions */
-            transition:
-                display var(--drawer-animation-duration) allow-discrete,
-                overlay var(--drawer-animation-duration) allow-discrete,
-                opacity var(--drawer-animation-duration) var(--drawer-animation-easing),
-                transform var(--drawer-animation-duration) var(--drawer-animation-easing);
-        }
-
-        /* Open state */
-        [popover]:popover-open {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        /* Starting style for smooth entry animation */
-        @starting-style {
-            [popover]:popover-open {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-        }
-
-        /* Backdrop */
-        [popover]::backdrop {
-            background: rgba(0, 0, 0, 0);
-            backdrop-filter: blur(0px);
-            transition:
-                background var(--drawer-animation-duration) var(--drawer-animation-easing),
-                backdrop-filter var(--drawer-animation-duration) var(--drawer-animation-easing);
-        }
-
-        [popover]:popover-open::backdrop {
-            background: var(--drawer-backdrop-color);
-            backdrop-filter: blur(2px);
-        }
-
-        @starting-style {
-            [popover]:popover-open::backdrop {
-                background: rgba(0, 0, 0, 0);
-                backdrop-filter: blur(0px);
-            }
-        }
-
-        /* ===== DIRECTIONAL DRAWER STYLES ===== */
-
-        /* Header drawer (top) */
-        header[popover] {
-            top: 0;
-            bottom: auto;
-            left: 0;
-            right: 0;
-            width: 100%;
-            height: auto;
-            max-height: 80vh;
-            border-radius: 0 0 var(--drawer-border-radius) var(--drawer-border-radius);
-            border-top: none;
-            transform: translateY(-100%);
-        }
-
-        header[popover]:popover-open {
-            transform: translateY(0);
-        }
-
-        @starting-style {
-            header[popover]:popover-open {
-                transform: translateY(-100%);
-            }
-        }
-
-        /* Nav drawer (left) */
-        nav[popover] {
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: auto;
-            width: auto;
-            min-width: 300px;
-            max-width: 80vw;
-            height: 100vh;
-            border-radius: 0 var(--drawer-border-radius) var(--drawer-border-radius) 0;
-            border-left: none;
-            transform: translateX(-100%);
-        }
-
-        nav[popover]:popover-open {
-            transform: translateX(0);
-        }
-
-        @starting-style {
-            nav[popover]:popover-open {
-                transform: translateX(-100%);
-            }
-        }
-
-        /* Aside drawer (right) */
-        aside[popover] {
-            top: 0;
-            bottom: 0;
-            left: auto;
-            right: 0;
-            width: auto;
-            min-width: 300px;
-            max-width: 80vw;
-            height: 100vh;
-            border-radius: var(--drawer-border-radius) 0 0 var(--drawer-border-radius);
-            border-right: none;
-            transform: translateX(100%);
-        }
-
-        aside[popover]:popover-open {
-            transform: translateX(0);
-        }
-
-        @starting-style {
-            aside[popover]:popover-open {
-                transform: translateX(100%);
-            }
-        }
-
-        /* Footer drawer (bottom) */
-        footer[popover] {
-            top: auto;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            width: 100%;
-            height: auto;
-            max-height: 80vh;
-            border-radius: var(--drawer-border-radius) var(--drawer-border-radius) 0 0;
-            border-bottom: none;
-            transform: translateY(100%);
-            padding-bottom: calc(var(--gap-size) + env(safe-area-inset-bottom, 0px));
-        }
-
-        footer[popover]:popover-open {
-            transform: translateY(0);
-        }
-
-        @starting-style {
-            footer[popover]:popover-open {
-                transform: translateY(100%);
-            }
-        }
-
-        /* Mobile adjustments */
-        @media (max-width: 768px) {
-            nav[popover],
-            aside[popover] {
-                min-width: 280px;
-                max-width: 90vw;
-            }
-        }
-
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-            [popover],
-            [popover]::backdrop {
-                transition: none !important;
-            }
-
-            @starting-style {
-                [popover]:popover-open {
-                    opacity: 1 !important;
-                    transform: none !important;
+    <body data-signals="{windowWidth: window.innerWidth, currentPage: 'home'}"
+        data-on-windowresize="$windowWidth = evt.detail.width"
+        data-style-width="$layoutWidth === 'container' ? 'min(100%, 1200px)' : ''"
+        data-on-load="
+            window.layoutBroadcast = new BroadcastChannel('layout-updates');
+            window.layoutBroadcast.onmessage = (e) => {
+                if (e.data.type === 'layout-change') {
+                    $layoutWidth = e.data.layoutWidth;
                 }
-            }
-        }
+            };
+        "
+        data-effect="
+            window.layoutBroadcast?.postMessage({
+                type: 'layout-change',
+                layoutWidth: $layoutWidth
+            });
+        "
+    >
+        <header id="header" data-on-load="@get('partials/index-header.html')">  </header>
+        <nav    id="nav"    data-on-load="@get('partials/index-nav.html')"  > </nav>
+        <main   id="main"   data-on-load="@get('partials/index-main.html')">  </main>
+        <aside  id="aside"  data-on-load="@get('partials/index-aside.html')"></aside>
+        <footer id="footer" data-on-load="@get('partials/index-footer.html')"></footer>
 
-        /* Demo styles */
-        .demo-content {
-            background: #f5f5f5;
-            border-radius: 8px;
-            padding: var(--gap-size);
-            margin: var(--gap-size) 0;
-        }
-
-        [data-theme-mode="dark"] .demo-content {
-            background: #2a2a2a;
-        }
-
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #dc3545;
-            min-width: 30px;
-            padding: 6px;
-            border-radius: 50%;
-        }
-
-        .close-btn:hover {
-            background: #c82333;
-        }
-
-        h2 {
-            margin-top: 0;
-        }
-    </style>
-</head>
-
-<body 
-    data-signals="{
-        windowWidth: window.innerWidth, 
-        currentPage: 'home',
-        activeDrawer: null
-    }"
-    data-on-windowresize="$windowWidth = evt.detail.width"
-    data-on-load="
-        // Initialize popover system
-        window.PopoverDrawer = {
-            open: (position) => {
-                const drawer = document.querySelector(position + '[popover]');
-                if (drawer) {
-                    $activeDrawer = position;
-                    drawer.showPopover();
-                }
-            },
-            close: (position = null) => {
-                const target = position 
-                    ? document.querySelector(position + '[popover]')
-                    : document.querySelector('[popover]:popover-open');
-                if (target) {
-                    target.hidePopover();
-                    $activeDrawer = null;
-                }
-            }
-        };
-    "
->
-
-    <!-- Main layout content -->
-    <header>
-        <div class="demo-content">
-            <h1>Main Header</h1>
-            <button data-on-click="window.PopoverDrawer.open('header')">
-                Open Header Drawer
-            </button>
-        </div>
-    </header>
-
-    <nav>
-        <div class="demo-content">
-            <h2>Main Nav</h2>
-            <button data-on-click="window.PopoverDrawer.open('nav')">
-                Open Nav Drawer
-            </button>
-        </div>
-    </nav>
-
-    <main>
-        <div class="demo-content">
-            <h2>Main Content</h2>
-            <p>This is the main content area. Try opening the drawers!</p>
-            
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
-                <button data-on-click="window.PopoverDrawer.open('header')">
-                    Open Header (Top)
-                </button>
-                <button data-on-click="window.PopoverDrawer.open('nav')">
-                    Open Nav (Left)
-                </button>
-                <button data-on-click="window.PopoverDrawer.open('aside')">
-                    Open Aside (Right)
-                </button>
-                <button data-on-click="window.PopoverDrawer.open('footer')">
-                    Open Footer (Bottom)
-                </button>
-            </div>
-
-            <p>Current window width: <span data-text="$windowWidth + 'px'"></span></p>
-            <p>Active drawer: <span data-text="$activeDrawer || 'none'"></span></p>
-        </div>
-    </main>
-
-    <aside>
-        <div class="demo-content">
-            <h2>Main Aside</h2>
-            <button data-on-click="window.PopoverDrawer.open('aside')">
-                Open Aside Drawer
-            </button>
-        </div>
-    </aside>
-
-    <footer>
-        <div class="demo-content">
-            <h2>Main Footer</h2>
-            <button data-on-click="window.PopoverDrawer.open('footer')">
-                Open Footer Drawer
-            </button>
-        </div>
-    </footer>
-
-    <!-- Popover Drawers -->
-    <header popover="auto" 
-            data-on-toggle="if (!evt.target.matches(':popover-open')) $activeDrawer = null">
-        <button class="close-btn" data-on-click="window.PopoverDrawer.close()">×</button>
-        <h2>Header Drawer</h2>
-        <div class="demo-content">
-            <p>This is the header drawer content. It slides down from the top.</p>
-            <p>You can put navigation, search, or any header-related content here.</p>
-            <button data-on-click="window.PopoverDrawer.close()">Close</button>
-        </div>
-    </header>
-
-    <nav popover="auto"
-         data-on-toggle="if (!evt.target.matches(':popover-open')) $activeDrawer = null">
-        <button class="close-btn" data-on-click="window.PopoverDrawer.close()">×</button>
-        <h2>Navigation Drawer</h2>
-        <div class="demo-content">
-            <p>This is the navigation drawer. It slides in from the left.</p>
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <button data-on-click="window.PopoverDrawer.close()">Close</button>
-        </div>
-    </nav>
-
-    <aside popover="auto"
-           data-on-toggle="if (!evt.target.matches(':popover-open')) $activeDrawer = null">
-        <button class="close-btn" data-on-click="window.PopoverDrawer.close()">×</button>
-        <h2>Aside Drawer</h2>
-        <div class="demo-content">
-            <p>This is the aside drawer. It slides in from the right.</p>
-            <p>Perfect for sidebars, filters, or secondary content.</p>
-            <button data-on-click="window.PopoverDrawer.close()">Close</button>
-        </div>
-    </aside>
-
-    <footer popover="auto"
-            data-on-toggle="if (!evt.target.matches(':popover-open')) $activeDrawer = null">
-        <button class="close-btn" data-on-click="window.PopoverDrawer.close()">×</button>
-        <h2>Footer Drawer</h2>
-        <div class="demo-content">
-            <p>This is the footer drawer. It slides up from the bottom.</p>
-            <p>Great for mobile menus, quick actions, or footer content.</p>
-            <button data-on-click="window.PopoverDrawer.close()">Close</button>
-        </div>
-    </footer>
-
-    <!-- Datastar (using jsdelivr CDN) -->
-    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
-
-    <script>
-        // Window resize handler
-        addEventListener('resize', () =>
-            document.body.dispatchEvent(new CustomEvent('windowresize', {
-                detail: { width: innerWidth }
-            }))
-        );
-
-        // Handle backdrop clicks and escape key
-        document.addEventListener('click', (e) => {
-            if (e.target.hasAttribute('popover') && e.target.matches(':popover-open')) {
-                // Clicked on the popover backdrop
-                window.PopoverDrawer.close();
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const openPopover = document.querySelector('[popover]:popover-open');
-                if (openPopover) {
-                    e.preventDefault();
-                    window.PopoverDrawer.close();
-                }
-            }
-        });
-    </script>
-</body>
+        <script>
+          // Simple window resize handler that dispatches a custom event
+          addEventListener('resize', () =>
+              document.body.dispatchEvent(new CustomEvent('windowresize', {
+                  detail: { width: innerWidth }
+              }))
+          );
+        </script>
+    </body>
 </html>
