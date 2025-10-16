@@ -1,53 +1,61 @@
 <!DOCTYPE html>
-<html lang="en" data-signals="{themeMode: 'dark', fontScale: 'md', theme-color: 'cyan', layoutWidth: 'fullwidth'}">
-    <head>
-        <meta charset="UTF-8">
-        <title>Some Usefull CSS</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <!-- CSS -->
-        <link id="styles" rel="stylesheet" href="static/css/styles.css">
-        <link id="drawer-styles" rel="stylesheet" href="static/css/drawer.css">
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Drawer Test</title>
+		<style>
+		  body {
+			      margin: 0;
+				  font-family: system-ui;
+				    }
 
-        <!-- Web Components -->
-        <script type="module" src="static/wc/code-viewer.js"></script>
+		    nav[popover] {
+				border: none;
+				    padding: 2rem;
+					background: white;
+					    height: 100svh;
+						max-width: 80vw;
+						    
+						    transition-property: transform, opacity, display, overlay;
+							transition-duration: 0.3s;
+							    transition-behavior: allow-discrete;
+								
+								opacity: 0;
+								    transform: translateX(-100%);
+								      }
 
-        <!-- Vendor -->
-        <!-- <script type="module" src="vendor/datastar.js"></script> -->
-        <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+		      nav[popover]:popover-open {
+				  opacity: 1;
+				      transform: translateX(0);
+					}
 
-    </head>
+			@starting-style {
+				    nav[popover]:popover-open {
+						  opacity: 0;
+							transform: translateX(-100%);
+							    }
+				      }
 
-    <body data-signals="{windowWidth: window.innerWidth, currentPage: 'home'}"
-        data-on-windowresize="$windowWidth = evt.detail.width"
-        data-style-width="$layoutWidth === 'container' ? 'min(100%, 1200px)' : ''"
-        data-on-load="
-            window.layoutBroadcast = new BroadcastChannel('layout-updates');
-            window.layoutBroadcast.onmessage = (e) => {
-                if (e.data.type === 'layout-change') {
-                    $layoutWidth = e.data.layoutWidth;
-                }
-            };
-        "
-        data-effect="
-            window.layoutBroadcast?.postMessage({
-                type: 'layout-change',
-                layoutWidth: $layoutWidth
-            });
-        "
-    >
-        <header id="header" data-on-load="@get('partials/index-header.html')">  </header>
-        <nav    id="nav"    data-on-load="@get('partials/index-nav.html')"  > </nav>
-        <main   id="main"   data-on-load="@get('partials/index-main.html')">  </main>
-        <aside  id="aside"  data-on-load="@get('partials/index-aside.html')"></aside>
-        <footer id="footer" data-on-load="@get('partials/index-footer.html')"></footer>
+			  nav[popover]::backdrop {
+				      background: rgba(0,0,0,0.5);
+					  opacity: 0;
+					      transition: opacity 0.3s, display 0.3s, overlay 0.3s;
+						  transition-behavior: allow-discrete;
+						    }
 
-        <script>
-          // Simple window resize handler that dispatches a custom event
-          addEventListener('resize', () =>
-              document.body.dispatchEvent(new CustomEvent('windowresize', {
-                  detail: { width: innerWidth }
-              }))
-          );
-        </script>
-    </body>
+			    nav[popover]:popover-open::backdrop {
+					opacity: 1;
+					  }
+		</style>
+	</head>
+	<body>
+		<button popovertarget="drawer">Open Drawer</button>
+		<nav popover id="drawer">
+			<h2>Drawer Content</h2>
+			<p>This is a test drawer</p>
+			<button popovertarget="drawer" popovertargetaction="hide">Close</button>
+		</nav>
+	</body>
 </html>
+
