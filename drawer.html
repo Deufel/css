@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Drawer Test</title>
+		<style>
+		body { margin: 0; font-family: system-ui; }
+
+    nav[popover] { border: none; padding: 2rem; background: white; height: 100svh; max-width: 80vw;
+
+      transition-property: transform, opacity, display, overlay;
+			transition-duration: 0.3s;
+			transition-behavior: allow-discrete;
+								
+			opacity: 0;
+			transform: translateX(-100%);
+		}
+
+		nav[popover]:popover-open {
+		  opacity: 1;
+			transform: translateX(0);
+		}
+
+		@starting-style {
+			nav[popover]:popover-open {
+			  opacity: 0;
+			  transform: translateX(-100%);
+			}
+		}
+
+		nav[popover]::backdrop {
+		  background: rgba(0,0,0,0.5);
+			opacity: 0;
+			transition: opacity 0.3s, display 0.3s, overlay 0.3s;
+			transition-behavior: allow-discrete;
+		}
+
+		nav[popover]:popover-open::backdrop {
+			opacity: 1;
+		}
+		</style>
+	</head>
+	<body>
+		<button popovertarget="drawer">Open Drawer</button>
+		<nav popover id="drawer">
+			<h2>Drawer Content</h2>
+			<p>This is a test drawer</p>
+			<button popovertarget="drawer" popovertargetaction="hide">Close</button>
+		</nav>
+	</body>
+</html>
+
