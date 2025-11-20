@@ -18,9 +18,9 @@
     </head>
 
     <body data-signals="{windowWidth: window.innerWidth, currentPage: 'home'}"
-        data-on-windowresize="$windowWidth = evt.detail.width"
+        data-on:windowresize="$windowWidth = evt.detail.width"
         data-style-width="$layoutWidth === 'container' ? 'min(100%, 1200px)' : ''"
-        data-on-load="
+        data-on:load="
             window.layoutBroadcast = new BroadcastChannel('layout-updates');
             window.layoutBroadcast.onmessage = (e) => {
                 if (e.data.type === 'layout-change') {
@@ -35,11 +35,11 @@
             });
         "
     >
-        <header id="header" data-on-load="@get('partials/index-header.html')">  </header>
-        <nav    id="nav"    data-on-load="@get('partials/index-nav.html')"  > </nav>
-        <main   id="main"   data-on-load="@get('partials/index-main.html')">  </main>
-        <aside  id="aside"  data-on-load="@get('partials/index-aside.html')"></aside>
-        <footer id="footer" data-on-load="@get('partials/index-footer.html')"></footer>
+        <header id="header" data-on:load="@get('partials/index-header.html')">  </header>
+        <nav    id="nav"    data-on:load="@get('partials/index-nav.html')"  > </nav>
+        <main   id="main"   data-on:load="@get('partials/index-main.html')">  </main>
+        <aside  id="aside"  data-on:load="@get('partials/index-aside.html')"></aside>
+        <footer id="footer" data-on:load="@get('partials/index-footer.html')"></footer>
 
         <script>
           // Simple window resize handler that dispatches a custom event
