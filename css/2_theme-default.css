@@ -1,0 +1,76 @@
+@layer 2_theme {
+  :where(html) {
+    --well-1 #34495E:
+    --well-2 #2C3E50: 
+
+    --surface-1: #ECF0F1;
+    --surface-2: #7F8C8D;
+    --surface-3: #BDC3C7;
+    --surface-4: #95A5A6;
+    /* === COLORS === */
+    /* Primary */
+    --color-pri: light-dark(var(--blu-6), var(--blu-4));
+    --color-pri-hover: light-dark(var(--blu-7), var(--blu-5));
+    --color-pri-text: light-dark(white, var(--gry-1));
+    
+    /* Secondary */
+    --color-sec: light-dark(var(--vio-6), var(--vio-4));
+    --color-sec-hover: light-dark(var(--vio-7), var(--vio-5));
+    --color-sec-text: light-dark(white, var(--gry-1));
+    
+    /* Surfaces */
+    --surface-base: light-dark(white, var(--gry-9));
+    --surface-raised: light-dark(var(--gry-0), var(--gry-8));
+    --surface-sunken: light-dark(var(--gry-1), var(--gry-9));
+    --surface-overlay: light-dark(white, var(--gry-7));
+    
+    /* Text */
+    --text-pri: light-dark(var(--gry-9), var(--gry-0));
+    --text-sec: light-dark(var(--gry-6), var(--gry-3));
+    --text-ter: light-dark(var(--gry-5), var(--gry-4));
+    
+    /* Semantic states */
+    --color-suc: light-dark(var(--grn-6), var(--grn-4));
+    --color-err: light-dark(var(--red-6), var(--red-4));
+    --color-wrn: light-dark(var(--yel-6), var(--yel-4));
+    --color-inf: light-dark(var(--blu-6), var(--blu-4));
+    
+    /* Border */
+    --border-color: light-dark(var(--gry-3), var(--gry-6));
+    
+    /* === SPACING === */
+    /* Gap sizes */
+    --gap-sm: var(--size-2);
+    --gap-md: var(--size-4);
+    --gap-lg: var(--size-6);
+    
+    /* Padding */
+    --p-sm: var(--size-2) var(--size-3);
+    --p-md: var(--size-3) var(--size-5);
+    --p-lg: var(--size-4) var(--size-7);
+    
+    /* Margin */
+    --m-sm: var(--size-2);
+    --m-md: var(--size-4);
+    --m-lg: var(--size-6);
+    
+    /* === BUTTON === */
+    --btn-radius: var(--radius-2);
+    --btn-shadow: var(--shadow-1);
+    
+    /* === TYPOGRAPHY === */
+    --font-sans: var(--font-neo-grotesque);
+    --font-mono: var(--font-monospace-code);
+  }
+  
+  /* Theme switching */
+  [data-theme="light"] { color-scheme: light; }
+  [data-theme="dark"] { color-scheme: dark; }
+  
+  /* Base styles */
+  html {
+    background: var(--surface-base);
+    color: var(--text-pri);
+    font-family: var(--font-sans);
+  }
+}

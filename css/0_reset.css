@@ -1,9 +1,9 @@
 @layer reset {
   *,{ box-sizing: border-box;} 
   *, *::before, *::after {scrollbar-width: thin}
-  :root {; interpolate-size: allow-keywords; }
+  :root {interpolate-size: allow-keywords; }
   html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
-  body {margin:0; padding:0; max-height: 100svh, min-height: 100svh, scroll-behavior: none;}
+  body {margin:0; padding:0; max-height: 100svh; min-height: 100svh, scroll-behavior: none;}
   body, h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin-block-end: 0; }
   ul[role='list'], ol[role='list'] { list-style: none; }
   body { min-height: 100svh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
@@ -18,7 +18,7 @@
   @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 }
 
-@layer reset.scrollbar {
+@layer reset {
 * { scrollbar-width: thin; scrollbar-color: var(--color-primary) transparent; }
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; margin-block: var(--space-2); }

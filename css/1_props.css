@@ -1,0 +1,80 @@
+@layer props{
+:where(html) {
+    --highlight-size: 10px;
+    --highlight-color: hsl(0 0%, 0% / 20%);
+    --highlight: 0 0 0 var(--highlight-size) var(--highlight-color);
+
+    @media (--os-dark),
+    @media (prefers-color-scheme: dark) {
+        :where(html) {
+            --inner-shadow-highlight: inset 0 -.5px 0 0 #fff1, inset 0 .5px 0 0 #0007;
+            --highlight-color: hsl(0 0%, 100% / 20%);
+            --shadow-color: 220 40% 2%;
+            --shadow-strength: 25%;
+        }
+    }
+
+    --grid-cell: [stack] 1fr / [stack] 1fr;
+    --grid-cell-name: stack;
+    --grid-ram: repeat(auto-fit, minmax(min(0, 100%), 1fr));
+    --grid-holy-grail: auto 1fr auto / auto 1fr auto;
+    --shadow-color: 220 3% 15%;
+    --shadow-strength: 1%;
+    --inner-shadow-highlight: inset 0 -.5px 0 0 #fff,
+    inset 0 .5px 0 0 #0001;
+    --shadow-1: 0 1px 2px -1px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 9%));
+    --shadow-2: 0 3px 5px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 3%)), 0 7px 14px -5px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 5%));
+    --shadow-3: 0 -1px 3px 0 hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)), 0 1px 2px -5px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)), 0 2px 5px -5px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 4%)), 0 4px 12px -5px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 5%)), 0 12px 15px -5px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 7%));
+    --shadow-4: 0 -2px 5px 0 hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)), 0 1px 1px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 3%)), 0 2px 2px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 3%)), 0 5px 5px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 4%)), 0 9px 9px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 5%)), 0 16px 16px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 6%));
+    --shadow-5: 0 -1px 2px 0 hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)), 0 2px 1px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 3%)), 0 5px 5px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 3%)), 0 10px 10px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 4%)), 0 20px 20px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 5%)), 0 40px 40px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 7%));
+    --shadow-6: 0 -1px 2px 0 hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)), 0 3px 2px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 3%)), 0 7px 5px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 3%)), 0 12px 10px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 4%)), 0 22px 18px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 5%)), 0 41px 33px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 6%)), 0 100px 80px -2px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 7%));
+    --inner-shadow-0: inset 0 0 0 1px hsl(var(--shadow-color) / calc(var(--shadow-strength) + 9%));
+    --inner-shadow-1: inset 0 1px 2px 0 hsl(var(--shadow-color) / calc(var(--shadow-strength) + 9%)), var(--inner-shadow-highlight);
+    --inner-shadow-2: inset 0 1px 4px 0 hsl(var(--shadow-color) / calc(var(--shadow-strength) + 9%)), var(--inner-shadow-highlight);
+    --inner-shadow-3: inset 0 2px 8px 0 hsl(var(--shadow-color) / calc(var(--shadow-strength) + 9%)), var(--inner-shadow-highlight);
+    --inner-shadow-4: inset 0 2px 14px 0 hsl(var(--shadow-color) / calc(var(--shadow-strength) + 9%)), var(--inner-shadow-highlight);
+    --ratio-square: 1;
+    --ratio-landscape: 1.3333333333333333;
+    --ratio-portrait: 0.75;
+    --ratio-widescreen: 1.7777777777777777;
+    --ratio-ultra-wide: 3.6;
+    --ratio-cinema: 2.3333333333333335;
+    --ratio-golden: 1.6180339887;
+    --gry-0: #f8f9fa; --gry-1: #f1f3f5; --gry-2: #e9ecef; --gry-3: #dee2e6; --gry-4: #ced4da; --gry-5: #adb5bd; --gry-6: #868e96; --gry-7: #495057; --gry-8: #343a40; --gry-9: #212529;
+    --red-0: #fff5f5; --red-1: #ffe3e3; --red-2: #ffc9c9; --red-3: #ffa8a8; --red-4: #ff8787; --red-5: #ff6b6b; --red-6: #fa5252; --red-7: #f03e3e; --red-8: #e03131; --red-9: #c92a2a;
+    --pnk-0: #fff0f6; --pnk-1: #ffdeeb; --pnk-2: #fcc2d7; --pnk-3: #faa2c1; --pnk-4: #f783ac; --pnk-5: #f06595; --pnk-6: #e64980; --pnk-7: #d6336c; --pnk-8: #c2255c; --pnk-9: #a61e4d;
+    --grp-0: #f8f0fc; --grp-1: #f3d9fa; --grp-2: #eebefa; --grp-3: #e599f7; --grp-4: #da77f2; --grp-5: #cc5de8; --grp-6: #be4bdb; --grp-7: #ae3ec9; --grp-8: #9c36b5; --grp-9: #862e9c;
+    --vio-0: #f3f0ff; --vio-1: #e5dbff; --vio-2: #d0bfff; --vio-3: #b197fc; --vio-4: #9775fa; --vio-5: #845ef7; --vio-6: #7950f2; --vio-7: #7048e8; --vio-8: #6741d9; --vio-9: #5f3dc4;
+    --ind-0: #edf2ff; --ind-1: #dbe4ff; --ind-2: #bac8ff; --ind-3: #91a7ff; --ind-4: #748ffc; --ind-5: #5c7cfa; --ind-6: #4c6ef5; --ind-7: #4263eb; --ind-8: #3b5bdb; --ind-9: #364fc7;
+    --blu-0: #e7f5ff; --blu-1: #d0ebff; --blu-2: #a5d8ff; --blu-3: #74c0fc; --blu-4: #4dabf7; --blu-5: #339af0; --blu-6: #228be6; --blu-7: #1c7ed6; --blu-8: #1971c2; --blu-9: #1864ab;
+    --cyn-0: #e3fafc; --cyn-1: #c5f6fa; --cyn-2: #99e9f2; --cyn-3: #66d9e8; --cyn-4: #3bc9db; --cyn-5: #22b8cf; --cyn-6: #15aabf; --cyn-7: #1098ad; --cyn-8: #0c8599; --cyn-9: #0b7285;
+    --tel-0: #e6fcf5; --tel-1: #c3fae8; --tel-2: #96f2d7; --tel-3: #63e6be; --tel-4: #38d9a9; --tel-5: #20c997; --tel-6: #12b886; --tel-7: #0ca678; --tel-8: #099268; --tel-9: #087f5b;
+    --grn-0: #ebfbee; --grn-1: #d3f9d8; --grn-2: #b2f2bb; --grn-3: #8ce99a; --grn-4: #69db7c; --grn-5: #51cf66; --grn-6: #40c057; --grn-7: #37b24d; --grn-8: #2f9e44; --grn-9: #2b8a3e;
+    --lim-0: #f4fce3; --lim-1: #e9fac8; --lim-2: #d8f5a2; --lim-3: #c0eb75; --lim-4: #a9e34b; --lim-5: #94d82d; --lim-6: #82c91e; --lim-7: #74b816; --lim-8: #66a80f; --lim-9: #5c940d;
+    --yel-0: #fff9db; --yel-1: #fff3bf; --yel-2: #ffec99; --yel-3: #ffe066; --yel-4: #ffd43b; --yel-5: #fcc419; --yel-6: #fab005; --yel-7: #f59f00; --yel-8: #f08c00; --yel-9: #e67700;
+    --org-0: #fff4e6; --org-1: #ffe8cc; --org-2: #ffd8a8; --org-3: #ffc078; --org-4: #ffa94d; --org-5: #ff922b; --org-6: #fd7e14; --org-7: #f76707; --org-8: #e8590c; --org-9: #d9480f;
+    --size-000: -.5rem; --size-00: -.25rem; --size-1: .25rem; --size-2: .5rem; --size-3: 1rem; --size-4: 1.25rem; --size-5: 1.5rem; --size-6: 1.75rem; --size-7: 2rem; --size-8: 3rem; --size-9: 4rem;
+    --content-1: 25ch; --content-2: 45ch; --content-3: 75ch;
+    --border-size-1: 1px; --border-size-2: 2px; --border-size-3: 5px;
+    --radius-1: 2px; --radius-2: 5px; --radius-3: 1rem; --radius-4: 2rem; --radius-5: 4rem;
+    --radius-round: 1e5px;
+    --radius-conditional-3: clamp(0px, calc(100vw - 100%) * 1e5, var(--radius-3));
+    --font-system-ui: system-ui, sans-serif;
+    --font-transitional: Charter, Bitstream Charter, Sitka Text, Cambria, serif;
+    --font-old-style: Iowan Old Style, Palatino Linotype, URW Palladio L, P052, serif;
+    --font-humanist: Seravek, Gill Sans Nova, Ubuntu, Calibri, DejaVu Sans, source-sans-pro, sans-serif;
+    --font-geometric-humanist: Avenir, Montserrat, Corbel, URW Gothic, source-sans-pro, sans-serif;
+    --font-classical-humanist: Optima, Candara, Noto Sans, source-sans-pro, sans-serif;
+    --font-neo-grotesque: Inter, Roboto, Helvetica Neue, Arial Nova, Nimbus Sans, Arial, sans-serif;
+    --font-monospace-slab-serif: Nimbus Mono PS, Courier New, monospace;
+    --font-monospace-code: Dank Mono, Operator Mono, Inconsolata, Fira Mono, ui-monospace, SF Mono,Monaco, Droid Sans Mono, Source Code Pro, Cascadia Code,Menlo, Consolas, DejaVu Sans Mono, monospace;
+    --font-industrial: Bahnschrift, DIN Alternate, Franklin Gothic Medium, Nimbus Sans Narrow, sans-serif-condensed, sans-serif;
+    --font-rounded-sans: ui-rounded, Hiragino Maru Gothic ProN, Quicksand, Comfortaa, Manjari, Arial Rounded MT, Arial Rounded MT Bold, Calibri, source-sans-pro, sans-serif;
+    --font-slab-serif: Rockwell, Rockwell Nova, Roboto Slab, DejaVu Serif, Sitka Small, serif;
+    --font-antique: Superclarendon, Bookman Old Style, URW Bookman, URW Bookman L, Georgia Pro, Georgia, serif;
+    --font-didone: Didot, Bodoni MT, Noto Serif Display, URW Palladio L, P052, Sylfaen, serif;
+    --font-handwritten: Segoe Print, Bradley Hand, Chilanka, TSCu_Comic, casual, cursive;
+    --layer-1: 1; --layer-2: 2; --layer-3: 3; --layer-4: 4; --layer-5: 5; 
+    --layer-important: 2147483647;
+  }
+}
