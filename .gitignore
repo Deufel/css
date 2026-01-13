@@ -1,0 +1,8 @@
+**/.DS_Store
+.DS_Store
+archive/
+.ropeproject/
+.zed/
+.local/
+.js/*
+datastar-pro.js

@@ -1,0 +1,108 @@
+    @layer exception {
+      /* Button Variants */
+ 
+      :is(.btn, .icon-btn)[var="pri"] { background: var(--color-primary); color: var(--color-primary-text); border-color: transparent; box-shadow: var(--shadow-xs); }
+      :is(.btn, .icon-btn)[var="pri"]:hover { background: var(--color-primary-hover); box-shadow: var(--shadow-md); }
+      :is(.btn, .icon-btn)[var="sec"] { background: var(--color-secondary); color: var(--color-secondary-text); border-color: transparent; box-shadow: var(--shadow-xs); }
+      :is(.btn, .icon-btn)[var="sec"]:hover { background: var(--color-secondary-hover); box-shadow: var(--shadow-md); }
+      :is(.btn, .icon-btn)[var="out"] { background: transparent; color: var(--color-primary); border-color: var(--color-primary-border); }
+      :is(.btn, .icon-btn)[var="out"]:hover { background: var(--color-primary-subtle); }
+      :is(.btn, .icon-btn)[var="gho"] { background: transparent; border-color: transparent; }
+      :is(.btn, .icon-btn)[var="gho"]:hover { background: var(--interactive-hover); }
+      
+      /* Button Sizes */
+      .btn[sz="xs"] { padding: var(--space-1) var(--space-3); font-size: var(--text-2xs); }
+      .btn[sz="sm"] { padding: var(--space-2) var(--space-4); font-size: var(--text-xs); }
+      .btn[sz="md"] { padding: var(--space-3) var(--space-6); font-size: var(--text-sm); }
+      .btn[sz="lg"] { padding: var(--space-4) var(--space-8); font-size: var(--text-base); }
+      .btn[sz="xl"] { padding: var(--space-5) var(--space-10); font-size: var(--text-lg); }
+      
+      /* Button States */
+      :is(.btn, .icon-btn)[st="lod"] { opacity: 0.6; cursor: wait; pointer-events: none; }
+      :is(.btn, .icon-btn)[st="dis"] { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+      
+      /* Icon Button Sizes */
+      .icon-btn[sz="xs"] { width: 1.5rem; height: 1.5rem; }
+      .icon-btn[sz="sm"] { width: 2rem; height: 2rem; }
+      .icon-btn[sz="md"] { width: 2.5rem; height: 2.5rem; }
+      .icon-btn[sz="lg"] { width: 3rem; height: 3rem; }
+      .icon-btn[sz="xl"] { width: 3.5rem; height: 3.5rem; }
+      
+      /* Badge Variants */
+      .badge[var="def"] { background: var(--interactive-hover); color: var(--text-secondary); }
+      .badge[var="pri"] { background: var(--color-primary-subtle); color: var(--color-primary); }
+      .badge[var="sec"] { background: var(--color-secondary-subtle); color: var(--color-secondary); }
+      .badge[var="suc"] { background: var(--success-subtle); color: var(--success-5); }
+      .badge[var="wrn"] { background: var(--warning-subtle); color: var(--warning-5); }
+      .badge[var="err"] { background: var(--danger-subtle); color: var(--danger-5); }
+      .badge[var="inf"] { background: var(--info-subtle); color: var(--info-5); }
+      
+      /* Avatar Sizes */
+      .avatar[sz="xs"] { width: 1.5rem; height: 1.5rem; font-size: var(--text-2xs); }
+      .avatar[sz="sm"] { width: 2rem; height: 2rem; font-size: var(--text-xs); }
+      .avatar[sz="md"] { width: 2.5rem; height: 2.5rem; font-size: var(--text-sm); }
+      .avatar[sz="lg"] { width: 3.5rem; height: 3.5rem; font-size: var(--text-lg); }
+      .avatar[sz="xl"] { width: 4.5rem; height: 4.5rem; font-size: var(--text-xl); }
+      
+      /* Input States */
+      .input[st="err"] { border-color: var(--danger-5); }
+      .input[st="suc"] { border-color: var(--success-5); }
+      .input[st="wrn"] { border-color: var(--warning-5); }
+      
+      /* Card Variants */
+      .card[var="pri"] { background: var(--color-primary-subtle); border-color: var(--color-primary-border); }
+      .card[var="sec"] { background: var(--color-secondary-subtle); }
+      .card[st="lod"] { opacity: 0.6; pointer-events: none; }
+      
+      /* Switch Sizes */
+      .switch[sz="sm"] .switch-track { width: 2rem; height: 1.25rem; }
+      .switch[sz="sm"] .switch-track::after { width: 0.875rem; height: 0.875rem; }
+      .switch[sz="sm"] input:checked + .switch-track::after { transform: translateX(0.75rem); }
+      .switch[sz="sm"] .switch-label { font-size: var(--text-xs); }
+      .switch[sz="sm"] .switch-helper { font-size: var(--text-2xs); }
+
+      .switch[sz="lg"] .switch-track { width: 3rem; height: 1.75rem; }
+      .switch[sz="lg"] .switch-track::after { width: 1.375rem; height: 1.375rem; }
+      .switch[sz="lg"] input:checked + .switch-track::after { transform: translateX(1.25rem); }
+      .switch[sz="lg"] .switch-label { font-size: var(--text-base); }
+      .switch[sz="lg"] .switch-helper { font-size: var(--text-sm); }
+
+      /* Switch States */
+      .switch[st="dis"] { opacity: 0.4; cursor: not-allowed; }
+      .switch[st="lod"] { opacity: 0.6; cursor: wait; pointer-events: none; }
+
+      .switch[st="err"] .switch-track { outline: 2px solid var(--danger-5); outline-offset: 2px; }
+      .switch[st="err"] .switch-helper { color: var(--danger-5); }
+
+      .switch[st="suc"] .switch-track { outline: 2px solid var(--success-5); outline-offset: 2px; }
+      .switch[st="suc"] .switch-helper { color: var(--success-5); }
+
+      .switch[st="wrn"] .switch-track { outline: 2px solid var(--warning-5); outline-offset: 2px; }
+      .switch[st="wrn"] .switch-helper { color: var(--warning-5); }
+
+      /* Radio Sizes */
+      .radio[sz="sm"] .radio-indicator { width: 1rem; height: 1rem; }
+      .radio[sz="sm"] .radio-indicator::after { inset: 2.5px; }  /* Proportional spacing */
+      .radio[sz="sm"] .radio-label { font-size: var(--text-xs); }
+      .radio[sz="sm"] .radio-helper { font-size: var(--text-2xs); }
+
+      .radio[sz="lg"] .radio-indicator { width: 1.5rem; height: 1.5rem; }
+      .radio[sz="lg"] .radio-indicator::after { inset: 4px; }  /* Proportional spacing */
+      .radio[sz="lg"] .radio-label { font-size: var(--text-base); }
+      .radio[sz="lg"] .radio-helper { font-size: var(--text-sm); }
+
+
+      /* Radio States */
+      .radio[st="dis"] { opacity: 0.4; cursor: not-allowed; }
+      .radio[st="lod"] { opacity: 0.6; cursor: wait; pointer-events: none; }
+
+      .radio[st="err"] .radio-indicator { outline: 2px solid var(--danger-5); outline-offset: 2px; }
+      .radio[st="err"] .radio-helper { color: var(--danger-5); }
+
+      .radio[st="suc"] .radio-indicator { outline: 2px solid var(--success-5); outline-offset: 2px; }
+      .radio[st="suc"] .radio-helper { color: var(--success-5); }
+
+      .radio[st="wrn"] .radio-indicator { outline: 2px solid var(--warning-5); outline-offset: 2px; }
+      .radio[st="wrn"] .radio-helper { color: var(--warning-5); }
+
+    }

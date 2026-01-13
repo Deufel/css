@@ -1,0 +1,22 @@
+
+@layer theme {
+  :root {
+    
+    --gray-0: oklch(0.11 0.015 145); --gray-1: oklch(0.17 0.015 142); --gray-2: oklch(0.23 0.014 139);
+    --gray-3: oklch(0.31 0.013 136); --gray-4: oklch(0.39 0.012 133); --gray-5: oklch(0.47 0.011 130);
+    --gray-6: oklch(0.55 0.010 127); --gray-7: oklch(0.63 0.010 124); --gray-8: oklch(0.71 0.009 121);
+    --gray-9: oklch(0.79 0.008 118); --gray-10: oklch(0.87 0.006 115); --gray-11: oklch(0.93 0.004 112);
+    --gray-12: oklch(0.98 0.003 110);
+    
+    --theme-5: oklch(0.50 0.08 145); --theme-6: oklch(0.55 0.085 143);
+    --theme-7: oklch(0.60 0.09 141); --theme-8: oklch(0.65 0.095 139);
+    
+    --accent-5: oklch(0.55 0.08 55); --accent-6: oklch(0.60 0.085 53);
+    --accent-7: oklch(0.65 0.09 51); --accent-8: oklch(0.70 0.095 49);
+    
+    --success-5: oklch(0.58 0.10 150); --success-6: oklch(0.63 0.095 148);
+    --danger-5: oklch(0.55 0.10 25); --danger-6: oklch(0.60 0.095 24);
+    --warning-5: oklch(0.62 0.10 70); --warning-6: oklch(0.67 0.095 68);
+    --info-5: oklch(0.55 0.06 200); --info-6: oklch(0.60 0.058 198);
+  }
+}

@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html id="html" lang="en" data-attr:data-theme="$prst_colorScheme === 'system' ? false : $prst_colorScheme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS - CUBE Attributes</title>
+  <script type="module">
+    try { await import('/js/datastar-pro.js'); } 
+    catch { await import('https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js'); }
+  </script>
+  <style>@layer reset, theme, composition, utility, block, exception;</style>
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/theme-base.css">
+  <link rel="stylesheet" data-attr:href="$prst_theme">
+  <link rel="stylesheet" href="../css/composition.css">
+  <link rel="stylesheet" href="../css/utility.css">
+  <link rel="stylesheet" href="../css/block.css">
+  <link rel="stylesheet" href="../css/exception.css">
+  <style>
+    .app-layout {
+      display: grid;
+      grid-template-columns: var(--col-nav, auto) 1fr var(--col-aside, auto);
+      grid-template-rows: var(--row-header, auto) 1fr var(--row-footer, auto);
+      min-height: 100svh;
+      gap: var(--space-2);
+    }
+    .app-layout > header { grid-column: 1 / -1; grid-row: 1; }
+    .app-layout > nav { grid-column: 1; grid-row: 2; }
+    .app-layout > main { grid-column: 2; grid-row: 2; }
+    .app-layout > aside { grid-column: 3; grid-row: 2; }
+    .app-layout > footer { grid-column: 1 / -1; grid-row: 3; }
+  </style>
+</head>
+<body class="bg-base app-layout" 
+    data-persist="{include: /^prst_/}"
+    data-signals="{prst_header: true, prst_nav: true, prst_aside: false, prst_footer: true, prst_colorScheme: 'system', prst_theme: '../css/theme-default.css', _hideMode: false, _bak: {}}"
+    data-style:--col-nav="$prst_nav ? 'auto' : '0fr'"
+    data-style:--col-aside="$prst_aside ? 'auto' : '0fr'"
+    data-style:--row-header="$prst_header ? 'auto' : '0fr'"
+    data-style:--row-footer="$prst_footer ? 'auto' : '0fr'">
+
+  <header class="card rounded-md" data-show="$prst_header">
+    <div class="--make-grid:lcr">
+      <div class="--make-flex:items-center" style="justify-content: flex-start">
+        <button class="icon-btn" sz="md" data-on:click__viewtransition="$prst_nav = !$prst_nav">☰</button>
+        <h1 class="m-0 text-2xl font-semibold">CSS</h1>
+      </div>
+      <div></div>
+      <div class="--make-flex">
+        <button class="icon-btn" sz="md" data-on:click="$prst_footer = !$prst_footer">ℹ</button>
+        <button class="icon-btn" sz="md" data-on:click__viewtransition="$prst_aside = !$prst_aside">⚙</button>
+        <a class="icon-btn center" sz="sm" href="https://github.com/Deufel/css">GH</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="bg-raised card rounded-md p-6" style="overflow-y: auto;" data-show="$prst_nav">
+    <div class="--make-flex:stack" style="--space-2: 0.5rem;">
+      <a href="./index.html" class="btn" sz="md" var="gho">🏠 Home</a>
+      <a href="./buttons.html" class="btn" sz="md" var="pri">⬜ Buttons</a>
+      <a href="./avatar.html" class="btn" sz="sm" var="gho">👤 Avatar</a>
+      <a href="./badge.html" class="btn" sz="sm" var="gho">🏷 Badge</a>
+      <a href="./cards.html" class="btn" sz="sm" var="gho">🪪 Cards</a>
+    </div>
+  </nav>
+
+  <main class="bg-raised card" var="pri" style="overflow-y: auto;">
+    <section>
+      <h2>Buttons</h2>
+    </section>
+  </main>
+
+  <aside class="bg-raised rounded-md p-4" style="overflow-y: auto;" data-show="$prst_aside">
+    <div>
+      <h4 class="font-semibold text-sm mb-3">Light/Dark</h4>
+      <div class="card --make-grid:auto-fill" var="pri">
+        <button class="btn" sz="sm" data-attr:var="$prst_colorScheme === 'light' ? 'pri' : 'gho'" data-on:click="$prst_colorScheme = 'light'">Light</button>
+        <button class="btn" sz="sm" data-attr:var="$prst_colorScheme === 'system' ? 'pri' : 'gho'" data-on:click="$prst_colorScheme = 'system'">System</button>
+        <button class="btn" sz="sm" data-attr:var="$prst_colorScheme === 'dark' ? 'pri' : 'gho'" data-on:click="$prst_colorScheme = 'dark'">Dark</button>
+      </div>
+    </div>
+    <div>
+      <h4 class="font-semibold text-sm mb-3">Theme</h4>
+      <div class="card --make-grid:auto-fit" var="pri">
+        <button class="btn" sz="sm" data-attr:var="$prst_theme.includes('default') ? 'pri' : 'gho'" data-on:click="$prst_theme = '../css/theme-default.css'">Default</button>
+        <button class="btn" sz="sm" data-attr:var="$prst_theme.includes('sand') ? 'pri' : 'gho'" data-on:click="$prst_theme = '../css/theme-sand.css'">Sand</button>
+        <button class="btn" sz="sm" data-attr:var="$prst_theme.includes('ocean') ? 'pri' : 'gho'" data-on:click="$prst_theme = '../css/theme-ocean.css'">Ocean</button>
+        <button class="btn" sz="sm" data-attr:var="$prst_theme.includes('forest') ? 'pri' : 'gho'" data-on:click="$prst_theme = '../css/theme-forest.css'">Forest</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="no-print" style="position: fixed; bottom: var(--space-4); right: var(--space-4);">
+    <button class="icon-btn m-4" var="gho" data-on:click__viewtransition="
+        $_hideMode = !$_hideMode;
+        if ($_hideMode) { $_bak = {footer: $prst_footer, aside: $prst_aside, nav: $prst_nav, header: $prst_header}; @setAll(false, {include: /prst_footer|prst_aside|prst_nav|prst_header/}) }
+        else { $prst_footer = $_bak.footer; $prst_aside = $_bak.aside; $prst_nav = $_bak.nav; $prst_header = $_bak.header }">⛶</button>
+  </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html id="html" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS - Work in Progress</title>
+  <script type="module">
+    try {
+      await import('/js/datastar-pro.js');
+      console.log('Loaded local datastar-pro.js');
+    } catch {
+      await import('https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js');
+      console.log('Loaded datastar from CDN fallback');
+    }
+  </script>
+</head>
+<body data-persist="{include: /^prst_/}" 
+    data-signals:prst_header="true" 
+    data-signals:prst_nav__ifmissing="true" 
+    data-signals:normal_header__ifmissing="true" 
+    data-signals:normal_nav__ifmissing="true">
+
+  <h1>Persist vs Normal Signal Demo</h1>
+  
+  <div class="box">
+    <h3>Persisted Signals (prst_*)</h3>
+    <div>prst_header: <span data-text="$prst_header"></span></div>
+    <div>prst_nav: <span data-text="$prst_nav"></span></div>
+    <button data-on:click="$prst_header = !$prst_header">Toggle prst_header</button>
+    <button data-on:click="$prst_nav = !$prst_nav">Toggle prst_nav</button>
+  </div>
+
+  <div class="box">
+    <h3>Normal Signals (not persisted)</h3>
+    <div>normal_header: <span data-text="$normal_header"></span></div>
+    <div>normal_nav: <span data-text="$normal_nav"></span></div>
+    <button data-on:click="$normal_header = !$normal_header">Toggle normal_header</button>
+    <button data-on:click="$normal_nav = !$normal_nav">Toggle normal_nav</button>
+  </div>
+
+  <div class="box">
+    <h3>Test Steps</h3>
+    <ol>
+      <li>On fresh load, both should show "true"</li>
+      <li>Toggle both headers to "false"</li>
+      <li>Hard refresh (Ctrl+Shift+R)</li>
+      <li>Normal signals reset to "true" (correct)</li>
+      <li>Persist signals stay "false" (persist wins over __ifmissing)</li>
+    </ol>
+    <button data-on:click="localStorage.clear(); location.reload()">Clear Storage & Reload</button>
+  </div>
+
+  <div class="box">
+    <h3>Raw localStorage</h3>
+    <pre data-text="JSON.stringify(Object.fromEntries(Object.entries(localStorage).filter(([k]) => k.includes('datastar'))), null, 2)"></pre>
+  </div>
+
+</body>
+</html>

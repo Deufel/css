@@ -1,0 +1,128 @@
+/* ===== GRID PRIMITIVE ===== */
+
+/* Base */
+[class*="--make-grid"] {
+    display: grid;
+    gap: 0.5 rem;
+}
+
+/* Auto variants */
+[class*="--make-grid"][class*="\:auto\:fit"] {
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(var(--min-column-size, 20ch), 100%), 1fr)
+    );
+}
+
+[class*="--make-grid"][class*="\:auto\:fill"] {
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(min(var(--min-column-size, 20ch), 100%), 1fr)
+    );
+}
+
+/* LCR - left center right */
+[class*="--make-grid"][class*="\:lcr"] {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+[class*="--make-grid"][class*="\:lcr"] > :nth-child(1) { justify-self: start; }
+[class*="--make-grid"][class*="\:lcr"] > :nth-child(2) { justify-self: center; }
+[class*="--make-grid"][class*="\:lcr"] > :nth-child(3) { justify-self: end; }
+
+/* TMB - top middle bottom */
+[class*="--make-grid"][class*="\:tmb"] {
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+[class*="--make-grid"][class*="\:tmb"] > :nth-child(1) { align-self: start; }
+[class*="--make-grid"][class*="\:tmb"] > :nth-child(2) { align-self: center; }
+[class*="--make-grid"][class*="\:tmb"] > :nth-child(3) { align-self: end; }
+
+/* Overlap */
+[class*="--make-grid"][class*="\:overlap"] {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+}
+[class*="--make-grid"][class*="\:overlap"] > * {
+    grid-area: 1 / 1;
+}
+
+/* Dense packing */
+[class*="--make-grid"][class*="\:dense"] {
+    grid-auto-flow: dense;
+}
+
+/* Span utility */
+[class*="--make-grid"] > [class*="--make-span"] {
+    grid-column: 1 / -1;
+}
+
+/* Justify modifiers (inline axis) */
+[class*="--make-grid"][class*="\:justify-start"] { justify-items: start; }
+[class*="--make-grid"][class*="\:justify-center"] { justify-items: center; }
+[class*="--make-grid"][class*="\:justify-end"] { justify-items: end; }
+
+/* Align modifiers (block axis) */
+[class*="--make-grid"][class*="\:items-start"] { align-items: start; }
+[class*="--make-grid"][class*="\:items-center"] { align-items: center; }
+[class*="--make-grid"][class*="\:items-end"] { align-items: end; }
+
+/* Place (both axes) */
+[class*="--make-grid"][class*="\:place-center"] { place-items: center; }
+
+
+/* ===== FLEX PRIMITIVE ===== */
+
+/* Base */
+[class*="--make-flex"] {
+    display: flex;
+    gap: 0.5 rem;
+}
+
+/* Direction variants */
+[class*="--make-flex"][class*="\:stack"] {
+    flex-direction: column;
+}
+
+[class*="--make-flex"][class*="\:cluster"] {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+/* Flank variants */
+[class*="--make-flex"][class*="\:flank\:start"] > :first-child {
+    flex-basis: var(--flank-size, auto);
+    flex-grow: 1;
+}
+[class*="--make-flex"][class*="\:flank\:start"] > :last-child {
+    flex-basis: 0;
+    flex-grow: 999;
+    min-inline-size: var(--content-percentage, 50%);
+}
+
+[class*="--make-flex"][class*="\:flank\:end"] > :last-child {
+    flex-basis: var(--flank-size, auto);
+    flex-grow: 1;
+}
+[class*="--make-flex"][class*="\:flank\:end"] > :first-child {
+    flex-basis: 0;
+    flex-grow: 999;
+    min-inline-size: var(--content-percentage, 50%);
+}
+
+/* Justify modifiers */
+[class*="--make-flex"][class*="\:spread"] {
+    justify-content: space-between;
+}
+
+[class*="--make-flex"][class*="\:center"] {
+    justify-content: center;
+}
+
+[class*="--make-flex"][class*="\:end"] {
+    justify-content: flex-end;
+}
+
+/* Wrap modifier */
+[class*="--make-flex"][class*="\:nowrap"] {
+    flex-wrap: nowrap;
+}

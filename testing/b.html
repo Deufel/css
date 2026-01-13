@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html id="html">
+  <head>
+    <title>Test data-persist</title>
+  <script type="module">
+    try {
+      await import('./datastar-pro.js');
+    } catch {
+      await import('https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js');
+    }
+  </script>
+  </head>
+
+  <body data-persist="{include: /^persist_/}">
+    <h1>Page 1</h1>
+    
+  <div style="display: inline-flex">
+        <div>
+          <input class="input" data-bind:test placeholder="Normal signal">
+          <p>Signal value: <strong data-text="$test"></strong></p>
+        </div>
+
+        <div>
+          <input data-bind:persist_test placeholder="Persist Signal">
+          <p>Signal value: <strong data-text="$persist_test"></strong></p>
+        </div>
+
+  </div>
+    
+    <hr>
+    <a href="./a.html">&lt goto page a &gt </a>
+    <button data-on:click="@get('./a.html')">&lt using fetch (no history)&gt</button>
+  </body>
+
+</html>
+
