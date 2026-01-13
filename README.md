@@ -12,64 +12,54 @@ This system styles your web pages. It uses CSS layers and Datastar for reactive 
 ```
 css/
   reset.css          # Fixes browser quirks
-  theme.css          # Colors and tokens
-  composition.css    # Layout tools
-  utility.css        # Helper classes  
+  props.css          # CSS Custom Props
+  theme.css          # Theme
+  composition.css    # Layout 
+  utility.css        # single purpopse 
   block.css          # Component base
   exception.css      # Variants and sizes
-  
 ```
 
-## Install
+## To "install" just add to your page headers. in the correctly layer order
 
-Add these in order:
+Add a layer declaration first: 
+ - this establishes the layer hierarchy
+ - Do not use important this has weird behaviour with layers You should not need important this is a sign your using CUBE incorrectly.
+ - reset is very basic
+ - props is basically Open Props
+ - theme is where the Custom Props are applied to the design system;
+  * Ideally the Custom Props are the same not matter what and all you would need to change the design system would be the theme layer More on this next* 
 
-```html
-<link rel="stylesheet" href="css/reset.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/composition.css">
-<link rel="stylesheet" href="css/utility.css">
-<link rel="stylesheet" href="css/block.css">
-<link rel="stylesheet" href="css/exception.css">
+```html 
+<style>@layer reset, props, theme, composition, utility, block, exception;</style>
+<link rel="stylesheet" href="../css/reset.css">
+<link rel="stylesheet" data-attr:href="$prst_theme">
+<!-- and import the rest since of the css here -->
 ```
 
-Add Datastar:
+Notice the theme is loaded in via a `$prst_theme` this is a datastar signal that is used to keep the users theme in local storage; It is probably a bettter idea to use your backend and track the users theme in your database. We will use persist for the purpose of being able to test this easily locally. 
+    ** NOTE: data-persist is a datastar_pro attribute ** 
+
+
 
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"></script>
 ```
 
-## Three-Letter Attributes
+## API
 
-Style components with short attributes:
-
+Components all follow generally the same API;
 ```html
-<button class="btn" var="pri" sz="lg">Click</button>
+<button class="btn" var="pri" sz="lg" st="lod">Click</button>
 ```
+these html attributes are out of spec I do understand this. Maybe later I will make this a rocket library to comply with html spec:
+
 
 **var** = variant (pri, sec, out, gho)  
 **sz** = size (xs, sm, md, lg, xl)  
 **st** = state (def, lod, dis, err, suc, wrn, inf)
 
 These are CSS hooks. Not Datastar attributes.
-
-## Make It Reactive
-
-Use Datastar to control attributes:
-
-```html
-<button class="btn"
-        var="pri"
-        sz="md"
-        data-signals="{v: 'pri', s: 'md'}"
-        data-attr:var="$v"
-        data-attr:sz="$s"
-        data-on:click="$v = 'sec'">
-  Toggle
-</button>
-```
-
-The `$v` signal controls the `var` attribute. Click changes it. CSS reacts.
 
 ## Components
 
@@ -132,12 +122,9 @@ Grid things:
 ## Rules
 
 - Static markup gets static attributes
-- Dynamic markup gets Datastar signals
-- Signals control attributes
-- Attributes control styles
 - Keep `data-*` for Datastar only
 - Keep regular attributes for styling
 
 ## License
 
-MIT. Use it.
+MIT. 
