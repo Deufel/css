@@ -1,100 +1,32 @@
 @layer theme {
   :where(html) {
-    /* ===== WELLS (Fixed colors) ===== */
-    --well-1: #34495e;
-    --well-2: #2c3e50;
-
-    /* ===== SURFACES (Legacy - consider removing) ===== */
-    --surface-1: #ecf0f1;
-    --surface-2: #7f8c8d;
-    --surface-3: #bdc3c7;
-    --surface-4: #95a5a6;
-
-    /* ===== SPACING TOKENS (T-shirt sizes from props layer) ===== */
+    /* === SPACING (t-shirt sizes) === */
     --space-xs: var(--size-1);   /* 0.25rem */
     --space-sm: var(--size-2);   /* 0.5rem */
     --space-md: var(--size-3);   /* 1rem */
     --space-lg: var(--size-5);   /* 1.5rem */
     --space-xl: var(--size-7);   /* 2rem */
-    --space-2xl: var(--size-8);  /* 3rem */
-    --space-3xl: var(--size-9);  /* 4rem */
 
-    /* ===== COLORS ===== */
-    /* Primary */
-    --color-pri: light-dark(var(--blu-6), var(--blu-4));
-    --color-pri-hover: light-dark(var(--blu-7), var(--blu-5));
-    --color-pri-text: light-dark(white, var(--gry-1));
+    /* === LAYOUT === */
+    --grid-gap: var(--space-sm);
+    
+    /* === RADIUS === */
+    --radius-btn: var(--radius-2);  /* 5px */
 
-    /* Secondary */
-    --color-sec: light-dark(var(--vio-6), var(--vio-4));
-    --color-sec-hover: light-dark(var(--vio-7), var(--vio-5));
-    --color-sec-text: light-dark(white, var(--gry-1));
+    /* === COLORS === */
+    --color-pri: var(--ind-6);
+    --color-pri-hover: color-mix(in oklch, var(--color-pri), black 15%);
+    --color-pri-text: white;
 
-    /* Surfaces */
-    --surface-base: light-dark(white, var(--gry-9));
-    --surface-raised: light-dark(var(--gry-0), var(--gry-8));
-    --surface-sunken: light-dark(var(--gry-1), var(--gry-9));
-    --surface-overlay: light-dark(white, var(--gry-7));
+    --color-sec: var(--vio-6);
+    --color-sec-hover: color-mix(in oklch, var(--color-sec), black 15%);
+    --color-sec-text: white;
 
-    /* Text */
-    --text-pri: light-dark(var(--gry-9), var(--gry-0));
-    --text-sec: light-dark(var(--gry-6), var(--gry-3));
-    --text-ter: light-dark(var(--gry-5), var(--gry-4));
-
-    /* Semantic states */
-    --color-suc: light-dark(var(--grn-6), var(--grn-4));
-    --color-err: light-dark(var(--red-6), var(--red-4));
-    --color-wrn: light-dark(var(--yel-6), var(--yel-4));
-    --color-inf: light-dark(var(--blu-6), var(--blu-4));
-
-    /* Border */
-    --border-color: light-dark(var(--gry-3), var(--gry-6));
-
-    /* ===== COMPONENT SPACING DEFAULTS ===== */
-    --gap-sm: var(--space-sm);
-    --gap-md: var(--space-md);
-    --gap-lg: var(--space-lg);
-
-    /* Padding presets */
-    --p-sm: var(--space-sm) var(--space-md);
-    --p-md: var(--space-md) var(--space-lg);
-    --p-lg: var(--space-lg) var(--space-xl);
-
-    /* Margin presets */
-    --m-sm: var(--space-sm);
-    --m-md: var(--space-md);
-    --m-lg: var(--space-lg);
-
-    /* ===== BUTTON ===== */
-    --btn-radius: var(--radius-2);
-    --btn-shadow: var(--shadow-1);
-
-    /* ===== TYPOGRAPHY ===== */
-    --font-sans: var(--font-neo-grotesque);
-    --font-mono: var(--font-monospace-code);
-
-    /* ===== ANIMATION ===== */
-    --duration-fast: 150ms;
-    --duration-normal: 250ms;
-    --duration-slow: 350ms;
-    --ease-in: cubic-bezier(0.4, 0, 1, 1);
-    --ease-out: cubic-bezier(0, 0, 0.2, 1);
-    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* ===== THEME SWITCHING ===== */
-  [data-theme="light"] {
-    color-scheme: light;
-  }
-
-  [data-theme="dark"] {
-    color-scheme: dark;
-  }
-
-  /* ===== BASE STYLES ===== */
-  html {
-    background: var(--surface-base);
-    color: var(--text-pri);
-    font-family: var(--font-sans);
+    /* === TEXT === */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.5rem;
   }
 }

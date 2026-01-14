@@ -1,0 +1,38 @@
+
+@layer theme {
+  :where(html) {
+    /* === SPACING (more generous) === */
+    --space-xs: var(--size-2);   /* 0.5rem */
+    --space-sm: var(--size-3);   /* 1rem */
+    --space-md: var(--size-5);   /* 1.5rem */
+    --space-lg: var(--size-7);   /* 2rem */
+    --space-xl: var(--size-9);   /* 4rem */
+
+    /* === LAYOUT === */
+    --grid-gap: var(--space-sm);
+    
+    /* === RADIUS (larger, softer) === */
+    --radius-btn: var(--radius-3);  /* 1rem */
+
+    /* === COLORS (desaturated, premium) === */
+    --color-pri: var(--gry-8);
+    --color-pri-hover: var(--gry-9);
+    --color-pri-text: var(--gry-0);
+
+    --color-sec: var(--ind-5);
+    --color-sec-hover: color-mix(in oklch, var(--color-sec), black 15%);
+    --color-sec-text: white;
+
+    /* === SURFACES === */
+    --surface-page: var(--gry-1);
+    --surface-card: white;
+    --surface-raised: var(--gry-0);
+
+    /* === TEXT === */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.75rem;
+  }
+}

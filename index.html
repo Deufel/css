@@ -1,226 +1,132 @@
-
 <!DOCTYPE html>
-<html id="html" lang="en" data-attr:data-theme="$prst_colorScheme === 'system' ? false : $prst_colorScheme">
+<html lang="en" data-attr:data-mode="$prst_mode === 'system' ? false : $prst_mode">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>single file for dev</title>
+  <title>CUBE CSS Demo</title>
+  
   <script type="module">
     try {
-      await import('/js/datastar-pro.js');
+      await import('./js/datastar-pro.js');
       console.log('Loaded local datastar-pro.js');
     } catch {
       await import('https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js');
       console.log('Loaded datastar from CDN fallback');
     }
   </script>
-  <style>@layer reset, theme, composition, utility, block, exception;</style>
-  <style>
-  @layer reset {
-    *,{ box-sizing: border-box;} 
-    *, *::before, *::after {scrollbar-width: thin}
-    :root {; interpolate-size: allow-keywords; }
-    html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
-    body {margin:0; padding:0; max-height: 100svh, min-height: 100svh, scroll-behavior: none;}
-    body, h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin-block-end: 0; }
-    ul[role='list'], ol[role='list'] { list-style: none; }
-    body { min-height: 100svh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-    h1, h2, h3, h4, button, input, label { line-height: 1.1; }
-    h1, h2, h3, h4 { text-wrap: balance; }
-    p, li, figcaption { text-wrap: pretty; }
-    a:not([class]) { text-decoration-skip-ink: auto; color: currentColor; }
-    img, picture { max-width: 100%; display: block; }
-    input, button, textarea, select { font-family: inherit; font-size: inherit; }
-    textarea:not([rows]) { min-height: 10em; }
-    :target { scroll-margin-block: 5ex; }
-    @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
-    }
-    </style>
-    <style>
-
-    </style>
+  
+  <style>@layer reset, props, theme, composition, utility, block, exception;</style>
+  <link rel="stylesheet" href="./css/0_reset.css">
+  <link rel="stylesheet" href="./css/1_props.css">
   <link rel="stylesheet" data-attr:href="$prst_theme">
-  <link rel="stylesheet" href="../css/composition.css">
-  <link rel="stylesheet" href="../css/utility.css">
-  <link rel="stylesheet" href="../css/block.css">
-  <link rel="stylesheet" href="../css/exception.css">
+  <link rel="stylesheet" href="./css/3_composition.css">
+  <link rel="stylesheet" href="./css/4_utility.css">
+  <link rel="stylesheet" href="./css/5_block.css">
+  <link rel="stylesheet" href="./css/6_exception.css">
 </head>
-<body class="m-0 bg-base --make-grid:fullpage" 
-    data-persist="{include: /^prst_/}"
-    data-signals:prst_header="true" 
-    data-signals:prst_nav="true" 
-    data-style:height="`calc(100svh - ${$prst_header + $prst_footer} * var(--space-2))`"
-  >
-  <!-- Header -->
-  <header class="" data-show="$prst_header" data-effect="$prst_headerArea = `1 / 1 / ${1 + $prst_header} / 4`" data-style:grid-area="$prst_headerArea">
-    <div class="--make-grid:lcr">
-      <div class="--make-flex:items-center" style="justify-content: flex-start">
-        <button class="icon-btn" sz="md" data-on:click__viewtransition="$prst_nav = !$prst_nav">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
-        </button>
-        <h1 class="m-0 text-2xl font-semibold">CSS</h1>
-      </div>
-
-      <div>|
-      </div>
-
-      <div class="--make-flex">
-        <button class="icon-btn" sz="md" data-on:click__viewtransition="$prst_footer= !$prst_footer">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        </button>
-        <button class="icon-btn" sz="md" data-on:click__viewtransition="$prst_aside = !$prst_aside">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-      <div class="center">|</div>
-        <a class="icon-btn center" var="gho" sz="sm" href="https://github.com/Deufel/css">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github-icon lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-        </a>
-      </div>
-    </div>
+<body class="grid:hero-full gap:sm p:sm"
+  data-persist="{include: /^prst_/}"
+  data-signals:prst_theme="'./css/2_theme-default.css'"
+  data-signals:prst_mode="'system'">
+  
+  <header class="card flex:spread-row align:center p:md" style="grid-column: 1 / -1;">
+    <h1 class="text:lg">CUBE CSS</h1>
+    <nav class="flex:cluster gap:sm">
+      <button class="btn" var="pri" sz="sm">Home</button>
+      <button class="btn" var="gho" sz="sm">Docs</button>
+      <button class="btn" var="gho" sz="sm">GitHub</button>
+    </nav>
   </header>
 
-
-  <!-- Navigation -->
-  <nav class="bg-raised card  rounded-md p-6" var="sec" style="overflow-y: auto;" data-show="$prst_nav" data-effect="$prst_navArea = `${1 + $prst_header} / 1 / ${3 + !$prst_footer} / 2`" data-style:grid-area="$prst_navArea">
-    <div class="--make-flex:stack" style="--space-2: 0.5rem;">
-      <a href="./index.html"   class="btn" sz="md" var="pri">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        Home</a>
-      <a href="./buttons.html" class="btn" sz="md" var="gho" style="p-1">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-squircle-icon lucide-squircle"><path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9-9 9-9-1.8-9-9 1.8-9 9-9"/></svg>
-          Buttons</a>
-      <a href="./avatar.html"  class="btn" sz="sm" var="gho">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round-icon lucide-circle-user-round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
-          Avatar</a>
-      <a href="./badge.html"   class="btn" sz="sm" var="gho">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag-icon lucide-tag"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
-          Badge</a>
-      <a href="./cards.html"   class="btn" sz="sm" var="gho">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card-icon lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
-          Cards</a>
-      <a href="./forms.html"   class="btn" sz="sm" var="gho">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-form-icon lucide-form"><path d="M4 14h6"/><path d="M4 2h10"/><rect x="4" y="18" width="16" height="4" rx="1"/><rect x="4" y="6" width="16" height="4" rx="1"/></svg>
-          Forms</a>
-    </div>
+  <nav class="card flex:stack gap:sm p:md">
+    <h2 class="text:md">Navigation</h2>
+    <button class="btn" var="pri" sz="sm">Dashboard</button>
+    <button class="btn" var="gho" sz="sm">Components</button>
+    <button class="btn" var="gho" sz="sm">Settings</button>
   </nav>
 
-  <!-- Main Content -->
-  <main class="bg-raised card" var="pri" style="overflow-y: auto;" 
-      data-effect="$_mainArea = `${1 + $prst_header} / ${1 + $prst_nav} / ${3 + !$prst_footer} / ${3 + !$prst_aside}`" 
-      data-style:grid-area="$_mainArea"
-      data-style:border-radius="(!$prst_header && !$prst_nav && !$prst_footer && !$prst_aside) ? '0' : ''">
+  <main class="card flex:stack gap:md p:lg">
+    <h2 class="text:xl">Component Showcase</h2>
+    
+    <section class="flex:stack gap:sm">
+      <h3 class="text:md">Buttons</h3>
+      <div class="flex:cluster gap:sm">
+        <button class="btn" var="pri">Primary</button>
+        <button class="btn" var="sec">Secondary</button>
+        <button class="btn" var="out">Outline</button>
+        <button class="btn" var="gho">Ghost</button>
+      </div>
+    </section>
 
+    <section class="flex:stack gap:sm">
+      <h3 class="text:md">Sizes</h3>
+      <div class="flex:cluster align:center gap:sm">
+        <button class="btn" var="pri" sz="xs">XS</button>
+        <button class="btn" var="pri" sz="sm">SM</button>
+        <button class="btn" var="pri">MD</button>
+        <button class="btn" var="pri" sz="lg">LG</button>
+        <button class="btn" var="pri" sz="xl">XL</button>
+      </div>
+    </section>
 
+    <section class="flex:stack gap:sm">
+      <h3 class="text:md">States</h3>
+      <div class="flex:cluster gap:md">
+        <button class="btn" var="pri" st="suc">Success</button>
+        <button class="btn" var="pri" st="err">Error</button>
+        <button class="btn" var="pri" st="wrn">Warning</button>
+        <button class="btn" var="pri" st="lod">Loading</button>
+        <button class="btn" var="pri" st="dis">Disabled</button>
+      </div>
+    </section>
 
-
-      <hr class="mb-8" style="border: none; height: 1px; background: var(--border-color-subtle);">
-
+    <section class="flex:stack gap:sm">
+      <h3 class="text:md">Badges</h3>
+      <div class="flex:cluster gap:sm">
+        <span class="badge" var="pri">Primary</span>
+        <span class="badge" var="sec">Secondary</span>
+        <span class="badge" st="suc">Success</span>
+        <span class="badge" st="err">Error</span>
+        <span class="badge" st="wrn">Warning</span>
+      </div>
+    </section>
   </main>
+
+  <aside class="card flex:stack gap:md p:md">
+    <h2 class="text:md">Settings</h2>
     
-
-
-
-  <!-- Aside Panel -->
-  <aside class="bg-raised rounded-md p-4" style="display: none; overflow-y: auto; grid-area: 2 / 2 / 4 / -1;" data-show="$prst_aside" data-effect="$prst_asideArea = `${1 + $prst_header} / ${2 + $prst_aside} / ${3 + !$prst_footer} / -1`" data-style:grid-area="$prst_asideArea">
-    
-    <div class="">
-      <h4 class="font-semibold text-sm mb-3"> Light/Dark</h4>
-      <div class="card --make-grid:auto-fill" var="pri">
-        <button class="btn" sz="sm" data-attr:var="$prst_colorScheme === 'light' ? 'pri' : 'gho'" data-on:click="$prst_colorScheme = 'light'">Light</button>
-        <button class="btn" sz="sm" data-attr:var="$prst_colorScheme === 'system' ? 'pri' : 'gho'" data-on:click="$prst_colorScheme = 'system'">System</button>
-        <button class="btn" sz="sm" data-attr:var="$prst_colorScheme === 'dark' ? 'pri' : 'gho'" data-on:click="$prst_colorScheme = 'dark'">Dark</button>
+    <section class="flex:stack gap:sm">
+      <h3 class="text:sm">Theme</h3>
+      <div class="flex:cluster gap:xs">
+        <button class="btn" sz="sm" 
+          data-attr:var="$prst_theme === './css/2_theme-default.css' ? 'pri' : 'gho'" 
+          data-on:click="$prst_theme = './css/2_theme-default.css'">Default</button>
+        <button class="btn" sz="sm" 
+          data-attr:var="$prst_theme === './css/2_theme-premium.css' ? 'pri' : 'gho'" 
+          data-on:click="$prst_theme = './css/2_theme-premium.css'">Premium</button>
       </div>
-    </div>
+    </section>
 
-    <div class="">
-      <h4 class="font-semibold text-sm mb-3">Theme</h4>
-      
-      <div class="card --make-grid:auto-fit" var="pri">
-        <button 
-          class="btn" 
-          sz="sm" 
-          data-attr:var="$prst_theme === '../css/theme-default.css' ? 'pri' : 'gho'" 
-          data-on:click="$prst_theme = '../css/theme-default.css'"
-        >Default</button>
-
-        <button 
-          class="btn" 
-          sz="sm" 
-          data-attr:var="$prst_theme === '../css/theme-sand.css' ? 'pri' : 'gho'" 
-          data-on:click="$prst_theme = '../css/theme-sand.css'"
-        >Sand</button>
-
-        <button 
-          class="btn" 
-          sz="sm" 
-          data-attr:var="$prst_theme === '../css/theme-ocean.css' ? 'pri' : 'gho'" 
-          data-on:click="$prst_theme = '../css/theme-ocean.css'"
-        >Ocean</button>
-
-        <button 
-          class="btn" 
-          sz="sm" 
-          data-attr:var="$prst_theme === '../css/theme-forest.css' ? 'pri' : 'gho'" 
-          data-on:click="$prst_theme = '../css/theme-forest.css'"
-        >Forest</button>
+    <section class="flex:stack gap:sm">
+      <h3 class="text:sm">Mode</h3>
+      <div class="flex:cluster gap:xs">
+        <button class="btn" sz="sm" 
+          data-attr:var="$prst_mode === 'light' ? 'pri' : 'gho'" 
+          data-on:click="$prst_mode = 'light'">Light</button>
+        <button class="btn" sz="sm" 
+          data-attr:var="$prst_mode === 'system' ? 'pri' : 'gho'" 
+          data-on:click="$prst_mode = 'system'">System</button>
+        <button class="btn" sz="sm" 
+          data-attr:var="$prst_mode === 'dark' ? 'pri' : 'gho'" 
+          data-on:click="$prst_mode = 'dark'">Dark</button>
       </div>
-    </div>
-
+    </section>
   </aside>
 
-  <!-- Footer -->
-  <footer class="bg-raised rounded-md p-6" style="display: none; grid-area: 4 / 1 / -1 / -1;" data-show="$prst_footer" data-effect="$prst_footerArea = `${3 + !$prst_footer} / 1 / -1 / -1`" data-style:grid-area="$prst_footerArea">
-    <div class="--make-flex:cluster">
-      <div class="card p-4" style="flex: 1; min-width: 200px;">
-        <div class="text-2xs text-tertiary mb-1">ATTRIBUTE SYSTEM</div>
-        <div class="font-semibold">3-Letter Aligned</div>
-      </div>
-      <div class="card p-4" style="flex: 1; min-width: 200px;">
-        <div class="text-2xs text-tertiary mb-1">FRAMEWORK</div>
-        <div class="font-semibold">Datastar 1.0-RC.7</div>
-      </div>
-      <div class="card p-4" style="flex: 1; min-width: 200px;">
-        <div class="text-2xs text-tertiary mb-1">METHODOLOGY</div>
-        <div class="font-semibold">CUBE CSS</div>
-      </div>
-    </div>
+  <footer class="card flex:cluster justify:center gap:md p:md" style="grid-column: 1 / -1;">
+    <span class="text:sm">CUBE CSS Design System</span>
+    <span class="badge" var="gho" sz="xs">v0.1</span>
   </footer>
 
-
-
-  <!-- Overlap Button -->
-<div class="no-print" style="position: fixed; bottom: var(--space-2); right: var(--space-2);">
-  <button class="icon-btn" var="gho" style="place-self: end; pointer-events: auto;"
-      data-on:click__viewtransition="
-          const inFullscreen = !$prst_header;
-          if (!inFullscreen) {
-            $prst_fs_bak = {footer: $prst_footer, aside: $prst_aside, nav: $prst_nav};
-            $prst_header = false;
-            @setAll(false, {include: /prst_footer|prst_aside|prst_nav/})
-          } else {
-            $prst_header = true;
-            $prst_footer = $prst_fs_bak?.footer ?? false;
-            $prst_aside = $prst_fs_bak?.aside ?? false;
-            $prst_nav = $prst_fs_bak?.nav ?? true;
-            $prst_fs_bak = {}
-          }">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-icon lucide-maximize"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-  </button>
-</div>
-  <!-- <div class="no-print" style=" position: fixed; bottom: var(--space-2); right: var(--space-2);"> -->
-  <!--   <button class="icon-btn " var="gho" style="place-self: end; pointer-events: auto;" -->
-  <!--       data-signals:_hidemode="false"  -->
-  <!--       data-signals:_bak="{}"  -->
-  <!--       data-on:click__viewtransition=" -->
-  <!--           $_hideMode = !$_hideMode; -->
-  <!--           if ($_hideMode) { -->
-  <!--             $_bak = {footer: $prst_footer, aside: $prst_aside, nav: $prst_nav, header: $prst_header}; -->
-  <!--             @setAll(false, {include: /prst_footer|prst_aside|prst_nav|prst_header/}) -->
-  <!--           } else { -->
-  <!--             $prst_footer = $_bak.footer; $prst_aside = $_bak.aside; $prst_nav = $_bak.nav; $prst_header = $_bak.header -->
-  <!--           }"> -->
-  <!--     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-icon lucide-maximize"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> -->
-  <!--   </button> -->
-  <!-- </div> -->
-
-</body></html>
+</body>
+</html>
