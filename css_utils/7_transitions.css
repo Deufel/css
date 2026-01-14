@@ -1,0 +1,67 @@
+@layer exception {
+  /* ===== VIEW TRANSITIONS ===== */
+  /* These are exceptions because they modify default browser behavior */
+  /* Apply to semantic elements for SPA-like transitions */
+
+  @supports (view-transition-name: none) {
+    /* Main content panel */
+    main {
+      view-transition-name: main-panel;
+    }
+
+    ::view-transition-group(main-panel) {
+      animation-duration: var(--duration-normal);
+      animation-timing-function: var(--ease-out);
+    }
+
+    /* Navigation panel - slides from left */
+    nav {
+      view-transition-name: nav-panel;
+    }
+
+    ::view-transition-old(nav-panel) {
+      animation: slide-out-left var(--duration-normal) var(--ease-out);
+    }
+
+    ::view-transition-new(nav-panel) {
+      animation: slide-in-left var(--duration-normal) var(--ease-out);
+    }
+
+    @keyframes slide-out-left {
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    @keyframes slide-in-left {
+      from {
+        transform: translateX(-100%);
+      }
+    }
+
+    /* Aside panel - slides from right */
+    aside {
+      view-transition-name: aside-panel;
+    }
+
+    ::view-transition-old(aside-panel) {
+      animation: slide-out-right var(--duration-normal) var(--ease-out);
+    }
+
+    ::view-transition-new(aside-panel) {
+      animation: slide-in-right var(--duration-normal) var(--ease-out);
+    }
+
+    @keyframes slide-out-right {
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes slide-in-right {
+      from {
+        transform: translateX(100%);
+      }
+    }
+  }
+}

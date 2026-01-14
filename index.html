@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
-<html lang="en" data-attr:data-theme="$prst_colorScheme === 'system' ? false : $prst_colorScheme">
+<html id="html" lang="en" data-attr:data-theme="$prst_colorScheme === 'system' ? false : $prst_colorScheme">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSS - CUBE Attributes</title>
+  <title>single file for dev</title>
   <script type="module">
     try {
       await import('/js/datastar-pro.js');
@@ -15,21 +15,44 @@
     }
   </script>
   <style>@layer reset, theme, composition, utility, block, exception;</style>
-  <link rel="stylesheet" href="./css/reset.css">
-  <link rel="stylesheet" href="./css/theme-base.css">
+  <style>
+  @layer reset {
+    *,{ box-sizing: border-box;} 
+    *, *::before, *::after {scrollbar-width: thin}
+    :root {; interpolate-size: allow-keywords; }
+    html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
+    body {margin:0; padding:0; max-height: 100svh, min-height: 100svh, scroll-behavior: none;}
+    body, h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin-block-end: 0; }
+    ul[role='list'], ol[role='list'] { list-style: none; }
+    body { min-height: 100svh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, h4, button, input, label { line-height: 1.1; }
+    h1, h2, h3, h4 { text-wrap: balance; }
+    p, li, figcaption { text-wrap: pretty; }
+    a:not([class]) { text-decoration-skip-ink: auto; color: currentColor; }
+    img, picture { max-width: 100%; display: block; }
+    input, button, textarea, select { font-family: inherit; font-size: inherit; }
+    textarea:not([rows]) { min-height: 10em; }
+    :target { scroll-margin-block: 5ex; }
+    @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+    }
+    </style>
+    <style>
+
+    </style>
   <link rel="stylesheet" data-attr:href="$prst_theme">
-  <link rel="stylesheet" href="./css/composition.css">
-  <link rel="stylesheet" href="./css/utility.css">
-  <link rel="stylesheet" href="./css/block.css">
-  <link rel="stylesheet" href="./css/exception.css">
+  <link rel="stylesheet" href="../css/composition.css">
+  <link rel="stylesheet" href="../css/utility.css">
+  <link rel="stylesheet" href="../css/block.css">
+  <link rel="stylesheet" href="../css/exception.css">
 </head>
-<body class="bg-base --make-grid:fullpage" 
+<body class="m-0 bg-base --make-grid:fullpage" 
     data-persist="{include: /^prst_/}"
-    data-signals="{ }"
+    data-signals:prst_header="true" 
+    data-signals:prst_nav="true" 
     data-style:height="`calc(100svh - ${$prst_header + $prst_footer} * var(--space-2))`"
   >
   <!-- Header -->
-  <header class=" card rounded-md " data-show="$prst_header" data-effect="$prst_headerArea = `1 / 1 / ${1 + $prst_header} / 4`" data-style:grid-area="$prst_headerArea">
+  <header class="" data-show="$prst_header" data-effect="$prst_headerArea = `1 / 1 / ${1 + $prst_header} / 4`" data-style:grid-area="$prst_headerArea">
     <div class="--make-grid:lcr">
       <div class="--make-flex:items-center" style="justify-content: flex-start">
         <button class="icon-btn" sz="md" data-on:click__viewtransition="$prst_nav = !$prst_nav">
@@ -56,19 +79,28 @@
     </div>
   </header>
 
+
   <!-- Navigation -->
   <nav class="bg-raised card  rounded-md p-6" var="sec" style="overflow-y: auto;" data-show="$prst_nav" data-effect="$prst_navArea = `${1 + $prst_header} / 1 / ${3 + !$prst_footer} / 2`" data-style:grid-area="$prst_navArea">
-    <h3 class="m-0 mb-4 text-lg font-semibold">Navigation</h3>
-    <div class="flow">
-      <section>
-        <h4 class="text-sm text-tertiary mb-2">COMPONENTS</h4>
-        <div class="--make-flex:stack" style="--space-2: 0.5rem;">
-          <a href="#buttons" class="p-2 rounded-sm">Buttons</a>
-          <a href="#badges" class="p-2 rounded-sm">Badges &amp; Avatars</a>
-          <a href="#cards" class="p-2 rounded-sm">Cards</a>
-          <a href="#inputs" class="p-2 rounded-sm">Inputs</a>
-        </div>
-      </section>
+    <div class="--make-flex:stack" style="--space-2: 0.5rem;">
+      <a href="./index.html"   class="btn" sz="md" var="pri">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Home</a>
+      <a href="./buttons.html" class="btn" sz="md" var="gho" style="p-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-squircle-icon lucide-squircle"><path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9-9 9-9-1.8-9-9 1.8-9 9-9"/></svg>
+          Buttons</a>
+      <a href="./avatar.html"  class="btn" sz="sm" var="gho">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round-icon lucide-circle-user-round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+          Avatar</a>
+      <a href="./badge.html"   class="btn" sz="sm" var="gho">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag-icon lucide-tag"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+          Badge</a>
+      <a href="./cards.html"   class="btn" sz="sm" var="gho">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card-icon lucide-id-card"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+          Cards</a>
+      <a href="./forms.html"   class="btn" sz="sm" var="gho">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-form-icon lucide-form"><path d="M4 14h6"/><path d="M4 2h10"/><rect x="4" y="18" width="16" height="4" rx="1"/><rect x="4" y="6" width="16" height="4" rx="1"/></svg>
+          Forms</a>
     </div>
   </nav>
 
@@ -78,404 +110,8 @@
       data-style:grid-area="$_mainArea"
       data-style:border-radius="(!$prst_header && !$prst_nav && !$prst_footer && !$prst_aside) ? '0' : ''">
 
-      <hr class="mb-8" style="border: none; height: 1px; background: var(--border-color-subtle);">
-
-      <!-- Buttons Section -->
-      <section id="buttons" class="mb-8">
-        <h3 class="text-2xl font-semibold mb-4">Buttons</h3>
-        
-        <div class="--make-grid:auto:fit" style="--min-col: 300px;">
-          <!-- Reactive Button -->
-          <div class="card">
-            <h4 class="font-semibold mb-4">
-              Reactive Button
-              <span class="badge" var="inf">LIVE</span>
-            </h4>
-            
-            <button class="btn mb-4" data-attr:var="$btnVar" data-attr:sz="$btnSize" data-attr:st="$btnState" data-on:click="$btnVar = ($btnVar === 'pri' ? 'sec' : ($btnVar === 'sec' ? 'out' : ($btnVar === 'out' ? 'gho' : 'pri')))" var="pri" sz="md" st="def">
-              <span data-text="'Click to cycle'">Click to cycle</span>
-            </button>
-            
-            <div class="flow" style="--flow-space: 0.5rem;">
-              <div class="--make-flex:cluster">
-                <button class="btn" sz="xs" var="pri" data-on:click="$btnVar = 'pri'">pri</button>
-                <button class="btn" sz="xs" var="sec" data-on:click="$btnVar = 'sec'">sec</button>
-                <button class="btn" sz="xs" var="out" data-on:click="$btnVar = 'out'">out</button>
-                <button class="btn" sz="xs" var="gho" data-on:click="$btnVar = 'gho'">gho</button>
-              </div>
-              <div class="--make-flex:cluster">
-                <button class="btn" sz="xs" data-on:click="$btnSize = 'xs'">xs</button>
-                <button class="btn" sz="xs" data-on:click="$btnSize = 'sm'">sm</button>
-                <button class="btn" sz="xs" data-on:click="$btnSize = 'md'">md</button>
-                <button class="btn" sz="xs" data-on:click="$btnSize = 'lg'">lg</button>
-                <button class="btn" sz="xs" data-on:click="$btnSize = 'xl'">xl</button>
-              </div>
-              <p class="text-xs text-tertiary mt-2">
-                Current: <span class="inline-code" data-text="'var=' + $btnVar">var=pri</span>
-                <span class="inline-code" data-text="'sz=' + $btnSize">sz=md</span>
-              </p>
-            </div>
-          </div>
-
-          <!-- Reactive Icon Button -->
-          <div class="card">
-            <h4 class="font-semibold mb-4">
-              Reactive Icon Button
-              <span class="badge" var="inf">Interactive</span>
-            </h4>
-            
-            <button 
-              class="icon-btn mb-4" 
-              data-attr:var="$iconBtnVar" 
-              data-attr:sz="$iconBtnSize" 
-              data-attr:st="$iconBtnState"
-              data-on:click="$iconBtnVar = ($iconBtnVar === 'pri' ? 'sec' : ($iconBtnVar === 'sec' ? 'out' : ($iconBtnVar === 'out' ? 'gho' : 'pri')))"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-            </button>
-            
-            <div class="flow" style="--flow-space: 0.5rem;">
-              <div class="--make-flex:cluster">
-                <button class="btn" sz="xs" var="pri" data-on:click="$iconBtnVar = 'pri'">pri</button>
-                <button class="btn" sz="xs" var="sec" data-on:click="$iconBtnVar = 'sec'">sec</button>
-                <button class="btn" sz="xs" var="out" data-on:click="$iconBtnVar = 'out'">out</button>
-                <button class="btn" sz="xs" var="gho" data-on:click="$iconBtnVar = 'gho'">gho</button>
-              </div>
-              <div class="--make-flex:cluster">
-                <button class="btn" sz="xs" data-on:click="$iconBtnSize = 'xs'">xs</button>
-                <button class="btn" sz="xs" data-on:click="$iconBtnSize = 'sm'">sm</button>
-                <button class="btn" sz="xs" data-on:click="$iconBtnSize = 'md'">md</button>
-                <button class="btn" sz="xs" data-on:click="$iconBtnSize = 'lg'">lg</button>
-                <button class="btn" sz="xs" data-on:click="$iconBtnSize = 'xl'">xl</button>
-              </div>
-              <p class="text-xs text-tertiary mt-2">
-                Current: <span class="inline-code" data-text="'var=' + $iconBtnVar"></span>
-                <span class="inline-code" data-text="'sz=' + $iconBtnSize"></span>
-              </p>
-            </div>
-          </div>
-
-          <!-- Icon Buttons -->
-          <div class="card">
-            <h4 class="font-semibold mb-4">Icon Buttons</h4>
-            <div class="--make-flex:items-center">
-              <button class="icon-btn" sz="xs">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mountain-snow-icon lucide-mountain-snow"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19"/></svg>
-              </button>
-              <button class="icon-btn" sz="sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cable-car-icon lucide-cable-car"><path d="M10 3h.01"/><path d="M14 2h.01"/><path d="m2 9 20-5"/><path d="M12 12V6.5"/><rect width="16" height="10" x="4" y="12" rx="3"/><path d="M9 12v5"/><path d="M15 12v5"/><path d="M4 17h16"/></svg>
-              </button>
-              <button class="icon-btn" sz="md">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chess-knight-icon lucide-chess-knight"><path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M16.5 18c1-2 2.5-5 2.5-9a7 7 0 0 0-7-7H6.635a1 1 0 0 0-.768 1.64L7 5l-2.32 5.802a2 2 0 0 0 .95 2.526l2.87 1.456"/><path d="m15 5 1.425-1.425"/><path d="m17 8 1.53-1.53"/><path d="M9.713 12.185 7 18"/></svg>
-              </button>
-              <button class="icon-btn" sz="lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cable-car-icon lucide-cable-car"><path d="M10 3h.01"/><path d="M14 2h.01"/><path d="m2 9 20-5"/><path d="M12 12V6.5"/><rect width="16" height="10" x="4" y="12" rx="3"/><path d="M9 12v5"/><path d="M15 12v5"/><path d="M4 17h16"/></svg>
-              </button>
-              <button class="icon-btn" sz="xl">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-piano-icon lucide-piano"><path d="M18.5 8c-1.4 0-2.6-.8-3.2-2A6.87 6.87 0 0 0 2 9v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8.5C22 9.6 20.4 8 18.5 8"/><path d="M2 14h20"/><path d="M6 14v4"/><path d="M10 14v4"/><path d="M14 14v4"/><path d="M18 14v4"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <hr class="mb-8" style="border: none; height: 1px; background: var(--border-color-subtle);">
 
 
-      <hr class="mb-8" style="border: none; height: 1px; background: var(--border-color-subtle);">
-
-      <!-- Layout Compositions Section -->
-      <section id="layouts" class="mb-8">
-        <h3 class="text-2xl font-semibold mb-4">Layout Compositions</h3>
-        
-        <!-- Auto-fit Grid -->
-        <div class="card mb-6">
-          <h4 class="font-semibold mb-2">Grid: auto:fit</h4>
-          <p class="text-xs text-tertiary mb-4"><code class="inline-code">--make-grid:auto:fit</code></p>
-          <div class="--make-grid:auto:fit" style="--min-col: 150px;">
-            <div class="card p-4 bg-sunken">Card 1</div>
-            <div class="card p-4 bg-sunken">Card 2</div>
-            <div class="card p-4 bg-sunken">Card 3</div>
-            <div class="card p-4 bg-sunken">Card 4</div>
-          </div>
-        </div>
-
-        <!-- LCR Grid -->
-        <div class="card mb-6">
-          <h4 class="font-semibold mb-2">Grid: lcr (left-center-right)</h4>
-          <p class="text-xs text-tertiary mb-4"><code class="inline-code">--make-grid:lcr</code></p>
-          <div class="--make-grid:lcr bg-sunken p-4 rounded-md">
-            <span class="badge" var="pri">Left</span>
-            <span class="font-semibold">Center Title</span>
-            <button class="icon-btn" sz="sm">⚙</button>
-          </div>
-        </div>
-
-        <!-- Overlap Grid -->
-        <div class="card mb-6">
-          <h4 class="font-semibold mb-2">Grid: overlap</h4>
-          <p class="text-xs text-tertiary mb-4"><code class="inline-code">--make-grid:overlap</code></p>
-          <div class="--make-grid:overlap rounded-lg" style="height: 150px; background: var(--color-primary-subtle);">
-            <div style="place-self: center;" class="text-tertiary">Background layer</div>
-            <div style="place-self: end; margin: var(--space-3);">
-              <button class="btn" var="pri" sz="sm">Overlay button</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Flex Stack -->
-        <div class="card mb-6">
-          <h4 class="font-semibold mb-2">Flex: stack</h4>
-          <p class="text-xs text-tertiary mb-4"><code class="inline-code">--make-flex:stack</code></p>
-          <div class="--make-flex:stack">
-            <div class="card p-3 bg-sunken">Item 1</div>
-            <div class="card p-3 bg-sunken">Item 2</div>
-            <div class="card p-3 bg-sunken">Item 3</div>
-          </div>
-        </div>
-
-        <!-- Flex Cluster -->
-        <div class="card mb-6">
-          <h4 class="font-semibold mb-2">Flex: cluster</h4>
-          <p class="text-xs text-tertiary mb-4"><code class="inline-code">--make-flex:cluster</code></p>
-          <div class="--make-flex:cluster">
-            <span class="badge" var="pri">Tag</span>
-            <span class="badge" var="sec">Design</span>
-            <span class="badge" var="suc">CSS</span>
-            <span class="badge" var="inf">Layout</span>
-            <span class="badge" var="wrn">Flex</span>
-          </div>
-        </div>
-
-        <!-- Flex Spread -->
-        <div class="card mb-6">
-          <h4 class="font-semibold mb-2">Flex: spread</h4>
-          <p class="text-xs text-tertiary mb-4"><code class="inline-code">--make-flex:spread:items-center</code></p>
-          <div class="--make-flex:spread:items-center bg-sunken p-4 rounded-md">
-            <div>
-              <div class="font-semibold">Card Title</div>
-              <div class="text-xs text-tertiary">Subtitle text</div>
-            </div>
-            <button class="btn" var="out" sz="sm">Action</button>
-          </div>
-        </div>
-
-        <!-- Flex Flank -->
-        <div class="card mb-6">
-          <h4 class="font-semibold mb-2">Flex: flank:start</h4>
-          <p class="text-xs text-tertiary mb-4"><code class="inline-code">--make-flex:flank:start</code></p>
-          <div class="--make-flex:flank:start" style="--flank-size: 80px; --content-min: 60%;">
-            <div class="card p-4 bg-sunken">Sidebar</div>
-            <div class="card p-4 bg-sunken">Main content area takes remaining space</div>
-          </div>
-        </div>
-      </section>
-      
-      <!-- Badges Section -->
-      <section id="badges" class="mb-8">
-        <h3 class="text-2xl font-semibold mb-4">Badges &amp; Avatars</h3>
-        
-        <div class="--make-grid:auto:fit" style="--min-col: 300px;">
-          <!-- Reactive Badge -->
-          <div class="card">
-            <h4 class="font-semibold mb-4">
-              Reactive Badge
-              <span class="badge" var="inf">LIVE</span>
-            </h4>
-            
-            <div class="mb-4">
-              <span class="badge" data-attr:var="$badgeVar" data-text="$badgeVar.toUpperCase()" var="pri">PRI</span>
-            </div>
-            
-            <div class="--make-flex:cluster">
-              <div class="badge" var="def" sz="xs" data-on:click="$badgeVar = 'def'">def</div>
-              <div class="badge" var="pri" sz="xs" data-on:click="$badgeVar = 'pri'">pri</div>
-              <div class="badge" var="sec" sz="xs" data-on:click="$badgeVar = 'sec'">sec</div>
-              <div class="badge" var="suc" sz="xs" data-on:click="$badgeVar = 'suc'">suc</div>
-              <div class="badge" var="wrn" sz="xs" data-on:click="$badgeVar = 'wrn'">wrn</div>
-              <div class="badge" var="err" sz="xs" data-on:click="$badgeVar = 'err'">err</div>
-              <div class="badge" var="inf" sz="xs" data-on:click="$badgeVar = 'inf'">inf</div>
-            </div>
-          </div>
-
-          <!-- Reactive Avatar -->
-          <div class="card" var="pri">
-            <h4 class="font-semibold mb-4">
-              Reactive Avatar
-              <span class="badge" var="inf">LIVE</span>
-            </h4>
-            
-            <div class="mb-4">
-              <span class="avatar" data-attr:sz="$avatarSize" data-text="$avatarSize.toUpperCase()" sz="md">MD</span>
-            </div>
-            
-            <div class="--make-flex:cluster">
-              <button class="btn" sz="sm" data-on:click="$avatarSize = 'xs'">xs</button>
-              <button class="btn" sz="sm" data-on:click="$avatarSize = 'sm'">sm</button>
-              <button class="btn" sz="sm" data-on:click="$avatarSize = 'md'">md</button>
-              <button class="btn" sz="sm" data-on:click="$avatarSize = 'lg'">lg</button>
-              <button class="btn" sz="sm" data-on:click="$avatarSize = 'xl'">xl</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <hr class="mb-8" style="border: none; height: 1px; background: var(--border-color-subtle);">
-
-      <!-- FormSection -->
-      <section id="cards" class="mb-8">
-        <h3 class="text-2xl font-semibold mb-4">Form Elements</h3>
-        <!-- Reactive Switch -->
-        <div class="card"
-          data-signals="{switchSize: 'md', switchState: 'def', switchOn:false}" >
-          <h4 class="font-semibold mb-4">
-            Reactive Switch
-            <span class="badge" var="inf">LIVE</span>
-          </h4>
-          
-          <div class="mb-4">
-            <label 
-              class="switch"
-              data-attr:sz="$switchSize"
-              data-attr:st="$switchState"
-            >
-              <input type="checkbox" data-bind:switch-On>
-              <span class="switch-track"></span>
-              <span class="switch-label">Enable feature</span>
-              <span class="switch-helper">Helper text goes here</span>
-            </label>
-          </div>
-          
-          <div class="flow" style="--flow-space: 0.5rem;">
-            <div class="--make-flex:cluster">
-              <button class="btn" sz="xs" data-on:click="$switchSize = 'sm'">sm</button>
-              <button class="btn" sz="xs" data-on:click="$switchSize = 'md'">md</button>
-              <button class="btn" sz="xs" data-on:click="$switchSize = 'lg'">lg</button>
-            </div>
-            <div class="--make-flex:cluster">
-              <button class="btn" sz="xs" data-on:click="$switchState = 'def'">def</button>
-              <button class="btn" sz="xs" data-on:click="$switchState = 'dis'">dis</button>
-              <button class="btn" sz="xs" data-on:click="$switchState = 'lod'">lod</button>
-              <button class="btn" sz="xs" data-on:click="$switchState = 'err'">err</button>
-            </div>
-            <p class="text-xs text-tertiary mt-2">
-              Current: <span class="inline-code" data-text="'sz=' + $switchSize"></span>
-              <span class="inline-code" data-text="'st=' + $switchState"></span>
-              <span class="inline-code" data-text="'checked=' + $switchOn"></span>
-            </p>
-          </div>
-        </div>
-
-        <!-- Reactive Input -->
-        <div class="card" data-signals="{inputSize: 'md', inputState: 'def', inputVal: ''}">
-          <h4 class="font-semibold mb-4">
-            Reactive Input
-            <span class="badge" var="inf">LIVE</span>
-          </h4>
-          
-          <div class="mb-4">
-            <div class="--make-flex:items-baseline mb-2">
-              <label class="input-field">
-                <div class="--make-flex:flank:items-baseline mb-2">
-                  <span class="text-sm font-medium">Label</span>
-                  <span class="input-helper text-xs text-secondary">Helper text</span>
-                </div>
-                <input class="input" type="text" data-bind:input-val data-attr:st="$inputState">
-              </label>
-            </div>
-          </div>
-            
-          <div class="flow" style="--flow-space: 0.5rem;">
-            <div class="--make-flex:cluster">
-              <button class="btn" sz="xs" data-on:click="$inputState = 'def'">def</button>
-              <button class="btn" sz="xs" data-on:click="$inputState = 'suc'">suc</button>
-              <button class="btn" sz="xs" data-on:click="$inputState = 'err'">err</button>
-              <button class="btn" sz="xs" data-on:click="$inputState = 'wrn'">wrn</button>
-            </div>
-            <p class="text-xs text-tertiary mt-2">
-              Current: <span class="inline-code" data-text="'st=' + $inputState"></span>
-              <span class="inline-code" data-text="'val=' + $inputVal"></span>
-            </p>
-          </div>
-        </div>
-
-
-        <!-- Reactive Radio -->
-        <div class="card" data-signals="{radioSize: 'md', radioState: 'def', radioVal: 'option1'}">
-          <h4 class="font-semibold mb-4">
-            Reactive Radio
-            <span class="badge" var="inf">LIVE</span>
-          </h4>
-          
-          <fieldset class="radio-group mb-4">
-            <legend class="radio-group-label">Select an option</legend>
-            
-            <label class="radio" data-attr:sz="$radioSize" data-attr:st="$radioState">
-              <input type="radio" name="demo-radio" value="option1" data-bind:radio-val>
-              <span class="radio-indicator"></span>
-              <span class="radio-label">Option one</span>
-              <span class="radio-helper">Description for option one</span>
-            </label>
-            
-            <label class="radio" data-attr:sz="$radioSize" data-attr:st="$radioState">
-              <input type="radio" name="demo-radio" value="option2" data-bind:radio-val>
-              <span class="radio-indicator"></span>
-              <span class="radio-label">Option two</span>
-              <span class="radio-helper">Description for option two</span>
-            </label>
-            
-            <label class="radio" data-attr:sz="$radioSize" data-attr:st="$radioState">
-              <input type="radio" name="demo-radio" value="option3" data-bind:radio-val>
-              <span class="radio-indicator"></span>
-              <span class="radio-label">Option three</span>
-              <span class="radio-helper">Description for option three</span>
-            </label>
-          </fieldset>
-          
-          <div class="flow" style="--flow-space: 0.5rem;">
-            <div class="--make-flex:cluster">
-              <button class="btn" sz="xs" data-on:click="$radioSize = 'sm'">sm</button>
-              <button class="btn" sz="xs" data-on:click="$radioSize = 'md'">md</button>
-              <button class="btn" sz="xs" data-on:click="$radioSize = 'lg'">lg</button>
-            </div>
-            <div class="--make-flex:cluster">
-              <button class="btn" sz="xs" data-on:click="$radioState = 'def'">def</button>
-              <button class="btn" sz="xs" data-on:click="$radioState = 'dis'">dis</button>
-              <button class="btn" sz="xs" data-on:click="$radioState = 'lod'">lod</button>
-              <button class="btn" sz="xs" data-on:click="$radioState = 'err'">err</button>
-              <button class="btn" sz="xs" data-on:click="$radioState = 'suc'">suc</button>
-              <button class="btn" sz="xs" data-on:click="$radioState = 'wrn'">wrn</button>
-            </div>
-            <p class="text-xs text-tertiary mt-2">
-              Current: <span class="inline-code" data-text="'sz=' + $radioSize"></span>
-              <span class="inline-code" data-text="'st=' + $radioState"></span>
-              <span class="inline-code" data-text="'val=' + $radioVal"></span>
-            </p>
-          </div>
-        </div>
-
-      </section>
-
-
-      <!-- Cards Section -->
-      <section id="cards" class="mb-8">
-        <h3 class="text-2xl font-semibold mb-4">Cards</h3>
-        
-        <div class="--make-grid:auto:fit" style="--min-col: 300px;">
-          <div class="card">
-            <h4 class="font-semibold mb-2">Default Card</h4>
-            <p class="text-sm text-secondary">Clean and simple.</p>
-          </div>
-          <div class="card" var="pri">
-            <h4 class="font-semibold mb-2">Primary Card</h4>
-            <p class="text-sm text-secondary"><span class="inline-code">var="pri"</span></p>
-          </div>
-          <div class="card" var="sec">
-            <h4 class="font-semibold mb-2">Secondary Card</h4>
-            <p class="text-sm text-secondary"><span class="inline-code">var="sec"</span></p>
-          </div>
-        </div>
-      </section>
 
       <hr class="mb-8" style="border: none; height: 1px; background: var(--border-color-subtle);">
 
@@ -503,29 +139,29 @@
         <button 
           class="btn" 
           sz="sm" 
-          data-attr:var="$prst_theme === './css/theme-default.css' ? 'pri' : 'gho'" 
-          data-on:click="$prst_theme = './css/theme-default.css'"
+          data-attr:var="$prst_theme === '../css/theme-default.css' ? 'pri' : 'gho'" 
+          data-on:click="$prst_theme = '../css/theme-default.css'"
         >Default</button>
 
         <button 
           class="btn" 
           sz="sm" 
-          data-attr:var="$prst_theme === './css/theme-sand.css' ? 'pri' : 'gho'" 
-          data-on:click="$prst_theme = './css/theme-sand.css'"
+          data-attr:var="$prst_theme === '../css/theme-sand.css' ? 'pri' : 'gho'" 
+          data-on:click="$prst_theme = '../css/theme-sand.css'"
         >Sand</button>
 
         <button 
           class="btn" 
           sz="sm" 
-          data-attr:var="$prst_theme === './css/theme-ocean.css' ? 'pri' : 'gho'" 
-          data-on:click="$prst_theme = './css/theme-ocean.css'"
+          data-attr:var="$prst_theme === '../css/theme-ocean.css' ? 'pri' : 'gho'" 
+          data-on:click="$prst_theme = '../css/theme-ocean.css'"
         >Ocean</button>
 
         <button 
           class="btn" 
           sz="sm" 
-          data-attr:var="$prst_theme === './css/theme-forest.css' ? 'pri' : 'gho'" 
-          data-on:click="$prst_theme = './css/theme-forest.css'"
+          data-attr:var="$prst_theme === '../css/theme-forest.css' ? 'pri' : 'gho'" 
+          data-on:click="$prst_theme = '../css/theme-forest.css'"
         >Forest</button>
       </div>
     </div>
@@ -553,20 +189,38 @@
 
 
   <!-- Overlap Button -->
-  <div class="no-print" style=" position: fixed; bottom: var(--space-4); right: var(--space-4);">
-    <button class="icon-btn m-4" var="gho" style="place-self: end; pointer-events: auto;"
-        data-signals:_hidemode="false" 
-        data-signals:_bak="{}" 
-        data-on:click__viewtransition="
-            $_hideMode = !$_hideMode;
-            if ($_hideMode) {
-              $_bak = {footer: $prst_footer, aside: $prst_aside, nav: $prst_nav, header: $prst_header};
-              @setAll(false, {include: /prst_footer|prst_aside|prst_nav|prst_header/})
-            } else {
-              $prst_footer = $_bak.footer; $prst_aside = $_bak.aside; $prst_nav = $_bak.nav; $prst_header = $_bak.header
-            }">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-icon lucide-maximize"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-    </button>
-  </div>
+<div class="no-print" style="position: fixed; bottom: var(--space-2); right: var(--space-2);">
+  <button class="icon-btn" var="gho" style="place-self: end; pointer-events: auto;"
+      data-on:click__viewtransition="
+          const inFullscreen = !$prst_header;
+          if (!inFullscreen) {
+            $prst_fs_bak = {footer: $prst_footer, aside: $prst_aside, nav: $prst_nav};
+            $prst_header = false;
+            @setAll(false, {include: /prst_footer|prst_aside|prst_nav/})
+          } else {
+            $prst_header = true;
+            $prst_footer = $prst_fs_bak?.footer ?? false;
+            $prst_aside = $prst_fs_bak?.aside ?? false;
+            $prst_nav = $prst_fs_bak?.nav ?? true;
+            $prst_fs_bak = {}
+          }">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-icon lucide-maximize"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+  </button>
+</div>
+  <!-- <div class="no-print" style=" position: fixed; bottom: var(--space-2); right: var(--space-2);"> -->
+  <!--   <button class="icon-btn " var="gho" style="place-self: end; pointer-events: auto;" -->
+  <!--       data-signals:_hidemode="false"  -->
+  <!--       data-signals:_bak="{}"  -->
+  <!--       data-on:click__viewtransition=" -->
+  <!--           $_hideMode = !$_hideMode; -->
+  <!--           if ($_hideMode) { -->
+  <!--             $_bak = {footer: $prst_footer, aside: $prst_aside, nav: $prst_nav, header: $prst_header}; -->
+  <!--             @setAll(false, {include: /prst_footer|prst_aside|prst_nav|prst_header/}) -->
+  <!--           } else { -->
+  <!--             $prst_footer = $_bak.footer; $prst_aside = $_bak.aside; $prst_nav = $_bak.nav; $prst_header = $_bak.header -->
+  <!--           }"> -->
+  <!--     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-icon lucide-maximize"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> -->
+  <!--   </button> -->
+  <!-- </div> -->
 
 </body></html>
