@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.21.1"
-app = marimo.App(width="medium", css_file="mmm.css")
+app = marimo.App(width="medium", css_file="mmm.css", auto_download=["html"])
 
 with app.setup:
     # std lib
@@ -916,90 +916,358 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## CSS Check
+    ## CSS Linter
     """)
     return
 
 
 @app.cell
-def _():
+def css_linter():
+
+    from collections import defaultdict
+
+ 
     SKIP = {
         ".venv",
         "docs/wasm",
     }
-
+ 
+    # ──────────────────────────────────────────
+    # Types
+    # ──────────────────────────────────────────
+ 
     @dataclass
     class Issue:
         file: str
         line: int
-        level: str
+        level: str   # "warn" | "error" | "info"
         msg: str
-
+ 
+    @dataclass
+    class Property:
+        name: str
+        syntax: str
+        inherits: bool
+        initial: str
+        file: str
+        line: int
+ 
+    @dataclass
+    class Report:
+        issues: list[Issue] = field(default_factory=list)
+        properties: list[Property] = field(default_factory=list)
+        layers_declared: list[str] = field(default_factory=list)  # from @layer order statement
+        layers_used: dict = field(default_factory=lambda: defaultdict(list))  # layer -> [files]
+        var_usage: dict = field(default_factory=lambda: defaultdict(set))  # prefix -> set of names
+ 
+    # ──────────────────────────────────────────
+    # Project root
+    # ──────────────────────────────────────────
+ 
     def find_root(start: Path = None, marker: str = "pyproject.toml") -> Path:
         p = (start or Path.cwd()).resolve()
         for parent in [p, *p.parents]:
             if (parent / marker).exists():
                 return parent
         raise FileNotFoundError(f"No {marker} found in {p} or any parent directory")
-
+ 
     def should_skip(path: Path, root: Path) -> bool:
         rel = str(path.relative_to(root))
         return any(rel.startswith(s) for s in SKIP)
-
-    def lint_css(path: Path) -> list[Issue]:
-        issues = []
-        lines = path.read_text().splitlines()
-
+ 
+    # ──────────────────────────────────────────
+    # Parsers
+    # ──────────────────────────────────────────
+ 
+    RE_PROPERTY = re.compile(
+        r'@property\s+(--[\w-]+)\s*\{'
+        r'\s*syntax:\s*"([^"]+)";\s*'
+        r'inherits:\s*(true|false);\s*'
+        r'initial-value:\s*([^;]+);\s*\}'
+    )
+ 
+    RE_LAYER_ORDER = re.compile(r'@layer\s+([\w.:,\s/*-]+);', re.DOTALL)
+    RE_LAYER_BLOCK = re.compile(r'@layer\s+([\w.:]+)\s*\{')
+ 
+    RE_VAR_DECL = re.compile(r'(--[\w-]+)\s*:')
+    RE_VAR_USE  = re.compile(r'var\((--[\w-]+)')
+ 
+    def classify_var(name: str) -> str:
+        if name.startswith("--cfg-"):  return "--cfg-*"
+        if name.startswith("--_"):     return "--_* (private)"
+        return "--* (public)"
+ 
+    def parse_properties(text: str, file: str) -> list[Property]:
+        props = []
+        for m in RE_PROPERTY.finditer(text):
+            line = text[:m.start()].count('\n') + 1
+            props.append(Property(
+                name=m.group(1),
+                syntax=m.group(2),
+                inherits=m.group(3) == "true",
+                initial=m.group(4).strip(),
+                file=file,
+                line=line,
+            ))
+        return props
+ 
+    def parse_layer_order(text: str) -> list[str]:
+        """Parse the top-level @layer ordering statement into a flat list."""
+        layers = []
+        for m in RE_LAYER_ORDER.finditer(text):
+            raw = m.group(1)
+            # strip comments
+            raw = re.sub(r'/\*.*?\*/', '', raw, flags=re.DOTALL)
+            for chunk in raw.split(','):
+                name = chunk.strip()
+                if name:
+                    layers.append(name)
+        return layers
+ 
+    def parse_layer_blocks(text: str) -> list[str]:
+        """Find all @layer block names used in a file."""
+        return RE_LAYER_BLOCK.findall(text)
+ 
+    def collect_vars(text: str) -> tuple[set, set]:
+        """Return (declared, used) variable names."""
+        declared = set(RE_VAR_DECL.findall(text))
+        used = set(RE_VAR_USE.findall(text))
+        return declared, used
+ 
+    # ──────────────────────────────────────────
+    # Lint rules
+    # ──────────────────────────────────────────
+ 
+    def lint_css(path: Path, report: Report, root: Path):
+        rel = str(path.relative_to(root))
+        text = path.read_text()
+        lines = text.splitlines()
+ 
+        # ── @property discovery ──
+        props = parse_properties(text, rel)
+        report.properties.extend(props)
+ 
+        # ── layer discovery ──
+        order = parse_layer_order(text)
+        if order:
+            if report.layers_declared:
+                report.issues.append(Issue(rel, 1, "warn", "multiple @layer order statements found"))
+            report.layers_declared.extend(order)
+ 
+        for layer_name in parse_layer_blocks(text):
+            report.layers_used[layer_name].append(rel)
+ 
+        # ── variable tracking ──
+        declared, used = collect_vars(text)
+        for v in declared | used:
+            report.var_usage[classify_var(v)].add(v)
+ 
+        # ── line-by-line rules ──
         for i, ln in enumerate(lines, 1):
+            # knob without fallback
             if re.search(r'var\(--_[\w-]+\)(?!.*,)', ln):
-                issues.append(Issue(path.name, i, "warn", "private knob with no fallback"))
+                report.issues.append(Issue(rel, i, "warn", "private knob with no fallback"))
+ 
+            # raw hex color
             if re.search(r'(?<!-)#[0-9a-fA-F]{3,8}\b', ln):
-                issues.append(Issue(path.name, i, "warn", "raw hex color — use token?"))
+                report.issues.append(Issue(rel, i, "warn", "raw hex color — use token?"))
+ 
+            # px unit
             if re.search(r'\b\d+px\b', ln) and '--cfg' not in ln:
-                issues.append(Issue(path.name, i, "warn", "px unit — intentional?"))
+                report.issues.append(Issue(rel, i, "warn", "px unit — intentional?"))
+ 
+            # timing without motion multiplier
             if re.search(r'transition.*\d+(\.\d+)?s', ln) and '--cfg-motion' not in ln:
-                issues.append(Issue(path.name, i, "error", "timing without --cfg-motion multiplier"))
+                report.issues.append(Issue(rel, i, "error", "timing without --cfg-motion multiplier"))
+ 
+        # ── @property not in root file ──
+        if props and not any(rel.endswith(f) for f in ("index.css", "config.css", "props.css", "engine.css")):
+            for prop in props:
+                report.issues.append(Issue(rel, prop.line, "error",
+                    f"@property {prop.name} declared outside root — move to config"))
+ 
+    # ──────────────────────────────────────────
+    # Reporters
+    # ──────────────────────────────────────────
+ 
+    BOLD  = "\033[1m"
+    DIM   = "\033[2m"
+    RESET = "\033[0m"
+    RED   = "\033[31m"
+    YEL   = "\033[33m"
+    CYN   = "\033[36m"
+    GRN   = "\033[32m"
+ 
+    def print_header(title: str):
+        print(f"\n{BOLD}{'─' * 60}")
+        print(f"  {title}")
+        print(f"{'─' * 60}{RESET}\n")
+ 
+    def print_convention_table():
+        print_header("VARIABLE CONVENTIONS")
+        rows = [
+            ("--cfg-*",    "Core calc params. Set once."),
+            ("data-ui-*",  "User prefs. HTML attributes."),
+            ("--*",        "Public. Set freely. Core eats."),
+            ("--_*",       "Private. Don't touch. Ever."),
+        ]
+        print(f"  {'PREFIX':<14} RULE")
+        print(f"  {'─' * 14} {'─' * 40}")
+        for prefix, rule in rows:
+            print(f"  {CYN}{prefix:<14}{RESET} {rule}")
+        print()
+ 
+    def print_property_registry(report: Report):
+        print_header("@PROPERTY REGISTRY")
+        if not report.properties:
+            print(f"  {DIM}(none found){RESET}")
+            return
+ 
+        # group by prefix
+        groups = defaultdict(list)
+        for p in sorted(report.properties, key=lambda p: p.name):
+            if p.name.startswith("--cfg-"):   groups["config"].append(p)
+            elif p.name.startswith("--_"):    groups["private"].append(p)
+            else:                             groups["public"].append(p)
+ 
+        for label, props in [("public", groups.get("public", [])),
+                             ("config", groups.get("config", [])),
+                             ("private", groups.get("private", []))]:
+            if not props:
+                continue
+            print(f"  {DIM}/* {label} */{RESET}")
+            for p in props:
+                inh = "inherit" if p.inherits else "local "
+                print(f"  {CYN}{p.name:<22}{RESET} {DIM}{p.syntax:<12} {inh}  = {p.initial}{RESET}")
+                print(f"  {' ' * 22} {DIM}└─ {p.file}:{p.line}{RESET}")
+            print()
+ 
+    def print_layer_summary(report: Report):
+        print_header("LAYER SUMMARY")
+        if not report.layers_declared:
+            print(f"  {DIM}(no @layer order statement found){RESET}")
+            return
+ 
+        print(f"  {DIM}Declared order:{RESET}")
+        for i, layer in enumerate(report.layers_declared):
+            files = report.layers_used.get(layer, [])
+            status = f"{GRN}✓{RESET}" if files else f"{RED}✗ unused{RESET}"
+            print(f"  {i + 1:>3}. {CYN}{layer:<28}{RESET} {status}")
+            for f in files:
+                print(f"       {DIM}└─ {f}{RESET}")
+        print()
+ 
+        # layers used but not in the order statement
+        declared_set = set(report.layers_declared)
+        undeclared = {k: v for k, v in report.layers_used.items() if k not in declared_set}
+        if undeclared:
+            print(f"  {RED}Undeclared layers (used but not in @layer order):{RESET}")
+            for layer, files in sorted(undeclared.items()):
+                print(f"  {RED}  ⚠ {layer}{RESET}")
+                for f in files:
+                    print(f"       {DIM}└─ {f}{RESET}")
+                report.issues.append(Issue(files[0], 0, "error",
+                    f"layer '{layer}' used but not in @layer order statement"))
+            print()
+ 
+    def print_var_summary(report: Report):
+        print_header("VARIABLE USAGE")
+        for prefix in ("--cfg-*", "--* (public)", "--_* (private)"):
+            names = sorted(report.var_usage.get(prefix, set()))
+            print(f"  {CYN}{prefix:<18}{RESET} {len(names)} variables")
+            if len(names) <= 12:
+                for n in names:
+                    print(f"    {DIM}{n}{RESET}")
+            else:
+                for n in names[:5]:
+                    print(f"    {DIM}{n}{RESET}")
+                print(f"    {DIM}... and {len(names) - 5} more{RESET}")
+            print()
+ 
+    def print_issues(report: Report, root: Path):
+        print_header("ISSUES")
+        if not report.issues:
+            print(f"  {GRN}No issues found ✓{RESET}\n")
+            return
+ 
+        # group by file
+        by_file = defaultdict(list)
+        for iss in report.issues:
+            by_file[iss.file].append(iss)
+ 
+        errors = sum(1 for i in report.issues if i.level == "error")
+        warns  = sum(1 for i in report.issues if i.level == "warn")
+ 
+        for file, issues in sorted(by_file.items()):
+            print(f"  {BOLD}{file}{RESET}")
+            for iss in sorted(issues, key=lambda i: i.line):
+                icon = f"{RED}❌{RESET}" if iss.level == "error" else f"{YEL}⚠️{RESET}"
+                line_str = f":{iss.line}" if iss.line else ""
+                print(f"    {icon} {line_str} {iss.msg}")
+            print()
+ 
+        print(f"  {RED}{errors} error{'s' * (errors != 1)}{RESET}, "
+              f"{YEL}{warns} warning{'s' * (warns != 1)}{RESET}\n")
 
-        return issues
-
-    return SKIP, find_root, lint_css, should_skip
+    return (
+        BOLD,
+        RESET,
+        Report,
+        find_root,
+        lint_css,
+        print_convention_table,
+        print_issues,
+        print_layer_summary,
+        print_property_registry,
+        print_var_summary,
+        should_skip,
+    )
 
 
 @app.cell
-def _(SKIP, find_root, lint_css, should_skip):
-    def check_css():
-        root = find_root()
-        print(f"Project root: {root}\n")
-
+def _(
+    BOLD,
+    RESET,
+    Report,
+    find_root,
+    lint_css,
+    print_convention_table,
+    print_issues,
+    print_layer_summary,
+    print_property_registry,
+    print_var_summary,
+    should_skip,
+):
+    def run_css_check(root: Path = None):
+        root = root or find_root()
+        print(f"{BOLD}Project root:{RESET} {root}\n")
+ 
+        report = Report()
+ 
         if sys.argv[1:]:
             paths = [Path(p) for p in sys.argv[1:]]
         else:
             paths = sorted(p for p in root.rglob("*.css") if not should_skip(p, root))
-
-        total = 0
+ 
+        print(f"  Scanning {len(paths)} CSS files...\n")
         for p in paths:
-            issues = lint_css(p)
-            if not issues:
-                continue
-            rel = p.relative_to(root)
-            print(f"{rel}")
-            for iss in issues:
-                icon = "❌" if iss.level == "error" else "⚠️"
-                print(f"  {icon} :{iss.line} — {iss.msg}")
-            print()
-            total += len(issues)
+            lint_css(p, report, root)
+ 
+        print_convention_table()
+        print_property_registry(report)
+        print_layer_summary(report)
+        print_var_summary(report)
+        print_issues(report, root)
+ 
+        return report
+ 
 
-        scanned = len(list(p for p in root.rglob("*.css") if not should_skip(p, root)))
-        print(f"{total} issue{'s' * (total != 1)} found across {scanned} CSS files")
-        print(f"Skipped: {', '.join(sorted(SKIP))}")
-        return 
-
-    return (check_css,)
+    return (run_css_check,)
 
 
 @app.cell
-def _(check_css):
-    check_css()
+def _(run_css_check):
+    run_css_check()
     return
 
 
