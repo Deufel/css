@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>_ui</title>
+  <link rel="stylesheet" href="css/_ui-v4.css">
+  <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"></script>
+  <script type="module" src="js/highlight.js"></script>
+  <style>
+    .mono { font-family: var(--_font-mono); }
+    .tag { display: inline-block; padding: 0.15em 0.5em; border-radius: 0.25rem; font-size: 0.75em; font-weight: 600; }
+    .tag-fill { --_bg: --fill(); background: var(--_bg); color: --contrast(); }
+    .tag-surface { --_bg: --surface(2); background: var(--_bg); color: --contrast(0.6); }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; color: --contrast(0.4); font-weight: 500; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.05em; padding: --space(-2) --space(-1); border-bottom: 1px solid --alpha(0.1, --fill()); }
+    td { padding: --space(-2) --space(-1); font-size: 0.85em; border-bottom: 1px solid --alpha(0.05, --fill()); }
+    td code { font-size: 0.9em; }
+    .engine-card { --_bg: --surface(1); background: var(--_bg); padding: --space(1); border-radius: 0.5rem; flex: 1; min-width: 12rem; }
+    .engine-card h3 { color: --fill(); margin-bottom: --space(-2); }
+    .engine-card p { color: --contrast(0.5); font-size: 0.85em; }
+    .layer-row { display: flex; align-items: center; gap: --space(-1); padding: --space(-2) 0; }
+    .layer-row code { min-width: 8em; }
+    .layer-row span { color: --contrast(0.4); font-size: 0.85em; }
+    .install-block { --_bg: --surface(-1); background: var(--_bg); padding: --space(0) --space(1); border-radius: 0.375rem; font-family: var(--_font-mono); font-size: 0.8em; color: --contrast(0.6); overflow-x: auto; }
+    .layout-nav { --_bg: --surface(0); background: var(--_bg); padding: --space(-1) --space(1); border-bottom: 1px solid --alpha(0.1, --fill()); display: flex; align-items: center; justify-content: space-between; }
+    .layout-nav a { text-decoration: none; font-weight: 500; font-size: 0.85em; }
+    .layout-nav .row { gap: --space(0); }
+    .sidebar-link { display: block; padding: --space(-2) --space(-1); color: --contrast(0.5); text-decoration: none; font-size: 0.85em; border-radius: 0.25rem; }
+    .sidebar-link:hover { color: --contrast(0.8); background: --alpha(0.05, --fill()); }
+    .sidebar-link.active { color: --fill(); font-weight: 600; }
+    .sidebar-section { color: --contrast(0.3); font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.08em; padding: --space(-1) --space(-1) --space(-2); }
+    .settings-row { display: flex; align-items: center; justify-content: space-between; gap: --space(0); padding: --space(-2) 0; }
+    .settings-row small { color: --contrast(0.4); font-size: 0.8em; min-width: 5em; }
+    .settings-row select { padding: --space(-2); border-radius: 0.25rem; border: 1px solid --alpha(0.2, --fill()); background: --surface(0); color: --contrast(0.6); font: inherit; font-size: 0.8em; flex: 1; }
+    .settings-row input[type="color"] { width: 2rem; height: 1.5rem; }
+    .settings-divider { border: none; height: 1px; background: --alpha(0.1, --fill()); margin: --space(-2) 0; }
+  </style>
+</head>
+<body
+  data-signals="{scheme:'', size:'', density:'', motion:'', color:'oklch(50% 0.2 270)'}"
+  data-effect="
+    $scheme ? document.documentElement.setAttribute('data-ui-scheme',$scheme) : document.documentElement.removeAttribute('data-ui-scheme');
+    $size ? document.documentElement.setAttribute('data-ui-size',$size) : document.documentElement.removeAttribute('data-ui-size');
+    $density ? document.documentElement.setAttribute('data-ui-density',$density) : document.documentElement.removeAttribute('data-ui-density');
+    $motion ? document.documentElement.setAttribute('data-ui-motion',$motion) : document.documentElement.removeAttribute('data-ui-motion');
+    document.documentElement.style.setProperty('--_color',$color)
+  "
+>
+
+<div class="layout-doc">
+
+  <nav class="layout-nav">
+    <div class="row ai-center" style="--_gap: --space(-1)">
+      <button class="layout-toggle" data-on:click="$navDrawer.showModal()" style="background: none; border: none; box-shadow: none; padding: --space(-2); color: --contrast(0.5); font-size: 1.2em; cursor: pointer">☰</button>
+      <strong class="mono" style="color: --fill(); font-size: 0.85rem">_ui</strong>
+    </div>
+    <div class="row" style="--_gap: --space(0)">
+      <a href="index.html" style="color: --fill()">Home</a>
+      <a href="core.html">Core</a>
+      <a href="layers.html">Layers</a>
+      <a href="playground.html">Playground</a>
+      <a href="source.html">Source</a>
+    </div>
+  </nav>
+
+  <dialog class="layout-sidebar" data-ref:nav-drawer data-on:click="evt.target === el && el.close()">
+    <div class="stack" style="--_gap: --space(-2)">
+      <span class="sidebar-section">Overview</span>
+      <a href="#install" class="sidebar-link">Install</a>
+      <a href="#usage" class="sidebar-link">Usage</a>
+      <a href="#engine" class="sidebar-link">Engine</a>
+      <a href="#properties" class="sidebar-link">Properties</a>
+      <a href="#functions" class="sidebar-link">Functions</a>
+      <a href="#layers" class="sidebar-link">Layers</a>
+      <a href="#prefs" class="sidebar-link">User Prefs</a>
+      <span class="sidebar-section" style="margin-top: --space(-1)">Pages</span>
+      <a href="index.html" class="sidebar-link active">Home</a>
+      <a href="core.html" class="sidebar-link">Core</a>
+      <a href="layers.html" class="sidebar-link">Layers</a>
+      <a href="playground.html" class="sidebar-link">Playground</a>
+    </div>
+  </dialog>
+
+  <main class="layout-main">
+    <div class="stack" style="--_gap: --space(2)">
+
+      <section class="stack" style="--_gap: --space(-1)">
+        <h1 style="--_type: 5">_ui</h1>
+        <p style="color: --contrast(0.5); --_type: 1">A CSS system in 7 properties, 7 functions, and 9 layers.</p>
+      </section>
+
+      <section id="install" class="stack" style="--_gap: --space(-1)">
+        <h5>Install</h5>
+        <div class="install-block">&lt;link rel="stylesheet" href="css/_ui-v4.css"&gt;</div>
+      </section>
+
+      <section id="usage" class="stack" style="--_gap: --space(-1)">
+        <h5>Usage</h5>
+        <div class="install-block">--_color: oklch(50% 0.2 270);    /* set a color — full palette out */
+--_type: 3;                       /* set a number — full typography out */
+gap: --space(2);                  /* fluid spacing that scales */</div>
+      </section>
+
+      <section id="engine" class="stack" style="--_gap: --space(0)">
+        <h5>Engine</h5>
+        <p style="color: --contrast(0.5); font-size: 0.85em">Three orthogonal systems. Each takes one input. Everything else derives.</p>
+        <div class="row" style="--_gap: --space(0)">
+          <div class="engine-card stack" style="--_gap: --space(-2)">
+            <h3 style="--_type: 1">Color</h3>
+            <p>Set <code>--_color</code>. Get surfaces, fills, text, borders, shadows — light and dark.</p>
+            <div class="row" style="--_gap: --space(-2); margin-top: --space(-2)">
+              <span class="tag tag-surface">5 functions</span>
+              <span class="tag tag-surface">2 properties</span>
+            </div>
+          </div>
+          <div class="engine-card stack" style="--_gap: --space(-2)">
+            <h3 style="--_type: 1">Type</h3>
+            <p>Set <code>--_type</code>. Get fluid size, tightened tracking, compressed leading.</p>
+            <div class="row" style="--_gap: --space(-2); margin-top: --space(-2)">
+              <span class="tag tag-surface">1 function</span>
+              <span class="tag tag-surface">1 property</span>
+            </div>
+          </div>
+          <div class="engine-card stack" style="--_gap: --space(-2)">
+            <h3 style="--_type: 1">Space</h3>
+            <p>Call <code>--space(step)</code>. Fluid geometric rhythm from the same engine as type.</p>
+            <div class="row" style="--_gap: --space(-2); margin-top: --space(-2)">
+              <span class="tag tag-surface">1 function</span>
+              <span class="tag tag-surface">same config</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="properties" class="stack" style="--_gap: --space(-1)">
+        <h5>Properties</h5>
+        <table>
+          <tr><th>Property</th><th>Type</th><th>Default</th><th>Purpose</th></tr>
+          <tr><td><code>--_color</code></td><td>&lt;color&gt;</td><td>purple</td><td>palette source</td></tr>
+          <tr><td><code>--_dark</code></td><td>0 | 1</td><td>0</td><td>light/dark mode</td></tr>
+          <tr><td><code>--_bg</code></td><td>&lt;color&gt;</td><td>white</td><td>current background (for contrast)</td></tr>
+          <tr><td><code>--_type</code></td><td>&lt;number&gt;</td><td>-999</td><td>type scale step (sentinel = inactive)</td></tr>
+          <tr><td><code>--_motion</code></td><td>0 | 1</td><td>1</td><td>animation toggle</td></tr>
+          <tr><td><code>--_type-scale</code></td><td>&lt;number&gt;</td><td>1</td><td>global type multiplier</td></tr>
+          <tr><td><code>--_space-scale</code></td><td>&lt;number&gt;</td><td>1</td><td>global space multiplier</td></tr>
+        </table>
+      </section>
+
+      <section id="functions" class="stack" style="--_gap: --space(-1)">
+        <h5>Functions</h5>
+        <table>
+          <tr><th>Function</th><th>Returns</th><th>Purpose</th></tr>
+          <tr><td><code>--surface(level)</code></td><td>&lt;color&gt;</td><td>background at perceptual depth</td></tr>
+          <tr><td><code>--fill(level)</code></td><td>&lt;color&gt;</td><td>interactive color, full chroma</td></tr>
+          <tr><td><code>--contrast(amt, bg)</code></td><td>&lt;color&gt;</td><td>text for any bg, auto direction</td></tr>
+          <tr><td><code>--alpha(a, base)</code></td><td>&lt;color&gt;</td><td>transparency</td></tr>
+          <tr><td><code>--shadow(level)</code></td><td>&lt;shadow&gt;</td><td>colored depth</td></tr>
+          <tr><td><code>--type(step)</code></td><td>&lt;length&gt;</td><td>fluid geometric font size</td></tr>
+          <tr><td><code>--space(step)</code></td><td>&lt;length&gt;</td><td>fluid geometric spacing</td></tr>
+        </table>
+      </section>
+
+      <section id="layers" class="stack" style="--_gap: --space(-1)">
+        <h5>Layers</h5>
+        <div class="stack" style="--_gap: 0">
+          <div class="layer-row"><code>reset</code> <span>CSSWG corrections</span></div>
+          <div class="layer-row"><code>props</code> <span>static design constants</span></div>
+          <div class="layer-row"><code>theme</code> <span>brand config, fluid scale settings</span></div>
+          <div class="layer-row"><code>color</code> <span>OS prefs, user prefs (data-ui-*)</span></div>
+          <div class="layer-row"><code>typography</code> <span>type system, element defaults</span></div>
+          <div class="layer-row"><code>composition</code> <span>layout primitives</span></div>
+          <div class="layer-row"><code>layout</code> <span>page-level semantic regions</span></div>
+          <div class="layer-row"><code>components</code> <span>card, button, inputs, popover</span></div>
+          <div class="layer-row"><code>overrides</code> <span>responsive, a11y, print</span></div>
+        </div>
+      </section>
+
+      <section id="prefs" class="stack" style="--_gap: --space(-1)">
+        <h5>User Preferences</h5>
+        <table>
+          <tr><th>Attribute</th><th>Values</th><th>Effect</th></tr>
+          <tr><td><code>data-ui-scheme</code></td><td>light · dark</td><td>force color scheme</td></tr>
+          <tr><td><code>data-ui-motion</code></td><td>none</td><td>disable transitions</td></tr>
+          <tr><td><code>data-ui-size</code></td><td>small · large</td><td>scale all type</td></tr>
+          <tr><td><code>data-ui-density</code></td><td>compact · comfortable</td><td>scale all spacing</td></tr>
+        </table>
+      </section>
+
+      <hr>
+
+      <footer style="color: --contrast(0.3); font-size: 0.8em; padding-bottom: --space(2)">
+        <span class="mono">_ui-v4.css</span> · No build step · No dependencies · ~12kb
+      </footer>
+
+    </div>
+  </main>
+
+</div>
+
+<button class="fab" popovertarget="settings" style="anchor-name: --fab">⚙</button>
+
+<div id="settings" popover class="popover above-end" style="position-anchor: --fab">
+  <div class="stack" style="--_gap: --space(-2)">
+    <small style="color: --fill(); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7em">Settings</small>
+    <hr class="settings-divider">
+    <div class="settings-row"><small>Color</small><input type="color" data-bind:color></div>
+    <div class="settings-row"><small>Scheme</small><select data-bind:scheme><option value="">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+    <div class="settings-row"><small>Size</small><select data-bind:size><option value="">Default</option><option value="small">Small</option><option value="large">Large</option></select></div>
+    <div class="settings-row"><small>Density</small><select data-bind:density><option value="">Default</option><option value="compact">Compact</option><option value="comfortable">Comfortable</option></select></div>
+    <div class="settings-row"><small>Motion</small><select data-bind:motion><option value="">Default</option><option value="none">Reduced</option></select></div>
+  </div>
+</div>
+
+</body>
+</html>

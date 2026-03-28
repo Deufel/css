@@ -1,34 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="en"
+    data-attr="{
+    'data-ui-scheme':  ['light','dawn','dusk','night'][$scheme],
+    'data-ui-spacing': ['sm','md','lg'][$spacing],
+    'data-ui-font':    ['sm','md','lg'][$font],
+    'data-ui-motion':  ['none','fast','norm','chill','debug'][$motion],
+    'data-ui-corners': ['none','sm','md','lg'][$corners]
+    }">
+
 <head>
-  <link rel="stylesheet" href="styles.css">
-    <style>
-    @property --_depth { syntax: "<number>"; inherits: true; initial-value: 0; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toggle Group — Color & Type</title>
+<link rel="stylesheet" href="colorNtype.css">
+<script src="js/ripple.js"></script>
+<script src="js/scoped_css.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.8/bundles/datastar.js"></script>
 
-    .surface {
-      --_depth: calc(var(--_depth) + 1);
-      --bg: var(--_depth);
-      padding: 1.5rem;
-    }
-      .surface                             { --bg: 1; }
-      .surface .surface                    { --bg: 2; }
-      .surface .surface .surface           { --bg: 3; }
-      .surface .surface .surface .surface  { --_bg: 4; background:var(--_bg)) }
-
-    }
-  </style>
 </head>
-<body style="--color:blue">
-  <div class="surface">Level 1
-    <div class="surface">Level 2
-      <div class="surface">Level 3
-        <div class="surface">Level 4
-          <div class="surface">Level 5
-            <div class="surface">Level 6</div>
-          </div>
+
+<body class="app">
+    <header id="header" class="surface split ai-center">
+        <div class="cluster">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M17.57 20.51H17a.24.24 0 0 1-.23-.17L10.64 2.52a1.46 1.46 0 0 0-1.38-1a1.49 1.49 0 0 0-1.39 1L1.8 20.34a.25.25 0 0 1-.23.17H1a1 1 0 1 0 0 2h3a1 1 0 0 0 1-1a.94.94 0 0 0-.81-.95a.3.3 0 0 1-.17-.12a.28.28 0 0 1 0-.2l1.5-4.42a.25.25 0 0 1 .24-.16h7.23a.25.25 0 0 1 .23.16l1.5 4.42a.23.23 0 0 1 0 .2a.3.3 0 0 1-.17.12a1 1 0 0 0-.79.95a1 1 0 0 0 1 1h3a1 1 0 0 0 0-2ZM6.48 13.68a.26.26 0 0 1-.2-.1a.24.24 0 0 1 0-.23L9 5.2a.26.26 0 0 1 .26-.2a.26.26 0 0 1 .23.17l2.78 8.15a.27.27 0 0 1 0 .23a.26.26 0 0 1-.2.1Z"/><path fill="currentColor" d="M23 20.51h-.2a.24.24 0 0 1-.23-.17L18.31 7.89a1.53 1.53 0 0 0-2.89 0l-1.16 3.39a1 1 0 0 0 1.86.63l.51-1.51a.26.26 0 0 1 .23-.17a.26.26 0 0 1 .24.17l1.46 4.29a.22.22 0 0 1 0 .22a.24.24 0 0 1-.2.11H17a1 1 0 0 0 0 2h2.2a.25.25 0 0 1 .23.16l1.1 3.21a.27.27 0 0 1-.12.3a1 1 0 0 0-.52.85a1 1 0 0 0 1 1H23a1 1 0 0 0 0-2Z"/></svg>
+            <h1>Color&Type</h1>
+            <small>&nbsp </small>
         </div>
-      </div>
-    </div>
-  </div>
+
+        <div>
+            <a> Github </a>
+        </div>
+    </header>
+
+    <nav id="nav" class="surface split-v">
+        <div class="stack">
+            <header> Navigation </header>
+            <a>Home</a>
+            <a>About</a>
+            <a>Core</a>
+            <a>Components</a>
+        </div>
+        <div class="stack">
+            <hr>
+            <button style="--hue:40">Settings</button>
+            <kbd>V 0.69</kbd>
+        </div>
+    </nav>
+
+    <aside id="aside" class="stack">
+        <button class="btn"
+            data-init="$scheme=1"
+             data-on:click="$scheme = ($scheme + 1) % 4"
+              data-text="'scheme: ' + ['light','dawn','dusk','dark'][$scheme]"></button>
+
+        <button class="btn"
+          data-on:click="$spacing = ($spacing + 1) % 3"
+          data-text="'spacing: ' + ['sm','md','lg'][$spacing]"></button>
+
+        <button class="btn"
+          data-on:click="$font = ($font + 1) % 3"
+          data-text="'font: ' + ['sm','md','lg'][$font]"></button>
+
+        <button class="btn"
+          data-on:click="$motion = ($motion + 1) % 5"
+          data-text="'motion: ' + ['none','fast','norm','chill','debug'][$motion]"></button>
+
+        <button class="btn"
+          data-on:click="$corners = ($corners + 1) % 4"
+          data-text="'corners: ' + ['none','sm','md','lg'][$corners]"></button>
+    </aside>
+
+    <main id="main">
+        <div class="cluster ai-start">
+            <h1>Toggle Group</h1>
+            <span class="chip" style="--hue: 60; --nudge-c: .1; --type:-3;">alpha</span>
+        </div>
+        <p style="--contrast: 0.5; max-width: 38rem;">
+            A single-select button group for switching views, filters, or modes.
+            Active state derives from the color engine via <code>--nudge-l</code> and <code>--nudge-c</code>.
+            Inherits <code>--hue</code> from its context.
+        <div style="padding: 1rem; max-width: fit-content;">
+            <div class="cluster ai-baseline">
+                <strong style="--contrast: 0.7; display: inline-flex;">View:&nbsp</strong>
+                <small style="--contrast: 0.7; --type: -1;" data-text="$sel"></small>
+            </div>
+
+            <div class="toggle-group" data-signals:sel="'Month'">
+                <style> me > button{--hue: 45;min-width:7ch;} </style>
+                <button data-attr:aria-pressed="String($sel === 'Day')"   data-on:pointerdown="$sel = 'Day'">   Day</button>
+                <button data-attr:aria-pressed="String($sel === 'Month')" data-on:pointerdown="$sel = 'Month'"> Month</button>
+                <button data-attr:aria-pressed="String($sel === 'Year')"  data-on:pointerdown="$sel = 'Year'">  Year</button>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="card sruvface">
+
+            <button class="ripple" style="--type:9; --nudge-h:50; --nudge-c:0.01;">Click me</button>
+            <button class="ripple" style="--type:9; --nudge-h:80; --nudge-c:0.02;">Click me</button>
+            <button class="ripple" style="--type:9; --nudge-h:110;--nudge-c:0.04;">Click me</button>
+            <button class="ripple" style="--type:9; --nudge-h:140;--nudge-c:0.05;">Click me</button>
+            <button class="ripple" style="--type:9; --nudge-h:170;--nudge-c:0.06;">Click me</button>
+        </div>
+
+
+
+
+    <main>
+
+
 </body>
 </html>

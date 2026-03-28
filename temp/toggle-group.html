@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" data-attr:data-ui-scheme="$dark ? 'dark' : 'light'">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toggle Group — Color & Type</title>
+<link rel="stylesheet" href="_engine.css">
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.8/bundles/datastar.js"></script>
+<style>
+
+/* ═══════════════════════════════════════════
+   component doc page — layered on _engine.css
+   ═══════════════════════════════════════════ */
+
+@layer theme {
+  :root {
+    --font-heading: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif;
+    --font-body:    Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
+    --font-mono:    'SF Mono', Menlo, ui-monospace, 'Cascadia Code', 'Source Code Pro', Consolas, monospace;
+  }
+}
+
+@layer component.complex {
+
+  /* ── toggle group (the component being documented) ── */
+
+  .toggle-group {
+    display: inline-flex;
+    border-radius: var(--cfg-radius);
+    overflow: hidden;
+    --nudge-l: -2;
+  }
+  .toggle-item {
+    padding: 0.4em 1em;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    --type: -0.2;
+    font-family: var(--font-body);
+    font-weight: 500;
+    --contrast: 0.5;
+    background: transparent;
+    transition:
+      background calc(var(--cfg-motion) * 0.15s) ease-out,
+      color calc(var(--cfg-motion) * 0.15s) ease-out;
+    color: oklch(from var(--_bg)
+      calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
+      calc(c * (1 - var(--contrast)))
+      h
+    );
+  }
+  .toggle-item:hover { --contrast: 0.75; }
+  .toggle-item.active {
+    --nudge-l: -12;
+    --nudge-c: 0.08;
+    --contrast: 1;
+    background: var(--_bg);
+    color: oklch(from var(--_bg)
+      calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
+      calc(c * (1 - var(--contrast)))
+      h
+    );
+  }
+  .toggle-item + .toggle-item {
+    border-inline-start: 1px solid oklch(from var(--_bg) calc(l - 0.04 + var(--cfg-dark) * 0.08) c h);
+  }
+  .toggle-item.active + .toggle-item,
+  .toggle-item + .toggle-item.active {
+    border-inline-start-color: transparent;
+  }
+  .toggle-item.icon-only {
+    padding: 0.5em;
+    display: grid;
+    place-content: center;
+  }
+  .toggle-item.icon-only svg { width: 1.15em; height: 1.15em; }
+  .toggle-group.sm .toggle-item { --type: -0.5; padding: 0.3em 0.7em; }
+  .toggle-group.sm .toggle-item.icon-only { padding: 0.35em; }
+  .toggle-group.lg .toggle-item { --type: 0.2; padding: 0.5em 1.3em; }
+  .toggle-group.pill { border-radius: 100vw; }
+  .toggle-group.pill .toggle-item:first-child { padding-inline-start: 1.2em; }
+  .toggle-group.pill .toggle-item:last-child { padding-inline-end: 1.2em; }
+}
+
+
+/* ═══════════════════════════════════════════
+   doc template styles
+   ═══════════════════════════════════════════ */
+
+@layer component.complex {
+
+  /* ── page ── */
+  .doc-page {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: var(--space-s);
+  }
+
+  .doc-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block-end: var(--space-s);
+    margin-block-end: var(--space-l);
+    border-block-end: 1px solid oklch(from var(--_bg) calc(l - 0.03 + var(--cfg-dark) * 0.06) c h);
+  }
+  .doc-topbar-brand {
+    font-family: var(--font-mono);
+    --type: -0.3;
+    --contrast: 0.4;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── component header ── */
+  .comp-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+    margin-block-end: var(--space-xs);
+  }
+  .comp-header h1 { margin: 0; }
+  .comp-status {
+    --type: -2;
+    font-family: var(--font-mono);
+    padding: 0.15em 0.6em;
+    border-radius: 100vw;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* ── demo + api split ── */
+  .comp-body {
+    display: grid;
+    grid-template-columns: 1fr 22rem;
+    gap: var(--space-m);
+    margin-block: var(--space-m);
+  }
+  @media (width < 900px) {
+    .comp-body { grid-template-columns: 1fr; }
+  }
+
+  /* ── resizable demo box ── */
+  .comp-demo {
+    border-radius: var(--cfg-radius);
+    padding: var(--space-m);
+    --nudge-l: -2;
+    resize: horizontal;
+    overflow: auto;
+    min-width: 16rem;
+    min-height: 12rem;
+    position: relative;
+  }
+  .comp-demo::after {
+    content: "";
+    position: absolute;
+    inset-block-end: 0.4rem;
+    inset-inline-end: 0.4rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-inline-end: 2px solid oklch(from var(--_bg) calc(l - 0.08 + var(--cfg-dark) * 0.16) c h);
+    border-block-end: 2px solid oklch(from var(--_bg) calc(l - 0.08 + var(--cfg-dark) * 0.16) c h);
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .comp-demo-label {
+    position: absolute;
+    inset-block-start: var(--space-xs);
+    inset-inline-end: var(--space-xs);
+    --type: -2.5;
+    font-family: var(--font-mono);
+    --contrast: 0.25;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── api table ── */
+  .api-panel {
+    border-radius: var(--cfg-radius);
+    padding: var(--space-s);
+    --nudge-l: -2;
+    overflow-y: auto;
+    max-height: 36rem;
+  }
+  .api-panel h3 {
+    --type: -0.5;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    margin-block-end: var(--space-xs);
+    padding-block-end: var(--space-3xs);
+    border-block-end: 1px solid oklch(from var(--_bg) calc(l - 0.04 + var(--cfg-dark) * 0.08) c h);
+  }
+  .api-row {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: var(--space-2xs);
+    padding: var(--space-2xs) 0;
+    border-block-end: 1px solid oklch(from var(--_bg) calc(l - 0.02 + var(--cfg-dark) * 0.04) c h);
+    --type: -0.5;
+    align-items: baseline;
+  }
+  .api-row:last-child { border: none; }
+  .api-key {
+    font-family: var(--font-mono);
+    --type: -0.8;
+    --contrast: 0.8;
+    font-weight: 500;
+  }
+  .api-val {
+    --contrast: 0.5;
+    --type: -0.7;
+  }
+  .api-section-label {
+    --type: -1.8;
+    font-family: var(--font-mono);
+    --contrast: 0.3;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-block-start: var(--space-s);
+    margin-block-end: var(--space-2xs);
+  }
+
+  /* ── code panels ── */
+  .code-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-m);
+    margin-block: var(--space-m);
+  }
+  @media (width < 700px) {
+    .code-split { grid-template-columns: 1fr; }
+  }
+
+  .code-panel {
+    border-radius: var(--cfg-radius);
+    --nudge-l: -3;
+    --nudge-c: 0.005;
+    overflow: hidden;
+  }
+  .code-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2xs) var(--space-s);
+    --nudge-l: -5;
+    --type: -1.5;
+    font-family: var(--font-mono);
+    --contrast: 0.4;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .code-panel-body {
+    padding: var(--space-s) var(--space-m);
+    --type: -0.7;
+    font-family: var(--font-mono);
+    line-height: 1.65;
+    overflow-x: auto;
+    white-space: pre;
+    --contrast: 0.7;
+  }
+
+  /* ── full css details ── */
+  .css-details {
+    margin-block: var(--space-m);
+  }
+  .css-details summary {
+    cursor: pointer;
+    --type: -0.3;
+    font-family: var(--font-mono);
+    --contrast: 0.5;
+    padding: var(--space-xs) var(--space-s);
+    border-radius: var(--cfg-radius);
+    --nudge-l: -2;
+    transition: background calc(var(--cfg-motion) * 0.1s) ease-out;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+  .css-details summary:hover { --nudge-l: -3; }
+  .css-details summary svg {
+    width: 1em;
+    height: 1em;
+    transition: transform calc(var(--cfg-motion) * 0.2s) ease-out;
+  }
+  .css-details[open] summary svg { transform: rotate(90deg); }
+  .css-details .code-panel { margin-block-start: var(--space-xs); }
+}
+
+</style>
+</head>
+
+<body style="--hue: 220; --chroma: 0.025;">
+
+  <div class="doc-page">
+
+    <!-- ═══ topbar ═══ -->
+    <div class="doc-topbar">
+      <span class="doc-topbar-brand">color & type <span style="--contrast: 0.25;">/ components</span></span>
+      <button class="btn surface clickable sm" style="font-family: var(--font-mono); --type: -0.5;"
+        data-on:click="$dark = !$dark"
+        data-text="$dark ? '☀ light' : '☾ dark'"
+      ></button>
+    </div>
+
+
+    <!-- ═══ component header ═══ -->
+    <div class="comp-header">
+      <h1>Toggle Group</h1>
+      <span class="comp-status fill" style="--nudge-h: 60;">alpha</span>
+    </div>
+    <p style="--contrast: 0.55; max-width: 40rem;">
+      A single-select button group for switching views, filters, or modes.
+      Active state derives from the color engine via <code>--nudge-l</code> and <code>--nudge-c</code>.
+      Inherits <code>--hue</code> from its context.
+    </p>
+
+
+    <!-- ═══ demo + api ═══ -->
+    <div class="comp-body">
+
+      <!-- demo box (resizable) -->
+      <div class="comp-demo surface">
+        <span class="comp-demo-label">resize ↔</span>
+
+        <div class="stack" style="--_gap: var(--space-m);">
+
+          <!-- default -->
+          <div>
+              <div>
+                <small style="--contrast: 0.7; display: inline-flex;  ;">default</small>
+                <code style="--contrast: 0.3; --type: -2; display: inline-flex; " data-text="'$sel = ' + $sel"></code>
+              </div >
+            <div class="toggle-group surface">
+              <button class="toggle-item" data-class:active="$sel === 'list'" data-on:click="$sel = 'list'">List</button>
+              <button class="toggle-item" data-class:active="$sel === 'board'" data-on:click="$sel = 'board'">Board</button>
+              <button class="toggle-item" data-class:active="$sel === 'timeline'" data-on:click="$sel = 'timeline'">Timeline</button>
+            </div>
+
+          </div>
+
+          <!-- pill -->
+          <div>
+            <small style="--contrast: 0.3; display: block; margin-block-end: var(--space-2xs);">pill</small>
+            <div class="toggle-group pill surface">
+              <button class="toggle-item" data-class:active="$period === 'day'" data-on-click="$period = 'day'">Day</button>
+              <button class="toggle-item" data-class:active="$period === 'week'" data-on-click="$period = 'week'">Week</button>
+              <button class="toggle-item" data-class:active="$period === 'month'" data-on-click="$period = 'month'">Month</button>
+              <button class="toggle-item" data-class:active="$period === 'year'" data-on-click="$period = 'year'">Year</button>
+            </div>
+          </div>
+
+          <!-- icon -->
+          <div>
+            <small style="--contrast: 0.3; display: block; margin-block-end: var(--space-2xs);">icon</small>
+            <div class="toggle-group surface">
+              <button class="toggle-item icon-only" data-class:active="$layout === 'grid'" data-on-click="$layout = 'grid'" aria-label="Grid">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              </button>
+              <button class="toggle-item icon-only" data-class:active="$layout === 'rows'" data-on-click="$layout = 'rows'" aria-label="Rows">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+              </button>
+              <button class="toggle-item icon-only" data-class:active="$layout === 'columns'" data-on-click="$layout = 'columns'" aria-label="Columns">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="18"/><rect x="17" y="3" width="4" height="18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- sizes -->
+          <div>
+            <small style="--contrast: 0.3; display: block; margin-block-end: var(--space-2xs);">sizes</small>
+            <div class="row" style="--_gap: var(--space-s); align-items: center;">
+              <div class="toggle-group sm surface">
+                <button class="toggle-item" data-class:active="$size === 'sm'" data-on-click="$size = 'sm'">Sm</button>
+                <button class="toggle-item" data-class:active="$size === 'md'" data-on-click="$size = 'md'">Md</button>
+                <button class="toggle-item" data-class:active="$size === 'lg'" data-on-click="$size = 'lg'">Lg</button>
+              </div>
+              <div class="toggle-group surface">
+                <button class="toggle-item" data-class:active="$size === 'sm'" data-on-click="$size = 'sm'">Sm</button>
+                <button class="toggle-item" data-class:active="$size === 'md'" data-on-click="$size = 'md'">Md</button>
+                <button class="toggle-item" data-class:active="$size === 'lg'" data-on-click="$size = 'lg'">Lg</button>
+              </div>
+              <div class="toggle-group lg surface">
+                <button class="toggle-item" data-class:active="$size === 'sm'" data-on-click="$size = 'sm'">Sm</button>
+                <button class="toggle-item" data-class:active="$size === 'md'" data-on-click="$size = 'md'">Md</button>
+                <button class="toggle-item" data-class:active="$size === 'lg'" data-on-click="$size = 'lg'">Lg</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- hue contexts -->
+          <div>
+            <small style="--contrast: 0.3; display: block; margin-block-end: var(--space-2xs);">hue contexts</small>
+            <div class="row" style="--_gap: var(--space-s); align-items: center;">
+              <div class="toggle-group surface" style="--hue: 250;">
+                <button class="toggle-item" data-class:active="$sel === 'list'" data-on-click="$sel = 'list'">A</button>
+                <button class="toggle-item" data-class:active="$sel === 'board'" data-on-click="$sel = 'board'">B</button>
+                <button class="toggle-item" data-class:active="$sel === 'timeline'" data-on-click="$sel = 'timeline'">C</button>
+              </div>
+              <div class="toggle-group surface" style="--hue: 150;">
+                <button class="toggle-item" data-class:active="$sel === 'list'" data-on-click="$sel = 'list'">A</button>
+                <button class="toggle-item" data-class:active="$sel === 'board'" data-on-click="$sel = 'board'">B</button>
+                <button class="toggle-item" data-class:active="$sel === 'timeline'" data-on-click="$sel = 'timeline'">C</button>
+              </div>
+              <div class="toggle-group surface" style="--hue: 30;">
+                <button class="toggle-item" data-class:active="$sel === 'list'" data-on-click="$sel = 'list'">A</button>
+                <button class="toggle-item" data-class:active="$sel === 'board'" data-on-click="$sel = 'board'">B</button>
+                <button class="toggle-item" data-class:active="$sel === 'timeline'" data-on-click="$sel = 'timeline'">C</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- api panel -->
+      <div class="api-panel surface">
+        <h3>API</h3>
+
+        <div class="api-section-label">classes</div>
+        <div class="api-row"><span class="api-key">.toggle-group</span><span class="api-val">Container. Inline flex, rounded, clipped.</span></div>
+        <div class="api-row"><span class="api-key">.toggle-item</span><span class="api-val">Each option. Transparent bg, contrast-derived text.</span></div>
+        <div class="api-row"><span class="api-key">.active</span><span class="api-val">Selected state. Nudge-l: -12, nudge-c: +0.08.</span></div>
+        <div class="api-row"><span class="api-key">.icon-only</span><span class="api-val">Square padding, grid centered. For SVG icons.</span></div>
+
+        <div class="api-section-label">modifiers</div>
+        <div class="api-row"><span class="api-key">.pill</span><span class="api-val">100vw radius. Extra inline padding on ends.</span></div>
+        <div class="api-row"><span class="api-key">.sm</span><span class="api-val">On group. --type: -0.5, tighter padding.</span></div>
+        <div class="api-row"><span class="api-key">.lg</span><span class="api-val">On group. --type: 0.2, wider padding.</span></div>
+
+        <div class="api-section-label">engine knobs</div>
+        <div class="api-row"><span class="api-key">--hue</span><span class="api-val">Inherited. Sets palette for the group + active state.</span></div>
+        <div class="api-row"><span class="api-key">--nudge-l</span><span class="api-val">Group uses -2. Active uses -12.</span></div>
+        <div class="api-row"><span class="api-key">--nudge-c</span><span class="api-val">Active uses +0.08 for chromatic pop.</span></div>
+        <div class="api-row"><span class="api-key">--contrast</span><span class="api-val">Idle: 0.5. Hover: 0.75. Active: 1.</span></div>
+        <div class="api-row"><span class="api-key">--type</span><span class="api-val">Base: -0.2. Sm: -0.5. Lg: 0.2.</span></div>
+
+        <div class="api-section-label">a11y</div>
+        <div class="api-row"><span class="api-key">aria-label</span><span class="api-val">Required on .icon-only items.</span></div>
+        <div class="api-row"><span class="api-key">role</span><span class="api-val">Consider role="radiogroup" + role="radio" for strict a11y.</span></div>
+
+        <div class="api-section-label">reactivity</div>
+        <div class="api-row"><span class="api-key">data-class</span><span class="api-val">Datastar. Bind .active to a signal.</span></div>
+        <div class="api-row"><span class="api-key">data-on-click</span><span class="api-val">Datastar. Set the signal on click.</span></div>
+      </div>
+
+    </div>
+
+
+    <!-- ═══ code panels ═══ -->
+    <div class="code-split">
+
+      <div class="code-panel surface">
+        <div class="code-panel-header">
+          <span>html</span>
+        </div>
+        <div class="code-panel-body">&lt;div data-signals="{view: 'board'}"&gt;
+
+  &lt;div class="toggle-group surface"&gt;
+    &lt;button class="toggle-item"
+      data-class:active="$view === 'list'"
+      data-on-click="$view = 'list'"
+    &gt;List&lt;/button&gt;
+
+    &lt;button class="toggle-item"
+      data-class:active="$view === 'board'"
+      data-on-click="$view = 'board'"
+    &gt;Board&lt;/button&gt;
+
+    &lt;button class="toggle-item"
+      data-class:active="$view === 'timeline'"
+      data-on-click="$view = 'timeline'"
+    &gt;Timeline&lt;/button&gt;
+  &lt;/div&gt;
+
+&lt;/div&gt;</div>
+      </div>
+
+      <div class="code-panel surface">
+        <div class="code-panel-header">
+          <span>relevant css</span>
+        </div>
+        <div class="code-panel-body">/* container */
+.toggle-group {
+  display: inline-flex;
+  border-radius: var(--cfg-radius);
+  overflow: hidden;
+  --nudge-l: -2;
+}
+
+/* each option */
+.toggle-item {
+  padding: 0.4em 1em;
+  border: none;
+  cursor: pointer;
+  --contrast: 0.5;
+  background: transparent;
+}
+
+/* selected */
+.toggle-item.active {
+  --nudge-l: -12;
+  --nudge-c: 0.08;
+  --contrast: 1;
+  background: var(--_bg);
+}
+
+/* variants */
+.toggle-group.pill { border-radius: 100vw; }
+.toggle-group.sm .toggle-item { --type: -0.5; }
+.toggle-group.lg .toggle-item { --type: 0.2; }</div>
+      </div>
+
+    </div>
+
+
+    <!-- ═══ full css (collapsible) ═══ -->
+    <details class="css-details">
+      <summary class="surface">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+        Full component CSS
+      </summary>
+      <div class="code-panel surface">
+        <div class="code-panel-header"><span>toggle-group.css</span></div>
+        <div class="code-panel-body">.toggle-group {
+  display: inline-flex;
+  border-radius: var(--cfg-radius);
+  overflow: hidden;
+  --nudge-l: -2;
+}
+
+.toggle-item {
+  padding: 0.4em 1em;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  --type: -0.2;
+  font-family: var(--font-body);
+  font-weight: 500;
+  --contrast: 0.5;
+  background: transparent;
+  transition:
+    background calc(var(--cfg-motion) * 0.15s) ease-out,
+    color calc(var(--cfg-motion) * 0.15s) ease-out;
+  color: oklch(from var(--_bg)
+    calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
+    calc(c * (1 - var(--contrast)))
+    h
+  );
+}
+.toggle-item:hover { --contrast: 0.75; }
+
+.toggle-item.active {
+  --nudge-l: -12;
+  --nudge-c: 0.08;
+  --contrast: 1;
+  background: var(--_bg);
+  color: oklch(from var(--_bg)
+    calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
+    calc(c * (1 - var(--contrast)))
+    h
+  );
+}
+
+.toggle-item + .toggle-item {
+  border-inline-start: 1px solid
+    oklch(from var(--_bg) calc(l - 0.04 + var(--cfg-dark) * 0.08) c h);
+}
+.toggle-item.active + .toggle-item,
+.toggle-item + .toggle-item.active {
+  border-inline-start-color: transparent;
+}
+
+/* icon variant */
+.toggle-item.icon-only {
+  padding: 0.5em;
+  display: grid;
+  place-content: center;
+}
+.toggle-item.icon-only svg { width: 1.15em; height: 1.15em; }
+
+/* sizes */
+.toggle-group.sm .toggle-item { --type: -0.5; padding: 0.3em 0.7em; }
+.toggle-group.sm .toggle-item.icon-only { padding: 0.35em; }
+.toggle-group.lg .toggle-item { --type: 0.2; padding: 0.5em 1.3em; }
+
+/* pill shape */
+.toggle-group.pill { border-radius: 100vw; }
+.toggle-group.pill .toggle-item:first-child { padding-inline-start: 1.2em; }
+.toggle-group.pill .toggle-item:last-child { padding-inline-end: 1.2em; }</div>
+      </div>
+    </details>
+
+
+  </div>
+
+</body>
+</html>

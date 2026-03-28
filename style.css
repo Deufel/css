@@ -1,42 +1,3 @@
-import marimo
-
-__generated_with = "0.21.1"
-app = marimo.App(width="medium", css_file="", auto_download=["html"])
-
-with app.setup:
-    # std lib
-    import re, textwrap, logging, sys
-    from pathlib import Path
-    from dataclasses import dataclass, field
-
-    # other
-    from html_tags import setup_svg, setup_tags, HTML, Fragment, to_html, html_to_tag, pretty
-    setup_tags(), setup_svg()
-
-    # notebook settings
-    DEFAULT_CSS_PATH = "output.css"
-
-
-@app.cell
-def _():
-    import marimo as mo
-
-    return (mo,)
-
-
-@app.cell
-def _(sidebar):
-    sidebar
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    This should be a nice way to use css and should overtime get better and better, and allow multiple people to work on asingle project because the convention is obvious and easy to catch on with.
-
-    Naming conventions;
-    ```css
     /*
 
     PREFIX       RULE
@@ -46,32 +7,7 @@ def _(mo):
     --_*         Private. Don't touch. Ever.
 
     */
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # CSS
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # 0 @Properties
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    Registered properties
-    ```css
+    
     /* must be defined outside of all selectors */
 
 
@@ -103,15 +39,7 @@ def _(mo):
 
 
 
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ```css
+    
 
 
     /* ═══════════════════════════════════════════
@@ -252,24 +180,7 @@ def _(mo):
       .progress-bar { height: 100%; border-radius: 100vw; }
     }
 
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # 1 Layer Definition
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    1 Layer order
-    ```css
+    
     @layer reset.fix,          /* FIX CSS Working group admitted mistakes */
            reset.opinion,      /* Project Specific Global Resets  */
            core.config,        /* --cfg variable that set the math in the core "engine" and data-ui settings */
@@ -285,25 +196,7 @@ def _(mo):
            utility.layout,    /* layout utls some media qs  */
            utility.exceptions, /* incase of emergency break glass  */
            utility.important;  /* Only use for when you actually NEED to overwrite an inline style.. */
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # 2 Reset
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    2a Reset.fix
-    [these should not be controvosial](https://wiki.csswg.org/ideas/mistakes/)
-    ```css
+    
     @layer reset.fix {
         *, *::before, *::after { box-sizing: border-box; margin: 0; background-repeat: no-repeat; }
         :root { interpolate-size: allow-keywords; }
@@ -313,17 +206,7 @@ def _(mo):
         :where(table, thead, tbody, tfoot, tr) { isolation: isolate; }
         :where(input, button, textarea, select) { font: inherit; }
     }
-    ```
-    """)
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""
-    2b Reset.opinion
-    change these for your project
-    ```css
+    
     @layer reset.opinion {
         :where(body) { min-height: 100svh; }
         :where(html) { scrollbar-width: thin; }
@@ -351,24 +234,7 @@ def _(mo):
         /* Hidden attribute should always mean hidden  */
         :where([hidden]) { display: none; }
     }
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # 3 Core
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    3a core.config
-    ```css
+    
 
     @layer core.config {
       :root {
@@ -404,17 +270,7 @@ def _(mo):
       html[data-ui-scheme="light"] { --cfg-dark: 0; }
     }
 
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    3b. core.color
-
-    ```css
+    
     @layer core.color {
 
       :where(*) {
@@ -457,17 +313,7 @@ def _(mo):
       .clickable[disabled] { cursor: not-allowed; opacity: 0.38; }
     }
 
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    3c. core.type
-
-    ```css
+    
     @layer core.type {
       body,
       :where(h1, h2, h3, h4, h5, h6, small, .icon-btn, .btn),
@@ -486,17 +332,7 @@ def _(mo):
         line-height: calc(1.5 - var(--type) * 0.075);
       }
     }
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    3d. core.space
-
-    ```css
+    
     @layer core.spacing {
       :root {
         --space-0: clamp(0.5rem, 0.409rem + 0.364vi, 0.75rem);
@@ -505,26 +341,7 @@ def _(mo):
         --space-3: clamp(1.372rem, 0.382rem + 3.959vi, 3.369rem);
       }
     }
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # 4 Theme
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    4 Theme
-    cust to your pref
-
-    ```css
+    
     @layer theme {
       :root {
         --font-heading: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif;
@@ -543,27 +360,7 @@ def _(mo):
       pre   { --type: -0.5; font-family: var(--font-mono); }
     }
 
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # 5 Layout
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    5a. Layout.page
-    [] dashboard
-    [] landing
-    Q: Drawers here or Components?
-    ```css
+    
     @layer layout.page{
         :where(body.dashboard) {
             position: fixed;
@@ -608,11 +405,7 @@ def _(mo):
         }
     }
 
-    ```
-
-    5b. Layout.composition
-
-    ```css
+    
     @layer layout.composition {
       /* containers */
       .stack { display: flex; flex-direction: column; gap: var(--_gap, .75rem); }
@@ -634,42 +427,12 @@ def _(mo):
       .as-start { align-self: flex-start; } .as-center { align-self: center; } .as-end { align-self: flex-end; } .as-baseline { align-self: baseline; } .as-stretch { align-self: stretch; }
     }
 
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # 6 Components
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## 6a. Components.complex
-
-    ### Data Table
-    ```css
+    
     @layer component.complex {
        .datatable { }
     }
 
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## 6b. Components.simple
-
-    ### Card
-    ```css
+    
     @layer component.simple {
       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1.25rem; margin-block: 1rem; }
       .card { padding: 1.25rem; border-radius: var(--cfg-radius); }
@@ -706,39 +469,12 @@ def _(mo):
       .type-row { display: flex; align-items: baseline; gap: 1rem; }
       .type-meta { --type: -2; font-family: var(--font-mono); --contrast: 0.4; min-width: 7em; flex-shrink: 0; }
     }
-    ```
-    """)
-    return
+    
 
-
-@app.cell
-def _(mo):
-    mo.md(r"""
-    ### Icon Button
-    ```css
-
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ### Button
-    ```css
+    
     /* BUTTON */
 
-    ```
-    """)
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""
-    ### Badge
-    ```css
+    
     @layer component.simple {
       .badge {
         display: inline-block;
@@ -747,20 +483,14 @@ def _(mo):
         --type: -2;
       }
     }
-    ```
-
-    ### Divider
-    ```css
+    
     @layer component.simple {
       .divider {
         border: none;
         border-block-start: 1px solid oklch(from var(--_bg) calc(l + 0.08) c h);
       }
     }
-    ```
-
-    ### Popover auto align
-    ```css
+    
     @layer component.simple {
       [popover].popover { position: fixed; inset: auto; margin: 0; border: none; min-width: clamp(10rem, 40vw, 18rem); max-width: min(90vw, 24rem); max-height: 80vh; overflow: auto; --_bg: --surface(1); background: var(--_bg); color: --contrast(0.7); border-radius: 0.5rem; box-shadow: --shadow(5); padding: --space(1); opacity: 1; transform: scale(1); position-area: self-block-start self-inline-end; position-try-order: most-block-size; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; position-visibility: anchors-visible; transition: opacity calc(var(--cfg-motion) * 0.18s) ease-out, transform calc(var(--cfg-motion) * 0.18s) ease-out, display calc(var(--cfg-motion) * 0.18s) allow-discrete, overlay calc(var(--cfg-motion) * 0.18s) allow-discrete; }
       [popover].popover:not(:popover-open) { opacity: 0; transform: scale(0.95); }
@@ -769,16 +499,7 @@ def _(mo):
       [popover].popover.above-start { position-area: self-block-start self-inline-start; }
       [popover].popover.above-end { position-area: self-block-start self-inline-end; }
     }
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## 6c. component.utls
-    ```css
+    
 
     /* ─── interactive primitive ─── */
     @layer component.utls {
@@ -844,678 +565,20 @@ def _(mo):
         }
       }
     }
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # 7 Utility
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## 7a. utility.layout
-    single purpose utilities
-    ```css
+    
     @layer utility.layout {
       :where(.mobile, .tablet, .desktop) { display: none; }
       @media (width < 768px)           { :where(.mobile)  { display: revert-layer; } }
       @media (768px <= width < 1024px) { :where(.tablet)  { display: revert-layer; } }
       @media (width >= 1024px)         { :where(.desktop) { display: revert-layer; } }
     }
-    ```
-
-    ## 7b. utility.exceptions
-    Ideally this is empty but in time crunch you can use
-    ```css
+    
     @layer utility.exceptions {
       :where(.vh) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
     }
-    ```
-
-
-    ## 7b. utility.important
-    Use this only when you need to be sure to beat inline styles
-    ```css
+    
     @layer utility.important {
       :where([hidden]) { display: none !important; }
       @media print { :where(.np) { display: none !important; } }
     }
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Component Testing
-    """)
-    return
-
-
-@app.cell
-def _(
-    Body,
-    Head,
-    Html,
-    Iframe,
-    Meta,
-    Style,
-    extract_lang_blocks,
-    extract_md_blocks,
-    read_file,
-):
-    def create_isolated_component(*content):
-        """Create a component in an isolated iframe, CSS extracted live from this notebook."""
-        import base64
-
-        # Same pattern as the export pipeline — always fresh from source
-        _source = read_file()
-        _md_blocks = extract_md_blocks(_source)
-        _css = "\n".join(extract_lang_blocks(_md_blocks, "css"))
-
-        document = Html(
-            Head(
-                Meta(charset="utf-8"),
-                Meta(name="viewport", content="width=device-width, initial-scale=1"),
-                Style(_css)
-            ),
-            Body(*content)
-        )
-
-        html_string = to_html(document)
-        encoded_html = base64.b64encode(html_string.encode("utf-8")).decode("utf-8")
-        data_url = f"data:text/html;base64,{encoded_html}"
-
-        return Iframe(
-            src=data_url,
-            style="""
-    display: block;
-      inline-size: 100%;
-      block-size: 100cqb;
-      border: none;
-      margin-block:-1rem;
-      width: 100%
-      height: 100%
-                """
-        
-        )
-
-    return (create_isolated_component,)
-
-
-@app.cell
-def _():
-    icon_ski = html_to_tag("""<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cable-car-icon lucide-cable-car"><path d="M10 3h.01"/><path d="M14 2h.01"/><path d="m2 9 20-5"/><path d="M12 12V6.5"/><rect width="16" height="10" x="4" y="12" rx="3"/><path d="M9 12v5"/><path d="M15 12v5"/><path d="M4 17h16"/></svg>""")
-    return (icon_ski,)
-
-
-@app.cell
-def _(
-    A,
-    Aside,
-    Body,
-    Button,
-    Div,
-    H1,
-    H2,
-    Header,
-    Li,
-    Main,
-    Nav,
-    Section,
-    Small,
-    Strong,
-    Ul,
-    create_isolated_component,
-    icon_ski,
-):
-    HTML(
-        create_isolated_component(
-            Body(cls="dashboard", style="height=100svh, --color: red")(
-                Header(cls="split", id="header")(
-                    H1("Logo"),
-                    Div(
-                        Button("Login"),
-                        Button("Sign Up")
-                    )
-                      ),
-                Nav(id="nav")(
-                    Ul(
-                        Li(A("Demo1")),
-                        Li(A("Demo2")),
-                        Li(A("Demo3")),
-                    )
-                ),
-                Main(id="main", cls="surface")(
-                    Section(
-                        H2("Components.simple"),
-                        Div(cls="cluster")(
-                            Button("im a button", cls="btn fill", style=""),
-                            Button(cls="btn fill round")(icon_ski)
-                        )
-                    )
-                ),
-                Aside(id="aside")(
-                    Ul(style=" list-style: none; padding: 0; margin: 1rem;}")(
-                        Li(Strong(Small("on this page"))),
-                        Li(Small("Definitions")),
-                        Li(Small("Examples")),
-                        Li(Small("Code"))
-                    )
-                )
-            )
-        )
-    )
-    return
-
-
-@app.cell
-def _(Button, Div, icon_ski):
-    print(
-        pretty(
-            (Div(
-                    Button("im a button", cls="btn fill", style=""),
-                    Button(cls="btn fill round")(icon_ski)
-            )
-            )
-        )
-    )
-
-    return
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # III Export your css
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Export functions
-    """)
-    return
-
-
-@app.cell
-def _():
-    def read_file(path: str = __file__) -> str:
-        return Path(path).read_text()
     
-    def extract_md_blocks(source: str) -> list[str]:
-        pattern = r'mo\.md\(r"""\n(.*?)"""'
-        return re.findall(pattern, source, flags=re.DOTALL)
-    
-    def extract_lang_blocks(blocks: list[str], lang: str) -> list[str]:
-        pattern = rf'```{lang}\n(.*?)```'
-        result = []
-        for block in blocks:
-            result.extend(re.findall(pattern, block, flags=re.DOTALL))
-        return result
-    
-    def write_file(blocks: list[str], path: str) -> None:
-        _path = Path(path)
-        _path.parent.mkdir(parents=True, exist_ok=True)
-        _path.write_text("\n".join(blocks))
-    
-    def get_css() -> str:
-        """Extract and return all CSS blocks from this notebook."""
-        return "\n".join(extract_lang_blocks(extract_md_blocks(read_file()), "css"))
-
-    def export_css(path: str | None = None) -> str:
-        """Write CSS to path (creates dirs). Returns the path used."""
-        _path = path or _DEFAULT_CSS_PATH
-        write_file([get_css()], _path)
-        return _path
-
-    def download_css(filename: str | None = None) -> str:
-        """Save CSS to the user's Downloads folder. Returns the path used."""
-        _filename = filename or Path(_DEFAULT_CSS_PATH).name
-        _path = Path.home() / "Downloads" / _filename
-        write_file([get_css()], str(_path))
-        return str(_path)
-
-    
-
-    return extract_lang_blocks, extract_md_blocks, read_file, write_file
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## CSS Linter
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def css_linter():
-
-    from collections import defaultdict
-
- 
-    SKIP = {
-        ".venv",
-        "docs/wasm",
-    }
- 
-    # ──────────────────────────────────────────
-    # Types
-    # ──────────────────────────────────────────
- 
-    @dataclass
-    class Issue:
-        file: str
-        line: int
-        level: str   # "warn" | "error" | "info"
-        msg: str
- 
-    @dataclass
-    class Property:
-        name: str
-        syntax: str
-        inherits: bool
-        initial: str
-        file: str
-        line: int
- 
-    @dataclass
-    class Report:
-        issues: list[Issue] = field(default_factory=list)
-        properties: list[Property] = field(default_factory=list)
-        layers_declared: list[str] = field(default_factory=list)  # from @layer order statement
-        layers_used: dict = field(default_factory=lambda: defaultdict(list))  # layer -> [files]
-        var_usage: dict = field(default_factory=lambda: defaultdict(set))  # prefix -> set of names
- 
-    # ──────────────────────────────────────────
-    # Project root
-    # ──────────────────────────────────────────
- 
-    def find_root(start: Path = None, marker: str = "pyproject.toml") -> Path:
-        p = (start or Path.cwd()).resolve()
-        for parent in [p, *p.parents]:
-            if (parent / marker).exists():
-                return parent
-        raise FileNotFoundError(f"No {marker} found in {p} or any parent directory")
- 
-    def should_skip(path: Path, root: Path) -> bool:
-        rel = str(path.relative_to(root))
-        return any(rel.startswith(s) for s in SKIP)
- 
-    # ──────────────────────────────────────────
-    # Parsers
-    # ──────────────────────────────────────────
- 
-    RE_PROPERTY = re.compile(
-        r'@property\s+(--[\w-]+)\s*\{'
-        r'\s*syntax:\s*"([^"]+)";\s*'
-        r'inherits:\s*(true|false);\s*'
-        r'initial-value:\s*([^;]+);\s*\}'
-    )
- 
-    RE_LAYER_ORDER = re.compile(r'@layer\s+([\w.:,\s/*-]+);', re.DOTALL)
-    RE_LAYER_BLOCK = re.compile(r'@layer\s+([\w.:]+)\s*\{')
- 
-    RE_VAR_DECL = re.compile(r'(--[\w-]+)\s*:')
-    RE_VAR_USE  = re.compile(r'var\((--[\w-]+)')
- 
-    def classify_var(name: str) -> str:
-        if name.startswith("--cfg-"):  return "--cfg-*"
-        if name.startswith("--_"):     return "--_* (private)"
-        return "--* (public)"
- 
-    def parse_properties(text: str, file: str) -> list[Property]:
-        props = []
-        for m in RE_PROPERTY.finditer(text):
-            line = text[:m.start()].count('\n') + 1
-            props.append(Property(
-                name=m.group(1),
-                syntax=m.group(2),
-                inherits=m.group(3) == "true",
-                initial=m.group(4).strip(),
-                file=file,
-                line=line,
-            ))
-        return props
- 
-    def parse_layer_order(text: str) -> list[str]:
-        """Parse the top-level @layer ordering statement into a flat list."""
-        layers = []
-        for m in RE_LAYER_ORDER.finditer(text):
-            raw = m.group(1)
-            # strip comments
-            raw = re.sub(r'/\*.*?\*/', '', raw, flags=re.DOTALL)
-            for chunk in raw.split(','):
-                name = chunk.strip()
-                if name:
-                    layers.append(name)
-        return layers
- 
-    def parse_layer_blocks(text: str) -> list[str]:
-        """Find all @layer block names used in a file."""
-        return RE_LAYER_BLOCK.findall(text)
- 
-    def collect_vars(text: str) -> tuple[set, set]:
-        """Return (declared, used) variable names."""
-        declared = set(RE_VAR_DECL.findall(text))
-        used = set(RE_VAR_USE.findall(text))
-        return declared, used
- 
-    # ──────────────────────────────────────────
-    # Lint rules
-    # ──────────────────────────────────────────
- 
-    def lint_css(path: Path, report: Report, root: Path):
-        rel = str(path.relative_to(root))
-        text = path.read_text()
-        lines = text.splitlines()
- 
-        # ── @property discovery ──
-        props = parse_properties(text, rel)
-        report.properties.extend(props)
- 
-        # ── layer discovery ──
-        order = parse_layer_order(text)
-        if order:
-            if report.layers_declared:
-                report.issues.append(Issue(rel, 1, "warn", "multiple @layer order statements found"))
-            report.layers_declared.extend(order)
- 
-        for layer_name in parse_layer_blocks(text):
-            report.layers_used[layer_name].append(rel)
- 
-        # ── variable tracking ──
-        declared, used = collect_vars(text)
-        for v in declared | used:
-            report.var_usage[classify_var(v)].add(v)
- 
-        # ── line-by-line rules ──
-        for i, ln in enumerate(lines, 1):
-            # knob without fallback
-            if re.search(r'var\(--_[\w-]+\)(?!.*,)', ln):
-                report.issues.append(Issue(rel, i, "warn", "private knob with no fallback"))
- 
-            # raw hex color
-            if re.search(r'(?<!-)#[0-9a-fA-F]{3,8}\b', ln):
-                report.issues.append(Issue(rel, i, "warn", "raw hex color — use token?"))
- 
-            # px unit
-            if re.search(r'\b\d+px\b', ln) and '--cfg' not in ln:
-                report.issues.append(Issue(rel, i, "warn", "px unit — intentional?"))
- 
-            # timing without motion multiplier
-            if re.search(r'transition.*\d+(\.\d+)?s', ln) and '--cfg-motion' not in ln:
-                report.issues.append(Issue(rel, i, "error", "timing without --cfg-motion multiplier"))
- 
-        # ── @property not in root file ──
-        if props and not any(rel.endswith(f) for f in ("index.css", "config.css", "props.css", "engine.css")):
-            for prop in props:
-                report.issues.append(Issue(rel, prop.line, "error",
-                    f"@property {prop.name} declared outside root — move to config"))
- 
-    # ──────────────────────────────────────────
-    # Reporters
-    # ──────────────────────────────────────────
- 
-    BOLD  = "\033[1m"
-    DIM   = "\033[2m"
-    RESET = "\033[0m"
-    RED   = "\033[31m"
-    YEL   = "\033[33m"
-    CYN   = "\033[36m"
-    GRN   = "\033[32m"
- 
-    def print_header(title: str):
-        print(f"\n{BOLD}{'─' * 60}")
-        print(f"  {title}")
-        print(f"{'─' * 60}{RESET}\n")
- 
-    def print_convention_table():
-        print_header("VARIABLE CONVENTIONS")
-        rows = [
-            ("--cfg-*",    "Core calc params. Set once."),
-            ("data-ui-*",  "User prefs. HTML attributes."),
-            ("--*",        "Public. Set freely. Core eats."),
-            ("--_*",       "Private. Don't touch. Ever."),
-        ]
-        print(f"  {'PREFIX':<14} RULE")
-        print(f"  {'─' * 14} {'─' * 40}")
-        for prefix, rule in rows:
-            print(f"  {CYN}{prefix:<14}{RESET} {rule}")
-        print()
- 
-    def print_property_registry(report: Report):
-        print_header("@PROPERTY REGISTRY")
-        if not report.properties:
-            print(f"  {DIM}(none found){RESET}")
-            return
- 
-        # group by prefix
-        groups = defaultdict(list)
-        for p in sorted(report.properties, key=lambda p: p.name):
-            if p.name.startswith("--cfg-"):   groups["config"].append(p)
-            elif p.name.startswith("--_"):    groups["private"].append(p)
-            else:                             groups["public"].append(p)
- 
-        for label, props in [("public", groups.get("public", [])),
-                             ("config", groups.get("config", [])),
-                             ("private", groups.get("private", []))]:
-            if not props:
-                continue
-            print(f"  {DIM}/* {label} */{RESET}")
-            for p in props:
-                inh = "inherit" if p.inherits else "local "
-                print(f"  {CYN}{p.name:<22}{RESET} {DIM}{p.syntax:<12} {inh}  = {p.initial}{RESET}")
-                print(f"  {' ' * 22} {DIM}└─ {p.file}:{p.line}{RESET}")
-            print()
- 
-    def print_layer_summary(report: Report):
-        print_header("LAYER SUMMARY")
-        if not report.layers_declared:
-            print(f"  {DIM}(no @layer order statement found){RESET}")
-            return
- 
-        print(f"  {DIM}Declared order:{RESET}")
-        for i, layer in enumerate(report.layers_declared):
-            files = report.layers_used.get(layer, [])
-            status = f"{GRN}✓{RESET}" if files else f"{RED}✗ unused{RESET}"
-            print(f"  {i + 1:>3}. {CYN}{layer:<28}{RESET} {status}")
-            for f in files:
-                print(f"       {DIM}└─ {f}{RESET}")
-        print()
- 
-        # layers used but not in the order statement
-        declared_set = set(report.layers_declared)
-        undeclared = {k: v for k, v in report.layers_used.items() if k not in declared_set}
-        if undeclared:
-            print(f"  {RED}Undeclared layers (used but not in @layer order):{RESET}")
-            for layer, files in sorted(undeclared.items()):
-                print(f"  {RED}  ⚠ {layer}{RESET}")
-                for f in files:
-                    print(f"       {DIM}└─ {f}{RESET}")
-                report.issues.append(Issue(files[0], 0, "error",
-                    f"layer '{layer}' used but not in @layer order statement"))
-            print()
- 
-    def print_var_summary(report: Report):
-        print_header("VARIABLE USAGE")
-        for prefix in ("--cfg-*", "--* (public)", "--_* (private)"):
-            names = sorted(report.var_usage.get(prefix, set()))
-            print(f"  {CYN}{prefix:<18}{RESET} {len(names)} variables")
-            if len(names) <= 12:
-                for n in names:
-                    print(f"    {DIM}{n}{RESET}")
-            else:
-                for n in names[:5]:
-                    print(f"    {DIM}{n}{RESET}")
-                print(f"    {DIM}... and {len(names) - 5} more{RESET}")
-            print()
- 
-    def print_issues(report: Report, root: Path):
-        print_header("ISSUES")
-        if not report.issues:
-            print(f"  {GRN}No issues found ✓{RESET}\n")
-            return
- 
-        # group by file
-        by_file = defaultdict(list)
-        for iss in report.issues:
-            by_file[iss.file].append(iss)
- 
-        errors = sum(1 for i in report.issues if i.level == "error")
-        warns  = sum(1 for i in report.issues if i.level == "warn")
- 
-        for file, issues in sorted(by_file.items()):
-            print(f"  {BOLD}{file}{RESET}")
-            for iss in sorted(issues, key=lambda i: i.line):
-                icon = f"{RED}❌{RESET}" if iss.level == "error" else f"{YEL}⚠️{RESET}"
-                line_str = f":{iss.line}" if iss.line else ""
-                print(f"    {icon} {line_str} {iss.msg}")
-            print()
- 
-        print(f"  {RED}{errors} error{'s' * (errors != 1)}{RESET}, "
-              f"{YEL}{warns} warning{'s' * (warns != 1)}{RESET}\n")
-
-    return (
-        BOLD,
-        RESET,
-        Report,
-        find_root,
-        lint_css,
-        print_convention_table,
-        print_issues,
-        print_layer_summary,
-        print_property_registry,
-        print_var_summary,
-        should_skip,
-    )
-
-
-@app.cell
-def _(
-    BOLD,
-    RESET,
-    Report,
-    find_root,
-    lint_css,
-    print_convention_table,
-    print_issues,
-    print_layer_summary,
-    print_property_registry,
-    print_var_summary,
-    should_skip,
-):
-    def run_css_check(root: Path = None):
-        root = root or find_root()
-        print(f"{BOLD}Project root:{RESET} {root}\n")
- 
-        report = Report()
- 
-        if sys.argv[1:]:
-            paths = [Path(p) for p in sys.argv[1:]]
-        else:
-            paths = sorted(p for p in root.rglob("*.css") if not should_skip(p, root))
- 
-        print(f"  Scanning {len(paths)} CSS files...\n")
-        for p in paths:
-            lint_css(p, report, root)
- 
-        print_convention_table()
-        print_property_registry(report)
-        print_layer_summary(report)
-        print_var_summary(report)
-        print_issues(report, root)
- 
-        return report
- 
-
-    return (run_css_check,)
-
-
-@app.cell
-def _(run_css_check):
-    run_css_check()
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Export Marimo ui elements
-    """)
-    return
-
-
-@app.cell
-def _(mo):
-    export_btn   = mo.ui.run_button(label="Export")
-    download_btn = mo.ui.run_button(label="Download CSS")
-    export_path  = mo.ui.text(value="static/style.css", placeholder="output.css")
-    return export_btn, export_path
-
-
-@app.cell
-def ui_sidebar(
-    export_btn,
-    export_path,
-    extract_lang_blocks,
-    extract_md_blocks,
-    mo,
-    read_file,
-    write_file,
-):
-    _source = read_file()
-    _css_content = "\n".join(extract_lang_blocks(extract_md_blocks(_source), "css"))
-
-    _DEFAULT_CSS_PATH = "output.css"
-    _resolved_path = export_path.value.strip() or _DEFAULT_CSS_PATH
-
-    if export_btn.value:
-        write_file([_css_content], _resolved_path)
-        _msg = mo.md(f"✅ CSS exported to `{_resolved_path}`")
-    else:
-        _msg = mo.md("")
-
-    _export_ui = mo.hstack([export_path, export_btn])
-    _download_ui = mo.download(
-        data=_css_content.encode(),
-        filename=Path(_resolved_path).name,
-        mimetype="text/css",
-        label="Download CSS"
-    )
-
-    ui_footer = mo.vstack([_msg, _export_ui, _download_ui], justify="end")
-
-    sidebar = mo.sidebar(
-        mo.vstack([
-            mo.outline(label="Table of contents"),
-            mo.Html("<div style='flex: 1'></div>"),
-            ui_footer,
-        ])
-    )
-    return (sidebar,)
-
-
-@app.cell
-def _():
-    return
-
-
-if __name__ == "__main__":
-    app.run()
