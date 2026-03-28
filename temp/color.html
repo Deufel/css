@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color & Type — Color Engine v7</title>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.8/bundles/datastar.js"></script>
+
+<!-- ── Datastar signal → CSS bridge ── -->
+<style data-text="':root { --hue: ' + $hue + '; --cfg-surf-chroma: ' + $surfChroma + '; --cfg-color-chroma: ' + $colorChroma + '; --color-mode: ' + $mode + '; }'"
+       data-init="$hue = 250; $surfChroma = 0.02; $colorChroma = 0.15; $mode = 0"></style>
+
+<!-- ── Mode hue offsets (Datastar-driven) ── -->
+<style data-text="'.panel { --hue-sec: calc(var(--hue) + ' + ($mode===1?180:$mode===2?120:$mode===3?30:0) + '); --hue-ter: calc(var(--hue) + ' + ($mode===1?180:$mode===2?240:$mode===3?-30:0) + '); }'"></style>
+
+<style>
+
+/* ══════════════════════════════════════════════════════════════════════
+   @property registrations
+══════════════════════════════════════════════════════════════════════ */
+@property --hue              { syntax: "<number>";  inherits: true;  initial-value: 250; }
+@property --cfg-surf-chroma  { syntax: "<number>";  inherits: true;  initial-value: 0.02; }
+@property --cfg-color-chroma { syntax: "<number>";  inherits: true;  initial-value: 0.15; }
+@property --color-mode       { syntax: "<integer>"; inherits: true;  initial-value: 0; }
+@property --surface          { syntax: "<number>";  inherits: true;  initial-value: 0; }
+@property --contrast         { syntax: "<number>";  inherits: true;  initial-value: 1; }
+@property --cfg-dark         { syntax: "<number>";  inherits: true;  initial-value: 0; }
+@property --_bg              { syntax: "<color>";   inherits: true;  initial-value: oklch(87% 0.02 250); }
+@property --_depth-a         { syntax: "<integer>"; inherits: true;  initial-value: 0; }
+@property --_depth-b         { syntax: "<integer>"; inherits: true;  initial-value: 0; }
+@property --_parity          { syntax: "<integer>"; inherits: true;  initial-value: 0; }
+@property --_hue-pri         { syntax: "<number>";  inherits: true;  initial-value: 250; }
+@property --_c-surf          { syntax: "<number>";  inherits: true;  initial-value: 0.02; }
+@property --_c-color         { syntax: "<number>";  inherits: true;  initial-value: 0.15; }
+@property --color-index      { syntax: "<integer>"; inherits: true;  initial-value: 0; }
+
+@layer core.config, core.color, core.palette, page;
+
+/* ══════════════════════════════════════════════════════════════════════
+   LAYER: core.config
+══════════════════════════════════════════════════════════════════════ */
+@layer core.config {
+  .panel {
+    --cfg-dark: 0;
+    --_surf-base: calc(87% - var(--cfg-dark) * 75%);
+    --_surf-step: 2.5%;
+    --cfg-radius: 6px;
+  }
+  .panel.dark { --cfg-dark: 0.85; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LAYER: core.color — surface background + auto-contrast text
+   ─────────────────────────────────────────────────────────────────
+   --_bg = oklch( L: surface curve,  C: surf-chroma,  H: hue )
+
+   Everything reads --_bg:
+     background  →  var(--_bg)
+     color       →  auto-contrast from --_bg
+     --_border   →  derived from --_bg
+
+   Higher layers can override --_bg (e.g. core.palette sets it to
+   a palette color). The auto-contrast and border formulas still
+   work because they read the same --_bg regardless of source.
+   Use revert-layer on --_bg to punch back to surface colors.
+══════════════════════════════════════════════════════════════════════ */
+@layer core.color {
+  :where(.panel) {
+    --_c-surf:  clamp(0, var(--cfg-surf-chroma), 0.06);
+    --_c-color: clamp(0.04, var(--cfg-color-chroma), 0.37);
+  }
+
+  :where(*) {
+    --_bg: oklch(
+      clamp(10%, calc(var(--_surf-base) + var(--surface) * var(--_surf-step)), 99%)
+      var(--_c-surf)
+      var(--hue)
+    );
+    --_border: oklch(from var(--_bg) calc(l - 0.09 + var(--cfg-dark) * 0.20) c h);
+    background: var(--_bg);
+    color: oklch(from var(--_bg)
+      calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
+      calc(c * (1 - var(--contrast)))
+      h
+    );
+  }
+
+  /* ── leapfrog auto-nesting ── */
+  @container style(--_parity: 0) {
+    .surface { --_depth-b: calc(var(--_depth-a) + 1); --surface: var(--_depth-b); --_parity: 1; }
+  }
+  @container style(--_parity: 1) {
+    .surface { --_depth-a: calc(var(--_depth-b) + 1); --surface: var(--_depth-a); --_parity: 0; }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LAYER: core.palette
+   ─────────────────────────────────────────────────────────────────
+   Computes named palette colors (--color-pri, --color-sec, --color-ter)
+   on every element — always available for borders, shadows, etc.
+
+   .pri / .sec / .ter override --_bg so the core.color auto-contrast
+   and border formulas apply automatically. No inline styles needed.
+
+   --color-index controls lightness stepping (like --surface for surfaces).
+══════════════════════════════════════════════════════════════════════ */
+@layer core.palette {
+  :where(.panel) {
+    --_hue-pri: var(--hue);
+    --hue-sec: calc(var(--hue) + 180);
+    --hue-ter: calc(var(--hue) + 180);
+    --_color-mid-l: calc(75% - var(--cfg-dark) * 10%);
+    --_color-l-step: 12%;
+  }
+
+  :where(*) {
+    --_color-l: clamp(20%, calc(var(--_color-mid-l) + var(--color-index) * var(--_color-l-step)), 90%);
+    --color-pri: oklch(var(--_color-l) var(--_c-color) var(--_hue-pri));
+    --color-sec: oklch(var(--_color-l) var(--_c-color) var(--hue-sec));
+    --color-ter: oklch(var(--_color-l) var(--_c-color) var(--hue-ter));
+  }
+
+  /* ── palette → --_bg bridge ── */
+  :where(.pri) { --_bg: var(--color-pri); }
+  :where(.sec) { --_bg: var(--color-sec); }
+  :where(.ter) { --_bg: var(--color-ter); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LAYER: page — global resets + app shell grid
+══════════════════════════════════════════════════════════════════════ */
+@layer page {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+  :root {
+    font-family: Optima, Candara, 'Noto Sans', sans-serif;
+    font-size: 13px;
+    --cfg-page-gap: 0px;
+    --mono: 'SF Mono', Menlo, monospace;
+    --label: 10px;
+  }
+
+  body {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    display: grid;
+    grid-template:
+      "header     header" auto
+      "main-top   main-top"   1fr
+      "main-bot   main-bot"   1fr
+      / 1fr       1fr;
+    height: 100svh;
+  }
+
+  #header { grid-area: header; }
+  #light{ grid-area: main-top; overflow-y: auto; scrollbar-gutter: stable;}
+  #dark { grid-area: main-bot; overflow-y: auto; scrollbar-gutter: stable; }
+}
+</style>
+
+<!-- ── Scoped CSS runtime ── -->
+<script>
+window.cssScopeCount ??= 1
+window.cssScope ??= new MutationObserver(mutations => {
+  document?.body?.querySelectorAll('style:not([ready])').forEach(node => {
+    var scope = 'me__'+(window.cssScopeCount++)
+    node.parentNode.classList.add(scope)
+    node.textContent = node.textContent
+      .replace(/(?:^|\.|(\s|[^a-zA-Z0-9\-\_]))(me|this|self)(?![a-zA-Z\/])/g, '$1.'+scope)
+      .replace(/((@keyframes|animation:|animation-name:)[^{};]*)\.me__/g, '$1me__')
+    node.setAttribute('ready', '')
+  })
+}).observe(document.documentElement, {childList: true, subtree: true})
+</script>
+</head>
+<body>
+
+<!-- ══ HEADER — controls bar ════════════════════════════════════════ -->
+<header id="header">
+  <style>
+    me {
+      display: flex; align-items: center; gap: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #111; color: #aaa;
+      font-family: var(--mono); font-size: 11px;
+      flex-wrap: wrap;
+    }
+    me > label { display: flex; align-items: center; gap: 0.5rem; }
+    me input[type=range] { width: 120px; accent-color: #888; }
+    me > span { color: #fff; min-width: 2.5rem; display: inline-block; }
+    me > button {
+      padding: 2px 8px; border-radius: 3px;
+      border: 1px solid #444; background: transparent;
+      color: #888; cursor: pointer;
+      font-family: inherit; font-size: 11px;
+      transition: background 0.15s;
+    }
+    me > button.active { background: #444; color: #fff; border-color: #666; }
+    me > hr { border: none; border-left: 1px solid #444; height: 1em; }
+  </style>
+
+  <a href="/">Home</a>
+
+  <label>
+    hue
+    <input type="range" min="0" max="360" step="1" data-bind:hue>
+    <span data-text="$hue"></span>
+  </label>
+
+  <hr>
+
+  <label>
+    surf C
+    <input type="range" min="0" max="0.06" step="0.005" data-bind:surfChroma>
+    <span data-text="$surfChroma"></span>
+  </label>
+
+  <label>
+    color C
+    <input type="range" min="0.04" max="0.37" step="0.01" data-bind:colorChroma>
+    <span data-text="$colorChroma"></span>
+  </label>
+
+  <hr>
+
+  <label>mode</label>
+  <button data-class="{active: $mode===0}" data-on:click="$mode=0">mono</button>
+  <button data-class="{active: $mode===1}" data-on:click="$mode=1">complement</button>
+  <button data-class="{active: $mode===2}" data-on:click="$mode=2">triad</button>
+  <button data-class="{active: $mode===3}" data-on:click="$mode=3">analogous</button>
+</header>
+
+<!-- ══ LIGHT PANEL ══════════════════════════════════════════════════ -->
+<div id="light">
+  <div class="panel">
+    <style>
+      me { padding: 1.5rem; container-type: style; display: flex; flex-direction: column; gap: 2rem; }
+      me > h2 { font-size: var(--label); text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.4; font-family: var(--mono); font-weight: normal; }
+      me > h3 { font-size: var(--label); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.35; font-family: var(--mono); font-weight: normal; margin-bottom: -1rem; }
+      me > hr { border: none; border-top: 1px solid var(--_border); opacity: 0.25; }
+    </style>
+
+    <h2>Light — surfaces</h2>
+    <h3>Surface sweep at various hues (positive = lighter)</h3>
+
+    <div>
+      <style>
+        me { display: flex; gap: 4px; }
+        me > article {
+          flex: 1; border-radius: 4px; border: 2px solid var(--_border);
+          display: flex; flex-direction: column; overflow: hidden;
+        }
+        me > article > div {
+          padding: 0.35rem 0.5rem;
+          font-size: var(--label); font-family: var(--mono); letter-spacing: 0.04em;
+          border-bottom: 1px solid var(--_border);
+        }
+        me > article > div:last-of-type { border-bottom: none; }
+        me > article > div { display: flex; justify-content: space-between; }
+        me > article > div:nth-of-type(1) { --surface: -3; }
+        me > article > div:nth-of-type(2) { --surface: -2; }
+        me > article > div:nth-of-type(3) { --surface: -1; }
+        me > article > div:nth-of-type(4) { --surface: 0; }
+        me > article > div:nth-of-type(5) { --surface: 1; }
+        me > article > div:nth-of-type(6) { --surface: 2; }
+        me > article > div:nth-of-type(7) { --surface: 3; }
+        me > article > div > p { text-align:center; display:flex;}
+        me > article > div > p:nth-of-type(1) { --contrast:.25; }
+        me > article > div > p:nth-of-type(2) { --contrast:.5; }
+        me > article > div > p:nth-of-type(3) { --contrast:.7; }
+        me > article > div > p:nth-of-type(4) { --contrast:1; }
+      </style>
+
+      <article style="--hue:0;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:30;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:60;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:90;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:120;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:150;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:180;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:210;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:240;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:280;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:310;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:340;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+    </div>
+
+    <hr>
+    <h3>Color palette — .pri / .sec / .ter × --color-index −2→+2</h3>
+
+    <div>
+      <style>
+        me { display: flex; flex-direction: column; gap: 0.5rem; }
+        me > label { font-size: 9px; font-family: var(--mono); opacity: 0.4; letter-spacing: 0.06em; }
+        me > div { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; border-radius: 4px; overflow: hidden; }
+        me > div > div {
+          padding: 0.5rem 0.4rem;
+          font-size: 9px; font-family: var(--mono);
+          text-align: center; display: flex; flex-direction: column; gap: 2px;
+        }
+      </style>
+
+      <label>.pri (H = seed hue)</label>
+      <div>
+        <div class="pri" style="--color-index:-2">−2<br>dark</div>
+        <div class="pri" style="--color-index:-1">−1</div>
+        <div class="pri" style="--color-index: 0">0<br>base</div>
+        <div class="pri" style="--color-index: 1">+1</div>
+        <div class="pri" style="--color-index: 2">+2<br>bright</div>
+      </div>
+
+      <label>.sec (H = sec)</label>
+      <div>
+        <div class="sec" style="--color-index:-2">−2</div>
+        <div class="sec" style="--color-index:-1">−1</div>
+        <div class="sec" style="--color-index: 0">0</div>
+        <div class="sec" style="--color-index: 1">+1</div>
+        <div class="sec" style="--color-index: 2">+2</div>
+      </div>
+
+      <label>.ter (H = ter)</label>
+      <div>
+        <div class="ter" style="--color-index:-2">−2</div>
+        <div class="ter" style="--color-index:-1">−1</div>
+        <div class="ter" style="--color-index: 0">0</div>
+        <div class="ter" style="--color-index: 1">+1</div>
+        <div class="ter" style="--color-index: 2">+2</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ DARK PANEL ═══════════════════════════════════════════════════ -->
+<div id="dark">
+  <div class="panel dark">
+    <style>
+      me { padding: 1.5rem; container-type: style; display: flex; flex-direction: column; gap: 2rem; }
+      me > h2 { font-size: var(--label); text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.4; font-family: var(--mono); font-weight: normal; }
+      me > h3 { font-size: var(--label); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.35; font-family: var(--mono); font-weight: normal; margin-bottom: -1rem; }
+      me > hr { border: none; border-top: 1px solid var(--_border); opacity: 0.25; }
+    </style>
+
+    <h2>Dark — surfaces</h2>
+    <h3>Hue sweep (positive = lighter)</h3>
+
+    <div>
+      <style>
+        me { display: flex; gap: 4px; }
+        me > article {
+          flex: 1; border-radius: 4px; border: 2px solid var(--_border);
+          display: flex; flex-direction: column; overflow: hidden;
+        }
+        me > article > div {
+          padding: 0.35rem 0.5rem;
+          font-size: var(--label); font-family: var(--mono); letter-spacing: 0.04em;
+          border-bottom: 1px solid var(--_border);
+        }
+        me > article > div:last-of-type { border-bottom: none; }
+        me > article > div { display: flex; justify-content: space-between; }
+        me > article > div:nth-of-type(1) { --surface: -3; }
+        me > article > div:nth-of-type(2) { --surface: -2; }
+        me > article > div:nth-of-type(3) { --surface: -1; }
+        me > article > div:nth-of-type(4) { --surface: 0; }
+        me > article > div:nth-of-type(5) { --surface: 1; }
+        me > article > div:nth-of-type(6) { --surface: 2; }
+        me > article > div:nth-of-type(7) { --surface: 3; }
+        me > article > div > p { text-align:center; display:flex;}
+        me > article > div > p:nth-of-type(1) { --contrast:.25; }
+        me > article > div > p:nth-of-type(2) { --contrast:.5; }
+        me > article > div > p:nth-of-type(3) { --contrast:.7; }
+        me > article > div > p:nth-of-type(4) { --contrast:1; }
+      </style>
+
+      <article style="--hue:0;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:30;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:60;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:90;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:120;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:150;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:180;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:210;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:240;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:280;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:310;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+      <article style="--hue:340;"> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> <div><p>A<p>B<p>C<p>D</div> </article>
+    </div>
+
+    <hr>
+    <h3>Color palette — .pri / .sec / .ter × --color-index −2→+2</h3>
+
+    <div>
+      <style>
+        me { display: flex; flex-direction: column; gap: 0.5rem; }
+        me > label { font-size: 9px; font-family: var(--mono); opacity: 0.4; letter-spacing: 0.06em; }
+        me > div { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; border-radius: 4px; overflow: hidden; }
+        me > div > div {
+          padding: 0.5rem 0.4rem;
+          font-size: 9px; font-family: var(--mono);
+          text-align: center; display: flex; flex-direction: column; gap: 2px;
+        }
+      </style>
+
+      <label>.pri (H = seed hue)</label>
+      <div>
+        <div class="pri" style="--color-index:-2">−2<br>dark</div>
+        <div class="pri" style="--color-index:-1">−1</div>
+        <div class="pri" style="--color-index: 0">0<br>base</div>
+        <div class="pri" style="--color-index: 1">+1</div>
+        <div class="pri" style="--color-index: 2">+2<br>bright</div>
+      </div>
+
+      <label>.sec</label>
+      <div>
+        <div class="sec" style="--color-index:-2">−2</div>
+        <div class="sec" style="--color-index:-1">−1</div>
+        <div class="sec" style="--color-index: 0">0</div>
+        <div class="sec" style="--color-index: 1">+1</div>
+        <div class="sec" style="--color-index: 2">+2</div>
+      </div>
+
+      <label>.ter</label>
+      <div>
+        <div class="ter" style="--color-index:-2">−2</div>
+        <div class="ter" style="--color-index:-1">−1</div>
+        <div class="ter" style="--color-index: 0">0</div>
+        <div class="ter" style="--color-index: 1">+1</div>
+        <div class="ter" style="--color-index: 2">+2</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

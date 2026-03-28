@@ -28,7 +28,7 @@ function getLang(el) {
   return 'css';
 }
 
-export function highlightAll(root = document) {
+function highlightAll(root = document) {
   if (!CSS?.highlights) return;
   for (const [name] of ALL_TOKENS) CSS.highlights.delete(name);
 
