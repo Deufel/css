@@ -1,0 +1,45 @@
+@PROPERTIES
+  --_bg                  <color>      inherit  = oklch(87% 0.015 220)  .tmp_a_css.css:30
+  --_c                   <number>     inherit  = 0.015  .tmp_a_css.css:29
+  --_even                <integer>    inherit  = 0  .tmp_a_css.css:31
+  --_l                   <percentage> inherit  = 87%  .tmp_a_css.css:28
+  --_odd                 <integer>    inherit  = 0  .tmp_a_css.css:32
+  --_parity              <integer>    inherit  = 0  .tmp_a_css.css:33
+  --cfg-color-chroma     <number>     inherit  = 0.14  .tmp_a_css.css:24
+  --cfg-color-l          <percentage> inherit  = 68%  .tmp_a_css.css:25
+  --cfg-dark             <number>     inherit  = 0  .tmp_a_css.css:22
+  --cfg-motion           <number>     inherit  = 1  .tmp_a_css.css:12
+  --cfg-radius           <length>     inherit  = 6px  .tmp_a_css.css:26
+  --cfg-surf-chroma      <number>     inherit  = 0.015  .tmp_a_css.css:23
+  --cfg-type-scale       <number>     inherit  = 1  .tmp_a_css.css:13
+  --chroma-shift         <number>     inherit  = 0  .tmp_a_css.css:17
+  --contrast             <number>     inherit  = 9  .tmp_a_css.css:20
+  --depth                <number>     inherit  = 0  .tmp_a_css.css:19
+  --hue                  <number>     inherit  = 220  .tmp_a_css.css:15
+  --hue-shift            <number>     inherit  = 0  .tmp_a_css.css:16
+  --l-shift              <number>     inherit  = 0  .tmp_a_css.css:18
+  --type                 <number>     local  = 0  .tmp_a_css.css:11
+
+LAYERS
+    1. reset.fix                    ✓
+    2. reset.opinion                ✓
+    3. core.config                  ✓
+    4. core.color                   ✓
+    5. core.type                    ✓
+    6. core.spacing                 ✓
+    7. theme                        ✓
+    8. layout.page                  ✓
+    9. layout.composition           ✓
+   10. component.complex            ✓
+   11. component.simple             ✓
+   12. component.utls               ✓
+   13. utility.layout               ✓
+   14. utility.exceptions           ✓
+   15. utility.important            ✓
+
+VARIABLES
+  declared: 41  referenced: 53
+  unreferenced: --_parity, --_s, --isLTR
+
+ISSUES
+  none

@@ -6,3 +6,7 @@ archive/
 .local/
 .js/*
 datastar-pro.js
+temp/
+ds.js
+vendor/
+.env

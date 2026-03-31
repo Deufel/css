@@ -13,9 +13,6 @@ with app.setup:
     from html_tags import setup_svg, setup_tags, HTML, Fragment, to_html, html_to_tag, pretty
     setup_tags(), setup_svg()
 
-    # notebook settings
-    DEFAULT_CSS_PATH = "output.css"
-
 
 @app.cell
 def _():
@@ -24,29 +21,10 @@ def _():
     return (mo,)
 
 
-@app.cell
-def _(sidebar):
-    sidebar
-    return
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     This should be a nice way to use css and should overtime get better and better, and allow multiple people to work on asingle project because the convention is obvious and easy to catch on with.
-
-    Naming conventions;
-    ```css
-    /*
-
-    PREFIX       RULE
-    --cfg-*      Core calc params. Set once.
-    data-ui-*    User prefs. HTML attributes.
-    --*          Public. Set freely. Core eats.
-    --_*         Private. Don't touch. Ever.
-
-    */
-    ```
     """)
     return
 
@@ -72,185 +50,41 @@ def _(mo):
     mo.md(r"""
     Registered properties
     ```css
-    /* must be defined outside of all selectors */
-
-
-    /* ═══════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════════
        @property registrations
-       ═══════════════════════════════════════════ */
+       ─────────────────────────────────────────────────────────────────
+        > must be defined outside of all selectors
+        > naming convention: [this is still very fluid]
+           --[var]      developer-facing knobs, set freely on elements as you want
+           --cfg-[var]  config — change at your own peril, used in color math
+           --_[var]     internal intermediary, basically never touch
+    ══════════════════════════════════════════════════════════════════════ */
 
-    @property --hue       { syntax: "<number>"; inherits: true;  initial-value: 250; }
-    @property --surface   { syntax: "<number>"; inherits: true;  initial-value: 0; }
     @property --type      { syntax: "<number>"; inherits: false; initial-value: 0; }
-    @property --contrast  { syntax: "<number>"; inherits: true;  initial-value: 1; }
-    @property --chroma    { syntax: "<number>"; inherits: true;  initial-value: 0.02; }
-
-    @property --cfg-dark       { syntax: "<number>"; inherits: true; initial-value: 0; }
     @property --cfg-motion     { syntax: "<number>"; inherits: true; initial-value: 1; }
     @property --cfg-type-scale { syntax: "<number>"; inherits: true; initial-value: 1; }
 
-    @property --_bg { syntax: "<color>"; inherits: true; initial-value: oklch(95% 0.02 250); }
+    @property --hue          { syntax: "<number>"; inherits: true;  initial-value: 220; }
+    @property --hue-shift    { syntax: "<number>"; inherits: true;  initial-value: 0; }
+    @property --chroma-shift { syntax: "<number>"; inherits: true;  initial-value: 0; }
+    @property --l-shift      { syntax: "<number>"; inherits: true;  initial-value: 0; }
+    @property --depth        { syntax: "<number>"; inherits: true;  initial-value: 0; }
+    @property --contrast     { syntax: "<number>"; inherits: true;  initial-value: 9; }
 
-    @property --_depth-a { syntax: "<integer>"; inherits: true; initial-value: 0; }
-    @property --_depth-b { syntax: "<integer>"; inherits: true; initial-value: 0; }
-    @property --_parity  { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --cfg-dark         { syntax: "<number>"; inherits: true; initial-value: 0; }
+    @property --cfg-surf-chroma  { syntax: "<number>"; inherits: true; initial-value: 0.015; }
+    @property --cfg-color-chroma { syntax: "<number>"; inherits: true; initial-value: 0.14; }
+    @property --cfg-color-l      { syntax: "<percentage>"; inherits: true; initial-value: 68%; }
+    @property --cfg-radius       { syntax: "<length>"; inherits: true; initial-value: 6px; }
 
-    @property --nudge-l { syntax: "<number>"; inherits: true; initial-value: 0; }
-    @property --nudge-c { syntax: "<number>"; inherits: true; initial-value: 0; }
-    @property --nudge-h { syntax: "<number>"; inherits: true; initial-value: 0; }
-
-    @property --_interact { syntax: "<number>"; inherits: true; initial-value: 0; }
-
-
-
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ```css
+    @property --_l      { syntax: "<percentage>"; inherits: true; initial-value: 87%; }
+    @property --_c      { syntax: "<number>";  inherits: true; initial-value: 0.015; }
+    @property --_bg     { syntax: "<color>";   inherits: true; initial-value: oklch(87% 0.015 220); }
+    @property --_even   { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --_odd    { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --_parity { syntax: "<integer>"; inherits: true; initial-value: 0; }
 
 
-    /* ═══════════════════════════════════════════
-       @property registrations
-       ═══════════════════════════════════════════ */
-
-
-
-    /* ═══════════════════════════════════════════
-       Layers
-       ═══════════════════════════════════════════ */
-
-    @layer reset, core.config, core.color, theme, demo;
-
-    @layer reset {
-      *, *::before, *::after { box-sizing: border-box; margin: 0; }
-      body { min-height: 100svh; }
-    }
-
-    @layer core.config {
-      :root {
-        --cfg-dark: 0;
-        --_surf-base: calc(95% - var(--cfg-dark) * 82%);
-        --_surf-step: calc(-2.5% + var(--cfg-dark) * 6.5%);
-        --_dir: calc(1 - 2 * var(--cfg-dark));
-        --_l-gain: calc(var(--_dir) * (1 + var(--cfg-dark) * 0.4));
-        --_c-gain: calc(1 + var(--cfg-dark) * 0.25);
-        --_h-gain: 1;
-      }
-      @media (prefers-color-scheme: dark) { :root { --cfg-dark: 1; } }
-      html[data-ui-scheme="dark"]  { --cfg-dark: 1; }
-      html[data-ui-scheme="light"] { --cfg-dark: 0; }
-    }
-
-    @layer core.color {
-
-      /* ═══ ONE FORMULA ═══ */
-      :where(*) {
-        --_bg: oklch(
-          clamp(10%,
-            calc(
-              var(--_surf-base)
-              + var(--surface) * var(--_surf-step)
-              + var(--nudge-l) * var(--_l-gain) * 1%
-              + var(--_interact) * var(--_dir) * 1%
-            ),
-          99%)
-          max(0, calc(var(--chroma) + var(--nudge-c) * var(--_c-gain)))
-          calc(var(--hue) + var(--nudge-h) * var(--_h-gain))
-        );
-        background: var(--_bg);
-        color: oklch(from var(--_bg)
-          calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
-          calc(c * (1 - var(--contrast)))
-          h
-        );
-      }
-
-      /* knob preset — buttons & tags only */
-      .fill { --surface: 0; --nudge-l: -30; --chroma: 0.14; }
-
-      /* staircase */
-      @container style(--_parity: 0) {
-        .surface { --_depth-b: calc(var(--_depth-a) + 1); --surface: var(--_depth-b); --_parity: 1; }
-      }
-      @container style(--_parity: 1) {
-        .surface { --_depth-a: calc(var(--_depth-b) + 1); --surface: var(--_depth-a); --_parity: 0; }
-      }
-
-      /* clickable — buttons & tags only */
-      .clickable {
-        cursor: pointer;
-        transition: background calc(var(--cfg-motion) * 0.12s) ease-out,
-                    color     calc(var(--cfg-motion) * 0.12s) ease-out;
-      }
-      .clickable:hover:not([disabled])  { --_interact: -3; }
-      .clickable:active:not([disabled]) { --_interact: -5; }
-      .clickable[disabled] { cursor: not-allowed; opacity: 0.38; }
-    }
-
-
-    @layer theme {
-      :root {
-        --font-body: Avenir, Montserrat, Corbel, URW Gothic, source-sans-pro, sans-serif;
-        --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
-        --cfg-radius: 0.5rem;
-      }
-      body { font-family: var(--font-body); line-height: 1.5; }
-      code { font-family: var(--font-mono); font-size: 0.85em; }
-      h2, h3 { line-height: 1.2; }
-    }
-
-
-    /* ═══════════════════════════════════════════
-       Demo
-       ═══════════════════════════════════════════ */
-
-    @layer demo {
-
-      body { padding: clamp(1rem, 4vw, 3rem); --hue: 250; }
-
-      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1.25rem; margin-block: 1rem; }
-      .card { padding: 1.25rem; border-radius: var(--cfg-radius); }
-
-      .mono { font-family: var(--font-mono); }
-      .label { font-size: 0.68rem; font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.55; margin-block-end: 0.3rem; }
-      .code-line { font-family: var(--font-mono); font-size: 0.72rem; opacity: 0.55; }
-
-      .swatch-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-block: 0.5rem; }
-      .swatch { width: 3rem; height: 3rem; border-radius: var(--cfg-radius); display: grid; place-content: center; font-size: 0.5rem; font-family: var(--font-mono); }
-
-      .pill { display: inline-block; padding: 0.15em 0.65em; border-radius: 100vw; font-size: 0.75rem; font-family: var(--font-mono); border: 0; }
-      .badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-block: 0.5rem; }
-      .btn { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.35em 0.85em; border-radius: var(--cfg-radius); font-size: 0.85rem; font-family: var(--font-body); border: 0; }
-
-      hr { border: none; border-block-start: 1px solid oklch(from var(--_bg) calc(l - 0.06 + var(--cfg-dark) * 0.12) c h); margin-block: 2rem; }
-      .section-title { font-size: 1.05rem; font-weight: 600; margin-block-end: 0.1rem; }
-      .section-desc { font-size: 0.8rem; opacity: 0.65; margin-block-end: 0.75rem; }
-
-      .controls { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin-block-end: 1.5rem; padding: 1rem; border-radius: var(--cfg-radius); }
-      .controls label { font-size: 0.8rem; font-family: var(--font-mono); display: flex; align-items: center; gap: 0.4rem; }
-      .controls input[type="range"] { width: 6rem; accent-color: oklch(55% 0.15 var(--hue)); }
-
-      /* ─── bar chart ─── */
-      .chart { display: flex; align-items: flex-end; gap: 0.4rem; height: 10rem; padding-block-start: 0.5rem; }
-      .bar { flex: 1; border-radius: calc(var(--cfg-radius) * 0.5) calc(var(--cfg-radius) * 0.5) 0 0; display: flex; align-items: flex-end; justify-content: center; padding-block-end: 0.35rem; font-size: 0.55rem; font-family: var(--font-mono); min-width: 0; transition: background 0.15s ease-out, color 0.15s ease-out; }
-
-      /* ─── conic wheel ─── */
-      .conic-wheel { width: min(100%, 14rem); aspect-ratio: 1; border-radius: 50%; margin-inline: auto; }
-
-      /* ─── stat card ─── */
-      .stat { text-align: center; padding: 1rem; }
-      .stat-value { font-size: 2rem; font-weight: 700; line-height: 1.1; }
-      .stat-label { font-size: 0.72rem; font-family: var(--font-mono); opacity: 0.6; margin-block-start: 0.2rem; }
-
-      /* ─── progress ─── */
-      .progress-track { height: 0.5rem; border-radius: 100vw; overflow: hidden; --nudge-l: -3; }
-      .progress-bar { height: 100%; border-radius: 100vw; }
-    }
 
     ```
     """)
@@ -372,22 +206,12 @@ def _(mo):
 
     @layer core.config {
       :root {
-        --cfg-dark: 0;
-
         /* color */
-        --_surf-base: calc(95% - var(--cfg-dark) * 82%);
-        --_surf-step: calc(-2.5% + var(--cfg-dark) * 6.5%);
-        --_dir: calc(1 - 2 * var(--cfg-dark));
-        --_l-gain: calc(var(--_dir) * (1 + var(--cfg-dark) * 0.4));
-        --_c-gain: calc(1 + var(--cfg-dark) * 0.25);
-        --_h-gain: 1;
+        --_surf-base: calc(87% - var(--cfg-dark) * 75%);
+        --_l: var(--_surf-base);
+        --_c: var(--cfg-surf-chroma);
 
-        /* type
-           base:  17px → 19px fluid
-           ratio: 1.2 (minor 3rd) → 1.28 (wide major 3rd)
-           the wider desktop ratio gives headings more drama
-           while mobile stays compact and readable */
-
+        /* type */
         --cfg-fluid-min-vp:  22.5rem;
         --cfg-fluid-max-vp:  77.5rem;
         --cfg-type-min:       1.0625rem;
@@ -417,44 +241,37 @@ def _(mo):
     ```css
     @layer core.color {
 
+      /*.pri, .sec, .ter { --_l: var(--cfg-color-l); --_c: var(--cfg-color-chroma); }*/
+      :is(button, .badge, .avatar, .btn):is(.pri, .sec, .ter),
+      :is(.pri, .sec, .ter) :is(button, .badge, .avatar, .btn) {
+        --_l: var(--cfg-color-l); --_c: var(--cfg-color-chroma);
+      }
+
+      .layer { --_l: calc(var(--_surf-base) + var(--depth) * 2.5%); }
+
       :where(*) {
         --_bg: oklch(
-          clamp(10%,
-            calc(
-              var(--_surf-base)
-              + var(--surface) * var(--_surf-step)
-              + var(--nudge-l) * var(--_l-gain) * 1%
-              + var(--_interact) * var(--_dir) * 1%
-            ),
-          99%)
-          max(0, calc(var(--chroma) + var(--nudge-c) * var(--_c-gain)))
-          calc(var(--hue) + var(--nudge-h) * var(--_h-gain))
+          clamp(10%, calc(var(--_l) + var(--l-shift) * 100%), 99%)
+          calc(var(--_c) + var(--chroma-shift))
+          calc(var(--hue) + var(--hue-shift))
         );
+        --border: oklch(from var(--_bg) calc(l - 0.09 + var(--cfg-dark) * 0.20) var(--cfg-surf-chroma) h);
+        --Border: oklch(from var(--_bg) calc(l - 0.09 + var(--cfg-dark) * 0.20) var(--cfg-color-chroma) h);
         background: var(--_bg);
         color: oklch(from var(--_bg)
           calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
-          calc(c * (1 - var(--contrast)))
-          h
+          calc(c * (1 - var(--contrast))) h
         );
       }
 
-      .fill { --surface: 0; --nudge-l: -30; --chroma: 0.14; }
+      html[data-ui-color-palette="mono"]   { .sec { --chroma-shift:   0.03; }  .ter { --chroma-shift:    -0.03; } }
+      html[data-ui-color-palette="comp"]   { .sec { --hue-shift:  180; }   .ter { --hue-shift:    0; --l-shift: 0.02; } }
+      html[data-ui-color-palette="triad"]  { .sec { --hue-shift:  120; }   .ter { --hue-shift:  240; } }
+      html[data-ui-color-palette="analog"] { .sec { --hue-shift:  -30; }   .ter { --hue-shift:   30; } }
+      html[data-ui-color-palette="splitc"] { .sec { --hue-shift:  50; }   .ter { --hue-shift:  100; } }
 
-      @container style(--_parity: 0) {
-        .surface { --_depth-b: calc(var(--_depth-a) + 1); --surface: var(--_depth-b); --_parity: 1; }
-      }
-      @container style(--_parity: 1) {
-        .surface { --_depth-a: calc(var(--_depth-b) + 1); --surface: var(--_depth-a); --_parity: 0; }
-      }
-
-      .clickable {
-        cursor: pointer;
-        transition: background calc(var(--cfg-motion) * 0.12s) ease-out,
-                    color     calc(var(--cfg-motion) * 0.12s) ease-out;
-      }
-      .clickable:hover:not([disabled])  { --_interact: -3; }
-      .clickable:active:not([disabled]) { --_interact: -5; }
-      .clickable[disabled] { cursor: not-allowed; opacity: 0.38; }
+      @container style(--_parity: 0) { .layer { --_odd:  calc(var(--_even) + 1); --depth: var(--_odd);  --_parity: 1; } }
+      @container style(--_parity: 1) { .layer { --_even: calc(var(--_odd)  + 1); --depth: var(--_even); --_parity: 0; } }
     }
 
     ```
@@ -497,14 +314,26 @@ def _(mo):
     3d. core.space
 
     ```css
+    /* ═══════════════════════════════════════════
+       core.spacing
+       pow(ratio, --space). Fluid. Same curve shape as type.
+       --space: 0 = ~0.5rem  |  1 = ~0.85rem  |  2 = ~1.3rem
+                3 = ~2rem     | -1 = ~0.33rem  | -2 = ~0.22rem
+       ═══════════════════════════════════════════ */
+
     @layer core.spacing {
-      :root {
-        --space-0: clamp(0.5rem, 0.409rem + 0.364vi, 0.75rem);
-        --space-1: clamp(0.7rem, 0.473rem + 0.909vi, 1.238rem);
-        --space-2: clamp(0.98rem, 0.48rem + 2vi, 2.042rem);
-        --space-3: clamp(1.372rem, 0.382rem + 3.959vi, 3.369rem);
+      :where(*) {
+        --_s-min: calc(var(--cfg-space-min) * pow(var(--cfg-space-min-ratio), var(--space)));
+        --_s-max: calc(var(--cfg-space-max) * pow(var(--cfg-space-max-ratio), var(--space)));
+        --_s: clamp(var(--_s-min),
+          calc(var(--_s-min) + (var(--_s-max) - var(--_s-min)) *
+            (100vi - var(--cfg-fluid-min-vp)) /
+            (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))),
+          var(--_s-max)
+        )  * var(--cfg-space-scale);
       }
     }
+
     ```
     """)
     return
@@ -556,7 +385,7 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     5a. Layout.page
@@ -564,52 +393,45 @@ def _(mo):
     [] landing
     Q: Drawers here or Components?
     ```css
-    @layer layout.page{
-        :where(body.dashboard) {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none;
-            display: grid;
-            grid-template:
-                "header   header  header" auto
-                "nav      main    aside"  1fr
-                "footer   footer  footer" auto
-                / auto    1fr     auto;
-            height: 100svh;
-            padding: 0;
-            margin: 0;
+    @layer layout.page {
 
-            dialog::backdrop {
-                background-color: light-dark(
-                    rgba(0, 0, 0, 0.7),
-                    rgba(0, 0, 0, 0.8)
-                );
-            }
+      :where(body.blog) { display: flex; flex-direction: column; min-height: 100svh;
+          & #main { felx: 1; }
+      }
 
-            #header {
-                grid-area: header;
-            }
-            #main {
-                grid-area: main;
-            }
-            #nav {
-                grid-area: nav;
-            }
-            #aside {
-                grid-area: aside;
-            }
-            #footer {
-                grid-area: footer;
-            }
-        }
+      :where(body.app) {
+          position: fixed; /*not sure about this*/
+          inset: 0;
+          overflow: hidden;
+          overscroll-behavior: none;
+          display: grid;
+          grid-template:
+            "header  header  header" auto
+            "nav     main    aside"  1fr
+            "footer  footer  footer" auto
+            / auto   1fr     auto;
+          height: 100svh;
+
+          & #header, #main, #aside { overflow-y:auto; scrollbar-gutter: stable;}
+
+          & #header { grid-area: header; margin-bottom: var(--cfg-page-gap);}
+          & #main   { grid-area: main; }
+          & #nav    { grid-area: nav;    margin-right:  var(--cfg-page-pag);}
+          & #aside  { grid-area: aside;  margin-left:   var(--cfg-page-gap);}
+          & #footer { grid-area: footer; margin-top:    var(--cfg-page-gap);}
+
+          & dialog::backdrop { background-color: oklch(0 0 0 / calc(0.7 + var(--cfg-dark) * 0.1)); }
+      }
     }
 
     ```
+    """)
+    return
 
+
+@app.cell
+def _(mo):
+    mo.md(r"""
     5b. Layout.composition
 
     ```css
@@ -647,15 +469,25 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 6a. Components.complex
 
-    ### Data Table
+    ### Toggle Button Group
     ```css
     @layer component.complex {
-       .datatable { }
+      :where(.toggle-group) { display: inline-flex;
+        button { --contrast: 0.5; --_c: var(--cfg-surf-chroma); border: 1px solid var(--border);
+          &:has(+ button) { border-start-end-radius: 0;   border-end-end-radius: 0; }
+          & + button      { border-start-start-radius: 0; border-end-start-radius: 0;
+                            border-inline-start: 1px solid var(--border); }
+          &:hover { --contrast: 0.75; }
+          &[aria-pressed="true"] { --_l: var(--cfg-color-l); --_c: var(--cfg-color-chroma); --contrast: 1; }
+          &[aria-pressed="true"] + button,
+          & + button[aria-pressed="true"] { border-inline-start-color: transparent; }
+        }
+      }
     }
 
     ```
@@ -663,48 +495,35 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 6b. Components.simple
 
-    ### Card
+    ### Button
     ```css
     @layer component.simple {
-      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1.25rem; margin-block: 1rem; }
-      .card { padding: 1.25rem; border-radius: var(--cfg-radius); }
+      :where(button, .btn) {
+        border: 1px solid var(--Border);
+        border-radius: var(--cfg-radius);
+        padding: 0.5em 1.25em;
+        cursor: pointer;
+        font: inherit;
+      }
 
-      .label   { --type: -2; font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; --contrast: 0.45; }
-      .mono    { font-family: var(--font-mono); }
+      :where(.pri, .sec, .ter):where(button, .btn) {
+        &:hover  { --l-shift:  0.04; }
+        &:active { --l-shift: -0.04; }
+      }
 
-      .swatch-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-block: 0.5rem; }
-      .swatch { width: 3rem; height: 3rem; border-radius: var(--cfg-radius); display: grid; place-content: center; --type: -2.5; font-family: var(--font-mono); }
-
-      .pill { display: inline-block; padding: 0.15em 0.65em; border-radius: 100vw; --type: -1.2; font-family: var(--font-mono); border: 0; }
-      .badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-block: 0.5rem; align-items: center; }
-      .btn { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.35em 0.85em; border-radius: var(--cfg-radius); --type: 0; font-family: var(--font-body); border: 0; font-weight: 500; }
-
-      hr { border: none; border-block-start: 1px solid oklch(from var(--_bg) calc(l - 0.06 + var(--cfg-dark) * 0.12) c h); margin-block: 2.5rem; }
-
-      .controls { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin-block-end: 1.5rem; padding: 1rem; border-radius: var(--cfg-radius); }
-      .controls label { --type: -0.8; font-family: var(--font-mono); display: flex; align-items: center; gap: 0.4rem; }
-      .controls input[type="range"] { width: 6rem; accent-color: oklch(55% 0.15 var(--hue)); }
-
-      .chart { display: flex; align-items: flex-end; gap: 0.4rem; height: 10rem; padding-block-start: 0.5rem; }
-      .bar { flex: 1; border-radius: calc(var(--cfg-radius) * 0.5) calc(var(--cfg-radius) * 0.5) 0 0; display: flex; align-items: flex-end; justify-content: center; padding-block-end: 0.35rem; --type: -2.5; font-family: var(--font-mono); min-width: 0; transition: background 0.15s ease-out, color 0.15s ease-out; }
-
-      .conic-wheel { width: min(100%, 14rem); aspect-ratio: 1; border-radius: 50%; margin-inline: auto; }
-
-      .stat { text-align: center; padding: 0.75rem; }
-      .stat-value { --type: 3; font-weight: 400; font-family: var(--font-heading); }
-      .stat-label { --type: -1.5; font-family: var(--font-mono); --contrast: 0.5; margin-block-start: 0.15rem; }
-
-      .progress-track { height: 0.5rem; border-radius: 100vw; overflow: hidden; --nudge-l: -3; }
-      .progress-bar { height: 100%; border-radius: 100vw; }
-
-      .type-specimen { display: flex; flex-direction: column; gap: 0.65rem; }
-      .type-row { display: flex; align-items: baseline; gap: 1rem; }
-      .type-meta { --type: -2; font-family: var(--font-mono); --contrast: 0.4; min-width: 7em; flex-shrink: 0; }
+      :where(button.ghost, .btn.ghost) {
+        --_l: calc(var(--_surf-base) + (var(--depth) + 1) * 2.5%); /* manual surface step */
+        --_c: var(--cfg-surf-chroma);
+        --contrast: 0.8;
+        border-color: var(--border);
+        &:hover  { --contrast: 0.75; --_l: calc(var(--_surf-base) + (var(--depth) + 2) * 2.5%); }
+        &:active { --contrast: 1;    --_l: calc(var(--_surf-base) + (var(--depth) + 3) * 2.5%); }
+      }
     }
     ```
     """)
@@ -714,11 +533,29 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(r"""
-    ### Icon Button
+    ### Card
     ```css
+      :where(.Card) {
+        border-radius: var(--cfg-radius);
+        border: 1px solid var(--Border);
+        padding: --space:1;
+        overflow: hidden;
+      }
 
+      :where(.card) {
+        border-radius: var(--cfg-radius);
+        border: 1px solid var(--border);
+        padding: --space:1;
+        overflow: hidden;
+      }
+    }
     ```
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -740,25 +577,34 @@ def _(mo):
     ### Badge
     ```css
     @layer component.simple {
-      .badge {
-        display: inline-block;
-        padding: 0.15em 0.6em;
-        border-radius: 999px;
-        --type: -2;
+      :where(.badge) {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0.15em 0.6em; border-radius: 99px;
+        font-size: 0.75em; font-weight: 600;
       }
     }
     ```
+    """)
+    return
 
+
+@app.cell
+def _(mo):
+    mo.md(r"""
     ### Divider
     ```css
     @layer component.simple {
-      .divider {
-        border: none;
-        border-block-start: 1px solid oklch(from var(--_bg) calc(l + 0.08) c h);
-      }
+      .divider { border: none; border-block-start: 1px solid --border; }
+      .Divider { border: none; border-block-start: 1px solid --Border; }
     }
     ```
+    """)
+    return
 
+
+@app.cell
+def _(mo):
+    mo.md(r"""
     ### Popover auto align
     ```css
     @layer component.simple {
@@ -779,23 +625,6 @@ def _(mo):
     mo.md(r"""
     ## 6c. component.utls
     ```css
-
-    /* ─── interactive primitive ─── */
-    @layer component.utls {
-      .interactive, .btn {
-        cursor: pointer;
-        transition: background calc(var(--cfg-motion) * 0.12s) ease-out,
-                    color     calc(var(--cfg-motion) * 0.12s) ease-out;
-
-        &:hover:not([disabled])  { --_surf-bump: 1; }
-        &:active:not([disabled]) { --_surf-bump: 2; }
-
-        &[disabled] {
-          cursor: not-allowed;
-          opacity: 0.38;
-        }
-      }
-    }
 
     /* ─── ripple primitive ─── */
 
@@ -827,7 +656,7 @@ def _(mo):
             background-color: var(--_rp-bg);
             block-size:       var(--_rp-size);
             clip-path:        circle(50%);
-            content:          "\";
+            content:          " ";
             inline-size:      var(--_rp-size);
             inset-block-start:  50%;
             inset-inline-start: 50%;
@@ -901,619 +730,424 @@ def _(mo):
 
 
 @app.cell
-def _(
-    Body,
-    Head,
-    Html,
-    Iframe,
-    Meta,
-    Style,
-    extract_lang_blocks,
-    extract_md_blocks,
-    read_file,
-):
-    def create_isolated_component(*content):
-        """Create a component in an isolated iframe, CSS extracted live from this notebook."""
-        import base64
+def _():
+    from marimo_css import get_css
 
-        # Same pattern as the export pipeline — always fresh from source
-        _source = read_file()
-        _md_blocks = extract_md_blocks(_source)
-        _css = "\n".join(extract_lang_blocks(_md_blocks, "css"))
-
-        document = Html(
-            Head(
-                Meta(charset="utf-8"),
-                Meta(name="viewport", content="width=device-width, initial-scale=1"),
-                Style(_css)
-            ),
-            Body(*content)
-        )
-
-        html_string = to_html(document)
-        encoded_html = base64.b64encode(html_string.encode("utf-8")).decode("utf-8")
-        data_url = f"data:text/html;base64,{encoded_html}"
-
-        return Iframe(
-            src=data_url,
-            style="""
-    display: block;
-      inline-size: 100%;
-      block-size: 100cqb;
-      border: none;
-      margin-block:-1rem;
-      width: 100%
-      height: 100%
-                """
-        
-        )
-
-    return (create_isolated_component,)
+    return
 
 
 @app.cell
 def _():
-    icon_ski = html_to_tag("""<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cable-car-icon lucide-cable-car"><path d="M10 3h.01"/><path d="M14 2h.01"/><path d="m2 9 20-5"/><path d="M12 12V6.5"/><rect width="16" height="10" x="4" y="12" rx="3"/><path d="M9 12v5"/><path d="M15 12v5"/><path d="M4 17h16"/></svg>""")
-    return (icon_ski,)
+    import html as html_lib
+
+
+
+    return
+
+
+@app.cell
+def _():
+    DATASTAR_SRC = Path("vendor/ds.js").read_text()
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    #### Testing graning threaded server * Advanced *
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## App Demo
+    """)
+    return
+
+
+@app.cell
+def _():
+    FILE_JS = """
+    function dropHandler(e) {
+        e.preventDefault();
+        e.target.classList.remove('dragover');
+        const file = (e.dataTransfer || e.target).files[0];
+        if (!file || file.size > 5*1024*1024) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            fetch('/upload', {method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({datastar:{fileName:file.name, fileType:file.type, fileData:reader.result.split(',')[1]}})});
+        };
+        reader.readAsDataURL(file);
+    }
+    """
+    return
+
+
+@app.cell
+def _():
+    ME_CSS = """// 🌘 CSS Scope Inline 1.1.0 (https://github.com/gnat/css-scope-inline)
+    window.cssScopeCount ??= 1 // Let extra copies share the scope count.
+    window.cssScope ??= new MutationObserver(mutations => { // Allow 1 observer.
+    	document?.body?.querySelectorAll('style:not([ready])').forEach(node => { // Faster than walking MutationObserver results when recieving subtree (DOM swap, htmx, ajax, jquery).
+    		var scope = 'me__'+(window.cssScopeCount++) // Ready. Make unique scope, example: .me__1234
+    		node.parentNode.classList.add(scope)
+    		node.textContent = node.textContent
+    		.replace(/(?:^|\.|(\s|[^a-zA-Z0-9\-\_]))(me|this|self)(?![a-zA-Z\/])/g, '$1.'+scope) // Can use: me this self
+    		.replace(/((@keyframes|animation:|animation-name:)[^{};]*)\.me__/g, '$1me__') // Optional. Removes need to escape names, ex: "\.me"
+    		.replace(/(?:@media)\s(xs-|sm-|md-|lg-|xl-|sm|md|lg|xl|xx)/g, // Optional. Responsive design. Mobile First (above breakpoint): 🟢 None sm md lg xl xx 🏁  Desktop First (below breakpoint): 🏁 xs- sm- md- lg- xl- None 🟢 *- matches must be first!
+    			(match, part1) => { return '@media '+({'sm':'(min-width: 640px)','md':'(min-width: 768px)', 'lg':'(min-width: 1024px)', 'xl':'(min-width: 1280px)', 'xx':'(min-width: 1536px)', 'xs-':'(max-width: 639px)', 'sm-':'(max-width: 767px)', 'md-':'(max-width: 1023px)', 'lg-':'(max-width: 1279px)', 'xl-':'(max-width: 1535px)'}[part1]) }
+    		)
+    		node.setAttribute('ready', '')
+    	})
+    }).observe(document.documentElement, {childList: true, subtree: true})"""
+    return (ME_CSS,)
 
 
 @app.cell
 def _(
     A,
-    Aside,
     Body,
     Button,
     Div,
-    H1,
+    Footer,
     H2,
+    Head,
     Header,
-    Li,
+    Html,
+    Img,
+    Input,
+    ME_CSS,
     Main,
-    Nav,
-    Section,
-    Small,
-    Strong,
-    Ul,
-    create_isolated_component,
-    icon_ski,
+    P,
+    Script,
+    Source,
+    Span,
+    Style,
+    Video,
 ):
-    HTML(
-        create_isolated_component(
-            Body(cls="dashboard", style="height=100svh, --color: red")(
-                Header(cls="split", id="header")(
-                    H1("Logo"),
-                    Div(
-                        Button("Login"),
-                        Button("Sign Up")
-                    )
-                      ),
-                Nav(id="nav")(
-                    Ul(
-                        Li(A("Demo1")),
-                        Li(A("Demo2")),
-                        Li(A("Demo3")),
-                    )
-                ),
-                Main(id="main", cls="surface")(
-                    Section(
-                        H2("Components.simple"),
-                        Div(cls="cluster")(
-                            Button("im a button", cls="btn fill", style=""),
-                            Button(cls="btn fill round")(icon_ski)
-                        )
-                    )
-                ),
-                Aside(id="aside")(
-                    Ul(style=" list-style: none; padding: 0; margin: 1rem;}")(
-                        Li(Strong(Small("on this page"))),
-                        Li(Small("Definitions")),
-                        Li(Small("Examples")),
-                        Li(Small("Code"))
-                    )
-                )
-            )
-        )
-    )
-    return
+    import secrets, json, time, base64, tempfile, os, threading, apsw
+    from py_sse import create_app, create_relay, serve_background, stop_background, patch_elements, body
 
 
-@app.cell
-def _(Button, Div, icon_ski):
-    print(
-        pretty(
-            (Div(
-                    Button("im a button", cls="btn fill", style=""),
-                    Button(cls="btn fill round")(icon_ski)
-            )
-            )
-        )
-    )
+    setup_tags()
 
-    return
+    CHUNK_THRESHOLD = 10 * 1024 * 1024
 
+    def _delayed_unlink(path, delay=5): threading.Timer(delay, os.unlink, args=(path,)).start()
 
-@app.cell
-def _():
-    return
+    # ── Database ──────────────────────────────────────────────────
 
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # III Export your css
+    db = apsw.Connection("chat.db")
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS messages (id TEXT, user TEXT, text TEXT, ts REAL);
+        CREATE TABLE IF NOT EXISTS files (id TEXT PRIMARY KEY, name TEXT, mime TEXT, size INTEGER, data BLOB, ts REAL);
+        CREATE TABLE IF NOT EXISTS uploads (id TEXT PRIMARY KEY, name TEXT, mime TEXT, size INTEGER, received INTEGER DEFAULT 0, ts REAL, user TEXT, done INTEGER DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS upload_chunks (uid TEXT, offset INTEGER, data BLOB, PRIMARY KEY (uid, offset))
     """)
-    return
 
+    def _db(): return apsw.Connection("chat.db")
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Export functions
-    """)
-    return
+    def save_msg(id, user, text, ts): _db().execute("INSERT INTO messages VALUES (?,?,?,?)", (id, user, text, ts))
 
+    def load_msgs():
+        sql = """SELECT id, user, text,
+                 strftime('%l:%M %p', ts, 'unixepoch', 'localtime') as sent,
+                 CASE
+                   WHEN unixepoch('now') - ts < 60 THEN 'just now'
+                   WHEN unixepoch('now') - ts < 3600 THEN cast(((unixepoch('now') - ts) / 60) as int) || 'm ago'
+                   WHEN unixepoch('now') - ts < 86400 THEN cast(((unixepoch('now') - ts) / 3600) as int) || 'h ago'
+                   ELSE cast(((unixepoch('now') - ts) / 86400) as int) || 'd ago'
+                 END as ago
+                 FROM messages ORDER BY ts"""
+        return [dict(id=r[0], user=r[1], text=r[2], sent=r[3], ago=r[4]) for r in _db().execute(sql)]
 
-@app.cell
-def _():
-    def read_file(path: str = __file__) -> str:
-        return Path(path).read_text()
-    
-    def extract_md_blocks(source: str) -> list[str]:
-        pattern = r'mo\.md\(r"""\n(.*?)"""'
-        return re.findall(pattern, source, flags=re.DOTALL)
-    
-    def extract_lang_blocks(blocks: list[str], lang: str) -> list[str]:
-        pattern = rf'```{lang}\n(.*?)```'
-        result = []
-        for block in blocks:
-            result.extend(re.findall(pattern, block, flags=re.DOTALL))
-        return result
-    
-    def write_file(blocks: list[str], path: str) -> None:
-        _path = Path(path)
-        _path.parent.mkdir(parents=True, exist_ok=True)
-        _path.write_text("\n".join(blocks))
-    
-    def get_css() -> str:
-        """Extract and return all CSS blocks from this notebook."""
-        return "\n".join(extract_lang_blocks(extract_md_blocks(read_file()), "css"))
+    def save_file(id, name, mime, data, ts): _db().execute("INSERT INTO files VALUES (?,?,?,?,?,?)", (id, name, mime, len(data), data, ts))
 
-    def export_css(path: str | None = None) -> str:
-        """Write CSS to path (creates dirs). Returns the path used."""
-        _path = path or _DEFAULT_CSS_PATH
-        write_file([get_css()], _path)
-        return _path
+    def get_file_meta(fid):
+        r = list(_db().execute("SELECT name, mime FROM files WHERE id=?", (fid,)))
+        if r: return dict(name=r[0][0], mime=r[0][1], src="files")
+        r = list(_db().execute("SELECT name, mime FROM uploads WHERE id=? AND done=1", (fid,)))
+        if r: return dict(name=r[0][0], mime=r[0][1], src="uploads")
+        return None
 
-    def download_css(filename: str | None = None) -> str:
-        """Save CSS to the user's Downloads folder. Returns the path used."""
-        _filename = filename or Path(_DEFAULT_CSS_PATH).name
-        _path = Path.home() / "Downloads" / _filename
-        write_file([get_css()], str(_path))
-        return str(_path)
-
-    
-
-    return extract_lang_blocks, extract_md_blocks, read_file, write_file
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## CSS Linter
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def css_linter():
-
-    from collections import defaultdict
-
- 
-    SKIP = {
-        ".venv",
-        "docs/wasm",
-    }
- 
-    # ──────────────────────────────────────────
-    # Types
-    # ──────────────────────────────────────────
- 
-    @dataclass
-    class Issue:
-        file: str
-        line: int
-        level: str   # "warn" | "error" | "info"
-        msg: str
- 
-    @dataclass
-    class Property:
-        name: str
-        syntax: str
-        inherits: bool
-        initial: str
-        file: str
-        line: int
- 
-    @dataclass
-    class Report:
-        issues: list[Issue] = field(default_factory=list)
-        properties: list[Property] = field(default_factory=list)
-        layers_declared: list[str] = field(default_factory=list)  # from @layer order statement
-        layers_used: dict = field(default_factory=lambda: defaultdict(list))  # layer -> [files]
-        var_usage: dict = field(default_factory=lambda: defaultdict(set))  # prefix -> set of names
- 
-    # ──────────────────────────────────────────
-    # Project root
-    # ──────────────────────────────────────────
- 
-    def find_root(start: Path = None, marker: str = "pyproject.toml") -> Path:
-        p = (start or Path.cwd()).resolve()
-        for parent in [p, *p.parents]:
-            if (parent / marker).exists():
-                return parent
-        raise FileNotFoundError(f"No {marker} found in {p} or any parent directory")
- 
-    def should_skip(path: Path, root: Path) -> bool:
-        rel = str(path.relative_to(root))
-        return any(rel.startswith(s) for s in SKIP)
- 
-    # ──────────────────────────────────────────
-    # Parsers
-    # ──────────────────────────────────────────
- 
-    RE_PROPERTY = re.compile(
-        r'@property\s+(--[\w-]+)\s*\{'
-        r'\s*syntax:\s*"([^"]+)";\s*'
-        r'inherits:\s*(true|false);\s*'
-        r'initial-value:\s*([^;]+);\s*\}'
-    )
- 
-    RE_LAYER_ORDER = re.compile(r'@layer\s+([\w.:,\s/*-]+);', re.DOTALL)
-    RE_LAYER_BLOCK = re.compile(r'@layer\s+([\w.:]+)\s*\{')
- 
-    RE_VAR_DECL = re.compile(r'(--[\w-]+)\s*:')
-    RE_VAR_USE  = re.compile(r'var\((--[\w-]+)')
- 
-    def classify_var(name: str) -> str:
-        if name.startswith("--cfg-"):  return "--cfg-*"
-        if name.startswith("--_"):     return "--_* (private)"
-        return "--* (public)"
- 
-    def parse_properties(text: str, file: str) -> list[Property]:
-        props = []
-        for m in RE_PROPERTY.finditer(text):
-            line = text[:m.start()].count('\n') + 1
-            props.append(Property(
-                name=m.group(1),
-                syntax=m.group(2),
-                inherits=m.group(3) == "true",
-                initial=m.group(4).strip(),
-                file=file,
-                line=line,
-            ))
-        return props
- 
-    def parse_layer_order(text: str) -> list[str]:
-        """Parse the top-level @layer ordering statement into a flat list."""
-        layers = []
-        for m in RE_LAYER_ORDER.finditer(text):
-            raw = m.group(1)
-            # strip comments
-            raw = re.sub(r'/\*.*?\*/', '', raw, flags=re.DOTALL)
-            for chunk in raw.split(','):
-                name = chunk.strip()
-                if name:
-                    layers.append(name)
-        return layers
- 
-    def parse_layer_blocks(text: str) -> list[str]:
-        """Find all @layer block names used in a file."""
-        return RE_LAYER_BLOCK.findall(text)
- 
-    def collect_vars(text: str) -> tuple[set, set]:
-        """Return (declared, used) variable names."""
-        declared = set(RE_VAR_DECL.findall(text))
-        used = set(RE_VAR_USE.findall(text))
-        return declared, used
- 
-    # ──────────────────────────────────────────
-    # Lint rules
-    # ──────────────────────────────────────────
- 
-    def lint_css(path: Path, report: Report, root: Path):
-        rel = str(path.relative_to(root))
-        text = path.read_text()
-        lines = text.splitlines()
- 
-        # ── @property discovery ──
-        props = parse_properties(text, rel)
-        report.properties.extend(props)
- 
-        # ── layer discovery ──
-        order = parse_layer_order(text)
-        if order:
-            if report.layers_declared:
-                report.issues.append(Issue(rel, 1, "warn", "multiple @layer order statements found"))
-            report.layers_declared.extend(order)
- 
-        for layer_name in parse_layer_blocks(text):
-            report.layers_used[layer_name].append(rel)
- 
-        # ── variable tracking ──
-        declared, used = collect_vars(text)
-        for v in declared | used:
-            report.var_usage[classify_var(v)].add(v)
- 
-        # ── line-by-line rules ──
-        for i, ln in enumerate(lines, 1):
-            # knob without fallback
-            if re.search(r'var\(--_[\w-]+\)(?!.*,)', ln):
-                report.issues.append(Issue(rel, i, "warn", "private knob with no fallback"))
- 
-            # raw hex color
-            if re.search(r'(?<!-)#[0-9a-fA-F]{3,8}\b', ln):
-                report.issues.append(Issue(rel, i, "warn", "raw hex color — use token?"))
- 
-            # px unit
-            if re.search(r'\b\d+px\b', ln) and '--cfg' not in ln:
-                report.issues.append(Issue(rel, i, "warn", "px unit — intentional?"))
- 
-            # timing without motion multiplier
-            if re.search(r'transition.*\d+(\.\d+)?s', ln) and '--cfg-motion' not in ln:
-                report.issues.append(Issue(rel, i, "error", "timing without --cfg-motion multiplier"))
- 
-        # ── @property not in root file ──
-        if props and not any(rel.endswith(f) for f in ("index.css", "config.css", "props.css", "engine.css")):
-            for prop in props:
-                report.issues.append(Issue(rel, prop.line, "error",
-                    f"@property {prop.name} declared outside root — move to config"))
- 
-    # ──────────────────────────────────────────
-    # Reporters
-    # ──────────────────────────────────────────
- 
-    BOLD  = "\033[1m"
-    DIM   = "\033[2m"
-    RESET = "\033[0m"
-    RED   = "\033[31m"
-    YEL   = "\033[33m"
-    CYN   = "\033[36m"
-    GRN   = "\033[32m"
- 
-    def print_header(title: str):
-        print(f"\n{BOLD}{'─' * 60}")
-        print(f"  {title}")
-        print(f"{'─' * 60}{RESET}\n")
- 
-    def print_convention_table():
-        print_header("VARIABLE CONVENTIONS")
-        rows = [
-            ("--cfg-*",    "Core calc params. Set once."),
-            ("data-ui-*",  "User prefs. HTML attributes."),
-            ("--*",        "Public. Set freely. Core eats."),
-            ("--_*",       "Private. Don't touch. Ever."),
-        ]
-        print(f"  {'PREFIX':<14} RULE")
-        print(f"  {'─' * 14} {'─' * 40}")
-        for prefix, rule in rows:
-            print(f"  {CYN}{prefix:<14}{RESET} {rule}")
-        print()
- 
-    def print_property_registry(report: Report):
-        print_header("@PROPERTY REGISTRY")
-        if not report.properties:
-            print(f"  {DIM}(none found){RESET}")
-            return
- 
-        # group by prefix
-        groups = defaultdict(list)
-        for p in sorted(report.properties, key=lambda p: p.name):
-            if p.name.startswith("--cfg-"):   groups["config"].append(p)
-            elif p.name.startswith("--_"):    groups["private"].append(p)
-            else:                             groups["public"].append(p)
- 
-        for label, props in [("public", groups.get("public", [])),
-                             ("config", groups.get("config", [])),
-                             ("private", groups.get("private", []))]:
-            if not props:
-                continue
-            print(f"  {DIM}/* {label} */{RESET}")
-            for p in props:
-                inh = "inherit" if p.inherits else "local "
-                print(f"  {CYN}{p.name:<22}{RESET} {DIM}{p.syntax:<12} {inh}  = {p.initial}{RESET}")
-                print(f"  {' ' * 22} {DIM}└─ {p.file}:{p.line}{RESET}")
-            print()
- 
-    def print_layer_summary(report: Report):
-        print_header("LAYER SUMMARY")
-        if not report.layers_declared:
-            print(f"  {DIM}(no @layer order statement found){RESET}")
-            return
- 
-        print(f"  {DIM}Declared order:{RESET}")
-        for i, layer in enumerate(report.layers_declared):
-            files = report.layers_used.get(layer, [])
-            status = f"{GRN}✓{RESET}" if files else f"{RED}✗ unused{RESET}"
-            print(f"  {i + 1:>3}. {CYN}{layer:<28}{RESET} {status}")
-            for f in files:
-                print(f"       {DIM}└─ {f}{RESET}")
-        print()
- 
-        # layers used but not in the order statement
-        declared_set = set(report.layers_declared)
-        undeclared = {k: v for k, v in report.layers_used.items() if k not in declared_set}
-        if undeclared:
-            print(f"  {RED}Undeclared layers (used but not in @layer order):{RESET}")
-            for layer, files in sorted(undeclared.items()):
-                print(f"  {RED}  ⚠ {layer}{RESET}")
-                for f in files:
-                    print(f"       {DIM}└─ {f}{RESET}")
-                report.issues.append(Issue(files[0], 0, "error",
-                    f"layer '{layer}' used but not in @layer order statement"))
-            print()
- 
-    def print_var_summary(report: Report):
-        print_header("VARIABLE USAGE")
-        for prefix in ("--cfg-*", "--* (public)", "--_* (private)"):
-            names = sorted(report.var_usage.get(prefix, set()))
-            print(f"  {CYN}{prefix:<18}{RESET} {len(names)} variables")
-            if len(names) <= 12:
-                for n in names:
-                    print(f"    {DIM}{n}{RESET}")
-            else:
-                for n in names[:5]:
-                    print(f"    {DIM}{n}{RESET}")
-                print(f"    {DIM}... and {len(names) - 5} more{RESET}")
-            print()
- 
-    def print_issues(report: Report, root: Path):
-        print_header("ISSUES")
-        if not report.issues:
-            print(f"  {GRN}No issues found ✓{RESET}\n")
-            return
- 
-        # group by file
-        by_file = defaultdict(list)
-        for iss in report.issues:
-            by_file[iss.file].append(iss)
- 
-        errors = sum(1 for i in report.issues if i.level == "error")
-        warns  = sum(1 for i in report.issues if i.level == "warn")
- 
-        for file, issues in sorted(by_file.items()):
-            print(f"  {BOLD}{file}{RESET}")
-            for iss in sorted(issues, key=lambda i: i.line):
-                icon = f"{RED}❌{RESET}" if iss.level == "error" else f"{YEL}⚠️{RESET}"
-                line_str = f":{iss.line}" if iss.line else ""
-                print(f"    {icon} {line_str} {iss.msg}")
-            print()
- 
-        print(f"  {RED}{errors} error{'s' * (errors != 1)}{RESET}, "
-              f"{YEL}{warns} warning{'s' * (warns != 1)}{RESET}\n")
-
-    return (
-        BOLD,
-        RESET,
-        Report,
-        find_root,
-        lint_css,
-        print_convention_table,
-        print_issues,
-        print_layer_summary,
-        print_property_registry,
-        print_var_summary,
-        should_skip,
-    )
-
-
-@app.cell
-def _(
-    BOLD,
-    RESET,
-    Report,
-    find_root,
-    lint_css,
-    print_convention_table,
-    print_issues,
-    print_layer_summary,
-    print_property_registry,
-    print_var_summary,
-    should_skip,
-):
-    def run_css_check(root: Path = None):
-        root = root or find_root()
-        print(f"{BOLD}Project root:{RESET} {root}\n")
- 
-        report = Report()
- 
-        if sys.argv[1:]:
-            paths = [Path(p) for p in sys.argv[1:]]
+    def file_to_disk(fid):
+        meta = get_file_meta(fid)
+        if not meta: return None
+        conn = _db()
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix="_" + meta["name"])
+        if meta["src"] == "files":
+            row = list(conn.execute("SELECT rowid FROM files WHERE id=?", (fid,)))[0][0]
+            blob = conn.blobopen("main", "files", "data", row, False)
+            offset = 0
+            while offset < blob.length():
+                tmp.write(blob.read(min(65536, blob.length() - offset)))
+                offset = tmp.tell()
+            blob.close()
         else:
-            paths = sorted(p for p in root.rglob("*.css") if not should_skip(p, root))
- 
-        print(f"  Scanning {len(paths)} CSS files...\n")
-        for p in paths:
-            lint_css(p, report, root)
- 
-        print_convention_table()
-        print_property_registry(report)
-        print_layer_summary(report)
-        print_var_summary(report)
-        print_issues(report, root)
- 
-        return report
- 
+            for chunk in conn.execute("SELECT data FROM upload_chunks WHERE uid=? ORDER BY offset", (fid,)):
+                tmp.write(chunk[0])
+        tmp.close()
+        meta["path"] = tmp.name
+        return meta
 
-    return (run_css_check,)
+    # ── App ───────────────────────────────────────────────────────
+
+    app = create_app()
+    relay = create_relay()
+    NAMES = ["Fox", "Owl", "Bear", "Wolf", "Hawk"]
+
+    @app.before
+    async def inject_user(req):
+        user = req["cookies"].get("user")
+        if not user:
+            user = secrets.choice(NAMES) + str(secrets.randbelow(100))
+            req["set_cookie"] = ("user", user)
+        req["user"] = user
+
+    def render_messages():
+        msgs = load_msgs()
+        items = []
+        for m in msgs:
+            if m["text"].startswith("[file:"):
+                parts = m["text"][6:-1].split(":", 1)
+                fid, fname = parts[0], parts[1] if len(parts) > 1 else "file"
+                meta = get_file_meta(fid)
+                mime = meta["mime"] if meta else ""
+                if mime.startswith("image/"): content = Img(src=f"/file/{fid}", style="max-width:300px;border-radius:0.5rem")
+                elif mime.startswith("video/"): content = Video(Source(src=f"/file/{fid}", type=mime), controls=True, style="max-width:300px")
+                else: content = A(fname, href=f"/file/{fid}", download=fname, target="_blank", style="color:#4af")
+            else: content = Span(m["text"])
+            items.append(Div(
+                Span(m["user"], style="font-weight:bold"), " ", content,
+                Span(f" · {m['sent']} · {m['ago']}", style="color:#666;font-size:0.8em")))
+        return Div(*items, id="chat")
+
+    # ── JS ────────────────────────────────────────────────────────
+
+    CHUNK_JS = """
+    function uint8ToB64(bytes) {
+        const chunks = [];
+        for (let i = 0; i < bytes.length; i += 8192) chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 8192)));
+        return btoa(chunks.join(''));
+    }
+    async function uploadFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const prog = document.getElementById('upload-progress');
+        if (file.size < %d) {
+            prog.textContent = 'Uploading...';
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const b64 = reader.result.split(',')[1];
+                await fetch('/upload/small', {method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({fileName:file.name, fileType:file.type, fileData:b64})});
+                prog.textContent = 'Done!';
+                input.value = '';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            const CHUNK = 1 * 1024 * 1024;
+            const res = await fetch('/upload/init', {method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({datastar:{fileName:file.name, fileType:file.type, fileSize:file.size}})});
+            const {uploadId: uid} = await res.json();
+            if (!uid) return;
+            let offset = 0;
+            while (offset < file.size) {
+                try {
+                    const slice = file.slice(offset, offset + CHUNK);
+                    const buf = await slice.arrayBuffer();
+                    const b64 = uint8ToB64(new Uint8Array(buf));
+                    await fetch('/upload/chunk/'+uid+'?offset='+offset, {method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body: JSON.stringify({datastar:{chunk:b64}})});
+                    offset += slice.size;
+                    prog.textContent = Math.round(offset/file.size*100)+'%%';
+                } catch(e) {
+                    prog.textContent = 'Resuming...';
+                    await new Promise(r => setTimeout(r, 2000));
+                    try {
+                        const sr = await fetch('/upload/status/'+uid);
+                        const st = await sr.json();
+                        offset = st.uploadOffset || offset;
+                    } catch(e2) { await new Promise(r => setTimeout(r, 3000)); }
+                }
+            }
+            prog.textContent = 'Done!';
+            input.value = '';
+        }
+    }
+    """ % CHUNK_THRESHOLD
+
+    # ── Routes ────────────────────────────────────────────────────
+
+    @app.get("/")
+    async def home(req):
+        user = req["user"]
+        return to_html(Html(
+            Head(Script(type="module", src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.8/bundles/datastar.js"),
+                Script(ME_CSS), Script(CHUNK_JS)),
+            Body(
+                Style("""
+                me {height:60vh; display: grid; grid-template-rows: auto 1fr auto;}
+                me > main {scrollbar-gutter: stable; overflow-y:auto; display: flex; flex-direction: column-reverse;}
+                """),
+                Header(H2("Mini Chat"), P(f"You are: {user}")),
+                Main(Div(id="chat", **{"data-init": "@get('/stream')"})),
+                Footer(
+                    Input(id="inp", placeholder="Type a message...", **{"data-bind:text": ""}),
+                    Button({"data-on:click": "@post('/send')"}, "Send"),
+                    Button({"data-on:click": "@post('/clear')"}, "Clear"),
+                    Input(type="file", onchange="uploadFile(this)"),
+                    Span(id="upload-progress")))))
+
+    @app.get("/stream")
+    async def stream(req):
+        user = req["user"]
+        yield patch_elements(render_messages())
+        try:
+            async for topic, data in relay.subscribe("chat.*"):
+                yield patch_elements(render_messages())
+        finally: pass
+
+    @app.post("/send")
+    async def send_msg(req):
+        user = req["user"]
+        raw = await body(req)
+        text = json.loads(raw).get("datastar", json.loads(raw)).get("text", "").strip()
+        if not text: return None
+        save_msg(secrets.token_urlsafe(8), user, text, time.time())
+        relay.publish("chat.message", user)
+        return None
+
+    @app.post("/clear")
+    async def clear_chat(req):
+        conn = _db()
+        conn.execute("DELETE FROM messages")
+        conn.execute("DELETE FROM files")
+        conn.execute("DELETE FROM uploads")
+        conn.execute("DELETE FROM upload_chunks")
+        relay.publish("chat.clear", req["user"])
+        return None
+
+    @app.post("/upload/small")
+    async def upload_small(req):
+        raw = await body(req, max_size=CHUNK_THRESHOLD * 2)
+        s = json.loads(raw)
+        fdata = base64.b64decode(s.get("fileData", ""))
+        if not fdata: return None
+        fid = secrets.token_urlsafe(12)
+        save_file(fid, s.get("fileName", "file"), s.get("fileType", "application/octet-stream"), fdata, time.time())
+        save_msg(secrets.token_urlsafe(8), req["user"], f"[file:{fid}:{s.get('fileName','file')}]", time.time())
+        relay.publish("chat.file", req["user"])
+        return None
+
+    @app.post("/upload/init")
+    async def upload_init(req):
+        raw = await body(req)
+        s = json.loads(raw).get("datastar", json.loads(raw))
+        name, mime, size = s.get("fileName", "file"), s.get("fileType", "application/octet-stream"), int(s.get("fileSize", 0))
+        if size <= 0: return None
+        uid = secrets.token_urlsafe(12)
+        _db().execute("INSERT INTO uploads(id,name,mime,size,received,ts,user,done) VALUES (?,?,?,?,0,?,?,0)", (uid, name, mime, size, time.time(), req["user"]))
+        return dict(uploadId=uid)
+
+    @app.post("/upload/chunk/{uid}")
+    async def upload_chunk(req):
+        uid = req["params"]["uid"]
+        offset = int(req["query"].get("offset", 0))
+        raw = await body(req, max_size=8*1024*1024)
+        chunk = base64.b64decode(json.loads(raw).get("datastar", json.loads(raw)).get("chunk", ""))
+        if not chunk: return None
+        conn = _db()
+        r = list(conn.execute("SELECT size FROM uploads WHERE id=? AND done=0", (uid,)))
+        if not r: return None
+        conn.execute("INSERT OR REPLACE INTO upload_chunks VALUES (?,?,?)", (uid, offset, chunk))
+        received = offset + len(chunk)
+        conn.execute("UPDATE uploads SET received=? WHERE id=?", (received, uid))
+        size = r[0][0]
+        if received >= size:
+            conn.execute("UPDATE uploads SET done=1 WHERE id=?", (uid,))
+            name = list(conn.execute("SELECT name FROM uploads WHERE id=?", (uid,)))[0][0]
+            save_msg(secrets.token_urlsafe(8), req["user"], f"[file:{uid}:{name}]", time.time())
+            relay.publish("chat.file", req["user"])
+        return dict(uploadOffset=received)
+
+    @app.get("/upload/status/{uid}")
+    async def upload_status(req):
+        uid = req["params"]["uid"]
+        r = list(_db().execute("SELECT received, size, done FROM uploads WHERE id=?", (uid,)))
+        if not r: return None
+        received, size, done = r[0]
+        return dict(uploadId=uid, uploadOffset=received, uploadSize=size, uploadDone=bool(done))
+
+    @app.get("/file/{fid}")
+    async def serve_file(req):
+        fid = req["params"]["fid"]
+        f = file_to_disk(fid)
+        if not f: return None
+        proto = req["_proto"]
+        proto.response_file(200, [("content-type", f["mime"]), ("content-disposition", f'inline; filename="{f["name"]}"')], f["path"])
+        _delayed_unlink(f["path"])
+        req["_sent"] = True
+
+
+    return app, apsw, serve_background
 
 
 @app.cell
-def _(run_css_check):
-    run_css_check()
+def _(app, serve_background):
+
+    state = serve_background(app, port=8000)
+    input("pause")
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _(apsw):
+
+
+    list(apsw.Connection("/Users/mikedeufel/code/pub/css/chat.db").execute("SELECT id, name, mime, size FROM files"))
+
+
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Export Marimo ui elements
+    ### Ngrok Tunnel
     """)
     return
 
 
 @app.cell
-def _(mo):
-    export_btn   = mo.ui.run_button(label="Export")
-    download_btn = mo.ui.run_button(label="Download CSS")
-    export_path  = mo.ui.text(value="static/style.css", placeholder="output.css")
-    return export_btn, export_path
+def _():
+    from py_sse.ngrok import start_tunnel, stop_tunnel, load_env
 
-
-@app.cell
-def ui_sidebar(
-    export_btn,
-    export_path,
-    extract_lang_blocks,
-    extract_md_blocks,
-    mo,
-    read_file,
-    write_file,
-):
-    _source = read_file()
-    _css_content = "\n".join(extract_lang_blocks(extract_md_blocks(_source), "css"))
-
-    _DEFAULT_CSS_PATH = "output.css"
-    _resolved_path = export_path.value.strip() or _DEFAULT_CSS_PATH
-
-    if export_btn.value:
-        write_file([_css_content], _resolved_path)
-        _msg = mo.md(f"✅ CSS exported to `{_resolved_path}`")
-    else:
-        _msg = mo.md("")
-
-    _export_ui = mo.hstack([export_path, export_btn])
-    _download_ui = mo.download(
-        data=_css_content.encode(),
-        filename=Path(_resolved_path).name,
-        mimetype="text/css",
-        label="Download CSS"
-    )
-
-    ui_footer = mo.vstack([_msg, _export_ui, _download_ui], justify="end")
-
-    sidebar = mo.sidebar(
-        mo.vstack([
-            mo.outline(label="Table of contents"),
-            mo.Html("<div style='flex: 1'></div>"),
-            ui_footer,
-        ])
-    )
-    return (sidebar,)
+    return
 
 
 @app.cell
 def _():
+
+    # load_env()
+
+    # state  = serve_background(app, port=8000)
+    # tunnel = start_tunnel(8000)
+    # print(tunnel.url)
+
+    # input("pause")
+
+    # stop_tunnel(tunnel)
+    # stop_background(state)
     return
 
 
