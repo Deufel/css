@@ -1,24 +1,26 @@
 @PROPERTIES
-  --_bg                  <color>      inherit  = oklch(87% 0.015 220)  .tmp_a_css.css:30
-  --_c                   <number>     inherit  = 0.015  .tmp_a_css.css:29
-  --_even                <integer>    inherit  = 0  .tmp_a_css.css:31
-  --_l                   <percentage> inherit  = 87%  .tmp_a_css.css:28
-  --_odd                 <integer>    inherit  = 0  .tmp_a_css.css:32
-  --_parity              <integer>    inherit  = 0  .tmp_a_css.css:33
-  --cfg-color-chroma     <number>     inherit  = 0.14  .tmp_a_css.css:24
-  --cfg-color-l          <percentage> inherit  = 68%  .tmp_a_css.css:25
-  --cfg-dark             <number>     inherit  = 0  .tmp_a_css.css:22
-  --cfg-motion           <number>     inherit  = 1  .tmp_a_css.css:12
-  --cfg-radius           <length>     inherit  = 6px  .tmp_a_css.css:26
-  --cfg-surf-chroma      <number>     inherit  = 0.015  .tmp_a_css.css:23
-  --cfg-type-scale       <number>     inherit  = 1  .tmp_a_css.css:13
-  --chroma-shift         <number>     inherit  = 0  .tmp_a_css.css:17
-  --contrast             <number>     inherit  = 9  .tmp_a_css.css:20
-  --depth                <number>     inherit  = 0  .tmp_a_css.css:19
-  --hue                  <number>     inherit  = 220  .tmp_a_css.css:15
-  --hue-shift            <number>     inherit  = 0  .tmp_a_css.css:16
-  --l-shift              <number>     inherit  = 0  .tmp_a_css.css:18
-  --type                 <number>     local  = 0  .tmp_a_css.css:11
+  --_bg                  <color>      inherit  = oklch(87% 0.015 220)  notebooks/static/style.css:29
+  --_c                   <number>     inherit  = 0.015  notebooks/static/style.css:28
+  --_even                <integer>    inherit  = 0  notebooks/static/style.css:30
+  --_l                   <percentage> inherit  = 87%  notebooks/static/style.css:27
+  --_odd                 <integer>    inherit  = 0  notebooks/static/style.css:31
+  --_parity              <integer>    inherit  = 0  notebooks/static/style.css:32
+  --cfg-color-chroma     <number>     inherit  = 0.14  notebooks/static/style.css:15
+  --cfg-color-l          <percentage> inherit  = 68%  notebooks/static/style.css:16
+  --cfg-dark             <number>     inherit  = 0  notebooks/static/style.css:13
+  --cfg-motion           <number>     inherit  = 1  notebooks/static/style.css:37
+  --cfg-radius           <length>     inherit  = 0.5rem  notebooks/static/style.css:17
+  --cfg-space-scale      <number>     inherit  = 1  notebooks/static/style.css:39
+  --cfg-surf-chroma      <number>     inherit  = 0.015  notebooks/static/style.css:14
+  --cfg-type-scale       <number>     inherit  = 1  notebooks/static/style.css:38
+  --chroma-scale         <number>     inherit  = 1  notebooks/static/style.css:22
+  --contrast             <number>     inherit  = 9  notebooks/static/style.css:18
+  --depth                <number>     inherit  = 0  notebooks/static/style.css:24
+  --hue                  <number>     inherit  = 220  notebooks/static/style.css:12
+  --hue-shift            <number>     inherit  = 0  notebooks/static/style.css:21
+  --l-shift              <number>     inherit  = 0  notebooks/static/style.css:23
+  --space                <number>     local  = 0  notebooks/static/style.css:36
+  --type                 <number>     local  = 0  notebooks/static/style.css:35
 
 LAYERS
     1. reset.fix                    ✓
@@ -32,14 +34,15 @@ LAYERS
     9. layout.composition           ✓
    10. component.complex            ✓
    11. component.simple             ✓
-   12. component.utls               ✓
+   12. component.utls               ✗
    13. utility.layout               ✓
    14. utility.exceptions           ✓
    15. utility.important            ✓
 
 VARIABLES
-  declared: 41  referenced: 53
-  unreferenced: --_parity, --_s, --isLTR
+  declared: 43  referenced: 49
+  unreferenced: --_if-you-need-a-local-var, --_parity, --_s, --_user-dark
 
 ISSUES
-  none
+  [WRN] :0 layer 'component.utls' declared but unused
+  [ERR] notebooks/static/style.css:0 layer 'component.utils' used but not declared

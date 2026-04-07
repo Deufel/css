@@ -1,5 +1,5 @@
 [project]
-name = "css"
+name = "css_builder"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -7,27 +7,35 @@ authors = [
     { name = "Deufel", email = "MDeufel13@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = [
-    "apsw>=3.51.3.0",
-    "marimo-css>=0.1.1",
-    "py-sse>=0.1.0",
-]
+dependencies = []
 
 classifiers = ["Private :: Do Not Upload"]
 
 [tool.uv]
 default-groups = ["dev", "mike"]
 
-[build-system]
-requires = ["uv_build>=0.9.18,<0.10.0"]
-build-backend = "uv_build"
+
 
 [dependency-groups]
 dev = [
+    "apsw>=3.51.3.0",
     "marimo>=0.21.1",
     "ngrok>=1.7.0",
 ]
 mike = [
+    "marimo-css>=0.1.1",
+    "py-sse>=0.1.0",
     "html-tags>=0.0.7",
     "marimo-dev>=0.3.1",
 ]
+
+[tool.marimo-dev]
+  nbs = "notebooks"                            # default
+  out = "app"                                  # default
+  docs = "docs"                                # default
+  skip_prefixes = ["XX_", "test_"]             # default
+  application = "server:app:py_sse.serve"      # optional, enables __main__.py
+
+[tool.marimo-dev.renames]
+  internal_ = "_"                              # internal_foo → _foo (private)
+  dunder_   = "__"                             # dunder_init  → __init__
