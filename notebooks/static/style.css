@@ -1,126 +1,3 @@
-    /* ══════════════════════════════════════════════════════════════════════════
-       colorNtype.css
-       ──────────────────────────────────────────────────────────────────────────
-
-       PUBLIC API — the only custom properties a consumer sets inline:
-         --type          typographic scale step          style="--type: 2"
-         --space         spacing scale step              style="--space: 1"
-         --contrast      text-to-background prominence   style="--contrast: 0.7"
-
-       CONFIG — @property initial-values are the defaults. Override on :root
-                or via [data-ui-theme] to change globally.
-
-         --cfg-hue            base hue for the entire palette
-         --cfg-surf-chroma    chroma of neutral surfaces  (recommended: 0.010–0.025)
-         --cfg-color-chroma   chroma of .pri / color roles (recommended: 0.10–0.20)
-         --cfg-color-l        lightness of .pri in light mode (recommended: 60–72%)
-         --cfg-radius         border radius token
-         --cfg-motion         set to 0 to disable all transitions
-         --cfg-type-scale     global type size multiplier
-         --cfg-space-scale    global space size multiplier
-         --cfg-page-gap       spacing between app shell regions
-
-       SURFACE ENGINE — perceptual step curve
-         --cfg-top-l          lightest surface anchor, depth-0 (recommended: 88–93%)
-         --cfg-base-step      base lightness step per depth (recommended: 3–6%)
-         --cfg-curve-k        curve steepness (0 = linear, recommended: 0.4–1.0)
-         --cfg-surf-mid       midpoint for t normalisation — set automatically
-                              from (top-l + floor-l) / 2; only override if you
-                              know what you are doing.
-
-       INTERNAL — computed intermediaries, never set by consumers:
-         --_color-l/c/h       override channels (guaranteed-invalid by default)
-         --_l, --_c, --_h     resolved per-element
-         --_bg                computed background color
-         --_depth             surface depth 0–4 (0 = brightest / topmost)
-         --_l-shift           transient lightness nudge for hover / active
-
-       CLASSES
-         Layout:  .stack .row .split .cluster .grid .flank .flank-end
-                  .surface .span .wrap .nowrap
-         Color:   .pri .sec
-
-       THEME ATTRIBUTES
-         data-ui-theme="light"   force light mode
-         data-ui-theme="dark"    force dark mode
-         (falls back to prefers-color-scheme when absent)
-
-    ══════════════════════════════════════════════════════════════════════════ */
-
-
-    /* ══════════════════════════════════════════════════════════════════════════
-       @property — single source of truth for all defaults
-       ──────────────────────────────────────────────────────────────────────────
-       Every --cfg-* value here IS the default for light mode.
-       Dark mode overrides live in the media query and [data-ui-theme] below.
-    ══════════════════════════════════════════════════════════════════════════ */
-    
-    /* ══════════════════════════════════════════════════════════════════════════
-       colorNtype.css
-       ──────────────────────────────────────────────────────────────────────────
-
-       PUBLIC API — the only custom properties a consumer sets inline:
-         --type          typographic scale step          style="--type: 2"
-         --space         spacing scale step              style="--space: 1"
-         --contrast      text-to-background prominence   style="--contrast: 0.7"
-
-       CONFIG — @property initial-values are the defaults. Override on :root
-                or via [data-ui-theme] to change globally.
-
-         --cfg-hue            base hue for the entire palette
-         --cfg-surf-chroma    chroma of neutral surfaces  (recommended: 0.010–0.025)
-         --cfg-color-chroma   chroma of .pri / color roles (recommended: 0.10–0.20)
-         --cfg-color-l        lightness of .pri in light mode (recommended: 60–72%)
-         --cfg-radius         border radius token
-         --cfg-motion         set to 0 to disable all transitions
-         --cfg-type-scale     global type size multiplier
-         --cfg-space-scale    global space size multiplier
-         --cfg-page-gap       spacing between app shell regions
-
-       SURFACE ENGINE — :has() depth counting + perceptual curve
-         --cfg-top-l          brightest surface lightness (leaf/innermost)
-                              recommended: 88–93% light · 30–36% dark
-         --cfg-base-step      base lightness step per depth level
-                              recommended: 3–6% light · 2–3% dark  (min 5% for visibility)
-         --cfg-curve-k        curve steepness — 0 = flat linear steps
-                              recommended: 0.4–1.0
-         --cfg-surf-mid       normalisation midpoint (top-l + dark-anchor) / 2
-                              default 60.5. only change if you shift both anchors.
-         --cfg-surf-rng       normalisation range top-l − dark-anchor
-                              default 55. same caveat as surf-mid.
-
-       The chain --_l0 → --_l4 is computed on :root and inherited everywhere.
-       .surface uses :has(.surface) selectors to count nesting depth and pick
-       the correct lightness. Leaf surfaces (no .surface children) always get
-       --_l0 — the brightest value — regardless of which branch they live in.
-
-       INTERNAL — computed intermediaries, never set by consumers:
-         --_l0 → --_l4       pre-computed surface lightness chain (unitless)
-         --_color-l/c/h       override channels (guaranteed-invalid by default)
-         --_l, --_c, --_h     resolved per-element
-         --_bg                computed background color
-         --_l-shift           transient lightness nudge for hover / active
-
-       CLASSES
-         Layout:  .stack .row .split .cluster .grid .flank .flank-end
-                  .surface .span .wrap .nowrap
-         Color:   .pri .sec
-
-       THEME ATTRIBUTES
-         data-ui-theme="light"   force light mode
-         data-ui-theme="dark"    force dark mode
-         (falls back to prefers-color-scheme when absent)
-
-    ══════════════════════════════════════════════════════════════════════════ */
-
-
-    /* ══════════════════════════════════════════════════════════════════════════
-       @property — single source of truth for all defaults
-       ──────────────────────────────────────────────────────────────────────────
-       Every --cfg-* value here IS the default for light mode.
-       Dark mode overrides live in the media query and [data-ui-theme] below.
-    ══════════════════════════════════════════════════════════════════════════ */
-
     /* ── Config ── */
     @property --cfg-hue            { syntax: "<number>";     inherits: true;  initial-value: 220; }
     @property --cfg-surf-chroma    { syntax: "<number>";     inherits: true;  initial-value: 0.018; }
@@ -137,23 +14,7 @@
     @property --cfg-space-min-ratio{ syntax: "<number>";     inherits: true;  initial-value: 1.5; }
     @property --cfg-space-max-ratio{ syntax: "<number>";     inherits: true;  initial-value: 1.6; }
 
-    /* ── Surface curve config ──
-       --cfg-top-l    : lightness of the brightest surface (leaf / innermost)
-                        recommended: 88–93% light, 30–36% dark
-       --cfg-base-step: base lightness step between surface depths
-                        recommended: 3–6% light, 2–3% dark
-       --cfg-curve-k  : curve steepness — 0 = linear, higher = bigger steps
-                        near the lightness extremes. recommended: 0.4–1.0
-       --cfg-surf-mid : normalisation midpoint = (top-l + dark-anchor) / 2
-                        default 60.5 = (88 + 33) / 2. only change if you
-                        significantly shift both anchors.
-       --cfg-surf-rng : normalisation range = top-l - dark-anchor
-                        default 55 = 88 - 33. same caveat as surf-mid.
-
-       The curve chain --_l0 → --_l4 is pre-computed on :root and inherited.
-       .surface selectors read these via :has() — no counter, no container
-       queries needed.
-       ── */
+    /* ── Config color surfaces── */
     @property --cfg-top-l          { syntax: "<number>";     inherits: true;  initial-value: 88; }
     @property --cfg-base-step      { syntax: "<number>";     inherits: true;  initial-value: 4; }
     @property --cfg-curve-k        { syntax: "<number>";     inherits: true;  initial-value: 0.6; }
@@ -182,80 +43,41 @@
     @property --_l-shift           { syntax: "<number>";  inherits: true; initial-value: 0; }
 
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       :root — values that require rem, calc with rem, or media queries
-    ══════════════════════════════════════════════════════════════════════════ */
     :root {
-        /* ── Light mode surface curve ──
-           top-l  = 88%  → brightest surface (leaf nodes / innermost cards)
-           dark anchor ≈ 33% → used only for mid/rng normalisation
-           mid    = (88 + 33) / 2 = 60.5
-           rng    = 88 - 33       = 55
 
-           Pre-computed chain (unitless — multiply by 1% when used as lightness):
-             _l0 = top-l = 88          ← leaf / brightest
-             _l1 = _l0 − step(_l0)    ← one nesting level up
-             _l2 = _l1 − step(_l1)    ← two levels
-             _l3 = _l2 − step(_l2)    ← three levels
-             _l4 = _l3 − step(_l3)    ← four levels / darkest shell
+        /* Light mode defaults — dark overrides applied by @media */
+        --cfg-top-l:     88;
+        --cfg-base-step:  4;
+        --cfg-curve-k:    0.6;
+        --cfg-surf-mid:  60.5;   /* (88 + 33) / 2 */
+        --cfg-surf-rng:  55;     /* 88 - 33 */
 
-           where step(l) = base-step × (1 + k × ((l − mid) / rng)²)
 
-           Light defaults:  top=88, base=4, k=0.6  → steps ≈ 4.7, 4.5, 4.3, 4.1
-           Dark  defaults:  top=33, base=2.5, k=0.6 → steps ≈ 2.6, 2.7, 2.8, 2.9
-        ── */
-        --cfg-top-l:    88;
-        --cfg-base-step: 4;
-        --cfg-curve-k:   0.6;
-        --cfg-surf-mid: 60.5;
-        --cfg-surf-rng: 55;
 
-        /* chain — each --_tN is the normalised t value at that lightness */
-        --_l0: var(--cfg-top-l);
-        --_t0: calc((var(--_l0) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
-        --_l1: calc(var(--_l0) - var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t0) * var(--_t0)));
-        --_t1: calc((var(--_l1) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
-        --_l2: calc(var(--_l1) - var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t1) * var(--_t1)));
-        --_t2: calc((var(--_l2) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
-        --_l3: calc(var(--_l2) - var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t2) * var(--_t2)));
-        --_t3: calc((var(--_l3) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
-        --_l4: calc(var(--_l3) - var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t3) * var(--_t3)));
 
-        /* ── Fluid type & space ── */
-        --cfg-fluid-min-vp:  22.5rem;
-        --cfg-fluid-max-vp:  77.5rem;
-        --cfg-type-min:      1.0625rem;
-        --cfg-type-max:      1.1875rem;
-        --cfg-space-min:     0.5rem;
-        --cfg-space-max:     0.625rem;
 
-        /* ── Font stacks ── */
-        --font-heading: 'Josefin Slab', Cambria, serif;
-        --font-body:    Inter, system-ui, sans-serif;
-        --font-mono:    "JetBrains Mono", "SF Mono", monospace;
     }
 
-    /* ── Dark mode — prefers-color-scheme ──
-       top-l drops to 33% (brightest dark surface = innermost card)
-       base-step drops to 2.5% (steps are perceptually smaller in dark)
-       surf-chroma drops for visual comfort in low-light environments
-       The chain --_l0→--_l4 is recomputed automatically since it reads
-       --cfg-top-l and --cfg-base-step via calc() inheritance.
-    ── */
+
+    
     @media (prefers-color-scheme: dark) {
-        :root {
+        :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]) {
             --cfg-top-l:       33;
             --cfg-base-step:    2.5;
             --cfg-surf-chroma:  0.010;
+            --cfg-surf-mid:    33.5;
+            --cfg-surf-rng:    27.5;
         }
     }
 
-    /* ── Manual theme overrides ── */
+    /* ── Manual overrides ── */
     [data-ui-theme="light"] {
         --cfg-top-l:       88;
         --cfg-base-step:    4;
         --cfg-curve-k:      0.6;
         --cfg-surf-chroma:  0.018;
+        --cfg-surf-mid:    60.5;
+        --cfg-surf-rng:    55;
     }
 
     [data-ui-theme="dark"] {
@@ -263,15 +85,38 @@
         --cfg-base-step:    2.5;
         --cfg-curve-k:      0.6;
         --cfg-surf-chroma:  0.010;
+        --cfg-surf-mid:    33.5;
+        --cfg-surf-rng:    27.5;
     }
 
+    /* ── [data-ui-theme="system"] — explicit alias for the default behavior ── */
+    @media (prefers-color-scheme: dark) {
+        [data-ui-theme="system"] {
+            --cfg-top-l:       33;
+            --cfg-base-step:    2.5;
+            --cfg-surf-chroma:  0.010;
+            --cfg-surf-mid:    33.5;
+            --cfg-surf-rng:    27.5;
+        }
+    }
+    @media (prefers-color-scheme: light) {
+        [data-ui-theme="system"] {
+            --cfg-top-l:       88;
+            --cfg-base-step:    4;
+            --cfg-surf-chroma:  0.018;
+            --cfg-surf-mid:    60.5;
+            --cfg-surf-rng:    55;
+        }
+    }
+    
     /* ── Reduced motion ── */
     @media (prefers-reduced-motion: reduce) { :root { --cfg-motion: 0; } }
+    
 
-
-    /* ══════════════════════════════════════════════════════════════════════════
-       Layer order
-    ══════════════════════════════════════════════════════════════════════════ */
+    [data-ui-size="sm"] { --cfg-type-scale: 0.875; --cfg-space-scale: 0.875; }
+    [data-ui-size="md"] { --cfg-type-scale: 1;    --cfg-space-scale: 1; }
+    [data-ui-size="lg"] { --cfg-type-scale: 1.25;  --cfg-space-scale: 1.1; }
+    
     @layer reset.fix,
            reset.opinion,
            core.color,
@@ -285,7 +130,7 @@
            utility.layout,
            utility.exceptions,
            utility.important;
-     
+    
     /* ══════════════════════════════════════════════════════════════════════════
        reset.fix — CSS WG mistakes
     ══════════════════════════════════════════════════════════════════════════ */
@@ -326,49 +171,24 @@
     }
 
     
-    /* ══════════════════════════════════════════════════════════════════════════
-       core.color — the color engine
-       ──────────────────────────────────────────────────────────────────────────
-
-       SURFACE MODEL — :has() depth counting
-       ──────────────────────────────────────
-       Every .surface is a leaf by default (brightest, --_l0).
-       A .surface that :has a .surface descendant inside it is a parent
-       and gets stepped darker. The more .surface descendants it contains,
-       the darker it gets — up to 4 levels.
-
-       Example:
-         body.surface                     → :has 3 deep → --_l4 (darkest)
-           main.surface                   → :has 2 deep → --_l3
-             section.surface              → :has 1 deep → --_l2
-               article.surface            → leaf        → --_l0 (brightest)
-           article.surface (sibling)      → leaf        → --_l0 (brightest)
-           aside.surface                  → :has 1 deep → --_l2
-             aside-card.surface           → leaf        → --_l0 (brightest)
-
-       All leaf nodes — regardless of which branch they live in — are
-       always the same brightness. This is the "well" mental model:
-       the outermost shell is darkest, the innermost card is always brightest.
-
-       PERCEPTUAL CURVE FORMULA
-       ────────────────────────
-       t(l)   = (l − cfg-surf-mid) / cfg-surf-rng   [normalised position]
-       step   = cfg-base-step × (1 + cfg-curve-k × t²)
-       l_next = l − step
-
-       The chain --_l0→--_l4 is pre-computed on :root using this formula
-       iteratively. Light and dark modes differ only in cfg-top-l and
-       cfg-base-step — the chain recomputes automatically via calc().
-
-       ESCAPE HATCH
-       ────────────
-       Override depth for a single element without changing its structure:
-         <div class="surface" style="--_color-l: calc(var(--_l2) * 1%)">
-
-    ══════════════════════════════════════════════════════════════════════════ */
     @layer core.color {
 
         :where(*) {
+            /* ── Surface lightness chain — recomputes wherever cfg vars change ──
+               Placing this here (not :root) means [data-ui-theme] attribute
+               changes on any ancestor are picked up correctly, since calc()
+               re-evaluates against the in-scope --cfg-* values at each element.
+            ── */
+            --_l0: var(--cfg-top-l);
+            --_t0: calc((var(--_l0) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
+            --_l1: calc(var(--_l0) - var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t0) * var(--_t0)));
+            --_t1: calc((var(--_l1) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
+            --_l2: calc(var(--_l1) - var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t1) * var(--_t1)));
+            --_t2: calc((var(--_l2) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
+            --_l3: calc(var(--_l2) - var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t2) * var(--_t2)));
+            --_t3: calc((var(--_l3) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
+            --_l4: calc(var(--_l3) - var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t3) * var(--_t3)));
+
             --_l: var(--_color-l, calc(var(--cfg-top-l) * 1%));
             --_c: var(--_color-c, var(--cfg-surf-chroma));
             --_h: var(--_color-h, var(--cfg-hue));
@@ -381,8 +201,11 @@
                 / var(--_a)
             );
 
-            --border:  oklch(from var(--_bg) calc(l - 0.08) var(--cfg-surf-chroma)  h);
-            --Border:  oklch(from var(--_bg) calc(l - 0.08) var(--cfg-color-chroma) h);
+            /* --border:  oklch(from var(--_bg) calc(l - 0.08) var(--cfg-surf-chroma)  h);
+            --Border:  oklch(from var(--_bg) calc(l - 0.08) var(--cfg-color-chroma) h); */
+            --border: oklch(from var(--_bg) calc(l - 0.14) calc(c * 0.7)  h);
+            /* --Border: oklch(from var(--_bg) calc(l - 0.22) calc(c * 1.2)  h); */
+            --Border: oklch(from var(--_bg) calc(l - 0.28) clamp(0.08, calc(c * 1.4), 0.22) calc(h + 8));
 
             background: var(--_bg);
             color: oklch(from var(--_bg)
@@ -395,6 +218,7 @@
            Sets lightness from --cfg-color-l and chroma from --cfg-color-chroma.
            Hue inherits from --cfg-hue (or any ancestor hue override).
         ── */
+
         .pri {
             --_color-l: var(--cfg-color-l);
             --_color-c: var(--cfg-color-chroma);
@@ -427,6 +251,7 @@
             --_color-h: var(--cfg-hue);
         }
     }
+
     
     /* ══════════════════════════════════════════════════════════════════════════
        core.type — fluid typographic scale
@@ -447,6 +272,29 @@
             line-height: calc(1.5 - var(--type) * 0.075);
         }
     }
+
+    /*Locality of Behavior */
+
+    :root {
+        --cfg-type-min:     0.9375rem;
+        --cfg-type-max:     1.0625rem;
+        --cfg-space-min:    0.25rem;
+        --cfg-space-max:    0.5rem;
+        --cfg-fluid-min-vp: 320px;
+        --cfg-fluid-max-vp: 1280px;
+
+        /* ── Font stacks ── */
+        --font-heading: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", P052, serif;
+        --font-body:    Avenir, Montserrat, Corbel, URW Gothic, source-sans-pro, sans-serif;
+        --font-mono:    ui-monospace, "SF Mono", Monaco, Menlo, Consolas, monospace;
+        --font-kbd:     "Courier New", "Nimbus Mono PS", monospace;
+
+        [data-ui-size="sm"] { --cfg-type-scale: 0.875; --cfg-space-scale: 0.875; }
+        [data-ui-size="md"] { --cfg-type-scale: 1;    --cfg-space-scale: 1; }
+        [data-ui-size="lg"] { --cfg-type-scale: 1.25;  --cfg-space-scale: 1.1; }
+    }
+
+
     
     /* ══════════════════════════════════════════════════════════════════════════
        core.spacing — fluid spacing scale
@@ -533,13 +381,10 @@
        component.base — default HTML element styling
     ══════════════════════════════════════════════════════════════════════════ */
     @layer component.base {
-        body       { font-family: var(--font-body);    --contrast: 0.85; }
-        h1         { --type: 2.5;  --contrast: 1;    font-family: var(--font-heading); font-weight: 400; }
-        h2         { --type: 1.5;  --contrast: 0.95; font-family: var(--font-heading); font-weight: 400; }
-        h3         { --type: 0.8;  --contrast: 0.9;  font-family: var(--font-heading); font-weight: 500; }
-        h4         { --type: 0.4;  --contrast: 0.88; font-family: var(--font-heading); font-weight: 600; }
-        h5         { --type: 0.2;  --contrast: 0.85; font-family: var(--font-heading); font-weight: 600; }
-        h6         { --type: 0;    --contrast: 0.82; font-family: var(--font-heading); font-weight: 700; }
+        h1         { --type: 4;  --contrast: 1;    font-family: var(--font-heading); font-weight: 400; }
+        h2         { --type: 3;  --contrast: 0.95; font-family: var(--font-heading); font-weight: 400; }
+        h3         { --type: 2;  --contrast: 0.9;  font-family: var(--font-heading); font-weight: 500; }
+        h4         { --type: 1;  --contrast: 0.88; font-family: var(--font-heading); font-weight: 600; }
         p          { font-family: var(--font-body);    --contrast: 0.85; }
         small      { --type: -1.5; --contrast: 0.6;  font-family: var(--font-body); text-transform: uppercase; }
         code       { --type: -0.5; --contrast: 0.8;  font-family: var(--font-mono); }
@@ -557,6 +402,8 @@
         }
 
         :where(hr) { border-color: var(--border); }
+
+
     }
 
 
@@ -596,7 +443,6 @@
         }
 
     }
-
 
 
     

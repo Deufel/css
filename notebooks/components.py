@@ -1,17 +1,18 @@
 import marimo
 
-__generated_with = "0.22.4"
+__generated_with = "0.22.5"
 app = marimo.App(width="full")
 
 with app.setup:
     import os
-    from py_sse import create_app, create_relay, create_signer, start_tunnel, static, stop_background, stop_tunnel, set_cookie, serve_background, serve, signals, ServerState
 
-    from html_tags import pretty, to_html, Html, Head, Body, Style, Link, Meta, Header, Nav, Main, Aside, Footer, Div, H1, H2, H3, P, A, Span, Button, Ul, Li, Dialog, Title, Small, Fragment, Hr, Input, Fieldset, Legend, Label, H5, H4, H6, Code, Section, Strong, Br, Table, Thead, Tbody, Tr, Td, Th, Script, Tag
+    from py_sse.app import create_app, create_relay, create_signer, static, set_cookie, serve, signals
+    from py_sse.mserver import serve_background, stop_background, ServerState
 
-    from html_tags.extras import Datastar, ScopedCSS, Favicon, FontImport
+    from html_tags import pretty, to_html, Html, Head, Body, Style, Link, Meta, Header, Nav, Main, Aside, Footer, Div, H1, H2, H3, P, A, Span, Button, Ul, Li, Dialog, Title, Small, Fragment, Hr, Input, Fieldset, Legend, Label, H5, H4, H6, Code, Section, Strong, Br, Table, Thead, Tbody, Tr, Td, Th, Script, Tag, Kbd
 
-    from py_sse.ngrok import start_tunnel, stop_tunnel
+    from html_tags.extras import Datastar, ScopedCSS, Favicon, FontImport, MeCSS, Pointer
+
 
 
 
@@ -23,9 +24,8 @@ with app.setup:
     relay = create_relay()
     signer = create_signer()
 
+    #coolfont??
     font = FontImport(url="https://fonts.googleapis.com/css2?family=Josefin+Slab:ital,wght@0,100..700;1,100..700&display=swap")
-
-    head = Head(Title("Test Page"),  Datastar(),  ScopedCSS(),  Favicon("🎾"), FontImport(), font, Link(rel="stylesheet", href="./static/style.css") )
 
 
 @app.cell
@@ -42,22 +42,23 @@ def _():
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Navigation
+    """)
+    return
+
+
 @app.cell
 def _():
 
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # Nav
-    # ══════════════════════════════════════════════════════════════════════════
     nav_links = [
-        ("Typography",  "#typography"),
         ("Buttons",     "#buttons"),
-        ("Color Roles", "#color-roles"),
         ("Surface",     "#surface"),
-        ("Spacing",     "#spacing"),
         ("Calendar",    "#calendar"),
         ("Reflow",      "#reflow"),
-        ("Badges",      "#badges"),
         ("Contrast",    "#contrast"),
     ]
 
@@ -69,65 +70,90 @@ def _():
         Small("Tests"),
         *[A(label, href=href) for label, href in nav_links],
     )
+    return (nav,)
 
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # Aside — quick checks + live config controls
-    # ══════════════════════════════════════════════════════════════════════════
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Aside
+    """)
+    return
+
+
+@app.cell
+def _():
     def check_item(title, description):
         return Div(cls="stack", style="--space: 0;")(
             H5(title),
             P(description, style="--contrast: 0.6;"),
         )
 
-    aside = Aside(id="aside", cls="surface stack", style="padding: 1rem; --space: 1; max-width: 180px;")(
-        Small("Quick checks"),
-        check_item("Expect", "Background gets lighter per .surface nesting (light mode) or darker (dark mode)"),
-        Hr(),
-        check_item("Expect", "Text color auto-flips dark↔light for readability on any bg"),
-        Hr(),
-        check_item("Expect", "Buttons hover → lighter, active → darker"),
-        Hr(),
-        check_item("Expect", "Calendar day cells visually distinct from month bg from outer bg"),
-        Hr(),
-        check_item("Expect", "Reflow cards: each subtree has its own complete color world"),
-        Hr(),
-        Div(cls="stack", style="--space: -1;")(
-            Small("Status colors"),
-            Span("suc", cls="badge suc"),
-            Span("err", cls="badge err"),
-            Span("wrn", cls="badge wrn"),
-            Span("inf", cls="badge inf"),
-        ),
-    )
+    aside = Aside(id="aside", cls="surface stack", style="padding: 1rem; --space: 1; min-width: 180px;")(
+                Div(cls="surface vh")(Div(cls="surface vh")),
+                H3("Aside"), 
+                Hr(), 
+                Code(data_text="`theme:` + $_theme"),
+                Kbd(data_text=" `size:` + $_size")
+
+                  ) 
+    return (aside,)
 
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # Header
-    # ══════════════════════════════════════════════════════════════════════════
-    header = Header(id="header", cls="surface split", style="padding: 0.75rem 1.5rem;")(
-        Style("me { align-items: center; }"),
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## Header
+    """)
+    return
+
+
+@app.cell
+def _(icon_font, icon_moon):
+    header = Header(id="header", cls="surface split")(
+        Style('''
+        me { padding: 0.25rem; align-items: center; }
+        me > hr { width: stretch; }
+        '''),
         H4("Design System Check"),
-        Div(cls="row", style="--space: -1;")(
-            Small("--cfg-hue: 220"),
-            Small("Public API: --type · --space · --contrast"),
+        Div(cls="row")(
+            A(href="https://github.com/Deufel/css")("github"),
+            Hr(),
+            Button({"data-on:click":"$_theme = ($_theme + 1) % $_themes.length"}, icon_moon, cls="btn"),
+            Button({"data-on:click":"$_size = ($_size  + 1) % $_sizes.length"},  icon_font, cls="btn"),
         ),
     )
+    return (header,)
 
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # Footer
-    # ══════════════════════════════════════════════════════════════════════════
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Footer
+    """)
+    return
+
+
+@app.cell
+def _():
     footer = Footer(id="footer", cls="surface split", style="padding: 0.5rem 1.5rem; align-items: center;")(
         Small("Design System Check", style="--contrast: 0.4;"),
         Small("Classes: layout + color roles · Inline: --type --space --contrast · Components: scoped CSS", style="--contrast: 0.4;"),
     )
+    return (footer,)
 
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # Main — test sections
-    # ══════════════════════════════════════════════════════════════════════════
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Helpers
+    pannel, section
+    """)
+    return
 
+
+@app.cell
+def _():
     # ── Helper: section wrapper ──
     def section(id, label, title, description, *children):
         return Section(id=id, cls="stack", style="--space: 1;")(
@@ -146,30 +172,10 @@ def _():
         return Div(cls=cls, style=f"padding: 1rem; border-radius: var(--cfg-radius); {style}")(*children)
 
 
-    # ── Typography ──
-    sec_typography = section("typography",
-        "test: typography scale",
-        "Typography",
-        "Each heading sets --type in component.base. The fluid engine computes font-size automatically. Resize the viewport to see the scale respond.",
-        panel(
-            Style("me p { --contrast: 0.5; }"),
-            H1("h1 — --type: 2.5"), P("Expect: largest heading, serif, weight 400"), Hr(),
-            H2("h2 — --type: 1.5"), P("Expect: second largest, serif, weight 400"), Hr(),
-            H3("h3 — --type: 0.8"), P("Expect: medium, serif, weight 500"), Hr(),
-            H4("h4 — --type: 0.4"), P("Expect: small heading, serif, weight 600"), Hr(),
-            H5("h5 — --type: 0.2"), P("Expect: near body size, serif, weight 600"), Hr(),
-            H6("h6 — --type: 0"),   P("Expect: body size, serif, weight 700"), Hr(),
-            P("p — --type: 0 (body text)"),
-            Small("small — --type: -1.5, uppercase"),
-            P(Code("code — --type: -0.5, monospace"), style="--type: -0.5;"),
-            style="--space: 0;",
-        ),
-        panel(
-            P('Custom: style="--type: 1.2" — any element, any step. This text is between h3 and h2.', style="--type: 1.2;"),
-        ),
-    )
 
-    return aside, footer, header, nav, panel, sec_typography, section
+
+
+    return panel, section
 
 
 @app.cell(hide_code=True)
@@ -181,121 +187,63 @@ def _(mo):
 
 
 @app.cell
-def _(icon, section):
+def _(icon_cancel, icon_font, icon_moon, icon_save, icon_user_plus, section):
     sec_buttons = section("buttons",
-        "test: btn, btn.pri, btn.sec",
+        "test: btn.pri, btn.sec",
         "Buttons",
-        "The button has no color opinion by default. Color role classes compose onto it. Hover should lighten, active should darken. Disabled drops contrast.",
-        Div(cls="split")(
-            Div(cls="row", style="--cfg-dark:0")(
-                Button("btn pri",  cls="btn pri"), 
-                Button("btn pri",  cls="btn sec"), 
-                Button("btn sec",  cls="btn pri", disabled=1), 
-                Button("btn sec",  cls="btn sec", disabled=1), 
+        "The button has no color opinion by default. Color role classes compose onto it. Hover should lighten, active should darken. Disabled drops contrast & opacity.",
+        Div(cls="grid")(
+             Div(cls="row")(
+                Button("disabled",  cls="btn pri", disabled=True), 
+                Button("at rest",  cls="btn pri "), 
+                Button("hover ",  cls="btn pri hover"), 
+                Button("active",  cls="btn pri active"), 
             ),
-             Div(cls="row", style="--cfg-dark:1")(
-                Button("disabled",  cls="btn sec disabled"), 
+             Div(cls="row")(
+                Button("disabled",  cls="btn sec", disabled=True), 
                 Button("at rest",  cls="btn sec"), 
                 Button("hover ",  cls="btn sec hover"), 
                 Button("active",  cls="btn sec active"), 
             ),
-             Div(cls="row", style="--cfg-dark:1")(
-                Button(cls="btn sec disabled")(icon),
-                Button(cls="btn sec")(icon), 
-                Button(cls="btn sec hover")(icon),  
-                Button(cls="btn sec active")(icon),   
-             )
+             Div(cls="row")(
+                Button(cls="btn sec", disabled=True)(icon_moon),
+                Button(cls="btn sec")(icon_moon), 
+                Button(cls="btn sec hover")(icon_moon),  
+                Button(cls="btn sec active")(icon_moon),   
+             ),
+             Div(cls="row")(
+                Button(cls="btn pri", disabled=True)(icon_moon),
+                Button(cls="btn pri")(icon_moon), 
+                Button(cls="btn pri hover")(icon_moon),  
+                Button(cls="btn pri active")(icon_moon),   
+             ),
+             Div(cls="row")(
+                Button(cls="btn pri")(icon_save),
+                Button(cls="btn pri")(icon_user_plus), 
+                Button(cls="btn sec")(icon_cancel),  
+                Button(cls="btn sec")(icon_font),   
+             ),
         )
     )
-
-
     return (sec_buttons,)
 
 
 @app.cell
 def _():
-    from html_tags import html_to_tag
+    return
 
-    svg_str = '''<svg xmlns="http://www.w3.org/2000/svg" width="stretch" height="stretch" viewBox="0 0 48 48"><circle cx="24.039" cy="23.76" r="21.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M32.611 10.373v8.131l-7.057 4.1l.017-8.163zM15.389 34.977l4-6.928l.59 9.578l4-6.928" stroke-width="2"/></svg>'''
 
-    icon = html_to_tag(svg_str)
-
-    return (icon,)
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Demo
+    ### Calendar
+    """)
+    return
 
 
 @app.cell
-def _(panel, section):
-
-    # ── Color Roles on Divs ──
-    def color_div(name, hue_label):
-        return Div(cls=name, style="padding: 1rem; border-radius: var(--cfg-radius);")(
-            Strong(name), Br(), f"hue: {hue_label}",
-        )
-
-    sec_color_roles = section("color-roles",
-        "test: color role classes on arbitrary elements",
-        "Color Roles on Divs",
-        "Color classes work on any element. Text color auto-computes for contrast. These divs have zero custom CSS — just the class name.",
-        Div(cls="grid", style="--_col: 8rem;")(
-            color_div("pri", "base"),
-            color_div("sec", "+120"),
-            color_div("ter", "+240"),
-            color_div("suc", "145"),
-            color_div("err", "25"),
-            color_div("wrn", "85"),
-            color_div("inf", "250"),
-        ),
-    )
-
-
-    # ── Surface Depth ──
-    sec_surface = section("surface",
-        "test: .surface leapfrog",
-        "Surface Auto-Depth",
-        "Nest .surface elements and the parity system auto-increments depth. No numbers to manage. Each level gets 2.5% lighter (light mode) or darker (dark mode).",
-        panel(
-            P(Strong("Surface 1"), " — first nested .surface"),
-            panel(
-                P(Strong("Surface 2"), " — auto-incremented"),
-                panel(
-                    P(Strong("Surface 3"), " — and again"),
-                    panel(P(Strong("Surface 4"), " — and deeper still")),
-                ),
-            ),
-        ),
-    )
-
-
-    # ── Spacing ──
-    def spacing_demo(space_val, label):
-        return panel(
-            Style("me > .stack > div { padding: 0.5rem 0.75rem; border-radius: var(--cfg-radius); border: 1px dashed var(--border); }"),
-            Small(label),
-            Div(cls="stack")(Div("Item A"), Div("Item B"), Div("Item C")),
-            style=f"--space: {space_val};",
-        )
-
-    sec_spacing = section("spacing",
-        "test: --space on layout classes",
-        "Spacing Scale",
-        "Layout classes consume --space for their gap. Set it on the container and children flow accordingly.",
-        spacing_demo(2, "--space: 2 (wide gaps)"),
-        spacing_demo(-1, "--space: -1 (tight gaps)"),
-    )
-
-
-    # ── Badges ──
-    sec_badges = section("badges",
-        "test: badge + color roles",
-        "Badges",
-        "Same color role classes, different element. Zero extra CSS needed.",
-        Div(cls="row", style="--space: 0;")(
-            *[Span(name, cls=f"badge {name}") for name in ["pri", "sec", "ter", "suc", "err", "wrn", "inf"]]
-        ),
-    )
-
-
-    # ── Calendar ──
+def _():
     DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
     def day_cell(n, today=False):
@@ -313,7 +261,7 @@ def _(panel, section):
             ),
         )
 
-    return month, sec_badges, sec_color_roles, sec_spacing, sec_surface
+    return (month,)
 
 
 @app.cell
@@ -333,19 +281,25 @@ def _(month, section):
                 me .day.today { --_color-l: var(--cfg-color-l); --_color-c: var(--cfg-color-chroma); --contrast: 1; font-weight: 600; }
             """),
             Div(cls="cal-grid")(
-                month("April 2026",  2, 30, today=4),   # Apr 1 = Wednesday (offset 2)
+                month("April 2026",  2, 30, today=7),   # Apr 1 = Wednesday (offset 2)
                 month("May 2026",    4, 31),              # May 1 = Friday (offset 4)
                 month("June 2026",   0, 30),              # Jun 1 = Monday (offset 0)
             ),
         ),
     )
-
     return (sec_calendar,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Color Change
+    """)
+    return
 
 
 @app.cell
 def _(section):
-    # ── Subtree Color Reflow ──
     def reflow_card(hue, label, color_name):
         return Div(style=f"--cfg-hue: {hue};")(
             Style("me { border-radius: var(--cfg-radius); overflow: hidden; border: 1px solid var(--border); }"),
@@ -373,13 +327,19 @@ def _(section):
             reflow_card(60,  "--cfg-hue: 60",  "Amber"),
         ),
     )
-
     return (sec_reflow,)
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### ── Toggle Group (scoped component demo) ──
+    """)
+    return
+
+
 @app.cell
-def _(panel, section):
-    # ── Toggle Group (scoped component demo) ──
+def _(section):
     sec_toggle = section("toggle",
         "test: scoped CSS component — toggle group",
         "Scoped Component: Toggle Group",
@@ -400,9 +360,19 @@ def _(panel, section):
             Button("Month", **{"aria-pressed": "false"}),
         ),
     )
+    return (sec_toggle,)
 
 
-    # ── Contrast Scale ──
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### ── Contrast Scale ──
+    """)
+    return
+
+
+@app.cell
+def _(section):
     sec_contrast = section("contrast",
         "test: --contrast as a continuous dial",
         "Contrast Scale",
@@ -412,9 +382,19 @@ def _(panel, section):
             *[Div(str(v), style=f"--contrast: {v};") for v in [0.1, 0.2, 0.3, 0.5, 0.7, 0.85, 1.0]],
         ),
     )
+    return (sec_contrast,)
 
 
-    # ── Layout Compositions ──
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### ── Layout Compositions ──
+    """)
+    return
+
+
+@app.cell
+def _(panel, section):
     sec_layouts = section("layouts",
         "test: layout classes",
         "Layout Compositions",
@@ -437,9 +417,19 @@ def _(panel, section):
             Div(cls="grid", style="--_col: 8rem;")(*[Div(str(i), cls="demo-box") for i in range(1, 7)]),
         ),
     )
+    return (sec_layouts,)
 
 
-    # ── System Summary ──
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### ── System Summary ──
+    """)
+    return
+
+
+@app.cell
+def _(section):
     sec_summary = section("summary",
         "reference",
         "System Summary",
@@ -463,68 +453,85 @@ def _(panel, section):
             ),
         ),
     )
+    return
 
-    return sec_contrast, sec_layouts, sec_summary, sec_toggle
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Page
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## head
+    """)
+    return
+
+
+@app.cell
+def _():
+    head = Head( 
+        Title("Test Page"),  
+        Datastar(),  
+        MeCSS(), 
+        Pointer(), 
+        Favicon("🤖"), 
+        Link(rel="stylesheet", href="./static/style.css") 
+    )
+    return (head,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Main
+    """)
+    return
 
 
 @app.cell
 def _(
-    aside,
-    btnJs,
-    footer,
-    header,
-    nav,
-    sec_badges,
     sec_buttons,
     sec_calendar,
-    sec_color_roles,
     sec_contrast,
     sec_layouts,
     sec_reflow,
-    sec_spacing,
-    sec_summary,
-    sec_surface,
     sec_toggle,
-    sec_typography,
 ):
-    # ══════════════════════════════════════════════════════════════════════════
-    # Main assembly
-    # ══════════════════════════════════════════════════════════════════════════
-    main = Div(id="main", cls="stack", style="padding: 1.5rem; --space: 3;")(
-        sec_typography,
+    main = Div(id="main", cls="stack", style="padding: 1.5rem; max-width=800px;")(
         sec_buttons,
-        sec_color_roles,
-        sec_surface,
-        sec_spacing,
-        sec_badges,
         sec_calendar,
         sec_reflow,
         sec_toggle,
         sec_contrast,
         sec_layouts,
-        sec_summary,
     )
+    return (main,)
 
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # Body — Datastar bindings for live config
-    # ══════════════════════════════════════════════════════════════════════════
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Body
+    """)
+    return
+
+
+@app.cell
+def _(aside, footer, header, main, nav):
     body = Body(
-        {
-            "data-store": "{"
-                "'hue': 220, "
-                "'dark': 0, "
-                "'surfChroma': 0.015, "
-                "'colorChroma': 0.14, "
-                "'motion': 1"
-            "}",
-            "data-style": "{"
-                "'--cfg-hue': '' + $hue, "
-                "'--cfg-dark': '' + $dark, "
-                "'--cfg-surf-chroma': '' + $surfChroma, "
-                "'--cfg-color-chroma': '' + $colorChroma, "
-                "'--cfg-motion': '' + $motion"
-            "}",
+        {   "data-signals:_theme"     : "0", 
+            "data-signals:_themes"    : "['light', 'dark', null]",
+            "data-attr:data-ui-theme" : "$_themes[$_theme]", 
+
+            "data-signals:_size"      : "1", 
+            "data-signals:_sizes"     : "['sm', 'md', 'lg']", 
+            "data-attr:data-ui-size"  : "$_sizes[$_size]"
+
         },
         cls="app",
     )(
@@ -533,15 +540,30 @@ def _(
         aside,
         main,
         footer,
-        btnJs,
     )
+    return (body,)
 
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # Page
-    # ══════════════════════════════════════════════════════════════════════════
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## page
+    """)
+    return
+
+
+@app.cell
+def _(body, head):
     page = Html(lang="en")(head, body)
     return (page,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Scratch work
+    """)
+    return
 
 
 @app.function
@@ -640,38 +662,42 @@ def _(mo):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Icons
+    """)
+    return
+
+
 @app.cell
 def _():
-    btnJs = Script('''window.btnStates ??= (() => {
-        const slot = cls => {
-            let cur = null
-            return el => { cur?.classList.remove(cls); (cur = el)?.classList.add(cls) }
-        }
+    from html_tags import html_to_tag
 
-        const active = slot('active')
-        const hover  = slot('hover')
-        const B  = e => e.target.closest?.('.btn')
-        const kb = e => e.key === ' ' || e.key === 'Enter'
-        const guard = (el, fn) => el && !el.disabled && fn(el)
+    icon_cancel = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>''')
+    icon_font = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarge-small-icon lucide-a-large-small"><path d="m15 16 2.536-7.328a1.02 1.02 1 0 1 1.928 0L22 16"/><path d="M15.697 14h5.606"/><path d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"/><path d="M3.304 13h6.392"/></svg>''')
+    icon_moon = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon-icon lucide-moon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>''')
+    icon_save = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>''')
+    icon_user_plus = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus-icon lucide-user-plus"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>''')
+    return icon_cancel, icon_font, icon_moon, icon_save, icon_user_plus
 
-        document.addEventListener('pointerdown',   e => guard(B(e), active),           {passive:true})
-        document.addEventListener('pointerup',     () => active(null),                 {passive:true})
-        document.addEventListener('pointercancel', () => active(null),                 {passive:true})
-        document.addEventListener('pointerenter',  e => guard(B(e), hover),            {passive:true, capture:true})
-        document.addEventListener('pointerleave',  e => { hover(null); if(B(e)===document.activeElement?.closest('.btn')) active(null) }, {passive:true, capture:true})
-        document.addEventListener('keydown',       e => kb(e) && guard(document.activeElement?.closest('.btn'), active))
-        document.addEventListener('keyup',         e => kb(e) && active(null))
 
-        const scan = root => root.querySelectorAll?.('.btn')
-            .forEach(el => el.classList.toggle('disabled', !!el.disabled))
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Toolbox
+    """)
+    return
 
-        new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(scan)))
-            .observe(document.body, {childList:true, subtree:true})
 
-        scan(document)
-    })()
-    ''')
-    return (btnJs,)
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _():
+    return
 
 
 @app.cell

@@ -1,48 +1,52 @@
 @PROPERTIES
-  --_bg                  <color>      inherit  = oklch(87% 0.015 220)  notebooks/static/style.css:29
-  --_c                   <number>     inherit  = 0.015  notebooks/static/style.css:28
-  --_even                <integer>    inherit  = 0  notebooks/static/style.css:30
-  --_l                   <percentage> inherit  = 87%  notebooks/static/style.css:27
-  --_odd                 <integer>    inherit  = 0  notebooks/static/style.css:31
-  --_parity              <integer>    inherit  = 0  notebooks/static/style.css:32
-  --cfg-color-chroma     <number>     inherit  = 0.14  notebooks/static/style.css:15
-  --cfg-color-l          <percentage> inherit  = 68%  notebooks/static/style.css:16
-  --cfg-dark             <number>     inherit  = 0  notebooks/static/style.css:13
-  --cfg-motion           <number>     inherit  = 1  notebooks/static/style.css:37
-  --cfg-radius           <length>     inherit  = 0.5rem  notebooks/static/style.css:17
-  --cfg-space-scale      <number>     inherit  = 1  notebooks/static/style.css:39
-  --cfg-surf-chroma      <number>     inherit  = 0.015  notebooks/static/style.css:14
-  --cfg-type-scale       <number>     inherit  = 1  notebooks/static/style.css:38
-  --chroma-scale         <number>     inherit  = 1  notebooks/static/style.css:22
-  --contrast             <number>     inherit  = 9  notebooks/static/style.css:18
-  --depth                <number>     inherit  = 0  notebooks/static/style.css:24
-  --hue                  <number>     inherit  = 220  notebooks/static/style.css:12
-  --hue-shift            <number>     inherit  = 0  notebooks/static/style.css:21
-  --l-shift              <number>     inherit  = 0  notebooks/static/style.css:23
-  --space                <number>     local  = 0  notebooks/static/style.css:36
-  --type                 <number>     local  = 0  notebooks/static/style.css:35
+  --_bg                  <color>      inherit  = oklch(88% 0.018 220)  .tmp_style.css:42
+  --_l-shift             <number>     inherit  = 0  .tmp_style.css:43
+  --_l0                  <number>     inherit  = 88  .tmp_style.css:25
+  --_l1                  <number>     inherit  = 83  .tmp_style.css:26
+  --_l2                  <number>     inherit  = 78  .tmp_style.css:27
+  --_l3                  <number>     inherit  = 73  .tmp_style.css:28
+  --_l4                  <number>     inherit  = 68  .tmp_style.css:29
+  --cfg-base-step        <number>     inherit  = 4  .tmp_style.css:19
+  --cfg-color-alpha      <number>     inherit  = 1  .tmp_style.css:6
+  --cfg-color-chroma     <number>     inherit  = 0.14  .tmp_style.css:4
+  --cfg-color-l          <percentage> inherit  = 68%  .tmp_style.css:5
+  --cfg-curve-k          <number>     inherit  = 0.6  .tmp_style.css:20
+  --cfg-hue              <number>     inherit  = 220  .tmp_style.css:2
+  --cfg-motion           <number>     inherit  = 1  .tmp_style.css:8
+  --cfg-page-gap         <number>     inherit  = 1  .tmp_style.css:11
+  --cfg-radius           <length>     inherit  = 8px  .tmp_style.css:7
+  --cfg-space-max-ratio  <number>     inherit  = 1.6  .tmp_style.css:15
+  --cfg-space-min-ratio  <number>     inherit  = 1.5  .tmp_style.css:14
+  --cfg-space-scale      <number>     inherit  = 1  .tmp_style.css:10
+  --cfg-surf-chroma      <number>     inherit  = 0.018  .tmp_style.css:3
+  --cfg-surf-mid         <number>     inherit  = 60.5  .tmp_style.css:21
+  --cfg-surf-rng         <number>     inherit  = 55  .tmp_style.css:22
+  --cfg-top-l            <number>     inherit  = 88  .tmp_style.css:18
+  --cfg-type-max-ratio   <number>     inherit  = 1.28  .tmp_style.css:13
+  --cfg-type-min-ratio   <number>     inherit  = 1.2  .tmp_style.css:12
+  --cfg-type-scale       <number>     inherit  = 1  .tmp_style.css:9
+  --contrast             <number>     inherit  = 1  .tmp_style.css:34
+  --space                <number>     inherit  = 0  .tmp_style.css:33
+  --type                 <number>     local  = 0  .tmp_style.css:32
 
 LAYERS
     1. reset.fix                    ✓
     2. reset.opinion                ✓
-    3. core.config                  ✓
-    4. core.color                   ✓
-    5. core.type                    ✓
-    6. core.spacing                 ✓
-    7. theme                        ✓
-    8. layout.page                  ✓
-    9. layout.composition           ✓
+    3. core.color                   ✓
+    4. core.type                    ✓
+    5. core.spacing                 ✓
+    6. layout.page                  ✓
+    7. layout.composition           ✓
+    8. component.base               ✓
+    9. component.simple             ✓
    10. component.complex            ✓
-   11. component.simple             ✓
-   12. component.utls               ✗
-   13. utility.layout               ✓
-   14. utility.exceptions           ✓
-   15. utility.important            ✓
+   11. utility.layout               ✓
+   12. utility.exceptions           ✓
+   13. utility.important            ✓
 
 VARIABLES
-  declared: 43  referenced: 49
-  unreferenced: --_if-you-need-a-local-var, --_parity, --_s, --_user-dark
+  declared: 49  referenced: 62
+  unreferenced: --font-kbd
 
 ISSUES
-  [WRN] :0 layer 'component.utls' declared but unused
-  [ERR] notebooks/static/style.css:0 layer 'component.utils' used but not declared
+  none
