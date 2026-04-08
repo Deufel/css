@@ -7,11 +7,12 @@ with app.setup:
     import os
 
     from py_sse.app import create_app, create_relay, create_signer, static, set_cookie, serve, signals
-    from py_sse.mserver import serve_background, stop_background, ServerState
-
+    from py_sse.mserver import serve_background, stop_background, ServerState, dev_alive
+    from py_sse.ngrok import start_tunnel, stop_tunnel, TunnelState
     from html_tags import pretty, to_html, Html, Head, Body, Style, Link, Meta, Header, Nav, Main, Aside, Footer, Div, H1, H2, H3, P, A, Span, Button, Ul, Li, Dialog, Title, Small, Fragment, Hr, Input, Fieldset, Legend, Label, H5, H4, H6, Code, Section, Strong, Br, Table, Thead, Tbody, Tr, Td, Th, Script, Tag, Kbd
 
     from html_tags.extras import Datastar, ScopedCSS, Favicon, FontImport, MeCSS, Pointer
+
 
 
 
@@ -30,6 +31,11 @@ with app.setup:
 
 @app.cell
 def _():
+    return
+
+
+@app.cell
+def _():
     import marimo as mo
 
 
@@ -38,7 +44,7 @@ def _():
 
 @app.cell
 def _():
-    state  = serve_background(app, port=8000)
+    state = serve_background(app, host="127.0.0.1", port=8000)
     return
 
 
@@ -93,8 +99,9 @@ def _():
                 Div(cls="surface vh")(Div(cls="surface vh")),
                 H3("Aside"), 
                 Hr(), 
-                Code(data_text="`theme:` + $_theme"),
-                Kbd(data_text=" `size:` + $_size")
+                Code(data_text="`theme:` + $_themes[$_theme]"),
+                Code(data_text=" `size:` + $_sizes[$_size]"),
+                Code(data_text=" `motion:` + $_motions[$_motion]")
 
                   ) 
     return (aside,)
@@ -109,7 +116,7 @@ def _(mo):
 
 
 @app.cell
-def _(icon_font, icon_moon):
+def _(icon_font, icon_moon, icon_timer):
     header = Header(id="header", cls="surface split")(
         Style('''
         me { padding: 0.25rem; align-items: center; }
@@ -119,6 +126,7 @@ def _(icon_font, icon_moon):
         Div(cls="row")(
             A(href="https://github.com/Deufel/css")("github"),
             Hr(),
+            Button({"data-on:click":"$_motion= ($_motion+ 1) % $_motions.length"}, icon_timer, cls="btn"),
             Button({"data-on:click":"$_theme = ($_theme + 1) % $_themes.length"}, icon_moon, cls="btn"),
             Button({"data-on:click":"$_size = ($_size  + 1) % $_sizes.length"},  icon_font, cls="btn"),
         ),
@@ -525,12 +533,16 @@ def _(mo):
 def _(aside, footer, header, main, nav):
     body = Body(
         {   "data-signals:_theme"     : "0", 
-            "data-signals:_themes"    : "['light', 'dark', null]",
+            "data-signals:_themes"    : "['light', 'dark', null]", # values in css 
             "data-attr:data-ui-theme" : "$_themes[$_theme]", 
 
             "data-signals:_size"      : "1", 
-            "data-signals:_sizes"     : "['sm', 'md', 'lg']", 
-            "data-attr:data-ui-size"  : "$_sizes[$_size]"
+            "data-signals:_sizes"     : "['sm', 'md', 'lg']",      # Values set in css
+            "data-attr:data-ui-size"  : "$_sizes[$_size]",
+
+            "data-signals:_motion"      : "1", 
+            "data-signals:_motions"     : "['off', 'on', 'debug']", # values set in css
+            "data-attr:data-ui-motion"  : "$_motions[$_motion]"
 
         },
         cls="app",
@@ -542,6 +554,12 @@ def _(aside, footer, header, main, nav):
         footer,
     )
     return (body,)
+
+
+@app.cell
+def _(page):
+    print(pretty(page))
+    return
 
 
 @app.cell(hide_code=True)
@@ -679,7 +697,15 @@ def _():
     icon_moon = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon-icon lucide-moon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>''')
     icon_save = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>''')
     icon_user_plus = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus-icon lucide-user-plus"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>''')
-    return icon_cancel, icon_font, icon_moon, icon_save, icon_user_plus
+    icon_timer = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer-icon lucide-timer"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>''')
+    return (
+        icon_cancel,
+        icon_font,
+        icon_moon,
+        icon_save,
+        icon_timer,
+        icon_user_plus,
+    )
 
 
 @app.cell(hide_code=True)

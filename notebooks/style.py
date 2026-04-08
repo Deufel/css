@@ -182,8 +182,16 @@ def _(mo):
     ```css
     /* ── Reduced motion ── */
     @media (prefers-reduced-motion: reduce) { :root { --cfg-motion: 0; } }
+    [data-ui-motion="off"]   { --cfg-motion: 0; }
+    [data-ui-motion="on"]    { --cfg-motion: 1; }
+    [data-ui-motion="debug"] { --cfg-motion: 10; }
     ```
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -194,9 +202,7 @@ def _(mo):
     maybe it makes to roll spacinging into this aswell...
     ```css
 
-    [data-ui-size="sm"] { --cfg-type-scale: 0.875; --cfg-space-scale: 0.875; }
-    [data-ui-size="md"] { --cfg-type-scale: 1;    --cfg-space-scale: 1; }
-    [data-ui-size="lg"] { --cfg-type-scale: 1.25;  --cfg-space-scale: 1.1; }
+
     ```
     """)
     return
@@ -589,7 +595,7 @@ def _(mo):
 
     note the requires js to work (I think this is easier to understand then managing the pseudo css classes)
 
-    ```css
+    ```cssds
 
     @layer component.simple {
 
@@ -604,10 +610,9 @@ def _(mo):
             font-weight: 600;
             cursor: pointer;
             transition:
-                /*background   calc(var(--cfg-motion) * 0.15s) ease,*/
-                color        calc(var(--cfg-motion) * 0.15s) ease,
-                border-color calc(var(--cfg-motion) * 0.15s) ease,
-                border-width calc(var(--cfg-motion) * 0.06s) ease;
+                color        calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1),
+                border-color calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1),
+                border-width calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1);
 
             /* ── icon-only — detected by sole SVG child ── */
             &:has(> svg:only-child) {
@@ -624,43 +629,53 @@ def _(mo):
             &.disabled      { cursor: not-allowed; opacity: 0.45; }
         }
 
+
+
     }
 
-
     ```
 
-    ```js
-    window.btnStates ??= (() => {
-        const slot = cls => {
-            let cur = null
-            return el => { cur?.classList.remove(cls); (cur = el)?.classList.add(cls) }
+    ```css
+    @layer component.simple {
+
+        :where(.btn) {
+            --type: -1;
+            --contrast: 0.85;
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+            padding: 0.35em 1em;
+            border: 2px solid var(--Border);
+            border-radius: var(--cfg-radius);
+            font-family: var(--font-mono);
+            font-weight: 600;
+            cursor: pointer;
+            transition:
+                color        calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1),
+                border-color calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1),
+                border-width 0s;
+
+            /* ── icon-only — detected by sole SVG child ── */
+            &:has(> svg:only-child) {
+                padding: 0.25em;
+                height: calc(2.5 * 1em);
+                aspect-ratio: 1;
+                svg { pointer-events: none; }
+            }
+
+            /* ── states ── */
+            &.hover         { --_l-shift:  0.05; --contrast: 1;   border-width: 1px 3px 3px 1px; }
+            &.active        { --_l-shift: -0.04; --contrast: 0.4; border-width: 3px 1px 1px 3px; }
+            &:focus-visible { outline: 2px solid var(--Border); outline-offset: 2px; }
+            &.disabled      { cursor: not-allowed; opacity: 0.45; }
         }
 
-        const active = slot('active')
-        const hover  = slot('hover')
-        const B  = e => e.target.closest?.('.btn')
-        const kb = e => e.key === ' ' || e.key === 'Enter'
-        const guard = (el, fn) => el && !el.disabled && fn(el)
-
-        document.addEventListener('pointerdown',   e => guard(B(e), active),           {passive:true})
-        document.addEventListener('pointerup',     () => active(null),                 {passive:true})
-        document.addEventListener('pointercancel', () => active(null),                 {passive:true})
-        document.addEventListener('pointerenter',  e => guard(B(e), hover),            {passive:true, capture:true})
-        document.addEventListener('pointerleave',  e => { hover(null); if(B(e)===document.activeElement?.closest('.btn')) active(null) }, {passive:true, capture:true})
-        document.addEventListener('keydown',       e => kb(e) && guard(document.activeElement?.closest('.btn'), active))
-        document.addEventListener('keyup',         e => kb(e) && active(null))
-
-        const scan = root => root.querySelectorAll?.('.btn')
-            .forEach(el => el.classList.toggle('disabled', !!el.disabled))
-
-        new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(scan)))
-            .observe(document.body, {childList:true, subtree:true})
-
-        scan(document)
-    })()
-
+    }
     ```
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
