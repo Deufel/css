@@ -45,6 +45,8 @@ def _():
 @app.cell
 def _():
     state = serve_background(app, host="127.0.0.1", port=8000)
+
+
     return
 
 
@@ -107,7 +109,7 @@ def _():
     return (aside,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## Header
@@ -475,7 +477,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## head
+    ## _head
     """)
     return
 

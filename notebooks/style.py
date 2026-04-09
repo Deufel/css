@@ -279,7 +279,6 @@ def _(mo):
         :where(ul, ol):where([role="list"]) { list-style: none; padding: 0; }
         :where([hidden]) { display: none; }
     }
-
     ```
     """)
     return
@@ -300,8 +299,10 @@ def _(mo):
     ```css
     @layer core.color {
 
-        :where(*) {
-            /* ── Surface lightness chain — recomputes wherever cfg vars change ──
+        :where(*):not(svg, svg *) {
+            /* ── READ: yes this is kind of a mess but It does a lot so its ok for a bit of complexity here
+
+                Surface lightness chain — recomputes wherever cfg vars change ──
                Placing this here (not :root) means [data-ui-theme] attribute
                changes on any ancestor are picked up correctly, since calc()
                re-evaluates against the in-scope --cfg-* values at each element.
@@ -593,29 +594,37 @@ def _(mo):
     mo.md(r"""
     #### button
 
-    note the requires js to work (I think this is easier to understand then managing the pseudo css classes)
+    Swap in another button wheen ever this is kind of a retro button, but gives nice state on hover and active and a clear indication that it is clickable via a drop shadow.
 
-    ```cssds
+    note the requires js to work (I think this is easier to understand then managing the pseudo css classes on ios)
+
+    ```css
 
     @layer component.simple {
 
         :where(.btn) {
+
+            --_t : 0.12s;
             --type: -1;
+            --_jump:  calc(-1 * 0.2em);
             --contrast: 0.85;
+            min-width: 12ch;
             display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
             padding: 0.35em 1em;
-            border: 2px solid var(--Border);
+            border: 1px solid var(--Border);
             border-radius: var(--cfg-radius);
             font-family: var(--font-mono);
             font-weight: 600;
             cursor: pointer;
-            transition:
-                color        calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1),
-                border-color calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1),
-                border-width calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1);
+
+
+            box-shadow: calc(-1 * var(--_jump)) calc(-1 * var(--_jump)) 0 var(--Border);
+            transform: translateX(var(--_jump)) translateY(var(--_jump));
+            transition: calc(var(--cfg-motion) * var(--_t)) ease-out;
 
             /* ── icon-only — detected by sole SVG child ── */
             &:has(> svg:only-child) {
+                min-width: unset;
                 padding: 0.25em;
                 height: calc(2.5 * 1em);
                 aspect-ratio: 1;
@@ -623,59 +632,29 @@ def _(mo):
             }
 
             /* ── states ── */
-            &.hover         { --_l-shift:  0.05; --contrast: 1;   border-width: 1px 3px 3px 1px; }
-            &.active        { --_l-shift: -0.04; --contrast: 0.4; border-width: 3px 1px 1px 3px; }
-            &:focus-visible { outline: 2px solid var(--Border); outline-offset: 2px; }
-            &.disabled      { cursor: not-allowed; opacity: 0.45; }
-        }
-
-
-
-    }
-
-    ```
-
-    ```css
-    @layer component.simple {
-
-        :where(.btn) {
-            --type: -1;
-            --contrast: 0.85;
-            display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
-            padding: 0.35em 1em;
-            border: 2px solid var(--Border);
-            border-radius: var(--cfg-radius);
-            font-family: var(--font-mono);
-            font-weight: 600;
-            cursor: pointer;
-            transition:
-                color        calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1),
-                border-color calc(var(--cfg-motion) * 0.15s) cubic-bezier(0.5, 0, 0.5, 1),
-                border-width 0s;
-
-            /* ── icon-only — detected by sole SVG child ── */
-            &:has(> svg:only-child) {
-                padding: 0.25em;
-                height: calc(2.5 * 1em);
-                aspect-ratio: 1;
-                svg { pointer-events: none; }
+            &.hover {  --_l-shift:  0.05;  --contrast: 1; }
+            &.active{  --_l-shift: -0.05;  --contrast: 0.6;
+                transform: translateX(0px) translateY(0px);
+                box-shadow: 0 0 0  var(--Border) ;
             }
-
-            /* ── states ── */
-            &.hover         { --_l-shift:  0.05; --contrast: 1;   border-width: 1px 3px 3px 1px; }
-            &.active        { --_l-shift: -0.04; --contrast: 0.4; border-width: 3px 1px 1px 3px; }
-            &:focus-visible { outline: 2px solid var(--Border); outline-offset: 2px; }
+            &:focus-visible { outline: 2px solid var(--Border); outline-offset: var(--_jump); }
             &.disabled      { cursor: not-allowed; opacity: 0.45; }
         }
 
+
+
     }
+
     ```
     """)
     return
 
 
-@app.cell
-def _():
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+ 
+    """)
     return
 
 
@@ -761,6 +740,8 @@ def _(mo):
         @media (width < 768px)           { :where(.mobile)  { display: revert-layer; } }
         @media (768px <= width < 1024px) { :where(.tablet)  { display: revert-layer; } }
         @media (width >= 1024px)         { :where(.desktop) { display: revert-layer; } }
+
+        @media print { :where(body) { min-height: 0; } }
     }
     ```
 
@@ -782,6 +763,7 @@ def _(mo):
     @layer utility.important {
         :where([hidden]) { display: none !important; }
         @media print { :where(.np) { display: none !important; } }
+
     }
     ```
     """)
