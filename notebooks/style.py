@@ -608,6 +608,9 @@ def _(mo):
             --type: -1;
             --_jump:  calc(-1 * 0.2em);
             --contrast: 0.85;
+            /*ios stuff */
+            -webkit-tap-highlight-color: transparent;
+
             min-width: 12ch;
             display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
             padding: 0.35em 1em;
@@ -640,9 +643,6 @@ def _(mo):
             &:focus-visible { outline: 2px solid var(--Border); outline-offset: var(--_jump); }
             &.disabled      { cursor: not-allowed; opacity: 0.45; }
         }
-
-
-
     }
 
     ```
