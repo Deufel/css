@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+<link rel="stylesheet" href="_order.css">
+<link rel="stylesheet" href="reset.css">
+<link rel="stylesheet" href="core.css">
+<link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="app.css">
+<style>
+    body { padding: 2rem; }
+    .row { display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+    .box { padding: 1em 1.5em; border-radius: 6px; border: 1px solid var(--border); }
+    .label { font-family: monospace; font-size: 11px; opacity: 0.6; }
+</style>
+</head>
+<body>
+
+<h3>Test 1: Semantic classes on divs</h3>
+<p>These should be clearly different colors (red, amber, green, blue)</p>
+<div class="row">
+    <div class="box dgr" style="--color: 1;">dgr (red)</div>
+    <div class="box wrn" style="--color: 1;">wrn (amber)</div>
+    <div class="box suc" style="--color: 1;">suc (green)</div>
+    <div class="box inf" style="--color: 1;">inf (blue)</div>
+</div>
+
+<h3>Test 2: Same but on buttons</h3>
+<div class="row">
+    <button class="btn dgr" style="--color: 1;">dgr</button>
+    <button class="btn wrn" style="--color: 1;">wrn</button>
+    <button class="btn suc" style="--color: 1;">suc</button>
+    <button class="btn inf" style="--color: 1;">inf</button>
+</div>
+
+<h3>Test 3: Buttons with pri class added</h3>
+<p>These should also be clearly different colors if .dgr is working</p>
+<style>
+    .btn.pri { --color: 1; }
+</style>
+<div class="row">
+    <button class="btn dgr pri">dgr+pri</button>
+    <button class="btn wrn pri">wrn+pri</button>
+    <button class="btn suc pri">suc+pri</button>
+    <button class="btn inf pri">inf+pri</button>
+</div>
+
+<h3>Test 4: Debug — what hue is actually computed?</h3>
+<div class="row">
+    <button class="btn dgr pri" id="b1">dgr.pri</button>
+    <button class="btn pri" id="b2">pri only</button>
+    <span class="label" id="log"></span>
+</div>
+
+<script>
+    const b1 = document.getElementById('b1');
+    const b2 = document.getElementById('b2');
+    const log = document.getElementById('log');
+    const props = ['--color', '--hue', '--hue-shift', '--cfg-hue', '--depth', '--_k', '--_h', '--_l', '--_c', '--bg', 'background-color'];
+    const dump = (name, el) => {
+        const s = getComputedStyle(el);
+        return `${name}:\n` + props.map(p => `  ${p}: ${s.getPropertyValue(p).trim() || '(empty)'}`).join('\n') + '\n';
+    };
+    log.innerHTML = '<pre style="font-size: 10px;">' +
+        dump('b1 (.dgr.pri btn)', b1) +
+        dump('b2 (.pri btn)', b2) +
+        '</pre>';
+    
+    // Also sample a working div for comparison
+    const d = document.querySelector('.box.dgr');
+    log.innerHTML += '<pre style="font-size: 10px;">' + dump('working div (.dgr box)', d) + '</pre>';
+</script>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   app.css — layout, components, and utilities
+
+   Consumes the core API (--bg, --s, --border, --Border, .surface, .pri,
+   .sec, --type, --space, --contrast) but is not part of it. Remove or
+   rewrite freely; core.css stays intact.
+
+   Depends on: _order.css, core.css. Optionally themes.css.
+══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* ── Page gutter (used by layout.page) ── */
+    --cfg-page-gap: 1;
+
+    /* ── Radii ── */
+    --cfg-radius: 8px;
+
+    /* ── Font stacks ── */
+    --font-heading: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", P052, serif;
+    --font-body:    Avenir, Montserrat, Corbel, "URW Gothic", source-sans-pro, sans-serif;
+    --font-mono:    ui-monospace, "SF Mono", Monaco, Menlo, Consolas, monospace;
+    --font-kbd:     "Courier New", "Nimbus Mono PS", monospace;
+}
+
+@property --cfg-page-gap { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --cfg-radius   { syntax: "<length>"; inherits: true; initial-value: 8px; }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   layout.page — app shell (body.app)
+══════════════════════════════════════════════════════════════════════════ */
+@layer layout.page {
+    :where(body.app) {
+        --_pg-min: calc(var(--cfg-space-min) * pow(var(--cfg-space-min-ratio), var(--cfg-page-gap)));
+        --_pg-max: calc(var(--cfg-space-max) * pow(var(--cfg-space-max-ratio), var(--cfg-page-gap)));
+        --_page-gap: clamp(
+            var(--_pg-min),
+            calc(var(--_pg-min) + (var(--_pg-max) - var(--_pg-min))
+                * (100vi - var(--cfg-fluid-min-vp))
+                / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))),
+            var(--_pg-max)
+        );
+
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        overscroll-behavior: none;
+        display: grid;
+        grid-template:
+            "header  header  header" auto
+            "nav     main    aside"  1fr
+            "footer  footer  footer" auto
+            / auto   1fr     auto;
+        height: 100svh;
+
+        & #header, & #main, & #aside { overflow-y: auto; scrollbar-gutter: stable; }
+        & #header { grid-area: header; margin-bottom: var(--_page-gap); }
+        & #main   { grid-area: main;   min-width: 60%; }
+        & #nav    { grid-area: nav;    margin-right: var(--_page-gap); }
+        & #aside  { grid-area: aside;  margin-left:  var(--_page-gap); }
+        & #footer { grid-area: footer; margin-top:   var(--_page-gap); }
+
+        & dialog::backdrop { background-color: oklch(0 0 0 / 0.7); }
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   layout.composition — flow contexts
+══════════════════════════════════════════════════════════════════════════ */
+@layer layout.composition {
+    .stack     { display: flex; flex-direction: column;                            gap: var(--s, 0.75rem); }
+    .row       { display: flex; flex-wrap: wrap;                                   gap: var(--s, 0.5rem);  }
+    .split     { display: flex; flex-wrap: wrap; justify-content: space-between;   gap: var(--s, 0.5rem);  }
+    .cluster   { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--s, 0.5rem); }
+    .grid      { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--_col, 15rem), 1fr)); gap: var(--s, 1rem); }
+    .flank     { display: flex; flex-wrap: wrap; gap: var(--s, 1rem); }
+    .flank     > :first-child { flex: 1 1 var(--_flank, auto); }
+    .flank     > :last-child  { flex: 999 1 0; }
+    .flank-end { display: flex; flex-wrap: wrap; gap: var(--s, 1rem); }
+    .flank-end > :first-child { flex: 999 1 0; }
+    .flank-end > :last-child  { flex: 1 1 var(--_flank, auto); }
+
+    .span   { grid-column: 1 / -1; }
+    .wrap   { flex-wrap: wrap; }
+    .nowrap { flex-wrap: nowrap; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   component.base — default HTML element styling
+══════════════════════════════════════════════════════════════════════════ */
+@layer component.base {
+    h1         { --type: 4;    --contrast: 1;    font-family: var(--font-heading); font-weight: 400; }
+    h2         { --type: 3;    --contrast: 0.95; font-family: var(--font-heading); font-weight: 400; }
+    h3         { --type: 2;    --contrast: 0.9;  font-family: var(--font-heading); font-weight: 500; }
+    h4         { --type: 1;    --contrast: 0.88; font-family: var(--font-heading); font-weight: 600; }
+    p          { --contrast: 0.85;  font-family: var(--font-body); }
+    small      { --type: -1.5; --contrast: 0.6;  font-family: var(--font-body); text-transform: uppercase; }
+    code       { --type: -0.5; --contrast: 0.8;  font-family: var(--font-mono); }
+    pre        { --type: -0.5; --contrast: 0.75; font-family: var(--font-mono); }
+    figcaption { --type: -0.5; --contrast: 0.7;  }
+    blockquote { --contrast: 0.75; }
+    address    { --contrast: 0.75; }
+    cite       { --contrast: 0.7;  }
+    mark       { --contrast: 1;    }
+
+    :where(.badge) {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0.15em 0.6em; border-radius: 99px;
+        font-size: 0.75em; font-weight: 600;
+    }
+
+    :where(hr) { border-color: var(--border); }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   component.simple — core UI primitives
+══════════════════════════════════════════════════════════════════════════ */
+@layer component.simple {
+
+    :where(.btn) {
+        --_btn-t: 0.12s;
+        --type: -1;
+        --_btn-jump: calc(-1 * 0.2em);
+        --contrast: 0.85;
+        -webkit-tap-highlight-color: transparent;
+
+        min-width: 12ch;
+        display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+        padding: 0.35em 1em;
+        border: 1px solid var(--Border);
+        border-radius: var(--cfg-radius);
+        font-family: var(--font-mono);
+        font-weight: 600;
+        cursor: pointer;
+
+        box-shadow: calc(-1 * var(--_btn-jump)) calc(-1 * var(--_btn-jump)) 0 var(--Border);
+        transform: translateX(var(--_btn-jump)) translateY(var(--_btn-jump));
+        transition: calc(var(--cfg-motion) * var(--_btn-t)) ease-out;
+
+        /* ── icon-only — detected by sole SVG child ── */
+        &:has(> svg:only-child) {
+            min-width: unset;
+            padding: 0.25em;
+            height: calc(2.5 * 1em);
+            aspect-ratio: 1;
+            svg { pointer-events: none; }
+        }
+
+        /* ── states (JS-driven for iOS compatibility) ── */
+        &.hover  { --_l-shift:  0.05; --contrast: 1;   }
+        &.active { --_l-shift: -0.05; --contrast: 0.6;
+            transform: translateX(0) translateY(0);
+            box-shadow: 0 0 0 var(--Border);
+        }
+        &:focus-visible { outline: 2px solid var(--Border); outline-offset: var(--_btn-jump); }
+        &.disabled      { cursor: not-allowed; opacity: 0.45; }
+    }
+
+    .card {
+        box-shadow: inset 0 1px 0 oklch(from var(--bg) calc(l + 0.1) c h);
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   component.complex — dialog
+══════════════════════════════════════════════════════════════════════════ */
+@layer component.complex {
+    :where(dialog) {
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+        padding: 0;
+        max-width: min(90vw, 32rem);
+        max-height: 85vh;
+        overflow: auto;
+
+        opacity: 1;
+        transform: translateY(0);
+        transition:
+            opacity   calc(var(--cfg-motion) * 0.25s) ease-out,
+            transform calc(var(--cfg-motion) * 0.25s) ease-out,
+            display   calc(var(--cfg-motion) * 0.25s) allow-discrete,
+            overlay   calc(var(--cfg-motion) * 0.25s) allow-discrete;
+
+        &:not([open]) {
+            opacity: 0;
+            transform: translateY(calc(var(--cfg-motion) * 0.5rem));
+        }
+
+        @starting-style {
+            opacity: 0;
+            transform: translateY(calc(var(--cfg-motion) * -0.5rem));
+        }
+
+        &::backdrop { background: transparent; }
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   utility.layout — responsive visibility
+══════════════════════════════════════════════════════════════════════════ */
+@layer utility.layout {
+    :where(.mobile, .tablet, .desktop) { display: none; }
+    @media (width < 768px)           { :where(.mobile)  { display: revert-layer; } }
+    @media (768px <= width < 1024px) { :where(.tablet)  { display: revert-layer; } }
+    @media (width >= 1024px)         { :where(.desktop) { display: revert-layer; } }
+
+    @media print { :where(body) { min-height: 0; } }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   utility.exceptions — accessibility helpers
+══════════════════════════════════════════════════════════════════════════ */
+@layer utility.exceptions {
+    :where(.vh) {
+        position: absolute; width: 1px; height: 1px;
+        padding: 0; margin: -1px; overflow: hidden;
+        clip-path: inset(50%); white-space: nowrap; border: 0;
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   utility.important — only when you need to win over an inline style
+══════════════════════════════════════════════════════════════════════════ */
+@layer utility.important {
+    :where([hidden]) { display: none !important; }
+    @media print { :where(.np) { display: none !important; } }
+}

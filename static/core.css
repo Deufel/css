@@ -1,0 +1,292 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   core.css — three orthogonal design system cores
+
+   Section 1: preamble  — shared viewport config for fluid curves
+   Section 2: core.color — surface & color modes, theme-independent colors
+   Section 3: core.type  — fluid typographic scale via --type
+   Section 4: core.space — fluid spacing scale via --space / --s
+
+   ═══════════════════════════════════════════════════════════════════════
+   COLOR API — two modes, presence-of-property switch
+   ═══════════════════════════════════════════════════════════════════════
+
+   There are exactly two modes. The element is in one or the other:
+
+     SURFACE MODE  (default)   — neutral backgrounds that track the theme
+                                 via depth nesting. Used for layout.
+     COLOR MODE    (when --color is set) — calibrated chromatic fills that
+                                 DO NOT change between light/dark themes.
+                                 Used for brand, semantics, accents.
+
+   Mode is triggered by --color:
+     --color: -1 (default, unset)  →  SURFACE MODE
+     --color:  0..1                →  COLOR MODE (0=muted, 1=vivid)
+
+   Users set --color to a value in 0..1 to enter color mode; the -1
+   sentinel exists only as the mechanism for "not set."
+
+   SURFACE MODE KNOBS
+     --depth        0..4+    position on surface lightness curve
+                             (.surface uses :has() to manage this)
+     --hue                   absolute hue override
+     --hue-shift    degrees  offset from --cfg-hue
+     --contrast     0..1     fg text intensity (default 1)
+
+   COLOR MODE KNOBS
+     --color        0..1     0 = muted palette point (--cfg-color-muted-*)
+                             1 = vivid palette point (--cfg-color-vivid-*)
+                             fractional values interpolate between the
+                             two calibrated endpoints (both perceptually
+                             good, so the path between them stays clean)
+     --hue, --hue-shift, --contrast  same as above
+
+   SHARED DERIVED VALUES (read-only, for consumers)
+     --bg                    the computed bg color
+     --border                subtle border derived from --bg
+     --Border                stronger border derived from --bg
+     color                   text color derived from --bg via --contrast
+
+   COMPOSITIONAL CLASSES
+     .surface                marker for the :has() depth counter.
+                             Explicit depth control via surface nesting.
+     .suc .inf .wrn .dgr     semantic hues (set --hue only)
+
+   THEME INDEPENDENCE
+     Color-mode elements do NOT change between light/dark themes because
+     --cfg-color-muted-* and --cfg-color-vivid-* are not in theme overrides.
+     Only surface-mode elements track the theme (via --cfg-top-l etc).
+     This matches how good design systems work: accent colors have
+     identity, surfaces are context.
+
+   SVG
+     The color math runs on every element including SVG. Use var(--bg)
+     as a fill or stroke value:
+       <circle style="--color: 1; --hue: 145;" fill="var(--bg)" />
+
+   ═══════════════════════════════════════════════════════════════════════
+   TYPE API
+     --type        step on fluid type scale (non-inheriting)
+
+   SPACE API
+     --space       step on fluid space scale (inheriting)
+     --s           computed space value
+══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTION 1 — preamble (shared viewport config)
+══════════════════════════════════════════════════════════════════════════ */
+
+@property --cfg-fluid-min-vp { syntax: "<length>"; inherits: true; initial-value: 320px;  }
+@property --cfg-fluid-max-vp { syntax: "<length>"; inherits: true; initial-value: 1280px; }
+
+:root {
+    --cfg-fluid-min-vp: 320px;
+    --cfg-fluid-max-vp: 1280px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTION 2 — core.color
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Config: hue and surface chroma ──────────────────────────────────── */
+@property --cfg-hue              { syntax: "<number>";     inherits: true; initial-value: 220;   }
+@property --cfg-surf-chroma      { syntax: "<number>";     inherits: true; initial-value: 0.018; }
+@property --cfg-color-alpha      { syntax: "<number>";     inherits: true; initial-value: 1;     }
+
+/* ── Config: color palette endpoints (theme-independent) ─────────────── */
+@property --cfg-color-muted-l    { syntax: "<percentage>"; inherits: true; initial-value: 90%;   }
+@property --cfg-color-muted-c    { syntax: "<number>";     inherits: true; initial-value: 0.1;   }
+@property --cfg-color-vivid-l    { syntax: "<percentage>"; inherits: true; initial-value: 70%;   }
+@property --cfg-color-vivid-c    { syntax: "<number>";     inherits: true; initial-value: 0.4;   }
+
+/* ── Config: surface lightness curve ─────────────────────────────────── */
+@property --cfg-top-l            { syntax: "<number>"; inherits: true; initial-value: 88;   }
+@property --cfg-base-step        { syntax: "<number>"; inherits: true; initial-value: 4;    }
+@property --cfg-curve-k          { syntax: "<number>"; inherits: true; initial-value: 0.6;  }
+@property --cfg-surf-mid         { syntax: "<number>"; inherits: true; initial-value: 60.5; }
+@property --cfg-surf-rng         { syntax: "<number>"; inherits: true; initial-value: 55;   }
+
+/* ── Public scalar API ────────────────────────────────────────────────
+   --color uses a sentinel of -1 (the default) to mean "surface mode".
+   Any value 0..1 switches to color mode. The math derives a 0/1 weight
+   from the sentinel via clamp(0, --color+1, 1) — no conditionals needed.
+
+   --hue uses syntax:"*" so its default is guaranteed-invalid; the bg
+   formula falls through to --cfg-hue + --hue-shift when --hue is unset.
+── */
+@property --depth                { syntax: "<number>"; inherits: false; initial-value: 0;  }
+@property --color                { syntax: "<number>"; inherits: true;  initial-value: -1; }
+@property --hue                  { syntax: "*";        inherits: true; }
+@property --hue-shift            { syntax: "<number>"; inherits: true;  initial-value: 0;  }
+@property --contrast             { syntax: "<number>"; inherits: true;  initial-value: 1;  }
+
+/* ── Public derived value ────────────────────────────────────────────── */
+@property --bg                   { syntax: "<color>";  inherits: true; initial-value: oklch(88% 0.018 220); }
+
+/* ── Internal lightness shift (for button press/hover states) ────────── */
+@property --_l-shift             { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+/* ── Registered private intermediates in the color formula.
+      Registration gives them typed defaults AND crucially makes them
+      REJECT invalid assignments. This prevents outside components from
+      silently poisoning the formula by setting a name to the wrong type
+      (e.g., a component setting --_t: 0.12s for timing when the formula
+      expects <number>). Without registration, such an inherited value
+      would break the calc() chain and push --bg to its fallback; with
+      registration, the bad assignment is discarded and the formula
+      keeps computing correctly. ── */
+@property --_naive               { syntax: "<number>";     inherits: false; initial-value: 88;   }
+@property --_t                   { syntax: "<number>";     inherits: false; initial-value: 0.5;  }
+@property --_surf-l              { syntax: "<percentage>"; inherits: false; initial-value: 88%;  }
+@property --_c01                 { syntax: "<number>";     inherits: false; initial-value: 0;    }
+@property --_col-l               { syntax: "<percentage>"; inherits: false; initial-value: 90%;  }
+@property --_col-c               { syntax: "<number>";     inherits: false; initial-value: 0.1;  }
+@property --_k                   { syntax: "<number>";     inherits: false; initial-value: 0;    }
+@property --_l                   { syntax: "<percentage>"; inherits: false; initial-value: 88%;  }
+@property --_c                   { syntax: "<number>";     inherits: false; initial-value: 0.018;}
+@property --_h                   { syntax: "<number>";     inherits: false; initial-value: 220;  }
+
+
+@layer core.color {
+
+    /* ── The bg formula — every element computes --bg, --border, --Border,
+          and sets text color. But `background:` is NOT painted here.
+          Painting is opt-in via .surface, body, or being in color mode
+          (handled by the separate painting rule below). Text contrast
+          works everywhere because `color` derives from the computed --bg
+          regardless of whether background is actually painted. ── */
+    :where(*) {
+
+        /* ── Surface-mode lightness from depth (continuous curve) ── */
+        --_naive:    calc(var(--cfg-top-l) - var(--depth) * var(--cfg-base-step));
+        --_t:        calc((var(--_naive) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
+        --_surf-l:   calc((var(--cfg-top-l) - var(--depth) * var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t) * var(--_t))) * 1%);
+
+        /* ── Color-mode lightness and chroma, interpolated between
+              calibrated muted and vivid palette endpoints. --color acts
+              as the lerp parameter in 0..1 (clamped). ── */
+        --_c01:      clamp(0, var(--color), 1);
+        --_col-l:    calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
+        --_col-c:    calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
+
+        /* ── Mode blend weight:
+              --color: -1  (default, unset)  →  --_k = 0  (surface mode)
+              --color:  0..1                  →  --_k = 1  (color mode)
+              Pure math — no conditionals. ── */
+        --_k: clamp(0, calc(var(--color) + 1), 1);
+
+        --_l: calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k));
+        --_c: calc(var(--cfg-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k));
+        --_h: var(--hue, calc(var(--cfg-hue) + var(--hue-shift)));
+
+        --bg: oklch(
+            clamp(4%, calc(var(--_l) + var(--_l-shift) * 100%), 97%)
+            var(--_c)
+            var(--_h)
+            / var(--cfg-color-alpha)
+        );
+
+        --border: oklch(from var(--bg) calc(l - 0.14) calc(c * 0.7) h);
+        --Border: oklch(from var(--bg) calc(l - 0.28) clamp(0.08, calc(c * 1.4), 0.22) calc(h + 8));
+
+        color: oklch(from var(--bg)
+            calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
+            calc(c * (1 - var(--contrast)))
+            h
+        );
+    }
+
+    /* ── Background painting — opt-in via surface class, body, or color mode.
+
+          Every element gets `background-color: oklch(...bg... / alpha)` where
+          alpha is --_k (the 0/1 mode weight). In surface mode (--_k: 0) the
+          paint is transparent — effectively unpainted. In color mode the
+          paint is fully opaque. This also has the nice side effect of
+          overriding user-agent button/input backgrounds in surface mode
+          (transparent beats gray).
+
+          Then body and .surface explicitly set a fully opaque paint,
+          winning via source order. ── */
+    :where(*) {
+        background-color: oklch(from var(--bg) l c h / var(--_k));
+    }
+    :where(body, .surface) {
+        background-color: var(--bg);
+    }
+
+    /* ── .surface — marker for the :has() depth counter.
+          The class itself is a no-op; authors could set --depth directly,
+          but .surface nesting is the ergonomic path for layout. ── */
+    .surface:has(.surface)                                     { --depth: 1; }
+    .surface:has(.surface .surface)                            { --depth: 2; }
+    .surface:has(.surface .surface .surface)                   { --depth: 3; }
+    .surface:has(.surface .surface .surface .surface)          { --depth: 4; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTION 3 — core.type
+══════════════════════════════════════════════════════════════════════════ */
+
+@property --type               { syntax: "<number>"; inherits: false; initial-value: 0; }
+
+@property --cfg-type-scale     { syntax: "<number>"; inherits: true; initial-value: 1;    }
+@property --cfg-type-min-ratio { syntax: "<number>"; inherits: true; initial-value: 1.2;  }
+@property --cfg-type-max-ratio { syntax: "<number>"; inherits: true; initial-value: 1.28; }
+
+:root {
+    --cfg-type-min: 0.9375rem;
+    --cfg-type-max: 1.0625rem;
+}
+
+@layer core.type {
+    :where(*) {
+        --_t-min: calc(var(--cfg-type-min) * pow(var(--cfg-type-min-ratio), var(--type)));
+        --_t-max: calc(var(--cfg-type-max) * pow(var(--cfg-type-max-ratio), var(--type)));
+        font-size: calc(
+            clamp(var(--_t-min),
+                calc(var(--_t-min) + (var(--_t-max) - var(--_t-min)) *
+                    (100vi - var(--cfg-fluid-min-vp)) /
+                    (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))),
+                var(--_t-max)
+            ) * var(--cfg-type-scale)
+        );
+        letter-spacing: calc(0.01em - var(--type) * 0.01em);
+        line-height: calc(1.5 - var(--type) * 0.075);
+    }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTION 4 — core.space
+══════════════════════════════════════════════════════════════════════════ */
+
+@property --space              { syntax: "<number>"; inherits: true; initial-value: 0;      }
+@property --s                  { syntax: "<length>"; inherits: true; initial-value: 0.5rem; }
+
+@property --cfg-space-scale    { syntax: "<number>"; inherits: true; initial-value: 1;   }
+@property --cfg-space-min-ratio{ syntax: "<number>"; inherits: true; initial-value: 1.5; }
+@property --cfg-space-max-ratio{ syntax: "<number>"; inherits: true; initial-value: 1.6; }
+
+:root {
+    --cfg-space-min: 0.25rem;
+    --cfg-space-max: 0.5rem;
+}
+
+@layer core.space {
+    :where(*) {
+        --_s-min: calc(var(--cfg-space-min) * pow(var(--cfg-space-min-ratio), var(--space)));
+        --_s-max: calc(var(--cfg-space-max) * pow(var(--cfg-space-max-ratio), var(--space)));
+        --s: calc(
+            clamp(
+                var(--_s-min),
+                calc(var(--_s-min) + (var(--_s-max) - var(--_s-min))
+                    * (100vi - var(--cfg-fluid-min-vp))
+                    / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))),
+                var(--_s-max)
+            ) * var(--cfg-space-scale)
+        );
+    }
+}

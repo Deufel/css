@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>bg strategy test</title>
+<link rel="stylesheet" href="_order.css">
+<link rel="stylesheet" href="reset.css">
+<link rel="stylesheet" href="core.css">
+<link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="app.css">
+
+<style>
+    /* ── Test the new strategy:
+         1. Core computes --bg on everything.
+         2. Only body, .surface, and things with --color get painted.
+         3. color: still works everywhere (contrast derives from --bg).
+         4. Button UA styles removed via reset override.
+    ── */
+
+    body { padding: 2rem; font-family: system-ui; }
+    
+    .test {
+        border: 2px dashed var(--border);
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    .test > h3 { margin-bottom: 0.5rem; }
+    
+    .box {
+        padding: 1em;
+        margin: 0.5em 0;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+    }
+</style>
+</head>
+<body>
+
+<h2>Background painting strategy test</h2>
+
+<div class="test">
+    <h3>A. Plain paragraphs (no class, no --color)</h3>
+    <p>This paragraph has no --color, no .surface, no class.</p>
+    <p>It should be <strong>transparent</strong>, inheriting bg from body.</p>
+    <p>Text should still contrast correctly with the ambient bg.</p>
+</div>
+
+<div class="test surface">
+    <h3>B. Surface container with plain paragraphs inside</h3>
+    <p>This section is .surface, so it paints a bg.</p>
+    <p>These paragraphs are transparent children.</p>
+    <p>No banding should appear between them and the surface bg.</p>
+</div>
+
+<div class="test surface">
+    <h3>C. Surface with a colored element inside</h3>
+    <p>Plain paragraph (transparent).</p>
+    <div class="box" style="--color: 1; --hue: 145;">
+        Color box (painted green)
+    </div>
+    <p>Plain paragraph after (transparent).</p>
+</div>
+
+<div class="test">
+    <h3>D. Buttons with --color</h3>
+    <p>These should all be colored (red, green, blue).</p>
+    <div style="display: flex; gap: 0.5rem;">
+        <button class="btn" style="--color: 1; --hue: 25;">Red</button>
+        <button class="btn" style="--color: 1; --hue: 145;">Green</button>
+        <button class="btn" style="--color: 1; --hue: 240;">Blue</button>
+        <button class="btn">Surface</button>
+    </div>
+</div>
+
+<div class="test surface">
+    <h3>E. Surface nesting (no bare &lt;p&gt; banding)</h3>
+    <p>Outer paragraph.</p>
+    <div class="box surface">
+        <p>Level 1 paragraph — should be transparent over the surface's bg.</p>
+        <div class="box surface">
+            <p>Level 2 paragraph — still transparent.</p>
+            <div class="box surface">
+                <p>Level 3 paragraph.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="test">
+    <h3>F. Computed values debug</h3>
+    <p id="a">Paragraph A</p>
+    <div class="surface box"><p id="b">Paragraph B inside surface</p></div>
+    <div style="--color: 1; --hue: 25;" id="c" class="box">Div C in color mode</div>
+    
+    <pre id="log" style="font-family: monospace; background: #00000020; padding: 1em; font-size: 12px; white-space: pre-wrap;"></pre>
+</div>
+
+<script>
+    const log = document.getElementById('log');
+    const report = (id, el) => {
+        const s = getComputedStyle(el);
+        return `[${id}]
+  --bg: ${s.getPropertyValue('--bg').trim()}
+  --color: ${s.getPropertyValue('--color').trim()}
+  --_k: ${s.getPropertyValue('--_k').trim()}
+  background-color: ${s.backgroundColor}
+  color: ${s.color}
+`;
+    };
+    log.textContent =
+        report('A', document.getElementById('a')) +
+        report('B', document.getElementById('b')) +
+        report('C', document.getElementById('c'));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   themes.css — runtime theme controls + semantic hue utilities
+
+   Themes flip SURFACE configuration (lightness curve, surface chroma),
+   not COLOR configuration. This means:
+     - Surfaces adapt to theme (bright in light, dim in dark)
+     - Colors stay the same regardless of theme
+
+   Semantic hue utilities set --hue only. Compose with --color to get
+   various flavors:
+     .suc              hue-only tint
+     .suc { --color: 0 }   muted green
+     .suc { --color: 1 }   vivid green
+     .btn.dgr { --color: 1 }  vivid red button
+
+   Depends on: _order.css, core.css.
+══════════════════════════════════════════════════════════════════════════ */
+
+@property --cfg-motion { syntax: "<number>"; inherits: true; initial-value: 1; }
+
+
+@layer theme {
+
+    /* ── Theme: system (default) — follows OS preference ─────────────── */
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),
+        [data-ui-theme="system"] {
+            --cfg-top-l:       33;
+            --cfg-base-step:    2.5;
+            --cfg-surf-chroma:  0.010;
+            --cfg-surf-mid:    33.5;
+            --cfg-surf-rng:    27.5;
+        }
+    }
+    @media (prefers-color-scheme: light) {
+        [data-ui-theme="system"] {
+            --cfg-top-l:       88;
+            --cfg-base-step:    4;
+            --cfg-surf-chroma:  0.018;
+            --cfg-surf-mid:    60.5;
+            --cfg-surf-rng:    55;
+        }
+    }
+
+    /* ── Theme: manual light ─────────────────────────────────────────── */
+    [data-ui-theme="light"] {
+        --cfg-top-l:       88;
+        --cfg-base-step:    4;
+        --cfg-curve-k:      0.6;
+        --cfg-surf-chroma:  0.018;
+        --cfg-surf-mid:    60.5;
+        --cfg-surf-rng:    55;
+    }
+
+    /* ── Theme: manual dark ──────────────────────────────────────────── */
+    [data-ui-theme="dark"] {
+        --cfg-top-l:       33;
+        --cfg-base-step:    2.5;
+        --cfg-curve-k:      0.6;
+        --cfg-surf-chroma:  0.010;
+        --cfg-surf-mid:    33.5;
+        --cfg-surf-rng:    27.5;
+    }
+
+    /* ── Motion ──────────────────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) { :root { --cfg-motion: 0;  } }
+    [data-ui-motion="off"]   { --cfg-motion: 0;  }
+    [data-ui-motion="on"]    { --cfg-motion: 1;  }
+    [data-ui-motion="debug"] { --cfg-motion: 10; }
+
+    /* ── Size ────────────────────────────────────────────────────────── */
+    [data-ui-size="sm"] { --cfg-type-scale: 0.875; --cfg-space-scale: 0.875; }
+    [data-ui-size="md"] { --cfg-type-scale: 1;     --cfg-space-scale: 1;     }
+    [data-ui-size="lg"] { --cfg-type-scale: 1.25;  --cfg-space-scale: 1.1;   }
+
+    /* ── Semantic hue utilities (set --hue only; compose with --color) ── */
+    .suc { --hue: 145; }
+    .inf { --hue: 240; }
+    .wrn { --hue:  75; }
+    .dgr { --hue:  25; }
+}

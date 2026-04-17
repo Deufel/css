@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color & Type — Dashboard</title>
+
+<link rel="stylesheet" href="_order.css">
+<link rel="stylesheet" href="reset.css">
+<link rel="stylesheet" href="core.css">
+<link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="app.css">
+
+<style>
+    /* Surface-mode elements leave --color unset.
+       Color-mode elements set --color to a value in 0..1. */
+
+    body { padding: var(--s); }
+    .page { max-width: 1400px; margin-inline: auto; }
+
+    .dash {
+        display: grid;
+        grid-template-columns: minmax(200px, 260px) 1fr;
+        gap: var(--s);
+        min-height: calc(100svh - 2 * var(--s));
+    }
+    @media (width < 768px) { .dash { grid-template-columns: 1fr; } }
+
+    .card {
+        padding: calc(var(--s) * 1.2);
+        border-radius: var(--cfg-radius);
+        border: 1px solid var(--border);
+        --space: 0;
+    }
+
+    /* ── Stat cards ── */
+    .stat .num   { --type: 3; --contrast: 1; font-family: var(--font-heading); font-weight: 500; }
+    .stat .label { --type: -1.5; --contrast: 0.6; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat .delta {
+        --type: -1;
+        font-family: var(--font-mono);
+        display: inline-block;
+        padding: 0.1em 0.5em;
+        border-radius: 4px;
+        --color: 0.3;        /* muted semantic tint */
+        --contrast: 1;
+    }
+
+    /* ── Sidebar nav ── */
+    .nav-item {
+        display: flex; align-items: center; gap: 0.75em;
+        padding: 0.5em 0.75em;
+        border-radius: calc(var(--cfg-radius) * 0.75);
+        cursor: pointer;
+        font-family: var(--font-body);
+        --type: -0.5;
+    }
+    .nav-item.active { --depth: 2; --contrast: 1; }
+    .nav-item:not(.active):hover { --_l-shift: 0.04; }
+    .nav-item .dot {
+        width: 0.5em; height: 0.5em; border-radius: 50%;
+        --color: 1;          /* vivid brand-hue dot */
+    }
+
+    /* ── Bar chart ── */
+    .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5em; align-items: end; height: 160px; }
+    .bar  {
+        --color: 0.4;        /* mid-palette bars */
+        border-radius: 4px 4px 0 0;
+        min-height: 4px;
+    }
+    .bar.hl { --color: 1; }  /* vivid highlight */
+    .bar-labels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5em; }
+    .bar-labels span { --type: -2; --contrast: 0.55; text-align: center; font-family: var(--font-mono); }
+
+    /* ── Activity list ── */
+    .activity { list-style: none; padding: 0; }
+    .activity li {
+        display: flex; align-items: center; gap: 0.75em;
+        padding: 0.6em 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .activity li:last-child { border-bottom: 0; }
+
+    .avatar {
+        width: 2em; height: 2em; border-radius: 50%;
+        --color: 1;          /* vivid avatars, hue set per element */
+        display: grid; place-items: center;
+        font-family: var(--font-mono); font-weight: 600;
+        --type: -1;
+    }
+
+    .activity .meta { --type: -1.5; --contrast: 0.55; font-family: var(--font-mono); }
+    .activity .body { flex: 1; --type: -0.5; }
+
+    /* ── Table ── */
+    table { width: 100%; }
+    th, td { text-align: left; padding: 0.6em 0.75em; border-bottom: 1px solid var(--border); }
+    th { --type: -1.5; --contrast: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; font-family: var(--font-body); }
+    td { --type: -0.5; font-family: var(--font-body); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+
+    .pill {
+        display: inline-block;
+        padding: 0.15em 0.6em;
+        border-radius: 99px;
+        --type: -2;
+        font-weight: 600;
+        --color: 0.7;        /* fairly vivid pills */
+        --contrast: 1;
+    }
+
+    /* ── Header toolbar ── */
+    .toolbar {
+        display: flex; align-items: center; gap: var(--s);
+        padding: 0.6em calc(var(--s) * 1.2);
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+    }
+    .toolbar h1 { --type: 1; --contrast: 1; flex: 1; }
+    .toolbar .ctrl {
+        display: flex; align-items: center; gap: 0.5em;
+        padding: 0.35em 0.7em;
+        border: 1px solid var(--border);
+        border-radius: calc(var(--cfg-radius) * 0.75);
+        font-family: var(--font-mono); --type: -1;
+        cursor: pointer;
+        background: var(--bg);
+    }
+    .toolbar select.ctrl { appearance: none; -webkit-appearance: none; padding-right: 1.5em; }
+
+    .hue-slider {
+        display: flex; align-items: center; gap: 0.5em;
+        font-family: var(--font-mono); --type: -1; --contrast: 0.7;
+    }
+    .hue-slider input[type=range] { width: 120px; }
+
+    /* ── Primary button override — color mode ── */
+    .btn.pri { --color: 1; }
+    .btn.sec { --depth: 1; }
+</style>
+</head>
+<body>
+
+<div class="page stack">
+
+    <header class="surface toolbar">
+        <h1>Revenue Dashboard</h1>
+
+        <label class="hue-slider">
+            hue
+            <input type="range" min="0" max="360" value="220"
+                   oninput="document.documentElement.style.setProperty('--cfg-hue', this.value); document.getElementById('hue-val').textContent = this.value">
+            <span id="hue-val">220</span>
+        </label>
+
+        <select class="ctrl" onchange="document.documentElement.setAttribute('data-ui-theme', this.value)">
+            <option value="system">theme: system</option>
+            <option value="light">theme: light</option>
+            <option value="dark">theme: dark</option>
+        </select>
+
+        <select class="ctrl" onchange="document.documentElement.setAttribute('data-ui-size', this.value)">
+            <option value="md">size: md</option>
+            <option value="sm">size: sm</option>
+            <option value="lg">size: lg</option>
+        </select>
+    </header>
+
+    <div class="dash">
+
+        <aside class="surface card stack">
+            <small>Navigation</small>
+            <div class="stack" style="--space: -1;">
+                <div class="nav-item active"><span class="dot"></span> Overview</div>
+                <div class="nav-item"><span class="dot"></span> Revenue</div>
+                <div class="nav-item"><span class="dot"></span> Customers</div>
+                <div class="nav-item"><span class="dot"></span> Products</div>
+                <div class="nav-item"><span class="dot"></span> Reports</div>
+                <div class="nav-item"><span class="dot"></span> Settings</div>
+            </div>
+
+            <hr>
+
+            <small>Team</small>
+            <ul class="activity">
+                <li>
+                    <div class="avatar" style="--hue: 220;">AK</div>
+                    <div class="body">Alice K.<br><span class="meta">online</span></div>
+                </li>
+                <li>
+                    <div class="avatar" style="--hue: 80;">MR</div>
+                    <div class="body">Mike R.<br><span class="meta">online</span></div>
+                </li>
+                <li>
+                    <div class="avatar" style="--hue: 340;">JP</div>
+                    <div class="body">Jamie P.<br><span class="meta">away · 2h</span></div>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="stack">
+
+            <div class="grid" style="--_col: 12rem;">
+                <div class="surface card stat stack">
+                    <span class="label">MRR</span>
+                    <span class="num">$48,230</span>
+                    <span class="delta suc">↑ 12.4% vs last mo</span>
+                </div>
+                <div class="surface card stat stack">
+                    <span class="label">Active Customers</span>
+                    <span class="num">1,284</span>
+                    <span class="delta suc">↑ 3.1%</span>
+                </div>
+                <div class="surface card stat stack">
+                    <span class="label">Churn</span>
+                    <span class="num">2.8%</span>
+                    <span class="delta suc">↓ 0.4pp</span>
+                </div>
+                <div class="surface card stat stack">
+                    <span class="label">NPS</span>
+                    <span class="num">64</span>
+                    <span class="delta suc">↑ 5</span>
+                </div>
+            </div>
+
+            <div class="flank" style="--_flank: 22rem;">
+
+                <section class="surface card stack">
+                    <div class="split">
+                        <h3>Weekly Revenue</h3>
+                        <small>last 7 days</small>
+                    </div>
+                    <div class="bars">
+                        <div class="bar" style="height: 42%"></div>
+                        <div class="bar" style="height: 58%"></div>
+                        <div class="bar" style="height: 71%"></div>
+                        <div class="bar" style="height: 49%"></div>
+                        <div class="bar hl" style="height: 88%"></div>
+                        <div class="bar" style="height: 67%"></div>
+                        <div class="bar" style="height: 54%"></div>
+                    </div>
+                    <div class="bar-labels">
+                        <span>Mon</span><span>Tue</span><span>Wed</span>
+                        <span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                    </div>
+                </section>
+
+                <section class="surface card stack">
+                    <div class="split">
+                        <h3>Activity</h3>
+                        <small>today</small>
+                    </div>
+                    <ul class="activity">
+                        <li>
+                            <div class="avatar" style="--hue: 220;">AK</div>
+                            <div class="body">Closed <strong>Acme Corp</strong> · $4,800<br>
+                                <span class="meta">12 min ago</span></div>
+                        </li>
+                        <li>
+                            <div class="avatar" style="--hue: 80;">MR</div>
+                            <div class="body">Deployed <code>v0.8.2</code> to production<br>
+                                <span class="meta">1h ago</span></div>
+                        </li>
+                        <li>
+                            <div class="avatar" style="--hue: 340;">JP</div>
+                            <div class="body">Opened ticket <code>#1482</code><br>
+                                <span class="meta">3h ago</span></div>
+                        </li>
+                        <li>
+                            <div class="avatar" style="--hue: 180;">SL</div>
+                            <div class="body">Joined the team<br>
+                                <span class="meta">yesterday</span></div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+            <section class="surface card stack">
+                <div class="split">
+                    <h3>Recent Orders</h3>
+                    <div class="row">
+                        <button class="btn sec">Export</button>
+                        <button class="btn pri">New order</button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order</th><th>Customer</th><th>Status</th>
+                            <th class="num">Amount</th><th class="num">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>#A-1482</code></td><td>Acme Corp</td>
+                            <td><span class="pill suc">paid</span></td>
+                            <td class="num">$4,800</td><td class="num">Apr 17</td></tr>
+                        <tr><td><code>#A-1481</code></td><td>Globex</td>
+                            <td><span class="pill wrn">pending</span></td>
+                            <td class="num">$2,100</td><td class="num">Apr 16</td></tr>
+                        <tr><td><code>#A-1480</code></td><td>Initech</td>
+                            <td><span class="pill suc">paid</span></td>
+                            <td class="num">$960</td><td class="num">Apr 16</td></tr>
+                        <tr><td><code>#A-1479</code></td><td>Hooli</td>
+                            <td><span class="pill dgr">failed</span></td>
+                            <td class="num">$3,250</td><td class="num">Apr 15</td></tr>
+                        <tr><td><code>#A-1478</code></td><td>Pied Piper</td>
+                            <td><span class="pill suc">paid</span></td>
+                            <td class="num">$1,440</td><td class="num">Apr 15</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="surface card stack">
+                <h3>Surface Depth Demo</h3>
+                <p>Each nested <code>.surface</code> is one step darker than its parent.</p>
+                <div class="surface card">
+                    <p><strong>Level 1</strong></p>
+                    <div class="surface card">
+                        <p><strong>Level 2</strong></p>
+                        <div class="surface card">
+                            <p><strong>Level 3</strong></p>
+                            <div class="surface card">
+                                <p><strong>Level 4</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('pointerenter', () => btn.classList.add('hover'));
+        btn.addEventListener('pointerleave', () => btn.classList.remove('hover', 'active'));
+        btn.addEventListener('pointerdown',  () => btn.classList.add('active'));
+        btn.addEventListener('pointerup',    () => btn.classList.remove('active'));
+    });
+</script>
+
+</body>
+</html>

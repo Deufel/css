@@ -1,0 +1,22 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   _order.css — global @layer cascade order
+
+   Load this file FIRST. It establishes the cascade order for every layer
+   used across reset.css, core.css, themes.css, and app.css. Any file that
+   declares a layer later will slot into the order defined here.
+══════════════════════════════════════════════════════════════════════════ */
+
+@layer reset.fix,
+       reset.opinion,
+       core.color,
+       core.type,
+       core.space,
+       theme,
+       layout.page,
+       layout.composition,
+       component.base,
+       component.simple,
+       component.complex,
+       utility.layout,
+       utility.exceptions,
+       utility.important;
