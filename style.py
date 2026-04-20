@@ -254,13 +254,9 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ## 4 theme
-    """)
-    return
+    - should this layer exist? ? (it is not even have anything that can go in a layer...
+    - you could make the argument that these belong in their core laers probable makes more sense aswell honestly.
 
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
     ```css
 
     :root {
@@ -274,6 +270,72 @@ def _(mo):
 
     @property --cfg-page-gap { syntax: "<number>"; inherits: true; initial-value: 1 }
     @property --cfg-radius { syntax: "<length>"; inherits: true; initial-value: 8px }
+    @property --cfg-motion { syntax: "<number>"; inherits: true; initial-value: 1 }
+
+
+
+    /* you SHOULD be very carefull befor changing these settings a bit of magic numbers here but colors are a mf */
+    @layer theme {
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),[data-ui-theme="system"] {
+                --cfg-top-l:33;
+                --cfg-base-step: 2.5;
+                --cfg-surf-chroma: 0.010;
+                --cfg-surf-mid: 33.5;
+                --cfg-surf-rng: 27.5
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            [data-ui-theme="system"] {
+                --cfg-top-l:88;
+                --cfg-base-step: 4;
+                --cfg-surf-chroma: 0.018;
+                --cfg-surf-mid: 60.5;
+                --cfg-surf-rng: 55
+            }
+        }
+
+        [data-ui-theme="light"] {
+            --cfg-top-l: 88;
+            --cfg-base-step: 4;
+            --cfg-curve-k: 0.6;
+            --cfg-surf-chroma: 0.018;
+            --cfg-surf-mid: 60.5;
+            --cfg-surf-rng: 55
+        }
+
+        [data-ui-theme="dark"] {
+            --cfg-top-l: 33;
+            --cfg-base-step: 2.5;
+            --cfg-curve-k: 0.6;
+            --cfg-surf-chroma: 0.010;
+            --cfg-surf-mid: 33.5;
+            --cfg-surf-rng: 27.5
+        }
+
+
+        /* MOTION */
+        @media (prefers-reduced-motion:reduce) { :root { --cfg-motion: 0 } }
+        [data-ui-motion="off"] { --cfg-motion: 0 }
+        [data-ui-motion="on"] { --cfg-motion: 1 }
+        [data-ui-motion="debug"] { --cfg-motion: 10 }
+
+
+        /* TYPE */
+        [data-ui-size="sm"] { --cfg-type-scale: 0.875; --cfg-space-scale: 0.875 }
+        [data-ui-size="md"] { --cfg-type-scale: 1; --cfg-space-scale: 1 }
+        [data-ui-size="lg"] { --cfg-type-scale: 1.25; --cfg-space-scale: 1.1 }
+
+
+        /* SEMANTIC COLORS */
+        .suc { --hue: 145 }
+        .inf { --hue: 240 }
+        .wrn { --hue: 75 }
+        .dgr { --hue: 25 }
+
+    }
+
     ```
     """)
     return
@@ -449,35 +511,16 @@ def _(mo):
     ```css
     @layer component.base {
         h1 {
-            --type: 4;
-            --contrast: 1;
-            font-family: var(--font-heading);
-            font-weight: 400
-        }
-
-        h2 {
-            --type: 3;
-            --contrast: 0.95;
-            font-family: var(--font-heading);
-            font-weight: 400
-        }
-
-        h3 {
             --type: 2;
-            --contrast: 0.9;
-            font-family: var(--font-heading);
-            font-weight: 500
-        }
-
-        h4 {
-            --type: 1;
-            --contrast: 0.88;
+            --contrast: .5;
+            --color: 1;
+            --background-color: transparent;
             font-family: var(--font-heading);
             font-weight: 600
         }
 
         p {
-            --contrast: 0.85;
+            --contrast: 1;
             font-family: var(--font-body)
         }
 
@@ -491,12 +534,6 @@ def _(mo):
         code {
             --type: -0.5;
             --contrast: 0.8;
-            font-family: var(--font-mono)
-        }
-
-        pre {
-            --type: -0.5;
-            --contrast: 0.75;
             font-family: var(--font-mono)
         }
 
@@ -527,8 +564,6 @@ def _(mo):
             justify-content: center;
             padding: 0.15em 0.6em;
             border-radius: 99px;
-            font-size: 0.75em;
-            font-weight: 600
         }
 
         :where(hr) {
@@ -544,6 +579,14 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ## 6B Component Simple
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Button
     """)
     return
 
@@ -606,9 +649,38 @@ def _(mo):
             }
         }
 
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Card
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ```css
+    @layer{
+
         .card {
-            box-shadow: inset 0 1px 0 oklch(from var(--bg) calc(l + 0.1) c h)
+            box-shadow: inset 0 1px 0 oklch(from var(--bg) calc(l + 0.1) c h);
+            border-radius: var(--cfg-radius);
+            border: 1px solid var(--border);
         }
+
+        .Card {
+            box-shadow: inset 0 1px 0 oklch(from var(--bg) calc(l + 0.1) c h);
+            border-radius: var(--cfg-radius);
+            border: 1px solid var(--Border);
+        }
+
     }
     ```
     """)
@@ -626,6 +698,28 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    ### Popover - auto align
+        [] test add timing to motion styles
+        [] test auto layout
+
+    ```css
+    @layer component.complex {
+      [popover].popover { position: fixed; inset: auto; margin: 0; border: none; min-width: clamp(10rem, 40vw, 18rem); max-width: min(90vw, 24rem); max-height: 80vh; overflow: auto; --_bg: --surface(1); background: var(--_bg); color: --contrast(0.7); border-radius: 0.5rem; box-shadow: --shadow(5); padding: --space(1); opacity: 1; transform: scale(1); position-area: self-block-start self-inline-end; position-try-order: most-block-size; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; position-visibility: anchors-visible; transition: opacity calc(var(--_motion) * 0.18s) ease-out, transform calc(var(--_motion) * 0.18s) ease-out, display calc(var(--_motion) * 0.18s) allow-discrete, overlay calc(var(--_motion) * 0.18s) allow-discrete; }
+      [popover].popover:not(:popover-open) { opacity: 0; transform: scale(0.95); }
+      [popover].popover.below-start { position-area: self-block-end self-inline-start; }
+      [popover].popover.below-end { position-area: self-block-end self-inline-end; }
+      [popover].popover.above-start { position-area: self-block-start self-inline-start; }
+      [popover].popover.above-end { position-area: self-block-start self-inline-end; }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Dialog
     ```css
     @layer component.complex {
         :where(dialog) {
@@ -654,157 +748,37 @@ def _(mo):
         }
     }
 
+    ```
+    """)
+    return
 
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 7A utility.layout
+
+    ```css
 
     @layer utility.layout {
-        :where(.mobile,.tablet,.desktop) {
-            display: none
-        }
+        :where(.mobile,.tablet,.desktop) { display: none }
+        @media (width < 768px) { : where(.mobile) { display:revert-layer } }
+        @media (768px <= width < 1024px) { : where(.tablet) { display:revert-layer } }
+        @media (width >= 1024px) { : where(.desktop) { display:revert-layer } }
 
-        @media (width < 768px) {
-            : where(.mobile) {
-                display:revert-layer
-            }
-        }
-
-        @media (768px <= width < 1024px) {
-            : where(.tablet) {
-                display:revert-layer
-            }
-        }
-
-        @media (width >= 1024px) {
-            : where(.desktop) {
-                display:revert-layer
-            }
-        }
-
-        @media print {
-            :where(body) {
-                min-height: 0
-            }
-        }
+        @media print { :where(body) { min-height: 0 } } /* does this actualy do anything ? */
     }
 
     @layer utility.exceptions {
-        :where(.vh) {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip-path: inset(50%);
-            white-space: nowrap;
-            border: 0
-        }
+        :where(.vh) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0 }
     }
 
     @layer utility.important {
-        :where([hidden]) {
-            display: none !important
-        }
-
-        @media print {
-            :where(.np) {
-                display: none !important
-            }
-        }
+        :where([hidden]) { display: none !important }
+        @media print { :where(.np) { display: none !important } }
     }
 
-    @property --cfg-motion {
-        syntax: "<number>";
-        inherits: true;
-        initial-value: 1
-    }
 
-    @layer theme {
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),[data-ui-theme="system"] {
-                --cfg-top-l:33;
-                --cfg-base-step: 2.5;
-                --cfg-surf-chroma: 0.010;
-                --cfg-surf-mid: 33.5;
-                --cfg-surf-rng: 27.5
-            }
-        }
-
-        @media (prefers-color-scheme: light) {
-            [data-ui-theme="system"] {
-                --cfg-top-l:88;
-                --cfg-base-step: 4;
-                --cfg-surf-chroma: 0.018;
-                --cfg-surf-mid: 60.5;
-                --cfg-surf-rng: 55
-            }
-        }
-
-        [data-ui-theme="light"] {
-            --cfg-top-l: 88;
-            --cfg-base-step: 4;
-            --cfg-curve-k: 0.6;
-            --cfg-surf-chroma: 0.018;
-            --cfg-surf-mid: 60.5;
-            --cfg-surf-rng: 55
-        }
-
-        [data-ui-theme="dark"] {
-            --cfg-top-l: 33;
-            --cfg-base-step: 2.5;
-            --cfg-curve-k: 0.6;
-            --cfg-surf-chroma: 0.010;
-            --cfg-surf-mid: 33.5;
-            --cfg-surf-rng: 27.5
-        }
-
-        @media (prefers-reduced-motion:reduce) {
-            :root {
-                --cfg-motion: 0
-            }
-        }
-
-        [data-ui-motion="off"] {
-            --cfg-motion: 0
-        }
-
-        [data-ui-motion="on"] {
-            --cfg-motion: 1
-        }
-
-        [data-ui-motion="debug"] {
-            --cfg-motion: 10
-        }
-
-        [data-ui-size="sm"] {
-            --cfg-type-scale: 0.875;
-            --cfg-space-scale: 0.875
-        }
-
-        [data-ui-size="md"] {
-            --cfg-type-scale: 1;
-            --cfg-space-scale: 1
-        }
-
-        [data-ui-size="lg"] {
-            --cfg-type-scale: 1.25;
-            --cfg-space-scale: 1.1
-        }
-
-        .suc {
-            --hue: 145
-        }
-
-        .inf {
-            --hue: 240
-        }
-
-        .wrn {
-            --hue: 75
-        }
-
-        .dgr {
-            --hue: 25
-        }
     ```
     """)
     return
