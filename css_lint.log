@@ -1,0 +1,88 @@
+@PROPERTIES
+  --_c                   <number>     local  = 0.018  static/core.css:148
+  --_c01                 <number>     local  = 0  static/core.css:143
+  --_col-c               <number>     local  = 0.1  static/core.css:145
+  --_col-l               <percentage> local  = 90%  static/core.css:144
+  --_h                   <number>     local  = 220  static/core.css:149
+  --_k                   <number>     local  = 0  static/core.css:146
+  --_l                   <percentage> local  = 88%  static/core.css:147
+  --_l-shift             <number>     inherit  = 0  static/core.css:129
+  --_naive               <number>     local  = 88  static/core.css:140
+  --_surf-l              <percentage> local  = 88%  static/core.css:142
+  --_t                   <number>     local  = 0.5  static/core.css:141
+  --bg                   <color>      inherit  = oklch(88% 0.018 220)  static/core.css:126
+  --cfg-base-step        <number>     inherit  = 4  static/core.css:106
+  --cfg-color-alpha      <number>     inherit  = 1  static/core.css:96
+  --cfg-color-muted-c    <number>     inherit  = 0.1  static/core.css:100
+  --cfg-color-muted-l    <percentage> inherit  = 90%  static/core.css:99
+  --cfg-color-vivid-c    <number>     inherit  = 0.4  static/core.css:102
+  --cfg-color-vivid-l    <percentage> inherit  = 70%  static/core.css:101
+  --cfg-curve-k          <number>     inherit  = 0.6  static/core.css:107
+  --cfg-fluid-max-vp     <length>     inherit  = 1280px  static/core.css:81
+  --cfg-fluid-min-vp     <length>     inherit  = 320px  static/core.css:80
+  --cfg-hue              <number>     inherit  = 220  static/core.css:94
+  --cfg-motion           <number>     inherit  = 1  static/themes.css:19
+  --cfg-page-gap         <number>     inherit  = 1  static/app.css:25
+  --cfg-radius           <length>     inherit  = 8px  static/app.css:26
+  --cfg-space-max-ratio  <number>     inherit  = 1.6  static/core.css:271
+  --cfg-space-min-ratio  <number>     inherit  = 1.5  static/core.css:270
+  --cfg-space-scale      <number>     inherit  = 1  static/core.css:269
+  --cfg-surf-chroma      <number>     inherit  = 0.018  static/core.css:95
+  --cfg-surf-mid         <number>     inherit  = 60.5  static/core.css:108
+  --cfg-surf-rng         <number>     inherit  = 55  static/core.css:109
+  --cfg-top-l            <number>     inherit  = 88  static/core.css:105
+  --cfg-type-max-ratio   <number>     inherit  = 1.28  static/core.css:237
+  --cfg-type-min-ratio   <number>     inherit  = 1.2  static/core.css:236
+  --cfg-type-scale       <number>     inherit  = 1  static/core.css:235
+  --color                <number>     inherit  = -1  static/core.css:120
+  --contrast             <number>     inherit  = 1  static/core.css:123
+  --depth                <number>     local  = 0  static/core.css:119
+  --hue-shift            <number>     inherit  = 0  static/core.css:122
+  --s                    <length>     inherit  = 0.5rem  static/core.css:267
+  --space                <number>     inherit  = 0  static/core.css:266
+  --type                 <number>     local  = 0  static/core.css:233
+
+LAYERS
+    1. reset.fix                    ✓
+    2. reset.opinion                ✓
+    3. core.color                   ✓
+    4. core.type                    ✓
+    5. core.spacing                 ✓
+    6. layout.page                  ✓
+    7. layout.composition           ✓
+    8. component.base               ✓
+    9. component.simple             ✓
+   10. component.complex            ✓
+   11. utility.layout               ✓
+   12. utility.exceptions           ✓
+   13. utility.important            ✓
+   14. cascade order
+
+   Load this file FIRST. It establishes the cascade order for every layer
+   used across reset.css ✗
+   15. core.css                     ✗
+   16. themes.css                   ✗
+   17. and app.css. Any file that
+   declares a layer later will slot into the order defined here.
+══════════════════════════════════════════════════════════════════════════ */
+
+@layer reset.fix ✗
+   18. core.space                   ✓
+   19. theme                        ✓
+
+VARIABLES
+  declared: 66  referenced: 82
+  unreferenced: --font-kbd
+
+ISSUES
+  [WRN] :0 layer 'cascade order
+
+   Load this file FIRST. It establishes the cascade order for every layer
+   used across reset.css' declared but unused
+  [WRN] :0 layer 'core.css' declared but unused
+  [WRN] :0 layer 'themes.css' declared but unused
+  [WRN] :0 layer 'and app.css. Any file that
+   declares a layer later will slot into the order defined here.
+══════════════════════════════════════════════════════════════════════════ */
+
+@layer reset.fix' declared but unused

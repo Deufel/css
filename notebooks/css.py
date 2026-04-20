@@ -3,6 +3,10 @@ import marimo
 __generated_with = "0.23.1"
 app = marimo.App(width="medium")
 
+with app.setup:
+
+    from pathlib import Path
+
 
 @app.cell
 def _():
@@ -10,6 +14,14 @@ def _():
 
 
     return (mo,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # CSS
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -90,21 +102,17 @@ def _(mo):
         :where(h1,h2,h3,h4,h5,h6) { text-wrap: balance }
         :where(img,picture,video,canvas,svg) { height: auto }
         :where(svg) { color: currentColor }
-        :where(button,[role="button"],summary,label[for],input[type="file"]: :file-selector-button) {
-            cursor:pointer;
-            user-select: none;
-            -webkit-user-select: none
-        }
+        :where(button,[role="button"],summary,label[for],input[type="file"]::file-selector-button) { cursor: pointer; user-select: none; -webkit-user-select: none }
         :where(:disabled,[aria-disabled="true"]) { cursor: not-allowed }
         :where(table) { border-collapse: collapse }
         :where(fieldset) { border: 0; padding: 0; margin: 0; min-inline-size: 0 }
         :where(legend) { padding: 0 }
         :where(textarea) { resize: vertical }
-        :where(textarea: not([rows])) { min-block-size:10em }
+        :where(textarea:not([rows])) { min-block-size: 10em }
         :where(abbr[title]) { cursor: help; text-decoration: underline dotted }
         :where(summary) { list-style: none }
         :where(a) { text-decoration: none }
-        :where(input): autofill { box-shadow:inset 0 0 0 1000px var(--bg,transparent) }
+        :where(input):autofill { box-shadow: inset 0 0 0 1000px var(--bg, transparent) }
         :where(ul,ol): where([role="list"]) { list-style:none; padding: 0 }
         :where([hidden]) { display: none }
     }
@@ -117,64 +125,147 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ## 3A core.color
-    ```css
 
-    @property --cfg-hue { syntax: "<number>"; inherits: true; initial-value: 220 }
-    @property --cfg-surf-chroma { syntax: "<number>"; inherits: true; initial-value: 0.018 }
-    @property --cfg-color-alpha { syntax: "<number>"; inherits: true; initial-value: 1 }
-    @property --cfg-color-muted-l { syntax: "<percentage>"; inherits: true; initial-value: 90% }
-    @property --cfg-color-muted-c { syntax: "<number>"; inherits: true; initial-value: 0.05 }
-    @property --cfg-color-vivid-l { syntax: "<percentage>"; inherits: true; initial-value: 20% }
-    @property --cfg-color-vivid-c { syntax: "<number>"; inherits: true; initial-value: 0.4 }
-    @property --cfg-top-l { syntax: "<number>"; inherits: true; initial-value: 88 }
-    @property --cfg-base-step { syntax: "<number>"; inherits: true; initial-value: 4 }
-    @property --cfg-curve-k { syntax: "<number>"; inherits: true; initial-value: 0.6 }
-    @property --cfg-surf-mid { syntax: "<number>"; inherits: true; initial-value: 60.5 }
-    @property --cfg-surf-rng { syntax: "<number>"; inherits: true; initial-value: 55 }
-    @property --depth { syntax: "<number>"; inherits: false; initial-value: 0 }
-    @property --color { syntax: "<number>"; inherits: true; initial-value: -1 }
-    @property --hue { syntax: "*"; inherits: true }
-    @property --hue-shift { syntax: "<number>"; inherits: true; initial-value: 0 }
-    @property --contrast { syntax: "<number>"; inherits: true; initial-value: 1 }
-    @property --bg { syntax: "<color>"; inherits: true; initial-value: oklch(88% 0.018 220) }
-    @property --_l-shift { syntax: "<number>"; inherits: true; initial-value: 0 }
-    @property --_naive { syntax: "<number>"; inherits: false; initial-value: 88 }
-    @property --_t { syntax: "<number>"; inherits: false; initial-value: 0.5 }
-    @property --_surf-l { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_c01 { syntax: "<number>"; inherits: false; initial-value: 0 }
-    @property --_col-l { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-    @property --_col-c { syntax: "<number>"; inherits: false; initial-value: 0.1 }
-    @property --_k { syntax: "<number>"; inherits: false; initial-value: 0 }
-    @property --_l { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_c { syntax: "<number>"; inherits: false; initial-value: 0.018 }
-    @property --_h { syntax: "<number>"; inherits: false; initial-value: 220 }
+    ```css
+    /* ─── Public API ─────────────────────────────────────
+       Structural (cascade-driven):
+         .surface                  opt-in to paint a surface; auto-nests
+         --color      -1..1        -1 = surface, 0..1 = muted..vivid
+         --hue        number       absolute hue override
+         --hue-shift  number       additive offset from --cfg-color-hue
+         --contrast   0..1         text ink strength
+
+       Stateful (component-driven, non-inheriting):
+         --lighten    -0.2..0.2    additive lightness nudge
+                                   (states like hover/active/disabled)
+
+       Computed outputs:
+         var(--bg)                 background color
+         var(--border)             quiet accent (neighbor of --bg)
+         var(--Border)             loud accent (stronger neighbor)
+
+       Semantic hue conveniences: .suc .inf .wrn .dgr
+       ────────────────────────────────────────────────── */
+
+    /* ---------- Config properties ---------- */
+    @property --cfg-color-hue          { syntax: "<number>";     inherits: true; initial-value: 220 }
+    @property --cfg-color-alpha        { syntax: "<number>";     inherits: true; initial-value: 1 }
+    @property --cfg-color-top-l        { syntax: "<number>";     inherits: true; initial-value: 88 }
+    @property --cfg-color-base-step    { syntax: "<number>";     inherits: true; initial-value: 4 }
+    @property --cfg-color-curve-k      { syntax: "<number>";     inherits: true; initial-value: 0.6 }
+    @property --cfg-color-surf-mid     { syntax: "<number>";     inherits: true; initial-value: 60.5 }
+    @property --cfg-color-surf-rng     { syntax: "<number>";     inherits: true; initial-value: 55 }
+    @property --cfg-color-surf-chroma  { syntax: "<number>";     inherits: true; initial-value: 0.018 }
+    @property --cfg-color-muted-l      { syntax: "<percentage>"; inherits: true; initial-value: 90% }
+    @property --cfg-color-muted-c      { syntax: "<number>";     inherits: true; initial-value: 0.05 }
+    @property --cfg-color-vivid-l      { syntax: "<percentage>"; inherits: true; initial-value: 20% }
+    @property --cfg-color-vivid-c      { syntax: "<number>";     inherits: true; initial-value: 0.3 }
+
+    /* ---------- Public API ---------- */
+    @property --depth       { syntax: "<number>"; inherits: false; initial-value: 0 }
+    @property --color       { syntax: "<number>"; inherits: true;  initial-value: -1 }
+    /* --hue intentionally has syntax "*" and no initial-value so that
+       var(--hue, calc(--cfg-color-hue + --hue-shift)) falls through
+       to the fallback until something explicitly sets --hue. Do NOT
+       "fix" this to <number> — it will break --hue-shift entirely. */
+    @property --hue         { syntax: "*"; inherits: true }
+    @property --hue-shift   { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --contrast    { syntax: "<number>"; inherits: true; initial-value: 1 }
+    @property --border { syntax: "<color>"; inherits: true; initial-value: oklch(74% 0.013 220) }
+    @property --Border { syntax: "<color>"; inherits: true; initial-value: oklch(60% 0.022 228) }
+
+    /* ---------- Private intermediates ---------- */
+    @property --_l-shift { syntax: "<number>";     inherits: true;  initial-value: 0 }
+    @property --_naive   { syntax: "<number>";     inherits: false; initial-value: 88 }
+    @property --_t       { syntax: "<number>";     inherits: false; initial-value: 0.5 }
+    @property --_surf-l  { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_c01     { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_col-l   { syntax: "<percentage>"; inherits: false; initial-value: 90% }
+    @property --_col-c   { syntax: "<number>";     inherits: false; initial-value: 0.1 }
+    @property --_k       { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_l       { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_c       { syntax: "<number>";     inherits: false; initial-value: 0.018 }
+    @property --_h       { syntax: "<number>";     inherits: false; initial-value: 220 }
 
     @layer core.color {
+
+        /* ---------- Theme detection (moved in from theme layer) ---------- */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),
+            [data-ui-theme="system"] {
+                --cfg-color-top-l: 33;
+                --cfg-color-base-step: 2.5;
+                --cfg-color-surf-chroma: 0.010;
+                --cfg-color-surf-mid: 33.5;
+                --cfg-color-surf-rng: 27.5
+            }
+        }
+        @media (prefers-color-scheme: light) {
+            [data-ui-theme="system"] {
+                --cfg-color-top-l: 88;
+                --cfg-color-base-step: 4;
+                --cfg-color-surf-chroma: 0.018;
+                --cfg-color-surf-mid: 60.5;
+                --cfg-color-surf-rng: 55
+            }
+        }
+        [data-ui-theme="light"] {
+            --cfg-color-top-l: 88;
+            --cfg-color-base-step: 4;
+            --cfg-color-curve-k: 0.6;
+            --cfg-color-surf-chroma: 0.018;
+            --cfg-color-surf-mid: 60.5;
+            --cfg-color-surf-rng: 55
+        }
+        [data-ui-theme="dark"] {
+            --cfg-color-top-l: 33;
+            --cfg-color-base-step: 2.5;
+            --cfg-color-curve-k: 0.6;
+            --cfg-color-surf-chroma: 0.010;
+            --cfg-color-surf-mid: 33.5;
+            --cfg-color-surf-rng: 27.5
+        }
+
+        /* Semantic hue conveniences — only set --hue. */
+        .suc { --hue: 145 }
+        .inf { --hue: 240 }
+        .wrn { --hue: 75 }
+        .dgr { --hue: 25 }
+
+        /* ---------- The formula ---------- */
         :where(*) {
-            --_naive: calc(var(--cfg-top-l) - var(--depth) * var(--cfg-base-step));
-            --_t: calc((var(--_naive) - var(--cfg-surf-mid)) / var(--cfg-surf-rng));
-            --_surf-l: calc((var(--cfg-top-l) - var(--depth) * var(--cfg-base-step) * (1 + var(--cfg-curve-k) * var(--_t) * var(--_t))) * 1%);
-            --_c01: clamp(0,var(--color),1);
-            --_col-l: calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
-            --_col-c: calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
-            --_k: clamp(0,calc(var(--color) + 1),1);
-            --_l: calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k));
-            --_c: calc(var(--cfg-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k));
-            --_h: var(--hue,calc(var(--cfg-hue) + var(--hue-shift)));
-            --bg: oklch( clamp(4%,calc(var(--_l) + var(--_l-shift) * 100%),97%) var(--_c) var(--_h) / var(--cfg-color-alpha) );
-            --border: oklch(from var(--bg) calc(l - 0.14) calc(c * 0.7) h);
-            --Border: oklch(from var(--bg) calc(l - 0.28) clamp(0.08,calc(c * 1.4),0.22) calc(h + 8));
-            color: oklch(from var(--bg) calc(l + (clamp(0,calc((0.5 - l) * 999),1) - l) * var(--contrast)) calc(c * (1 - var(--contrast))) h )
+            --_naive:  calc(var(--cfg-color-top-l) - var(--depth) * var(--cfg-color-base-step));
+            --_t:      calc((var(--_naive) - var(--cfg-color-surf-mid)) / var(--cfg-color-surf-rng));
+            --_surf-l: calc((var(--_naive) - var(--depth) * var(--cfg-color-base-step) * var(--cfg-color-curve-k) * var(--_t) * var(--_t)) * 1%);
+            --_c01:    clamp(0, var(--color), 1);
+            --_col-l:  calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
+            --_col-c:  calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
+            --_k:      clamp(0, calc(var(--color) + 1), 1);
+            --_l:      calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k));
+            --_c:      calc(var(--cfg-color-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k));
+            --_h:      var(--hue, calc(var(--cfg-color-hue) + var(--hue-shift)));
+            --bg: oklch(
+                clamp(4%, calc(var(--_l) + var(--_l-shift) * 100%), 97%)
+                var(--_c)
+                var(--_h)
+                / var(--cfg-color-alpha)
+            );
+            --border:        oklch(from var(--bg) calc(l - 0.14) calc(c * 0.7) h);
+            --Border: oklch(from var(--bg) calc(l - 0.28) clamp(0.08, calc(c * 1.4), 0.22) calc(h + 8));
+            color: oklch(from var(--bg)
+                calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
+                calc(c * (1 - var(--contrast)))
+                h
+            )
         }
 
         :where(*) { background-color: oklch(from var(--bg) l c h / var(--_k)) }
-        :where(body,.surface) { background-color: var(--bg) }
-        .surface:has(.surface) { --depth: 1 }
-        .surface:has(.surface .surface) { --depth: 2 }
-        .surface:has(.surface .surface .surface) { --depth: 3 }
-        .surface:has(.surface .surface .surface .surface) { --depth: 4 }
+        :where(body, .surface) { background-color: var(--bg) }
+        .surface:has(.surface)                                    { --depth: 1 }
+        .surface:has(.surface .surface)                           { --depth: 2 }
+        .surface:has(.surface .surface .surface)                  { --depth: 3 }
+        .surface:has(.surface .surface .surface .surface)         { --depth: 4 }
     }
-
     ```
     """)
     return
@@ -229,22 +320,40 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
-    @property --space { syntax: "<number>"; inherits: true; initial-value: 0 }
-    @property --s { syntax: "<length>"; inherits: true; initial-value: 0.5rem }
-    @property --cfg-space-scale { syntax: "<number>"; inherits: true; initial-value: 1 }
-    @property --cfg-space-min-ratio { syntax: "<number>"; inherits: true; initial-value: 1.5 }
-    @property --cfg-space-max-ratio { syntax: "<number>"; inherits: true; initial-value: 1.6 }
 
-    :root { --cfg-space-min: 0.25rem; --cfg-space-max: 0.5rem }
+    /* ============================================
+       CORE.SPACE — localized, non-inheriting
+       Public API: --space (input), --s (output)
+       ============================================ */
+
+    /* Space configs — co-located with the layer that uses them */
+    @property --cfg-space-scale     { syntax: "<number>"; inherits: true;  initial-value: 1 }
+    @property --cfg-space-min-ratio { syntax: "<number>"; inherits: true;  initial-value: 1.5 }
+    @property --cfg-space-max-ratio { syntax: "<number>"; inherits: true;  initial-value: 1.6 }
+    @property --cfg-space-min       { syntax: "<length>"; inherits: true;  initial-value: 0.25rem }
+    @property --cfg-space-max       { syntax: "<length>"; inherits: true;  initial-value: 0.5rem }
+
+    /* Public API — does NOT inherit. Each element decides its own spacing. */
+    @property --space { syntax: "<number>"; inherits: false; initial-value: 0 }
+    @property --s     { syntax: "<length>"; inherits: false; initial-value: 0.5rem }
+
+    /* Private intermediates — also non-inheriting so they don't leak */
+    @property --_s-min { syntax: "<length>"; inherits: false; initial-value: 0.25rem }
+    @property --_s-max { syntax: "<length>"; inherits: false; initial-value: 0.5rem }
 
     @layer core.space {
         :where(*) {
-            --_s-min: calc(var(--cfg-space-min) * pow(var(--cfg-space-min-ratio),var(--space)));
-            --_s-max: calc(var(--cfg-space-max) * pow(var(--cfg-space-max-ratio),var(--space)));
-            --s: calc( clamp( var(--_s-min),calc(var(--_s-min) + (var(--_s-max) - var(--_s-min)) * (100vi - var(--cfg-fluid-min-vp)) / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))),var(--_s-max) ) * var(--cfg-space-scale) )
+            --_s-min: calc(var(--cfg-space-min) * pow(var(--cfg-space-min-ratio), var(--space)));
+            --_s-max: calc(var(--cfg-space-max) * pow(var(--cfg-space-max-ratio), var(--space)));
+            --s: calc(
+                clamp(
+                    var(--_s-min),
+                    calc(var(--_s-min) + (var(--_s-max) - var(--_s-min)) * (100vi - var(--cfg-fluid-min-vp)) / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))),
+                    var(--_s-max)
+                ) * var(--cfg-space-scale)
+            )
         }
     }
-
     ```
     """)
     return
@@ -354,18 +463,21 @@ def _(mo):
     mo.md(r"""
     ```css
     @layer layout.page {
-        :where(body.app) {
+        :where(body) {
             --_pg-min: calc(var(--cfg-space-min) * pow(var(--cfg-space-min-ratio),var(--cfg-page-gap)));
             --_pg-max: calc(var(--cfg-space-max) * pow(var(--cfg-space-max-ratio),var(--cfg-page-gap)));
             --_page-gap: clamp( var(--_pg-min),calc(var(--_pg-min) + (var(--_pg-max) - var(--_pg-min)) * (100vi - var(--cfg-fluid-min-vp)) / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))),var(--_pg-max) );
-            position: fixed;
-            inset: 0;
-            overflow: hidden;
-            overscroll-behavior: none;
+
             display: grid;
-            grid-template: "header header header" auto "nav main aside" 1fr "footer footer footer" auto / auto 1fr auto;
+            grid-template:
+                "header header header" auto
+                "nav    main   aside"  1fr
+                "footer footer footer" auto /
+                 auto   1fr    auto;
             height: 100svh;
-            & #header,& #main,& #aside {
+            overscroll-behavior: none;
+
+            #header, #main, #aside {
                 overflow-y: auto;
                 scrollbar-gutter: stable
             }
@@ -382,7 +494,8 @@ def _(mo):
 
             & #nav {
                 grid-area: nav;
-                margin-right: var(--_page-gap)
+                margin-right: var(--_page-gap);
+                min-width: 180px;
             }
 
             & #aside {
@@ -514,7 +627,7 @@ def _(mo):
             --type: 2;
             --contrast: .5;
             --color: 1;
-            --background-color: transparent;
+            background-color: transparent;
             font-family: var(--font-heading);
             font-weight: 600
         }
@@ -595,12 +708,17 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
+
+    @property --_btn-t    { syntax: "<time>";   inherits: false; initial-value: 0.12s }
+    @property --_btn-jump { syntax: "<length>"; inherits: false; initial-value: -0.1em }
+
     @layer component.simple {
-        :where(.btn) {
+        :where(button, .btn) {
             --_btn-t: 0.12s;
+            --_btn-jump: -0.1em;
             --type: -1;
-            --_btn-jump: calc(-1 * 0.2em);
             --contrast: 0.85;
+
             -webkit-tap-highlight-color: transparent;
             min-width: 12ch;
             display: inline-flex;
@@ -608,47 +726,35 @@ def _(mo):
             justify-content: center;
             gap: 0.5em;
             padding: 0.35em 1em;
-            border: 1px solid var(--Border);
+            border: 1px solid var(--Button);
             border-radius: var(--cfg-radius);
             font-family: var(--font-mono);
             font-weight: 600;
             cursor: pointer;
+            contain: layout;
+
             box-shadow: calc(-1 * var(--_btn-jump)) calc(-1 * var(--_btn-jump)) 0 var(--Border);
             transform: translateX(var(--_btn-jump)) translateY(var(--_btn-jump));
             transition: calc(var(--cfg-motion) * var(--_btn-t)) ease-out;
-            &:has(> svg: only-child) {
-                min-width:unset;
+
+            &:has(> svg:only-child) {
+                min-width: unset;
                 padding: 0.25em;
                 height: calc(2.5 * 1em);
                 aspect-ratio: 1;
-                svg {
-                    pointer-events: none
-                }
+                svg { pointer-events: none }
             }
 
-            &.hover {
-                --_l-shift: 0.05;
-                --contrast: 1
-            }
-
+            &.hover  { --lighten: 0.2; --contrast: 1 }
             &.active {
-                --_l-shift: -0.05;
+                --lighten: -0.05;
                 --contrast: 0.6;
                 transform: translateX(0) translateY(0);
                 box-shadow: 0 0 0 var(--Border)
             }
-
-            &:focus-visible {
-                outline: 2px solid var(--Border);
-                outline-offset: var(--_btn-jump)
-            }
-
-            &.disabled {
-                cursor: not-allowed;
-                opacity: 0.45
-            }
+            &:focus-visible { outline: 2px solid var(--Border); outline-offset: var(--_btn-jump) }
+            &.disabled { cursor: not-allowed; opacity: 0.45 }
         }
-
     }
     ```
     """)
@@ -761,6 +867,7 @@ def _(mo):
     ```css
 
     @layer utility.layout {
+        :where(.nowrap) { white-space: nowrap; }
         :where(.mobile,.tablet,.desktop) { display: none }
         @media (width < 768px) { : where(.mobile) { display:revert-layer } }
         @media (768px <= width < 1024px) { : where(.tablet) { display:revert-layer } }
@@ -848,6 +955,135 @@ def _(mo):
 
     ```
     """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ```css
+    this is a test
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # HTML
+    """)
+    return
+
+
+@app.cell
+def _():
+    from html_tags import html_doc, head, body, link, meta, Datastar, MeCSS, Pointer, html_to_tag
+    from html_tags import h1, span, div, header, body, main, nav, aside, footer, link, a, svg, button 
+
+    return (
+        Datastar,
+        MeCSS,
+        Pointer,
+        a,
+        aside,
+        body,
+        button,
+        div,
+        footer,
+        h1,
+        head,
+        header,
+        html_doc,
+        html_to_tag,
+        link,
+        main,
+        nav,
+    )
+
+
+@app.cell
+def _(html_to_tag):
+    # Some icons
+    home = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M4 20h16v2H4zm16-10h2v10h-2zM2 10h2v10H2zm2-2h2v2H4zm2-2h2v2H6zm2-2h2v2H8zm2-2h4v2h-4zm4 2h2v2h-2zm2 2h2v2h-2zm2 2h2v2h-2zM8 14h2v6H8zm2-2h4v2h-4zm4 2h2v6h-2z"/></svg>''')
+    cal = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 4h14v2H5zm0 16h14v2H5zM3 10h2v10H3zm0-4h2v2H3zm16 0h2v2h-2zm0 4h2v10h-2zM3 8h18v2H3zm12-6h2v2h-2zM7 2h2v2H7zm0 10h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2z"/></svg>''')
+    icon = html_to_tag('''<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"><path fill="#2f88ff" fill-rule="evenodd" stroke="#000" d="M17 14L44 24V44H17L17 14Z" clip-rule="evenodd"/><path stroke="#000" d="M17 14L4 24L4 44H17"/><path stroke="#fff" d="M35 44V32L26 29L26 44"/><path stroke="#000" d="M44 44H17"/></g></svg>''')
+    return cal, home, icon
+
+
+@app.cell
+def _(
+    Datastar,
+    MeCSS,
+    Pointer,
+    a,
+    aside,
+    body,
+    button,
+    cal,
+    div,
+    footer,
+    h1,
+    head,
+    header,
+    home,
+    html_doc,
+    icon,
+    link,
+    main,
+    nav,
+):
+    page = html_doc( 
+            head(
+                Datastar(), 
+                MeCSS(), 
+                Pointer(),
+                link(rel="stylesheet", href="css.css")
+            ), 
+            body(cls = "surface")(
+                header(id="header", cls="split")(
+                    div(cls="flank")(
+                        icon,
+                        h1(cls="nowrap")("Demo Page")
+                    ),
+                    div(
+                        button(cls="surface btn")("dark")
+                       )
+                ),
+                nav(id = "nav", cls="stack")(
+                
+                    a(href="")(home, "home"),
+                    a(href="")(cal, "home"),
+                ),
+                main(id = "main", cls = "surface")(
+                    div(cls="cluster")(
+                        div(cls="surface", style="--hue: 3")(
+                            button(cls="btn")("button"),
+                            button(cls="btn")(home),
+                            button(cls="btn")("button"),
+                        ) 
+                    )
+                ),
+                aside(id = "aside", style = "--depth:3")("Aside with depth setting"),
+                footer(id = "footer", cls="surface", style="--hue: 29")("Footer")
+            )
+        )
+
+
+    write_html(page, "notebooks/index.html")
+    return
+
+
+@app.function
+def write_html(html: str, path: str | Path) -> Path:
+    from pathlib import Path
+    p = Path(path)
+    p.write_text(html, encoding="utf-8")
+    return p
+
+
+@app.cell
+def _():
     return
 
 

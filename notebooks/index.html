@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Deufel/toolbox@latest/js/me_css.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Deufel/toolbox@latest/js/pointer_events.js"></script>
+    <link rel="stylesheet" href="css.css">
+  </head>
+  <body class="surface">
+    <header id="header" class="split">
+      <div class="flank">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewbox="0 0 48 48">
+          <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+            <path fill="#2f88ff" fill-rule="evenodd" stroke="#000" d="M17 14L44 24V44H17L17 14Z" clip-rule="evenodd" />
+            <path stroke="#000" d="M17 14L4 24L4 44H17" />
+            <path stroke="#fff" d="M35 44V32L26 29L26 44" />
+            <path stroke="#000" d="M44 44H17" />
+          </g>
+        </svg>
+        <h1 class="nowrap">Demo Page</h1>
+      </div>
+      <div>
+        <button class="surface">dark</button>
+      </div>
+    </header>
+    <nav id="nav" class="stack">
+      <a href="">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24">
+          <path fill="currentColor" d="M4 20h16v2H4zm16-10h2v10h-2zM2 10h2v10H2zm2-2h2v2H4zm2-2h2v2H6zm2-2h2v2H8zm2-2h4v2h-4zm4 2h2v2h-2zm2 2h2v2h-2zm2 2h2v2h-2zM8 14h2v6H8zm2-2h4v2h-4zm4 2h2v6h-2z" />
+        </svg>
+        home
+      </a>
+      <a href="">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24">
+          <path fill="currentColor" d="M5 4h14v2H5zm0 16h14v2H5zM3 10h2v10H3zm0-4h2v2H3zm16 0h2v2h-2zm0 4h2v10h-2zM3 8h18v2H3zm12-6h2v2h-2zM7 2h2v2H7zm0 10h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2z" />
+        </svg>
+        home
+      </a>
+    </nav>
+    <main id="main" class="surface">
+      <div class="cluster">
+        <div class="surface" style="--hue: 3">
+          <button class="btn">button</button>
+          <button class="btn">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24">
+              <path fill="currentColor" d="M4 20h16v2H4zm16-10h2v10h-2zM2 10h2v10H2zm2-2h2v2H4zm2-2h2v2H6zm2-2h2v2H8zm2-2h4v2h-4zm4 2h2v2h-2zm2 2h2v2h-2zm2 2h2v2h-2zM8 14h2v6H8zm2-2h4v2h-4zm4 2h2v6h-2z" />
+            </svg>
+          </button>
+          <button class="btn">button</button>
+        </div>
+      </div>
+    </main>
+    <aside id="aside" style="--depth:3">Aside with depth setting</aside>
+    <footer id="footer" class="surface" style="--hue: 29">Footer</footer>
+  </body>
+</html>
