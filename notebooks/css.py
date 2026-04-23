@@ -134,10 +134,11 @@ def _(mo):
          --hue        number       absolute hue override
          --hue-shift  number       additive offset from --cfg-color-hue
          --contrast   0..1         text ink strength
+         --contrast-hue number     explicit Hue change for text(remember contrast is used to set `color only`)
+         --contrast-chroma 0..0.4  add some chroma retention to let color-text keep some color (or else goes to white/black)
 
        Stateful (component-driven, non-inheriting):
-         --lighten    -0.2..0.2    additive lightness nudge
-                                   (states like hover/active/disabled)
+         compose with the shifts; (--{hue, c, l}-shift)
 
        Computed outputs:
          var(--bg)                 background color
@@ -148,7 +149,7 @@ def _(mo):
        ────────────────────────────────────────────────── */
 
     /* ---------- Config properties ---------- */
-    @property --cfg-color-hue          { syntax: "<number>";     inherits: true; initial-value: 220 }
+    @property --cfg-color-hue          { syntax: "<number>";     inherits: true; initial-value: 120 }
     @property --cfg-color-alpha        { syntax: "<number>";     inherits: true; initial-value: 1 }
     @property --cfg-color-top-l        { syntax: "<number>";     inherits: true; initial-value: 88 }
     @property --cfg-color-base-step    { syntax: "<number>";     inherits: true; initial-value: 4 }
@@ -168,14 +169,22 @@ def _(mo):
        var(--hue, calc(--cfg-color-hue + --hue-shift)) falls through
        to the fallback until something explicitly sets --hue. Do NOT
        "fix" this to <number> — it will break --hue-shift entirely. */
-    @property --hue         { syntax: "*"; inherits: true }
-    @property --hue-shift   { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --hue       { syntax: "*";        inherits: true }
+    @property --hue-shift { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --l-shift   { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --c-shift   { syntax: "<number>"; inherits: true; initial-value: 0 }
+
+    /* these are used to set a background aware text color */
     @property --contrast    { syntax: "<number>"; inherits: true; initial-value: 1 }
-    @property --border { syntax: "<color>"; inherits: true; initial-value: oklch(74% 0.013 220) }
-    @property --Border { syntax: "<color>"; inherits: true; initial-value: oklch(60% 0.022 228) }
+    @property --contrast-hue    { syntax: "*"; inherits: true }
+    @property --contrast-chroma { syntax: "*"; inherits: true ; initial-value:0 }
+
+    /* Helper colors */
+    @property --border { syntax: "<color>"; inherits: true; initial-value: red }
+    @property --Border { syntax: "<color>"; inherits: true; initial-value: blue}
 
     /* ---------- Private intermediates ---------- */
-    @property --_l-shift { syntax: "<number>";     inherits: true;  initial-value: 0 }
+
     @property --_naive   { syntax: "<number>";     inherits: false; initial-value: 88 }
     @property --_t       { syntax: "<number>";     inherits: false; initial-value: 0.5 }
     @property --_surf-l  { syntax: "<percentage>"; inherits: false; initial-value: 88% }
@@ -245,26 +254,51 @@ def _(mo):
             --_c:      calc(var(--cfg-color-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k));
             --_h:      var(--hue, calc(var(--cfg-color-hue) + var(--hue-shift)));
             --bg: oklch(
-                clamp(4%, calc(var(--_l) + var(--_l-shift) * 100%), 97%)
-                var(--_c)
-                var(--_h)
-                / var(--cfg-color-alpha)
+                clamp(4%, calc(var(--_l) + var(--l-shift) * 100%), 97%)     /*Lightness 0-1   */
+                /* calc(var(--_c) + var(--c-shift))                            Chroma    0-.4  */
+       /*            calc(var(--_c) + var(--c-shift) * pow(var(--_l) / 100%, 2)) /*Chroma    0-.4  */
+                calc(var(--_c) + var(--c-shift) * (var(--_l) / 100%))
+
+                var(--_h)                                                   /*Hue       0-360 */
+                / var(--cfg-color-alpha)                                    /*Alpha     0-1   */
             );
-            --border:        oklch(from var(--bg) calc(l - 0.14) calc(c * 0.7) h);
+            --border: oklch(from var(--bg) calc(l - 0.14) calc(c * 0.7) h);
             --Border: oklch(from var(--bg) calc(l - 0.28) clamp(0.08, calc(c * 1.4), 0.22) calc(h + 8));
             color: oklch(from var(--bg)
                 calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
-                calc(c * (1 - var(--contrast)))
-                h
-            )
+                calc(c * (1 - var(--contrast)) + var(--contrast-chroma))
+                var(--contrast-hue, h)
+            );
         }
 
         :where(*) { background-color: oklch(from var(--bg) l c h / var(--_k)) }
-        :where(body, .surface) { background-color: var(--bg) }
+        :where(body, .surface, .btn) { background-color: var(--bg) }
         .surface:has(.surface)                                    { --depth: 1 }
         .surface:has(.surface .surface)                           { --depth: 2 }
         .surface:has(.surface .surface .surface)                  { --depth: 3 }
         .surface:has(.surface .surface .surface .surface)         { --depth: 4 }
+    }
+
+
+    @layer theme {
+
+        ::selection       { background: var(--Border); color: var(--bg) }
+        :focus-visible    { outline: 2px solid var(--Border); outline-offset: 2px }
+        .shadow { filter: drop-shadow(0 6px 12px oklch(from var(--bg) 20% 0.08 h / 0.4)) }
+        .glow { filter: drop-shadow(0 0 12px oklch(from var(--bg) 70% 0.2 h / 0.6)) }
+
+        /* script takes care of active and hover on btn classes easier then using mcss and the pointer api */
+        .hover  {
+            --l-shift:  0.04;
+            --contrast: calc(var(--contrast, 1) + 0.15) ;
+            --c-shift: 0.02;
+        }
+        .active {
+            --l-shift: -0.04;
+            --contrast: max(calc(var(--contrast, 1) - 0.2), .4)
+            --c-shift: -0.1;
+        }
+        .disabled { cursor: not-allowed; opacity: 0.45 }
     }
     ```
     """)
@@ -508,7 +542,7 @@ def _(mo):
                 margin-top: var(--_page-gap)
             }
 
-            & dialog: :backdrop {
+            & dialog::backdrop {
                 background-color:oklch(0 0 0 / 0.7)
             }
         }
@@ -603,6 +637,21 @@ def _(mo):
         .nowrap {
             flex-wrap: nowrap
         }
+
+        .grid-2x2,.grid-3x3,.grid-overlap{display:grid;height:100%}
+        .grid-2x2{grid-template:1fr 1fr/1fr 1fr}
+        .grid-3x3{grid-template:1fr 1fr 1fr/1fr 1fr 1fr}
+        .grid-overlap{grid-template:1fr/1fr}
+        .grid-overlap>*{grid-area:1/1/-1/-1}
+        .↖{grid-area:1/1;justify-self:start;align-self:start}
+        .↗{grid-area:1/-2;justify-self:end;align-self:start}
+        .↙{grid-area:-2/1;justify-self:start;align-self:end}
+        .↘{grid-area:-2/-2;justify-self:end;align-self:end}
+        .grid-3x3>.↑,.grid-overlap>.↑{grid-area:1/2;justify-self:center;align-self:start}
+        .grid-3x3>.←,.grid-overlap>.←{grid-area:2/1;justify-self:start;align-self:center}
+        .grid-3x3>.→,.grid-overlap>.→{grid-area:2/-2;justify-self:end;align-self:center}
+        .grid-3x3>.↓,.grid-overlap>.↓{grid-area:-2/2;justify-self:center;align-self:end}
+
     }
 
     ```
@@ -625,11 +674,6 @@ def _(mo):
     @layer component.base {
         h1 {
             --type: 2;
-            --contrast: .5;
-            --color: 1;
-            background-color: transparent;
-            font-family: var(--font-heading);
-            font-weight: 600
         }
 
         p {
@@ -708,6 +752,47 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
+    @layer componenet.simple {
+        :where(button, .btn) {
+            --type: -1;
+            --contrast: 0.85;
+
+            -webkit-tap-highlight-color: transparent;
+            min-width: 12ch;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5em;
+            padding: 0.35em 1em;
+            margin: 5px;
+            border: 1px solid var(--border);
+            border-radius: var(--cfg-radius);
+            font-family: var(--font-mono);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color, color, border-color;
+            transition-duration: calc(var(--cfg-motion) * 0.12s);
+            transition-timing-function: ease-out;
+
+
+            &:has(> svg:only-child) {
+                min-width: unset;
+                padding: 0.25em;
+                height: calc(2.5 * 1em);
+                aspect-ratio: 1;
+                svg { pointer-events: none }
+            }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ```OLD BUTTON
 
     @property --_btn-t    { syntax: "<time>";   inherits: false; initial-value: 0.12s }
     @property --_btn-jump { syntax: "<length>"; inherits: false; initial-value: -0.1em }
@@ -773,7 +858,7 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
-    @layer{
+    layer componenet.simple {
 
         .card {
             box-shadow: inset 0 1px 0 oklch(from var(--bg) calc(l + 0.1) c h);
@@ -866,12 +951,13 @@ def _(mo):
 
     ```css
 
+
     @layer utility.layout {
         :where(.nowrap) { white-space: nowrap; }
         :where(.mobile,.tablet,.desktop) { display: none }
-        @media (width < 768px) { : where(.mobile) { display:revert-layer } }
-        @media (768px <= width < 1024px) { : where(.tablet) { display:revert-layer } }
-        @media (width >= 1024px) { : where(.desktop) { display:revert-layer } }
+        @media (width < 768px) { :where(.mobile) { display:revert-layer } }
+        @media (768px <= width < 1024px) { :where(.tablet) { display:revert-layer } }
+        @media (width >= 1024px) { :where(.desktop) { display:revert-layer } }
 
         @media print { :where(body) { min-height: 0 } } /* does this actualy do anything ? */
     }
@@ -962,7 +1048,28 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
-    this is a test
+    .test_1 {
+        --hue: 140;
+        --color: .6;
+        --contrast: 0;
+        background-color: inherit;
+    }
+    .test_2 {
+        --hue: 45;
+        --color: .6;
+        --contrast: 0;
+        background-color: transparent;
+    }
+    .test_3 {
+        --color: .6;
+        --contrast: 0;
+        background-color: inherit;
+    }
+    .test_4 {
+        --color: .6;
+        --contrast: 0;
+        background-color: transparent;
+    }
     ```
     """)
     return
@@ -1051,7 +1158,7 @@ def _(
                        )
                 ),
                 nav(id = "nav", cls="stack")(
-                
+
                     a(href="")(home, "home"),
                     a(href="")(cal, "home"),
                 ),
