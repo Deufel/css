@@ -397,85 +397,40 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ## 4 theme
-    - should this layer exist? ? (it is not even have anything that can go in a layer...
-    - you could make the argument that these belong in their core laers probable makes more sense aswell honestly.
+    Q1: should this layer exist? ? (it is not even have anything that can go in a layer...
+    A1: yes this is basically the noramilization that needs to use the core or interact with it this layer makes sense Keep it
+
+    If the things can go into the core, or normalize put it there first if it is purly a layout theme then iti  goes here.
+
+    > reminder: --custom properties go on root (or can be scoped on whatever) ,
+    > [data-ui-motion="off"]
+    > @properties Must go top layer
+
+    Consider nameign all --cfg-theme for matching the other --cfg-color, --cfg-space..
+
 
     ```css
+    @property --cfg-radius   { syntax: "<length>"; inherits: true; initial-value: 8px }
+    @property --cfg-motion   { syntax: "<number>"; inherits: true; initial-value: 1 }
 
     :root {
-        --cfg-page-gap: 1;
-        --cfg-radius: 8px;
         --font-heading: "Iowan Old Style","Palatino Linotype","URW Palladio L",P052,serif;
         --font-body: Avenir,Montserrat,Corbel,"URW Gothic",source-sans-pro,sans-serif;
         --font-mono: ui-monospace,"SF Mono",Monaco,Menlo,Consolas,monospace;
         --font-kbd: "Courier New","Nimbus Mono PS",monospace
     }
 
-    @property --cfg-page-gap { syntax: "<number>"; inherits: true; initial-value: 1 }
-    @property --cfg-radius { syntax: "<length>"; inherits: true; initial-value: 8px }
-    @property --cfg-motion { syntax: "<number>"; inherits: true; initial-value: 1 }
+    /* MOTION */
+    @media (prefers-reduced-motion:reduce) { :root { --cfg-motion: 0 } }
+    [data-ui-motion="off"] { --cfg-motion: 0 }
+    [data-ui-motion="on"] { --cfg-motion: 1 }
+    [data-ui-motion="debug"] { --cfg-motion: 10 }
 
+    /* TYPE */
+    [data-ui-size="sm"] { --cfg-type-scale: 0.875; --cfg-space-scale: 0.875 }
+    [data-ui-size="md"] { --cfg-type-scale: 1; --cfg-space-scale: 1 }
+    [data-ui-size="lg"] { --cfg-type-scale: 1.25; --cfg-space-scale: 1.1 }
 
-
-    /* you SHOULD be very carefull befor changing these settings a bit of magic numbers here but colors are a mf */
-    @layer theme {
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),[data-ui-theme="system"] {
-                --cfg-top-l:33;
-                --cfg-base-step: 2.5;
-                --cfg-surf-chroma: 0.010;
-                --cfg-surf-mid: 33.5;
-                --cfg-surf-rng: 27.5
-            }
-        }
-
-        @media (prefers-color-scheme: light) {
-            [data-ui-theme="system"] {
-                --cfg-top-l:88;
-                --cfg-base-step: 4;
-                --cfg-surf-chroma: 0.018;
-                --cfg-surf-mid: 60.5;
-                --cfg-surf-rng: 55
-            }
-        }
-
-        [data-ui-theme="light"] {
-            --cfg-top-l: 88;
-            --cfg-base-step: 4;
-            --cfg-curve-k: 0.6;
-            --cfg-surf-chroma: 0.018;
-            --cfg-surf-mid: 60.5;
-            --cfg-surf-rng: 55
-        }
-
-        [data-ui-theme="dark"] {
-            --cfg-top-l: 33;
-            --cfg-base-step: 2.5;
-            --cfg-curve-k: 0.6;
-            --cfg-surf-chroma: 0.010;
-            --cfg-surf-mid: 33.5;
-            --cfg-surf-rng: 27.5
-        }
-
-
-        /* MOTION */
-        @media (prefers-reduced-motion:reduce) { :root { --cfg-motion: 0 } }
-        [data-ui-motion="off"] { --cfg-motion: 0 }
-        [data-ui-motion="on"] { --cfg-motion: 1 }
-        [data-ui-motion="debug"] { --cfg-motion: 10 }
-
-
-        /* TYPE */
-        [data-ui-size="sm"] { --cfg-type-scale: 0.875; --cfg-space-scale: 0.875 }
-        [data-ui-size="md"] { --cfg-type-scale: 1; --cfg-space-scale: 1 }
-        [data-ui-size="lg"] { --cfg-type-scale: 1.25; --cfg-space-scale: 1.1 }
-
-
-        /* SEMANTIC COLORS */
-        .suc { --hue: 145 }
-        .inf { --hue: 240 }
-        .wrn { --hue: 75 }
-        .dgr { --hue: 25 }
 
     }
 
@@ -496,6 +451,193 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
+    @property --cfg-page-gap { syntax: "<length>"; inherits: true; initial-value: 4px }
+
+    @layer layout.page {
+        body {
+            font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
+            background: var(--bg);
+
+            /* The container context that drives the layout switch */
+            container: app-shell / inline-size;
+
+            /* WIDE LAYOUT (default) — 3x3 grid with named areas.
+            Columns are `auto 1fr auto` so the nav/aside tracks
+            size to their explicit widths, and collapse to zero
+            when those dialogs leave the grid (position: fixed).
+            gap: 0 + explicit margins on #main avoids phantom gap
+            around collapsed tracks in narrow mode. */
+            display: grid;
+            grid-template:
+            "header header header" auto
+            "nav    main   aside"  1fr
+            "footer footer footer" auto /
+            auto   1fr    auto;
+            gap: 0;
+            padding: var(--gap);
+            height: 100svh;
+            overflow: hidden;  /* body never scrolls; #main does */
+        }
+
+        /* Only #main scrolls; header/footer stay pinned */
+        #main {
+            overflow-y: auto;
+            min-height: 0;   /* critical in grid — lets child scroll */
+        }
+        #header, #footer {
+            min-height: 0;
+        }
+
+      /* ---------------------------------------------------------
+         GRID-MODE DIALOG RESET
+         ---------------------------------------------------------
+         <dialog> comes with UA styles we need to neutralize so
+         it renders like a plain block in its grid slot:
+           - position: absolute → static
+           - display: none (when !open) → block (always visible in grid)
+           - border, margin, etc. → ours
+         --------------------------------------------------------- */
+        #nav, #aside {
+            position: static;
+            display: block;  /* overrides dialog's display:none */
+            max-width: none;
+            max-height: none;
+            /* Explicit widths let the `auto` columns size to these
+            in wide mode, and collapse to 0 when position: fixed */
+            width: var(--drawer-width);
+            height: auto;
+            margin: 0;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--cfg-radius);
+            background: var(--bg);
+            color: inherit;
+            overflow-y: auto;
+        }
+
+        #nav {
+            grid-area: nav;
+            margin-right: var(--gap);   /* gap against #main — leaves with the drawer */
+        }
+        #aside {
+            grid-area: aside;
+            margin-left: var(--gap);    /* gap against #main — leaves with the drawer */
+        }
+
+      /* Regular grid areas */
+        #header, #main, #footer {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg);
+        }
+        #header {
+            grid-area: header;
+            margin-bottom: var(--gap);  /* gap below header — always wanted */
+        }
+        #main    {
+            grid-area: main;
+            background: var(--bg);
+        }
+        #footer  {
+            grid-area: footer;
+            margin-top: var(--cfg-page-gap);     /* gap above footer — always wanted */
+        }
+
+      /* ---------------------------------------------------------
+         NARROW LAYOUT — container query switches everything
+         ---------------------------------------------------------
+         Below 900px of container width:
+           - Grid collapses to single column DONT THINK WE NEED THIS
+           - #nav / #aside removed from grid, positioned as fixed drawers KEEP IMPORTANT
+           - Triggers become visible USE UTILITY.LAYOUT BETTER
+         --------------------------------------------------------- */
+        @container app-shell (width < 900px) {
+            /* The drawers: fixed, off-screen by default, slide in when open */
+            #nav, #aside {
+                position: fixed;
+                /* Reset all inset sides, then set the one we want per drawer.
+                Dialog UA style is `inset: 0` + `margin: auto` which would
+                fight our positioning, so we null it explicitly. */
+                inset: 0 auto 0 auto;
+                margin: 0;
+                width: min(85vw, 320px);
+                max-width: 85vw;
+                height: 100svh;
+                border-radius: 0;
+                border: 0;
+                background: var(--bg);
+                padding: 1.5rem 1rem;
+                overflow-y: auto;
+
+                /* Animation setup — transition discrete props */
+                transition:
+                    translate calc(var(--cfg-motion) * 0.25s) ease-out,
+                    opacity   calc(var(--cfg-motion) * 0.25s) ease-out,
+                    display   calc(var(--cfg-motion) * 0.25s) allow-discrete,
+                    overlay   calc(var(--cfg-motion) * 0.25s) allow-discrete;
+                translate: 0 0;
+                opacity: 1;
+            }
+
+            #nav {
+                left: 0;
+                border-right: 1px solid var(--Border);
+            }
+            #aside {
+                left: auto;
+                right: 0;
+                border-left: 1px solid var(--Border);
+            }
+
+            /* Closed state */
+            #nav:not([open]) {
+                display: none;
+                translate: -100% 0;
+                opacity: 0;
+            }
+            #aside:not([open]) {
+                display: none;
+                translate: 100% 0;
+                opacity: 0;
+            }
+
+            /* Starting state when opening — what we animate FROM */
+            @starting-style {
+                #nav[open] {
+                    translate: -100% 0;
+                    opacity: 0;
+                }
+                #aside[open] {
+                    translate: 100% 0;
+                    opacity: 0;
+                }
+            }
+
+            /* Backdrop only appears in modal mode (top layer) */
+            #nav::backdrop,
+            #aside::backdrop {
+                background: oklch(0% 0 0 / 0.5);
+                transition:
+                    background-color calc(var(--cfg-motion) * 0.25s) ease-out,
+                    display          calc(var(--cfg-motion) * 0.25s) allow-discrete,
+                    overlay          calc(var(--cfg-motion) * 0.25s) allow-discrete;
+            }
+            #nav:not([open])::backdrop,
+            #aside:not([open])::backdrop {
+                background: oklch(0% 0 0 / 0);
+            }
+            @starting-style {
+                #nav[open]::backdrop,
+                #aside[open]::backdrop {
+                      background: oklch(0% 0 0 / 0);
+                }
+            }
+        } /* end of @container query */
+    }
+    ```
+
+    ```old css
     @layer layout.page {
         :where(body) {
             --_pg-min: calc(var(--cfg-space-min) * pow(var(--cfg-space-min-ratio),var(--cfg-page-gap)));
@@ -752,8 +894,8 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
-    @layer componenet.simple {
-        :where(button, .btn) {
+    @layer component.simple{
+        :where(.btn) {
             --type: -1;
             --contrast: 0.85;
 
@@ -913,7 +1055,7 @@ def _(mo):
     ### Dialog
     ```css
     @layer component.complex {
-        :where(dialog) {
+        :where(dialog.modal) {
             border: 1px solid var(--border);
             border-radius: var(--cfg-radius);
             padding: 0;
@@ -955,9 +1097,9 @@ def _(mo):
     @layer utility.layout {
         :where(.nowrap) { white-space: nowrap; }
         :where(.mobile,.tablet,.desktop) { display: none }
-        @media (width < 768px) { :where(.mobile) { display:revert-layer } }
-        @media (768px <= width < 1024px) { :where(.tablet) { display:revert-layer } }
-        @media (width >= 1024px) { :where(.desktop) { display:revert-layer } }
+        @media (         width <   480px) { :where(.mobile)  { display:revert-layer } }
+        @media (480px <= width <  1024px) { :where(.tablet)  { display:revert-layer } }
+        @media (         width >= 1024px) { :where(.desktop) { display:revert-layer } }
 
         @media print { :where(body) { min-height: 0 } } /* does this actualy do anything ? */
     }
