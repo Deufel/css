@@ -326,7 +326,7 @@ def _(mo):
     @property --cfg-type-max-ratio { syntax: "<number>"; inherits: true; initial-value: 1.28 }
 
     :root { --cfg-fluid-min-vp: 320px; --cfg-fluid-max-vp: 1280px }
-    :root { --cfg-type-min: 0.9375rem; --cfg-type-max: 1.0625rem }
+    :root { --cfg-type-min: 0.85rem; --cfg-type-max: 1.0625rem }
 
     @layer core.type {
         :where(*) {
@@ -354,6 +354,48 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
+        /* ============================================
+           CORE.SPACE
+
+           NOTE: @property initial-values for <length> MUST be
+           computationally independent — no rem, em, %, vw, etc.
+           Use px in @property, then set the "real" default in a rule.
+           ============================================ */
+
+        @property --space { syntax: "<number>"; inherits: false; initial-value: 0 }
+        @property --s     { syntax: "<length>"; inherits: false; initial-value: 0px }
+
+        @property --cfg-space-base  { syntax: "<length>"; inherits: true; initial-value: 8px }
+        @property --cfg-space-ratio { syntax: "<number>"; inherits: true; initial-value: 1.5 }
+        @property --cfg-space-scale { syntax: "<number>"; inherits: true; initial-value: 1 }
+
+        /* Real defaults (rem-based) set here, not in @property */
+        :where(html) {
+            --cfg-space-base: 0.5rem;
+        }
+
+        :where(*) {
+            --s: calc(
+                var(--cfg-space-base) *
+                pow(var(--cfg-space-ratio), var(--space)) *
+                clamp(0.75, 100vi / 80rem, 1) *
+                var(--cfg-space-scale)
+            );
+        }
+
+        :where(.m)  { margin:  var(--s) }
+        :where(.p)  { padding: var(--s) }
+        :where(.mx) { margin-inline:  var(--s) }
+        :where(.my) { margin-block:   var(--s) }
+        :where(.px) { padding-inline: var(--s) }
+        :where(.py) { padding-block:  var(--s) }
+
+        [data-ui-space="sm"] { --cfg-space-scale: 0.875 }
+        [data-ui-space="md"] { --cfg-space-scale: 1 }
+        [data-ui-space="lg"] { --cfg-space-scale: 1.2 }
+    ```
+
+    ```old css
 
     /* ============================================
        CORE.SPACE — localized, non-inheriting
@@ -442,7 +484,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## 5 layout.page
+    ## 5A layout.page
     """)
     return
 
@@ -451,7 +493,13 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
-    @property --cfg-page-gap { syntax: "<length>"; inherits: true; initial-value: 4px }
+    @property --cfg-layout-radius   { syntax: "<length>"; inherits: true; initial-value: 4px; }
+    @property --cfg-layout-page-gap { syntax: "<length>"; inherits: true; initial-value: 6px; }
+
+    :where(html) {
+        --cfg-layout-radius: clamp(0px, calc(100vi - 100%) * 1e5, 0.5rem);
+        --cfg-layout-page-gap: clamp(0px, calc(100vi - 100%) * 1e5, 1rem);
+    }
 
     @layer layout.page {
         body {
@@ -474,7 +522,6 @@ def _(mo):
             "footer footer footer" auto /
             auto   1fr    auto;
             gap: 0;
-            padding: var(--gap);
             height: 100svh;
             overflow: hidden;  /* body never scrolls; #main does */
         }
@@ -509,7 +556,7 @@ def _(mo):
             margin: 0;
             padding: 1rem;
             border: 1px solid var(--border);
-            border-radius: var(--cfg-radius);
+            border-radius: var(--cfg-layout-radius);
             background: var(--bg);
             color: inherit;
             overflow-y: auto;
@@ -517,23 +564,23 @@ def _(mo):
 
         #nav {
             grid-area: nav;
-            margin-right: var(--gap);   /* gap against #main — leaves with the drawer */
+            margin-right: var(--cfg-layout-page-gap);   /* gap against #main — leaves with the drawer */
         }
         #aside {
             grid-area: aside;
-            margin-left: var(--gap);    /* gap against #main — leaves with the drawer */
+            margin-left: var(--cfg-layout-page-gap);    /* gap against #main — leaves with the drawer */
         }
 
       /* Regular grid areas */
-        #header, #main, #footer {
+        #main{
             padding: 1rem;
             border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: var(--cfg-layout-radius);
             background: var(--bg);
         }
         #header {
             grid-area: header;
-            margin-bottom: var(--gap);  /* gap below header — always wanted */
+            margin-bottom: var(--cfg-layout-page-gap);  /* gap below header — always wanted */
         }
         #main    {
             grid-area: main;
@@ -541,7 +588,7 @@ def _(mo):
         }
         #footer  {
             grid-area: footer;
-            margin-top: var(--cfg-page-gap);     /* gap above footer — always wanted */
+            margin-top: var(--cfg-layout-page-gap);     /* gap above footer — always wanted */
         }
 
       /* ---------------------------------------------------------
@@ -552,7 +599,7 @@ def _(mo):
            - #nav / #aside removed from grid, positioned as fixed drawers KEEP IMPORTANT
            - Triggers become visible USE UTILITY.LAYOUT BETTER
          --------------------------------------------------------- */
-        @container app-shell (width < 900px) {
+        @container app-shell (width < 1024px) {
             /* The drawers: fixed, off-screen by default, slide in when open */
             #nav, #aside {
                 position: fixed;
@@ -634,60 +681,6 @@ def _(mo):
                 }
             }
         } /* end of @container query */
-    }
-    ```
-
-    ```old css
-    @layer layout.page {
-        :where(body) {
-            --_pg-min: calc(var(--cfg-space-min) * pow(var(--cfg-space-min-ratio),var(--cfg-page-gap)));
-            --_pg-max: calc(var(--cfg-space-max) * pow(var(--cfg-space-max-ratio),var(--cfg-page-gap)));
-            --_page-gap: clamp( var(--_pg-min),calc(var(--_pg-min) + (var(--_pg-max) - var(--_pg-min)) * (100vi - var(--cfg-fluid-min-vp)) / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))),var(--_pg-max) );
-
-            display: grid;
-            grid-template:
-                "header header header" auto
-                "nav    main   aside"  1fr
-                "footer footer footer" auto /
-                 auto   1fr    auto;
-            height: 100svh;
-            overscroll-behavior: none;
-
-            #header, #main, #aside {
-                overflow-y: auto;
-                scrollbar-gutter: stable
-            }
-
-            & #header {
-                grid-area: header;
-                margin-bottom: var(--_page-gap)
-            }
-
-            & #main {
-                grid-area: main;
-                min-width: 60%
-            }
-
-            & #nav {
-                grid-area: nav;
-                margin-right: var(--_page-gap);
-                min-width: 180px;
-            }
-
-            & #aside {
-                grid-area: aside;
-                margin-left: var(--_page-gap)
-            }
-
-            & #footer {
-                grid-area: footer;
-                margin-top: var(--_page-gap)
-            }
-
-            & dialog::backdrop {
-                background-color:oklch(0 0 0 / 0.7)
-            }
-        }
     }
     ```
     """)
@@ -779,6 +772,10 @@ def _(mo):
         .nowrap {
             flex-wrap: nowrap
         }
+
+
+        .right { margin-inline-start: auto; text-align: end }
+        .fab-row { position: fixed; inset-block-end: 1rem; inset-inline-end: 1rem; display: flex; gap: 0.5rem; }
 
         .grid-2x2,.grid-3x3,.grid-overlap{display:grid;height:100%}
         .grid-2x2{grid-template:1fr 1fr/1fr 1fr}
@@ -885,7 +882,19 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Button
+    ### Tag
+
+    ```css
+    @layer component.simple{
+        .tag {
+            --type:-2;
+            display: inline-flex; align-items: center;
+            padding-inline: 0.6em; padding-block: 0.15em;
+            border-radius: 999px; border: 1px solid var(--border);
+            white-space: nowrap;
+        }
+    }
+    ```
     """)
     return
 
@@ -893,6 +902,8 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    ### Button
+
     ```css
     @layer component.simple{
         :where(.btn) {
@@ -1093,9 +1104,9 @@ def _(mo):
 
     ```css
 
-
     @layer utility.layout {
         :where(.nowrap) { white-space: nowrap; }
+        :where(.truncate) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         :where(.mobile,.tablet,.desktop) { display: none }
         @media (         width <   480px) { :where(.mobile)  { display:revert-layer } }
         @media (480px <= width <  1024px) { :where(.tablet)  { display:revert-layer } }
@@ -1105,7 +1116,7 @@ def _(mo):
     }
 
     @layer utility.exceptions {
-        :where(.vh) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0 }
+        :is(.vh) { inline-size: 0; block-size: 0; overflow: hidden; }
     }
 
     @layer utility.important {
