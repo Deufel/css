@@ -295,7 +295,7 @@ def _(mo):
         }
         .active {
             --l-shift: -0.04;
-            --contrast: max(calc(var(--contrast, 1) - 0.2), .4)
+            --contrast: max(calc(var(--contrast, 1) - 0.2), .4);
             --c-shift: -0.1;
         }
         .disabled { cursor: not-allowed; opacity: 0.45 }
@@ -517,10 +517,10 @@ def _(mo):
             around collapsed tracks in narrow mode. */
             display: grid;
             grid-template:
-            "header header header" auto
-            "nav    main   aside"  1fr
-            "footer footer footer" auto /
-            auto   1fr    auto;
+                "header header header" auto
+                "nav    main   aside"  1fr
+                "footer footer footer" auto /
+                auto    1fr    auto;
             gap: 0;
             height: 100svh;
             overflow: hidden;  /* body never scrolls; #main does */
@@ -905,7 +905,7 @@ def _(mo):
     ### Button
 
     ```css
-    @layer component.simple{
+    @layer component.simple {
         :where(.btn) {
             --type: -1;
             --contrast: 0.85;
@@ -927,16 +927,54 @@ def _(mo):
             transition-duration: calc(var(--cfg-motion) * 0.12s);
             transition-timing-function: ease-out;
 
+            /* SVG sizing inside any .btn — text-only buttons won't hit this,
+               combo and icon-only both will. Keeps icons proportional to
+               the current --type instead of hardcoded px. */
+            & > svg {
+                inline-size: 1.25em;
+                block-size: 1.25em;
+                pointer-events: none;
+                flex-shrink: 0;
+            }
 
+            /* Combo: svg + text. Tighten left padding so the icon has
+               room to breathe from the button edge without pushing the
+               label off-center. gap: 0.5em (inherited) handles icon↔text. */
+            &:has(> svg):not(:has(> svg:only-child)) {
+                padding-inline-start: 0.75em;
+            }
+
+            /* Icon-only: square, no min-width. */
             &:has(> svg:only-child) {
                 min-width: unset;
                 padding: 0.25em;
-                height: calc(2.5 * 1em);
+                block-size: calc(2.5 * 1em);
                 aspect-ratio: 1;
-                svg { pointer-events: none }
+            }
+
+            /* Touch-device overrides — nested inside .btn since you asked.
+               `pointer: coarse` catches phones/tablets where the primary
+               input is a finger, regardless of viewport width. More reliable
+               than width media queries for this. */
+            @media (pointer: coarse) {
+                min-block-size: 44px;
+                padding-block: 0.6em;
+
+                &:has(> svg:only-child) {
+                    /* 48px keeps us comfortably above the 44px floor even
+                       when rendered at small --type values. */
+                    block-size: 48px;
+                    inline-size: 48px;
+                }
+
+                /* Give combo buttons a bit more horizontal room on touch */
+                &:has(> svg):not(:has(> svg:only-child)) {
+                    padding-inline: 1em 1.25em;
+                }
             }
         }
     }
+
     ```
     """)
     return
@@ -1011,7 +1049,7 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ```css
-    layer componenet.simple {
+    @layer componet.simple {
 
         .card {
             box-shadow: inset 0 1px 0 oklch(from var(--bg) calc(l + 0.1) c h);
@@ -1042,19 +1080,598 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    ### resume header specifics
+
+    ```css
+    @layer component.complex {
+        #header {
+            display: flex;
+            flex-direction: column;
+            gap: var(--s);
+            padding: var(--s);
+        }
+
+        .header-top { align-items: center }
+
+        .blurb {
+            --type: 0;
+            --contrast: 0.8;
+            max-inline-size: 65ch;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .contact {
+            --type: -0.5;
+            --contrast: 0.7;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4em;
+            font-family: var(--font-body);
+
+            > svg {
+                inline-size: 1em;
+                block-size: 1em;
+                opacity: 0.7;
+            }
+        }
+    }
+
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### resume timeline
+
+    ```css
+    @layer component.complex {
+        /* ============================================================
+           TIMELINE — horizontal time-block bar.
+
+           Markup contract:
+             <div class="timeline" style="--start: 2011; --end: 2026">
+                 <div class="tl-track">
+                     <span class="tl-block" style="--from: 2011; --to: 2015; --hue-shift: 0">
+                         B.S. EE
+                     </span>
+                     <span class="tl-block" style="--from: 2015; --to: 2021; --hue-shift: 30">
+                         S&C Electric
+                     </span>
+                     ...
+                 </div>
+                 <div class="tl-ticks">
+                     <span>2011</span><span>2015</span><span>2020</span><span>2026</span>
+                 </div>
+             </div>
+
+           Each block sets its own --from/--to. The track uses CSS Grid
+           with --span fr units to size segments proportionally.
+
+           Why grid + fr: alternatives are positioned absolute (fragile,
+           requires container width) or flex with calc'd flex-basis
+           (clamps weirdly). Grid fr units are made for exactly this.
+           ============================================================ */
+
+        .timeline {
+            --tl-height: 2.25rem;
+            --tl-radius: calc(var(--cfg-radius) / 2);
+            --tl-tick-color: oklch(from var(--bg) calc(l + 0.05) c h / 0.4);
+
+            display: flex;
+            flex-direction: column;
+            gap: calc(var(--s) / 3);
+            inline-size: 100%;
+            font-family: var(--font-body);
+
+            /* The bar itself: grid with --span-total fr columns, where
+               --span-total = --end - --start. Each block spans
+               (--to - --from) fr units. */
+            > .tl-track {
+                display: grid;
+                grid-template-columns: repeat(
+                    calc(var(--end) - var(--start)),
+                    1fr
+                );
+                block-size: var(--tl-height);
+                gap: 2px;                    /* hairline between segments */
+                border-radius: var(--tl-radius);
+                overflow: hidden;            /* clips segment corners to bar */
+                background: var(--tl-tick-color);  /* shows through gaps */
+            }
+
+            /* A segment. --color: 0.5 takes it out of "surface" territory
+               into the muted-vivid color zone, where --hue-shift actually
+               changes its appearance. --contrast: 0 lets the color system
+               pick a readable text color against the segment's background. */
+            .tl-block {
+                --color: 0.5;
+                --contrast: 0;
+
+                /* Span proportional to its duration */
+                grid-column: span calc(var(--to) - var(--from));
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding-inline: 0.5em;
+                font-size: 0.75em;
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                cursor: default;
+                transition: filter calc(var(--cfg-motion) * 0.15s) ease-out;
+
+                /* Subtle hover lift — useful if you wire tooltips later */
+                &:hover {
+                    filter: brightness(1.1);
+                }
+            }
+
+            /* Quiet "gap" segment — for unaccounted-for time. */
+            .tl-block.tl-gap {
+                --color: -0.3;
+                --contrast: 0.4;
+                font-style: italic;
+            }
+
+            /* Year tick row underneath. Positioned with the same grid math
+               so labels align to segment boundaries. */
+            > .tl-ticks {
+                display: grid;
+                grid-template-columns: repeat(
+                    calc(var(--end) - var(--start)),
+                    1fr
+                );
+                font-size: 0.7em;
+                --contrast: 0.55;
+                font-family: var(--font-mono);
+                font-variant-numeric: tabular-nums;
+            }
+
+            /* Each tick spans from its --at year to the next year boundary,
+               rendered with the year label at its starting edge. */
+            .tl-ticks > span {
+                grid-column: calc(var(--at) - var(--start) + 1);
+                justify-self: start;
+                transform: translateX(-50%);   /* center over its boundary */
+                white-space: nowrap;
+            }
+
+            /* First and last tick: don't translate off-edge */
+            .tl-ticks > span:first-child { transform: none }
+            .tl-ticks > span:last-child  { transform: translateX(-100%) }
+        }
+    }
+
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### resume aside
+
+    ```css
+    @layer component.complex {
+        .aside {
+            --space: -1;                            /* was 0 — denser whole component */
+            width: minmax(18rem, 25%);
+            display: flex;
+            flex-direction: column;
+            gap: calc(var(--s) * 2);                /* was *3 — pull sections closer */
+            padding: var(--s);
+            font-family: var(--font-body);
+
+            > section {
+                display: flex;
+                flex-direction: column;
+                gap: calc(var(--s) * 0.75);
+
+                > h2 {
+                    --type: 0;
+                    --contrast: 1;
+                    margin: 0;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                    padding-block-end: calc(var(--s) / 3);
+                    border-block-end: 1px solid var(--Border);
+                }
+            }
+
+            /* ── EDUCATION ──────────────────────────────────────────
+               Two-column row: left = degree+school stacked,
+               right = date+location stacked. No wrapping. */
+            .edu {
+                display: flex;
+                flex-direction: column;
+                gap: calc(var(--s) / 6);
+
+                > header {
+                    display: grid;
+                    grid-template-columns: 1fr auto;
+                    column-gap: var(--s);
+                    align-items: start;
+                }
+
+                .edu-degree {
+                    --type: 0;
+                    margin: 0;
+                    line-height: 1.25;
+                    font-weight: 600;
+                }
+                .edu-school {
+                    --type: -0.5;
+                    --contrast: 0.75;
+                    font-weight: 500;
+                }
+
+                .edu-meta-group {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    gap: 0;
+                }
+
+                .edu-meta {
+                    --type: -1;
+                    --contrast: 0.6;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.3em;
+                    white-space: nowrap;
+                    line-height: 1.4;
+
+                    > svg {
+                        inline-size: 0.9em;
+                        block-size: 0.9em;
+                        flex-shrink: 0;
+                        opacity: 0.7;
+                    }
+                }
+
+                > ul {
+                    margin: 0;
+                    margin-block-start: calc(var(--s) / 3);
+                    padding-inline-start: 1em;
+                    display: flex;
+                    flex-direction: column;
+                    gap: calc(var(--s) / 6);
+                }
+                > ul > li {
+                    --type: -1;
+                    --contrast: 0.8;
+                    line-height: 1.35;
+                }
+            }
+
+            /* ── PROFICIENCY / LANGUAGES ────────────────────────────
+               Label left, dots right. min-width on dot rail prevents
+               it from collapsing in narrow drawers. */
+            .prof {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: calc(var(--s) / 3);
+
+                > li {
+                    display: grid;
+                    grid-template-columns: 1fr auto;
+                    align-items: center;
+                    gap: var(--s);
+
+                    > span:first-child {
+                        --type: -0.5;
+                        font-weight: 600;
+                    }
+                }
+            }
+
+            .prof-dots {
+                display: inline-flex;
+                gap: 0.25em;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+
+                > i {
+                    inline-size: 0.5em;
+                    block-size: 0.5em;
+                    border-radius: 50%;
+                    background: oklch(from var(--bg) calc(l - 0.04) calc(c * 0.4) h);
+                }
+            }
+            .prof-dots[data-level="1"] > i:nth-child(-n+1),
+            .prof-dots[data-level="2"] > i:nth-child(-n+2),
+            .prof-dots[data-level="3"] > i:nth-child(-n+3),
+            .prof-dots[data-level="4"] > i:nth-child(-n+4),
+            .prof-dots[data-level="5"] > i:nth-child(-n+5),
+            .prof-dots[data-level="6"] > i:nth-child(-n+6) {
+                background: var(--Border);
+            }
+
+            /* ── STACK GROUPS ───────────────────────────────────────
+               Tighter pills, smaller subheads. */
+            .stack-grp {
+                display: flex;
+                flex-direction: column;
+                gap: calc(var(--s) / 3);
+
+                > h3 {
+                    --type: -0.5;
+                    --contrast: 0.85;
+                    margin: 0;
+                    font-weight: 700;
+                }
+
+                > .tags {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: calc(var(--s) / 3);
+                }
+
+                .tag {
+                    --type: -2;
+                    padding-inline: 0.55em;
+                }
+            }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### resume experience
+
+    ```css
+    @layer component.complex {
+        /* Experience entry — resume/CV job block.
+           Structure:
+             .xp
+               > header   (title+company on left, meta on right)
+                   > .xp-title   (role + org)
+                   > .xp-meta    (dates + location, right-aligned)
+               > p            (summary)
+               > ul           (bullets, optional)
+               > .xp-tags     (skill pills, right-aligned)
+
+           Composes with .surface for auto-nested background. */
+        .xp {
+            --space: 1;                 /* drives padding/gap via --s */
+
+            display: flex;
+            flex-direction: column;
+            gap: var(--s);
+            padding: var(--s);
+            border-radius: var(--cfg-radius);
+        }
+
+        /* Header row: role block + meta block, space-between */
+        .xp > header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: var(--s);
+        }
+
+        .xp-title      { display: flex; flex-direction: column; gap: 0 }
+        .xp-title > h3 { --type: 2; margin: 0; line-height: 1.1 }
+        .xp-title > *:not(h3) { --contrast: 0.7 }   /* company name, subtitle */
+
+        .xp-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            text-align: end;
+            margin-inline-start: auto;  /* hard-right when header wraps */
+        }
+        .xp-meta > * { --type: -1; --contrast: 0.7 }
+
+        /* Body text */
+        .xp > p {
+            --type: 0;
+            line-height: 1.35;          /* tighter than default, readable */
+            margin: 0;
+        }
+
+        /* Bullets — reset the list, space items with --s/2 */
+        .xp > ul {
+            margin: 0;
+            padding-inline-start: 1.25em;
+            display: flex;
+            flex-direction: column;
+            gap: calc(var(--s) / 2);
+        }
+        .xp > ul > li { --contrast: 0.85 }
+
+        /* Skill tag row — right-aligned, tags inherit from component vars
+           instead of being set per-span. Flip --xp-tag-color if you ever
+           want the whole row quieter/louder in a single spot. */
+        .xp-tags {
+            --xp-tag-hue-shift: 15;
+            --xp-tag-color: -0.1;
+
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: calc(var(--s) / 2);
+        }
+        .xp-tags > .tag {
+            --hue-shift: var(--xp-tag-hue-shift);
+            --color: var(--xp-tag-color);
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### resume notes
+
+    ```css
+    @layer component.complex {
+        /* Notes — scratchpad component. Originally built for a #nav drawer,
+           now lives in a popover anchored to a FAB. Composes with .surface
+           for auto-nested background, .popover for positioning/animation,
+           and the existing --s / --border / --cfg-radius tokens.
+
+           Two contexts handled in one rule:
+             1. Bare .notes (drawer / dialog)        → fills container
+             2. .notes.popover (FAB-anchored popup)  → bounded width, 5-row
+                                                       textarea, surface bg
+        */
+        .notes {
+            display: flex;
+            flex-direction: column;
+            gap: var(--s);
+            block-size: 100%;       /* fill the drawer */
+            min-block-size: 0;      /* allow the textarea middle to shrink */
+
+            /* ── Header row: title + close button ─────────────────── */
+            > header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: var(--s);
+
+                h3 {
+                    --type: 1;
+                    margin: 0;
+                }
+            }
+
+            /* ── Close button: borderless, no min-width ───────────── */
+            .close {
+                border-color: transparent;
+                margin: 0;
+            }
+
+            /* ── Textarea: composes with .surface for auto bg ─────── */
+            > textarea {
+                flex: 1 1 auto;
+                min-block-size: 0;
+                inline-size: 100%;
+                padding: var(--s);
+                border: 0;
+                border-radius: var(--cfg-radius);
+                resize: none;
+                font-family: var(--font-body);
+
+                /* Caret tinted off the current --bg, --color: 0.4 equivalent.
+                   Stays hue-aware with the rest of the system. */
+                caret-color: oklch(from var(--bg) 65% 0.18 h);
+
+                &::placeholder {
+                    --contrast: 0.45;
+                    color: currentColor;
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--border);
+                    outline-offset: -2px;   /* inside — no border to sit beside */
+                }
+            }
+
+            /* ══ Popover variant ═══════════════════════════════════════
+               When .notes is also a .popover, override the drawer-style
+               "fill container" behavior with a bounded geometry suitable
+               for a FAB-anchored popup. */
+            &.popover {
+                --depth: 1;
+                background: var(--bg);
+                border: 1px solid var(--border);
+
+                /* Fixed, intentional width — not driven by content */
+                inline-size: min(95vw, 28rem);
+                min-width: unset;
+                max-width: unset;
+
+                /* Drop the "fill the drawer" behavior */
+                block-size: auto;
+
+                > textarea {
+                    flex: 0 0 auto;
+                    inline-size: 100%;        /* fill the popover, don't size to content */
+                    block-size: calc(5lh + 2 * var(--s));  /* explicit 5-line height */
+
+                    /* Drop field-sizing — we want a fixed box, not a content-driven one */
+                    field-sizing: normal;
+                }
+            }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ### Popover - auto align
         [] test add timing to motion styles
         [] test auto layout
 
     ```css
-    @layer component.complex {
-      [popover].popover { position: fixed; inset: auto; margin: 0; border: none; min-width: clamp(10rem, 40vw, 18rem); max-width: min(90vw, 24rem); max-height: 80vh; overflow: auto; --_bg: --surface(1); background: var(--_bg); color: --contrast(0.7); border-radius: 0.5rem; box-shadow: --shadow(5); padding: --space(1); opacity: 1; transform: scale(1); position-area: self-block-start self-inline-end; position-try-order: most-block-size; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; position-visibility: anchors-visible; transition: opacity calc(var(--_motion) * 0.18s) ease-out, transform calc(var(--_motion) * 0.18s) ease-out, display calc(var(--_motion) * 0.18s) allow-discrete, overlay calc(var(--_motion) * 0.18s) allow-discrete; }
-      [popover].popover:not(:popover-open) { opacity: 0; transform: scale(0.95); }
-      [popover].popover.below-start { position-area: self-block-end self-inline-start; }
-      [popover].popover.below-end { position-area: self-block-end self-inline-end; }
-      [popover].popover.above-start { position-area: self-block-start self-inline-start; }
-      [popover].popover.above-end { position-area: self-block-start self-inline-end; }
+
+    @layer component.simple {
+      [popover].popover {
+        position: fixed;
+        inset: auto;
+        margin: 0;
+        border: 1px solid var(--border);
+        min-width: clamp(10rem, 40vw, 18rem);
+        max-width: min(90vw, 24rem);
+        max-height: 80vh;
+        overflow: auto;
+
+        background: var(--bg);
+        color: inherit;                          /* let --contrast cascade do its job */
+        border-radius: var(--cfg-radius);
+        box-shadow: 0 8px 24px oklch(from var(--bg) 10% 0.05 h / 0.3);
+        padding: var(--s);
+
+        opacity: 1;
+        transform: scale(1);
+        position-area: block-start inline-end;
+        position-try-order: most-block-size;
+        position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+        position-visibility: anchors-visible;
+
+        transition:
+          opacity   calc(var(--cfg-motion) * 0.18s) ease-out,
+          transform calc(var(--cfg-motion) * 0.18s) ease-out,
+          display   calc(var(--cfg-motion) * 0.18s) allow-discrete,
+          overlay   calc(var(--cfg-motion) * 0.18s) allow-discrete;
+      }
+
+      [popover].popover:not(:popover-open) {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      [popover].popover.below-start { position-area: block-end inline-start; }
+      [popover].popover.below-end   { position-area: block-end inline-end; }
+      [popover].popover.above-start { position-area: block-start inline-start; }
+      [popover].popover.above-end   { position-area: block-start inline-end; }
     }
+
     ```
     """)
     return
@@ -1141,7 +1758,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ```css
+    ```noexport css
       /* highlight.css
       * Syntax highlight colors using OKLCH relative to --cfg-hue.
       *
@@ -1200,7 +1817,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ```css
+    ```no export css
     .test_1 {
         --hue: 140;
         --color: .6;
