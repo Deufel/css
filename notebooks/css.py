@@ -112,7 +112,7 @@ def _(mo):
         :where(abbr[title]) { cursor: help; text-decoration: underline dotted }
         :where(summary) { list-style: none }
         :where(a) { text-decoration: none }
-        :where(input):autofill { box-shadow: inset 0 0 0 1000px var(--bg, transparent) }
+        :where(input):autofill { box-shadow: inset 0 0 0 1000px var(--_bg, transparent) }
         :where(ul,ol): where([role="list"]) { list-style:none; padding: 0 }
         :where([hidden]) { display: none }
     }
@@ -459,7 +459,7 @@ def _(mo):
     @layer layout.page {
         body {
             font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
-            background: var(--bg);
+            background: var(--_bg);
 
             /* The container context that drives the layout switch */
             container: app-shell / inline-size;
@@ -512,7 +512,7 @@ def _(mo):
             padding: 1rem;
             border: 1px solid var(--border);
             border-radius: var(--cfg-layout-radius);
-            background: var(--bg);
+            background: var(--_bg);
             color: inherit;
             overflow-y: auto;
         }
@@ -531,7 +531,7 @@ def _(mo):
             padding: 1rem;
             border: 1px solid var(--border);
             border-radius: var(--cfg-layout-radius);
-            background: var(--bg);
+            background: var(--_bg);
         }
         #header {
             grid-area: header;
@@ -539,7 +539,7 @@ def _(mo):
         }
         #main    {
             grid-area: main;
-            background: var(--bg);
+            background: var(--_bg);
         }
         #footer  {
             grid-area: footer;
@@ -568,7 +568,7 @@ def _(mo):
                 height: 100svh;
                 border-radius: 0;
                 border: 0;
-                background: var(--bg);
+                background: var(--_bg);
                 padding: 1.5rem 1rem;
                 overflow-y: auto;
 
@@ -1007,13 +1007,11 @@ def _(mo):
     @layer componet.simple {
 
         .card {
-            box-shadow: inset 0 1px 0 oklch(from var(--bg) calc(l + 0.1) c h);
             border-radius: var(--cfg-radius);
             border: 1px solid var(--border);
         }
 
         .Card {
-            box-shadow: inset 0 1px 0 oklch(from var(--bg) calc(l + 0.1) c h);
             border-radius: var(--cfg-radius);
             border: 1px solid var(--Border);
         }
@@ -1114,7 +1112,7 @@ def _(mo):
         .timeline {
             --tl-height: 1.125rem;
             --tl-radius: calc(var(--cfg-radius) / 2);
-            --tl-tick-color: oklch(from var(--bg) calc(l + 0.05) c h / 0.4);
+            --tl-tick-color: oklch(from var(--_bg) calc(l + 0.05) c h / 0.4);
 
             display: flex;
             flex-direction: column;
@@ -1342,7 +1340,7 @@ def _(mo):
                     inline-size: 0.5em;
                     block-size: 0.5em;
                     border-radius: 50%;
-                    background: oklch(from var(--bg) calc(l - 0.04) calc(c * 0.4) h);
+                    background: oklch(from var(--_bg) calc(l - 0.04) calc(c * 0.4) h);
                 }
             }
             .prof-dots[data-level="1"] > i:nth-child(-n+1),
@@ -1528,9 +1526,9 @@ def _(mo):
                 resize: none;
                 font-family: var(--font-body);
 
-                /* Caret tinted off the current --bg, --color: 0.4 equivalent.
+                /* Caret tinted off the current --_bg, --color: 0.4 equivalent.
                    Stays hue-aware with the rest of the system. */
-                caret-color: oklch(from var(--bg) 65% 0.18 h);
+                caret-color: oklch(from var(--_bg) 65% 0.18 h);
 
                 &::placeholder {
                     --contrast: 0.45;
@@ -1549,7 +1547,7 @@ def _(mo):
                for a FAB-anchored popup. */
             &.popover {
                 --depth: 1;
-                background: var(--bg);
+                background: var(--_bg);
                 border: 1px solid var(--border);
 
                 /* Fixed, intentional width — not driven by content */
@@ -1596,10 +1594,10 @@ def _(mo):
         max-height: 80vh;
         overflow: auto;
 
-        background: var(--bg);
+        background: var(--_bg);
         color: inherit;                          /* let --contrast cascade do its job */
         border-radius: var(--cfg-radius);
-        box-shadow: 0 8px 24px oklch(from var(--bg) 10% 0.05 h / 0.3);
+        box-shadow: 0 8px 24px oklch(from var(--_bg) 10% 0.05 h / 0.3);
         padding: var(--s);
 
         opacity: 1;
@@ -1722,45 +1720,45 @@ def _(mo):
       *   - Data tokens (string, number, builtin) → cool (-30 to -60°)
       *   - Structural tokens (comment, operator, punctuation) → same as base hue
       *
-      * Colors derive from var(--bg) on the originating <pre> so they follow the
+      * Colors derive from var(--_bg) on the originating <pre> so they follow the
       * current theme (lightness) and page hue automatically. Comments use alpha
       * to dim further without changing lightness.
       */
 
       /* ─── Python ──────────────────────────────────────────────────────────── */
 
-      ::highlight(python-keyword)     { color: oklch(from var(--bg) 70% 0.19 calc(h + 45));  font-weight: 600; }
-      ::highlight(python-string)      { color: oklch(from var(--bg) 70% 0.14 calc(h - 60)); }
-      ::highlight(python-comment)     { color: oklch(from var(--bg) 55% 0.02 h / 0.6); font-style: italic; }
-      ::highlight(python-number)      { color: oklch(from var(--bg) 73% 0.16 calc(h - 45)); }
-      ::highlight(python-decorator)   { color: oklch(from var(--bg) 73% 0.17 calc(h + 60)); }
-      ::highlight(python-function)    { color: oklch(from var(--bg) 70% 0.18 calc(h + 30));  font-weight: 600; }
-      ::highlight(python-class)       { color: oklch(from var(--bg) 70% 0.16 calc(h + 75));  font-weight: 600; }
-      ::highlight(python-builtin)     { color: oklch(from var(--bg) 68% 0.13 calc(h - 30)); }
-      ::highlight(python-operator)    { color: oklch(from var(--bg) 60% 0.03 h); }
-      ::highlight(python-punctuation) { color: oklch(from var(--bg) 55% 0.02 h); }
+      ::highlight(python-keyword)     { color: oklch(from var(--_bg) 70% 0.19 calc(h + 45));  font-weight: 600; }
+      ::highlight(python-string)      { color: oklch(from var(--_bg) 70% 0.14 calc(h - 60)); }
+      ::highlight(python-comment)     { color: oklch(from var(--_bg) 55% 0.02 h / 0.6); font-style: italic; }
+      ::highlight(python-number)      { color: oklch(from var(--_bg) 73% 0.16 calc(h - 45)); }
+      ::highlight(python-decorator)   { color: oklch(from var(--_bg) 73% 0.17 calc(h + 60)); }
+      ::highlight(python-function)    { color: oklch(from var(--_bg) 70% 0.18 calc(h + 30));  font-weight: 600; }
+      ::highlight(python-class)       { color: oklch(from var(--_bg) 70% 0.16 calc(h + 75));  font-weight: 600; }
+      ::highlight(python-builtin)     { color: oklch(from var(--_bg) 68% 0.13 calc(h - 30)); }
+      ::highlight(python-operator)    { color: oklch(from var(--_bg) 60% 0.03 h); }
+      ::highlight(python-punctuation) { color: oklch(from var(--_bg) 55% 0.02 h); }
 
       /* ─── CSS ─────────────────────────────────────────────────────────────── */
 
-      ::highlight(css-comment)        { color: oklch(from var(--bg) 55% 0.02 h / 0.6); font-style: italic; }
-      ::highlight(css-string)         { color: oklch(from var(--bg) 70% 0.14 calc(h - 60)); }
-      ::highlight(css-atrule)         { color: oklch(from var(--bg) 70% 0.19 calc(h + 45));  font-weight: 600; }
-      ::highlight(css-var-name)       { color: oklch(from var(--bg) 73% 0.17 calc(h + 60)); }
-      ::highlight(css-unit)           { color: oklch(from var(--bg) 68% 0.13 calc(h - 30)); }
-      ::highlight(css-number)         { color: oklch(from var(--bg) 73% 0.16 calc(h - 45)); }
-      ::highlight(css-property)       { color: oklch(from var(--bg) 70% 0.18 calc(h + 30)); }
-      ::highlight(css-selector)       { color: oklch(from var(--bg) 70% 0.16 calc(h + 75));  font-weight: 600; }
-      ::highlight(css-punctuation)    { color: oklch(from var(--bg) 55% 0.02 h); }
+      ::highlight(css-comment)        { color: oklch(from var(--_bg) 55% 0.02 h / 0.6); font-style: italic; }
+      ::highlight(css-string)         { color: oklch(from var(--_bg) 70% 0.14 calc(h - 60)); }
+      ::highlight(css-atrule)         { color: oklch(from var(--_bg) 70% 0.19 calc(h + 45));  font-weight: 600; }
+      ::highlight(css-var-name)       { color: oklch(from var(--_bg) 73% 0.17 calc(h + 60)); }
+      ::highlight(css-unit)           { color: oklch(from var(--_bg) 68% 0.13 calc(h - 30)); }
+      ::highlight(css-number)         { color: oklch(from var(--_bg) 73% 0.16 calc(h - 45)); }
+      ::highlight(css-property)       { color: oklch(from var(--_bg) 70% 0.18 calc(h + 30)); }
+      ::highlight(css-selector)       { color: oklch(from var(--_bg) 70% 0.16 calc(h + 75));  font-weight: 600; }
+      ::highlight(css-punctuation)    { color: oklch(from var(--_bg) 55% 0.02 h); }
 
       /* ─── HTML ────────────────────────────────────────────────────────────── */
 
-      ::highlight(html-comment)       { color: oklch(from var(--bg) 55% 0.02 h / 0.6); font-style: italic; }
-      ::highlight(html-doctype)       { color: oklch(from var(--bg) 60% 0.03 h / 0.7); font-style: italic; }
-      ::highlight(html-entity)        { color: oklch(from var(--bg) 73% 0.16 calc(h - 45)); }
-      ::highlight(html-value)         { color: oklch(from var(--bg) 70% 0.14 calc(h - 60)); }
-      ::highlight(html-tag)           { color: oklch(from var(--bg) 70% 0.18 calc(h + 30));  font-weight: 600; }
-      ::highlight(html-attribute)     { color: oklch(from var(--bg) 73% 0.17 calc(h + 60)); }
-      ::highlight(html-bracket)       { color: oklch(from var(--bg) 55% 0.02 h); }
+      ::highlight(html-comment)       { color: oklch(from var(--_bg) 55% 0.02 h / 0.6); font-style: italic; }
+      ::highlight(html-doctype)       { color: oklch(from var(--_bg) 60% 0.03 h / 0.7); font-style: italic; }
+      ::highlight(html-entity)        { color: oklch(from var(--_bg) 73% 0.16 calc(h - 45)); }
+      ::highlight(html-value)         { color: oklch(from var(--_bg) 70% 0.14 calc(h - 60)); }
+      ::highlight(html-tag)           { color: oklch(from var(--_bg) 70% 0.18 calc(h + 30));  font-weight: 600; }
+      ::highlight(html-attribute)     { color: oklch(from var(--_bg) 73% 0.17 calc(h + 60)); }
+      ::highlight(html-bracket)       { color: oklch(from var(--_bg) 55% 0.02 h); }
 
 
 
