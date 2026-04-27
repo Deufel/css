@@ -127,78 +127,9 @@ def _(mo):
     ## 3A core.color
 
     ```css
-    /* ─── Public API ─────────────────────────────────────
-       Structural (cascade-driven):
-         .surface                  opt-in to paint a surface; auto-nests
-         --color      -1..1        -1 = surface, 0..1 = muted..vivid
-         --hue        number       absolute hue override
-         --hue-shift  number       additive offset from --cfg-color-hue
-         --contrast   0..1         text ink strength
-         --contrast-hue number     explicit Hue change for text(remember contrast is used to set `color only`)
-         --contrast-chroma 0..0.4  add some chroma retention to let color-text keep some color (or else goes to white/black)
-
-       Stateful (component-driven, non-inheriting):
-         compose with the shifts; (--{hue, c, l}-shift)
-
-       Computed outputs:
-         var(--bg)                 background color
-         var(--border)             quiet accent (neighbor of --bg)
-         var(--Border)             loud accent (stronger neighbor)
-
-       Semantic hue conveniences: .suc .inf .wrn .dgr
-       ────────────────────────────────────────────────── */
-
-    /* ---------- Config properties ---------- */
-    @property --cfg-color-hue          { syntax: "<number>";     inherits: true; initial-value: 120 }
-    @property --cfg-color-alpha        { syntax: "<number>";     inherits: true; initial-value: 1 }
-    @property --cfg-color-top-l        { syntax: "<number>";     inherits: true; initial-value: 88 }
-    @property --cfg-color-base-step    { syntax: "<number>";     inherits: true; initial-value: 4 }
-    @property --cfg-color-curve-k      { syntax: "<number>";     inherits: true; initial-value: 0.6 }
-    @property --cfg-color-surf-mid     { syntax: "<number>";     inherits: true; initial-value: 60.5 }
-    @property --cfg-color-surf-rng     { syntax: "<number>";     inherits: true; initial-value: 55 }
-    @property --cfg-color-surf-chroma  { syntax: "<number>";     inherits: true; initial-value: 0.018 }
-    @property --cfg-color-muted-l      { syntax: "<percentage>"; inherits: true; initial-value: 90% }
-    @property --cfg-color-muted-c      { syntax: "<number>";     inherits: true; initial-value: 0.05 }
-    @property --cfg-color-vivid-l      { syntax: "<percentage>"; inherits: true; initial-value: 20% }
-    @property --cfg-color-vivid-c      { syntax: "<number>";     inherits: true; initial-value: 0.3 }
-
-    /* ---------- Public API ---------- */
-    @property --depth       { syntax: "<number>"; inherits: false; initial-value: 0 }
-    @property --color       { syntax: "<number>"; inherits: true;  initial-value: -1 }
-    /* --hue intentionally has syntax "*" and no initial-value so that
-       var(--hue, calc(--cfg-color-hue + --hue-shift)) falls through
-       to the fallback until something explicitly sets --hue. Do NOT
-       "fix" this to <number> — it will break --hue-shift entirely. */
-    @property --hue       { syntax: "*";        inherits: true }
-    @property --hue-shift { syntax: "<number>"; inherits: true; initial-value: 0 }
-    @property --l-shift   { syntax: "<number>"; inherits: true; initial-value: 0 }
-    @property --c-shift   { syntax: "<number>"; inherits: true; initial-value: 0 }
-
-    /* these are used to set a background aware text color */
-    @property --contrast    { syntax: "<number>"; inherits: true; initial-value: 1 }
-    @property --contrast-hue    { syntax: "*"; inherits: true }
-    @property --contrast-chroma { syntax: "*"; inherits: true ; initial-value:0 }
-
-    /* Helper colors */
-    @property --border { syntax: "<color>"; inherits: true; initial-value: red }
-    @property --Border { syntax: "<color>"; inherits: true; initial-value: blue}
-
-    /* ---------- Private intermediates ---------- */
-
-    @property --_naive   { syntax: "<number>";     inherits: false; initial-value: 88 }
-    @property --_t       { syntax: "<number>";     inherits: false; initial-value: 0.5 }
-    @property --_surf-l  { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_c01     { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_col-l   { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-    @property --_col-c   { syntax: "<number>";     inherits: false; initial-value: 0.1 }
-    @property --_k       { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_l       { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_c       { syntax: "<number>";     inherits: false; initial-value: 0.018 }
-    @property --_h       { syntax: "<number>";     inherits: false; initial-value: 220 }
 
     @layer core.color {
 
-        /* ---------- Theme detection (moved in from theme layer) ---------- */
         @media (prefers-color-scheme: dark) {
             :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),
             [data-ui-theme="system"] {
@@ -235,70 +166,94 @@ def _(mo):
             --cfg-color-surf-rng: 27.5
         }
 
-        /* Semantic hue conveniences — only set --hue. */
         .suc { --hue: 145 }
         .inf { --hue: 240 }
         .wrn { --hue: 75 }
         .dgr { --hue: 25 }
 
-        /* ---------- The formula ---------- */
         :where(*) {
             --_naive:  calc(var(--cfg-color-top-l) - var(--depth) * var(--cfg-color-base-step));
             --_t:      calc((var(--_naive) - var(--cfg-color-surf-mid)) / var(--cfg-color-surf-rng));
             --_surf-l: calc((var(--_naive) - var(--depth) * var(--cfg-color-base-step) * var(--cfg-color-curve-k) * var(--_t) * var(--_t)) * 1%);
-            --_c01:    clamp(0, var(--color), 1);
+            --_c01:    clamp(0, var(--bg), 1);
             --_col-l:  calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
             --_col-c:  calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
-            --_k:      clamp(0, calc(var(--color) + 1), 1);
+            --_k:      clamp(0, calc(var(--bg) + 1), 1);
             --_l:      calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k));
             --_c:      calc(var(--cfg-color-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k));
             --_h:      var(--hue, calc(var(--cfg-color-hue) + var(--hue-shift)));
-            --bg: oklch(
-                clamp(4%, calc(var(--_l) + var(--l-shift) * 100%), 97%)     /*Lightness 0-1   */
-                /* calc(var(--_c) + var(--c-shift))                            Chroma    0-.4  */
-       /*            calc(var(--_c) + var(--c-shift) * pow(var(--_l) / 100%, 2)) /*Chroma    0-.4  */
+            /* Theme scalar derived from --cfg-color-top-l: 0 in light mode, 1 in dark mode.
+               top-l = 88 (light) → (60-88)/30 = -0.93 → clamped to 0
+               top-l = 33 (dark)  → (60-33)/30 =  0.90 → clamped to 1 */
+            --_dark:   clamp(0, calc((60 - var(--cfg-color-top-l)) / 30), 1);
+            --_bg: oklch(
+                clamp(4%, calc(var(--_l) + var(--l-shift) * 100%), 97%)
                 calc(var(--_c) + var(--c-shift) * (var(--_l) / 100%))
-
-                var(--_h)                                                   /*Hue       0-360 */
-                / var(--cfg-color-alpha)                                    /*Alpha     0-1   */
+                var(--_h)
+                / var(--cfg-color-alpha)
             );
-            --border: oklch(from var(--bg) calc(l - 0.14) calc(c * 0.7) h);
-            --Border: oklch(from var(--bg) calc(l - 0.28) clamp(0.08, calc(c * 1.4), 0.22) calc(h + 8));
-            color: oklch(from var(--bg)
-                calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--contrast))
-                calc(c * (1 - var(--contrast)) + var(--contrast-chroma))
-                var(--contrast-hue, h)
+            /* Borders are theme-driven, not bg-driven. Direction flips with theme only.
+               (var(--_dark) * 2 - 1) is -1 in light mode and +1 in dark mode.
+               --border  is neutral (low chroma);
+               --Border  is colored (chroma ~ 0.13, slight hue rotation). */
+            --border: oklch(
+                from var(--_bg)
+                calc(l + (var(--_dark) * 2 - 1) * 0.14)
+                calc(c * 0.3)
+                h
+            );
+            --Border: oklch(
+                from var(--_bg)
+                calc(l + (var(--_dark) * 2 - 1) * 0.22)
+                clamp(0.08, calc(c + 0.12), 0.18)
+                calc(h + 8)
+            );
+            color: oklch(from var(--_bg)
+                calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--fg-contrast))
+                calc(c * (1 - var(--fg-contrast)) + var(--fg-chroma))
+                var(--fg-hue, h)
             );
         }
 
-        :where(*) { background-color: oklch(from var(--bg) l c h / var(--_k)) }
-        :where(body, .surface, .btn) { background-color: var(--bg) }
+        :where(*) { background-color: oklch(from var(--_bg) l c h / var(--_k)) }
+        :where(body, .surface, .btn) { background-color: var(--_bg) }
         .surface:has(.surface)                                    { --depth: 1 }
         .surface:has(.surface .surface)                           { --depth: 2 }
         .surface:has(.surface .surface .surface)                  { --depth: 3 }
         .surface:has(.surface .surface .surface .surface)         { --depth: 4 }
     }
 
-
     @layer theme {
 
-        ::selection       { background: var(--Border); color: var(--bg) }
+        ::selection       { background: var(--Border); color: var(--_bg) }
         :focus-visible    { outline: 2px solid var(--Border); outline-offset: 2px }
-        .shadow { filter: drop-shadow(0 6px 12px oklch(from var(--bg) 20% 0.08 h / 0.4)) }
-        .glow { filter: drop-shadow(0 0 12px oklch(from var(--bg) 70% 0.2 h / 0.6)) }
+        .shadow { filter: drop-shadow(0 6px 12px oklch(from var(--_bg) 20% 0.08 h / 0.4)) }
+        .glow { filter: drop-shadow(0 0 12px oklch(from var(--_bg) 70% 0.2 h / 0.6)) }
 
-        /* script takes care of active and hover on btn classes easier then using mcss and the pointer api */
         .hover  {
             --l-shift:  0.04;
-            --contrast: calc(var(--contrast, 1) + 0.15) ;
+            --fg-contrast: calc(var(--fg-contrast, 1) + 0.15);
             --c-shift: 0.02;
         }
         .active {
             --l-shift: -0.04;
-            --contrast: max(calc(var(--contrast, 1) - 0.2), .4);
+            --fg-contrast: max(calc(var(--fg-contrast, 1) - 0.2), .4);
             --c-shift: -0.1;
         }
         .disabled { cursor: not-allowed; opacity: 0.45 }
+
+        /* SVG: descendants paint with the system's resolved colors.
+           Solid shapes use --_bg; line strokes use --_bg; text uses currentColor
+           so it picks up the same --fg-contrast / --fg-chroma / --fg-hue formula
+           as HTML text outside the SVG.
+           NOTE: all three rules use :where() to keep specificity at (0,0,0) so
+           cascade order (later wins) decides — text rule is last so it overrides
+           the broad shape rule for text only. Don't use :not(text) here without
+           wrapping in :where() — :not() takes the specificity of its argument
+           and would elevate rule 1 above rule 2. */
+        :where(svg) :where(*) { fill: var(--_bg); stroke: none }
+        :where(svg) :where(line, polyline, path.stroke) { fill: none; stroke: var(--_bg) }
+        :where(svg) :where(text, tspan) { fill: currentColor; stroke: none }
     }
     ```
     """)
@@ -1157,7 +1112,7 @@ def _(mo):
            ============================================================ */
 
         .timeline {
-            --tl-height: 2.25rem;
+            --tl-height: 1.125rem;
             --tl-radius: calc(var(--cfg-radius) / 2);
             --tl-tick-color: oklch(from var(--bg) calc(l + 0.05) c h / 0.4);
 
@@ -1262,7 +1217,7 @@ def _(mo):
     @layer component.complex {
         .aside {
             --space: -1;                            /* was 0 — denser whole component */
-            width: minmax(18rem, 25%);
+            width: minmax(10rem, 25cqw);
             display: flex;
             flex-direction: column;
             gap: calc(var(--s) * 2);                /* was *3 — pull sections closer */
