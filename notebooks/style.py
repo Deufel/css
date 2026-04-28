@@ -1,0 +1,1711 @@
+import marimo
+
+__generated_with = "0.23.1"
+app = marimo.App()
+
+with app.setup:
+    from pathlib import Path
+
+
+@app.cell
+def _():
+    import marimo as mo
+
+    return (mo,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # CSS System
+    # Layers
+
+    The toolbox CSS uses cascade layers to make every rule's role explicit. The order is fixed; the meaning of each layer is fixed; deciding where a new rule goes should be a 10-second decision.
+
+    ```css
+    @layer
+        reset.fix,
+        reset.opinion,
+        core.color,
+        core.type,
+        core.space,
+        theme,
+        layout.app,
+        layout.doc,
+        layout.composition,
+        component.base,
+        component.simple,
+        component.complex,
+        utility.layout,
+        utility.exceptions,
+        utility.important;
+    ```
+
+    Read top to bottom. Every layer assumes the ones above it have already happened.
+
+    ---
+
+    ## reset.fix
+
+    Browser bug fixes and ancient-CSS workarounds. Things that are objectively wrong defaults — `box-sizing`, default margins, baseline-aligned images, table isolation. If a rule could be defended as "this is what the spec should have done," it goes here.
+
+    **Belongs:** universal selectors, baseline element fixes, `:where(html)` font-smoothing.
+    **Doesn't belong:** anything that reflects taste. If two reasonable people would disagree, it's `reset.opinion`.
+
+    ## reset.opinion
+
+    Project-level structural preferences applied across all elements. Still resets, but driven by taste, not by spec correctness — `text-wrap: balance` on headings, scrollbar-width, link `text-decoration: none`. Think of these as "the structural defaults I want every project to inherit."
+
+    Rules in this layer **must not consume custom properties from the core system** (`--_bg`, `--s`, `--type`, etc.). It's structural baseline only — properties like `text-wrap`, `cursor`, `box-sizing`, `overflow-wrap`. Anything that needs `--_bg` or computes against `--s` goes in `theme` (visual) or `component.base` (per-element typography).
+
+    **Belongs:** structural baseline rules using `:where(...)` for zero specificity.
+    **Doesn't belong:** anything that consumes a core token. Anything that requires a class (that's `component.*` or `utility.*`).
+
+    ## core.color
+
+    The color formula. One layer, one job: take a small set of inputs (`--bg`, `--hue`, `--depth`, `--fg-contrast`, etc.) and compute one output (`--_bg`, plus `color`, `--border`, `--Border`). Every other layer consumes those outputs.
+
+    Also includes the rules that resolve `--_bg` into actual paint — the `:where(*) { background-color: ... }` rule, the `.surface` cascade, and the SVG color-bridge rules that translate the same outputs to `fill`/`stroke`.
+
+    **Belongs:** color math, `--_bg` painting, surface depth tracking, SVG color bridging.
+    **Doesn't belong:** semantic hue presets (`.suc`/`.inf`) — those are theme decisions about *which* hue means success, not how the math works. Theme blocks (`@media prefers-color-scheme`, `[data-ui-theme="dark"]`) — those are also theme.
+
+    ## core.type
+
+    The fluid-type formula. `--cfg-type-min`, `--cfg-type-max`, `--cfg-fluid-min-vp`, `--cfg-fluid-max-vp`, plus the `:where(*)` rule that interpolates `font-size` against viewport width. The `--type` step variable composes through `pow()` against the configured ratio.
+
+    **Belongs:** the type formula, type config tokens, line-height and letter-spacing derived from `--type`.
+    **Doesn't belong:** font-family declarations (those are `theme`), per-element type sizing (that's `component.base` for default elements, or per-component for everything else).
+
+    ## core.space
+
+    Same shape as `core.type`, but for spacing. The `--s` length is a fluid value derived from `--space` step + base + ratio + viewport clamp. Utility shorthands `.m/.p/.mx/.my/.px/.py` apply `--s` to the conventional axes.
+
+    **Belongs:** the space formula, the four shorthand classes.
+    **Doesn't belong:** layout primitives that *use* `--s` for `gap` (those are `layout.composition`).
+
+    ## theme
+
+    Project-level visual decisions. This is where the "vibe" of the page lives — anything you'd change to give the whole project a different mood without touching component logic.
+
+    Concretely:
+    - **Theme blocks**: `@media (prefers-color-scheme)`, `[data-ui-theme="light"]`, `[data-ui-theme="dark"]` — the values for `--cfg-color-top-l` etc. that make light/dark possible.
+    - **Semantic hue presets**: `.suc`, `.inf`, `.wrn`, `.dgr` — fixed-hue overrides for success/info/warning/danger contexts.
+    - **State classes**: `.hover`, `.active`, `.disabled` — color-formula nudges (`--l-shift`, `--c-shift`, `--fg-contrast` adjustments) that the pointer-events script applies. These look like component logic, but they're not — they're pure visual deltas to the existing color math, applied uniformly across every component. Lives here because (a) the math is theme-level, and (b) consistent state appearance across components is a theme concern.
+    - **Visual decoration helpers**: `.shadow`, `.glow` — drop-shadow filters that respond to the current `--_bg`.
+    - **Density/motion presets**: `[data-ui-size="sm/md/lg"]`, `[data-ui-motion="off/on"]`, `[data-ui-space="sm/md/lg"]`.
+    - **Font family declarations**: `--font-heading`, `--font-body`, `--font-mono`, `--font-kbd`.
+    - **Selection and focus visuals**: `::selection`, `:focus-visible` — the styling, not the JS.
+
+    **Belongs:** vibe. If swapping it changes how the page *feels* without changing what it *does*, it's theme.
+    **Doesn't belong:** color math (that's `core.color`). Layout decisions (`layout.*`). Per-component visual choices (those live with the component).
+
+    ## layout.app
+
+    The application shell layout. A 3×3 grid (header / nav · main · aside / footer) with drawer-style nav and aside that collapse to fixed-position modal drawers below a container-query breakpoint. Opt-in via `<body class="app">`.
+
+    **Belongs:** the app-shell grid template, drawer behavior, container-query breakpoint logic.
+    **Doesn't belong:** anything that assumes a different page shape — that's `layout.doc`. Composition primitives (`layout.composition`). Components that live *inside* a slot.
+
+    ## layout.doc
+
+    The document/paper layout. Used when the consumer wants a fixed-aspect "piece of paper" centered on a backdrop, with print awareness. Opt-in via `<body class="doc">` or applied directly via a `.paper` class on a child article. Sets up the backdrop, the paper's aspect-ratio container, the print `@page` rules.
+
+    **Belongs:** paper sizing math, backdrop centering, print media rules for fixed-page documents.
+    **Doesn't belong:** the paper's *contents* — that's per-document `me {}`. App-shell behavior (`layout.app`).
+
+    ## layout.composition
+
+    Stateless layout primitives that compose with anything. `.stack`, `.row`, `.split`, `.cluster`, `.grid`, `.flank`, `.flank-end`, `.span`. Plus a few small positioning helpers like `.fab-row` (fixed bottom-right action row) and the directional grid-overlap classes (`.↖`, `.↗`, etc.).
+
+    **Belongs:** classes that arrange children with no opinion about what the children are.
+    **Doesn't belong:** classes that style their children. Classes that assume a specific page structure (those are `layout.app/doc`).
+
+    ## component.base
+
+    Default-element styling. `h1`–`h6`, `p`, `small`, `code`, `pre`, `figcaption`, `blockquote`, `address`, `cite`, `mark`, `hr`.
+
+    These rules apply via tag selectors (`h1 { ... }`) so consumers get reasonable typography by default without classes. Each rule sets `--type`, `--contrast`, `font-family` — the formula does the rest.
+
+    **Belongs:** styling for unclassed HTML elements.
+    **Doesn't belong:** anything requiring a class. Class-based versions of the same idea (`.badge`, `.tag`) are `component.simple`.
+
+    ## component.simple
+
+    Generic, reusable components keyed by class. `.btn`, `.tag`, `.card`, `.popover`, etc. Each composes with the color/type/space systems and works in any context.
+
+    A component qualifies as "simple" if (a) it's small (one or two visual units), (b) it's general enough that the same class makes sense in any project, and (c) it doesn't assume a particular surrounding structure.
+
+    **Belongs:** generic components.
+    **Doesn't belong:** anything project-specific. If the class name has a domain noun in it (`.timeline`, `.xp`, `.aside`, `.invoice`), it's not simple — it's app code, and it lives with the app as a `me {}` block.
+
+    ## component.complex
+
+    Complex generic components — modal dialogs, calendars, data tables. Same purity rule as `component.simple`: project-specific things don't belong here.
+
+    This layer should usually be small. Most things that feel "complex" turn out to be either (a) a `component.simple` doing too much and needing decomposition, or (b) app code that belongs in a `me {}` block.
+
+    **Belongs:** generic complex components.
+    **Doesn't belong:** see `component.simple`.
+
+    ## utility.layout
+
+    Display-context utilities. `.mobile`, `.tablet`, `.desktop` for responsive show/hide. `.nowrap`, `.truncate`. `@media print { ... }` rules that adjust general behavior for print.
+
+    **Belongs:** small classes that flip layout-related properties.
+    **Doesn't belong:** anything visual or behavioral beyond layout.
+
+    ## utility.exceptions
+
+    Reserved for cases where a rule must override the cascade in a way that doesn't fit elsewhere. `.vh` (visually hidden) lives here.
+
+    **Belongs:** rare exceptions.
+    **Doesn't belong:** anything you can put in another layer.
+
+    ## utility.important
+
+    Rules that use `!important` to override inline styles or other cases where the cascade legitimately can't reach. `[hidden] { display: none !important }`, `@media print { .np { display: none !important } }`.
+
+    In practice this layer should be very small — often empty. It exists so that *when* you do need `!important`, there's a defined place for it instead of scattering high-priority rules through the rest of the system.
+
+    **Belongs:** rules that legitimately need `!important` for cascade reasons.
+    **Doesn't belong:** anything that could work without `!important`. If you reach for this layer, ask why first.
+
+    ---
+
+    ## Decision rules
+
+    When adding a new rule, ask in order:
+
+    1. **Is it stylistically opinionated?** No → `reset.fix`. Yes → continue.
+    2. **Is it a structural baseline that doesn't consume any core tokens?** Structural and token-free → `reset.opinion`. Anything that reads `--_bg`, `--s`, `--type`, etc. is not a reset — it's `theme` (project-wide visual) or `component.base` (per-element typography). Continue.
+    3. **Is it color/type/space math?** Yes → the matching `core.*` layer. No → continue.
+    4. **Is it a project-wide visual decision?** Yes → `theme`. No → continue.
+    5. **Does it shape the page layout?** Yes → `layout.app` (drawer shell), `layout.doc` (paper), or `layout.composition` (primitives). No → continue.
+    6. **Is it a default-element rule?** Yes → `component.base`. No → continue.
+    7. **Is it a class-keyed component?** Yes — and is it generic? Yes → `component.simple` or `.complex`. No → it's app code, write a `me {}` block.
+    8. **Is it a small layout flag?** Yes → `utility.layout`.
+    9. **Does it genuinely fit nowhere else but is still legitimate?** `utility.exceptions`. This layer is intentionally a buffer — expected to be empty in practice, kept declared so the scaffold is in place for the rare case you need it.
+    10. **Does it need `!important`?** Yes → `utility.important`. Otherwise → reconsider — most rules don't need this layer.
+
+    If a rule doesn't fit any layer, the answer is almost always "it's not generic; it should be a `me {}` block in the app code."
+
+    ## Declarations outside layers
+
+    Nothing should be declared outside a layer except things that the language requires to be unlayered: `@property` declarations, `@font-face`, `@import`. Everything else — every selector, every `@media`, every `@container` — goes inside a `@layer` block. This is what makes the cascade predictable; rules outside layers always win, which silently breaks the whole order.
+
+    ## What does *not* belong in any layer
+
+    App-specific components. Anything with a domain noun in the class name. The resume's timeline, sidebar, role cards, header — none of these are toolbox concerns. They're app code, expressed as `me {}` blocks scoped to the elements they belong to.
+
+    The toolbox is the substrate; the app is what you build on it. Keeping that line clean is what makes the toolbox reusable.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # CSS
+
+    ## Layer Decleration
+
+    ```css
+    /* ============================================================
+       toolbox / style.css
+
+       Single entry point. Declares the cascade-layer order, then
+       imports each module. Modules contribute @property declarations
+       at the top of their files (outside layers) and rules inside
+       their assigned @layer block.
+
+       See LAYERS.md for what each layer means and what belongs.
+       ============================================================ */
+
+    @layer
+        reset.fix,
+        reset.opinion,
+        core.color,
+        core.type,
+        core.space,
+        theme,
+        layout.app,
+        layout.doc,
+        layout.composition,
+        component.base,
+        component.simple,
+        component.complex,
+        utility.layout,
+        utility.exceptions,
+        utility.important;
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Reset
+
+    ```css
+    /* ============================================================
+       reset.css — reset.fix + reset.opinion
+
+       reset.fix: spec-correctness fixes only. No taste.
+       reset.opinion: structural project-wide preferences. NO core
+                      token consumption (no --_bg, --s, --type).
+                      Visual rules that consume tokens go to theme.
+       ============================================================ */
+
+    @layer reset.fix {
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            background-repeat: no-repeat;
+        }
+
+        :root {
+            interpolate-size: allow-keywords;
+        }
+
+        /* No color-scheme here. Theme is decided by [data-ui-theme]
+           and the prefers-color-scheme media query inside core.color.
+           Setting color-scheme at html level would let the browser
+           independently style native UI (scrollbars, form controls)
+           and fight our explicit theme attribute.
+
+           No line-height default. core.type computes per-element
+           line-height from --type; setting one here would conflict
+           with that formula. */
+        :where(html) {
+            -moz-text-size-adjust: none;
+            -webkit-text-size-adjust: none;
+            text-size-adjust: none;
+        }
+
+        :where(body, figure, blockquote, dl, dd, p) {
+            margin-block-end: 0;
+        }
+
+        :where(img, picture, svg) {
+            max-width: 100%;
+            display: block;
+            height: auto;
+        }
+
+        :where(table, thead, tbody, tfoot, tr) {
+            isolation: isolate;
+        }
+
+        :where(input, button, textarea, select) {
+            font: inherit;
+        }
+    }
+
+    @layer reset.opinion {
+        :where(body) {
+            overflow-wrap: break-word;
+        }
+
+        :where(html) {
+            scrollbar-width: thin;
+        }
+
+        :where(p) {
+            text-wrap: pretty;
+        }
+
+        :where(h1, h2, h3, h4, h5, h6) {
+            text-wrap: balance;
+        }
+
+        :where(img, picture, video, canvas, svg) {
+            height: auto;
+        }
+
+        :where(svg) {
+            color: currentColor;
+        }
+
+        :where(button, [role="button"], summary, label[for],
+               input[type="file"]::file-selector-button) {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        :where(:disabled, [aria-disabled="true"]) {
+            cursor: not-allowed;
+        }
+
+        :where(table) {
+            border-collapse: collapse;
+        }
+
+        :where(fieldset) {
+            border: 0;
+            padding: 0;
+            margin: 0;
+            min-inline-size: 0;
+        }
+
+        :where(legend) {
+            padding: 0;
+        }
+
+        :where(textarea) {
+            resize: vertical;
+        }
+
+        :where(textarea:not([rows])) {
+            min-block-size: 10em;
+        }
+
+        :where(abbr[title]) {
+            cursor: help;
+            text-decoration: underline dotted;
+        }
+
+        :where(summary) {
+            list-style: none;
+        }
+
+        :where(a) {
+            text-decoration: none;
+        }
+
+        /* The :autofill rule that previously lived here consumed --_bg,
+           which violates reset.opinion's "no core tokens" rule.
+           Moved to theme.css. */
+
+        :where(ul, ol):where([role="list"]) {
+            list-style: none;
+            padding: 0;
+        }
+
+        :where([hidden]) {
+            display: none;
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## core.color
+
+    ```css
+    /* ============================================================
+       color.css — core.color
+
+       The color formula. Takes inputs (--bg, --hue, --depth,
+       --fg-contrast, etc.) and computes outputs (--_bg, color,
+       --border, --Border).
+
+       Includes:
+         - @property registrations for the color tokens
+         - the math (:where(*) rule that computes --_bg etc.)
+         - rules that resolve --_bg into actual paint
+         - the .surface depth cascade
+         - SVG color bridging (fill/stroke from --_bg, text from currentColor)
+
+       Does NOT include:
+         - theme blocks (prefers-color-scheme media, [data-ui-theme])
+           → theme.css, since they decide WHICH values, not HOW math runs
+         - semantic hue presets (.suc/.inf/.wrn/.dgr) → theme.css
+       ============================================================ */
+
+    @property --cfg-color-hue       { syntax: "<number>";     inherits: true; initial-value: 220 }
+    @property --cfg-color-surf-chroma { syntax: "<number>";   inherits: true; initial-value: 0.018 }
+    @property --cfg-color-alpha     { syntax: "<number>";     inherits: true; initial-value: 1 }
+    @property --cfg-color-muted-l   { syntax: "<percentage>"; inherits: true; initial-value: 90% }
+    @property --cfg-color-muted-c   { syntax: "<number>";     inherits: true; initial-value: 0.05 }
+    @property --cfg-color-vivid-l   { syntax: "<percentage>"; inherits: true; initial-value: 20% }
+    @property --cfg-color-vivid-c   { syntax: "<number>";     inherits: true; initial-value: 0.4 }
+    @property --cfg-color-top-l     { syntax: "<number>";     inherits: true; initial-value: 88 }
+    @property --cfg-color-base-step { syntax: "<number>";     inherits: true; initial-value: 4 }
+    @property --cfg-color-curve-k   { syntax: "<number>";     inherits: true; initial-value: 0.6 }
+    @property --cfg-color-surf-mid  { syntax: "<number>";     inherits: true; initial-value: 60.5 }
+    @property --cfg-color-surf-rng  { syntax: "<number>";     inherits: true; initial-value: 55 }
+
+    @property --depth      { syntax: "<number>"; inherits: false; initial-value: 0 }
+    @property --bg         { syntax: "<number>"; inherits: true;  initial-value: -1 }
+    @property --hue        { syntax: "*";        inherits: true }
+    @property --hue-shift  { syntax: "<number>"; inherits: true;  initial-value: 0 }
+    @property --fg-contrast { syntax: "<number>"; inherits: true; initial-value: 1 }
+    @property --fg-chroma   { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --fg-hue      { syntax: "*";        inherits: true }
+    @property --l-shift    { syntax: "<number>"; inherits: true;  initial-value: 0 }
+    @property --c-shift    { syntax: "<number>"; inherits: true;  initial-value: 0 }
+
+    /* Private computed tokens — do NOT assign these from consumer code. */
+    @property --_bg     { syntax: "<color>";      inherits: true;  initial-value: oklch(88% 0.018 220) }
+    @property --_naive  { syntax: "<number>";     inherits: false; initial-value: 88 }
+    @property --_t      { syntax: "<number>";     inherits: false; initial-value: 0.5 }
+    @property --_surf-l { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_c01    { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_col-l  { syntax: "<percentage>"; inherits: false; initial-value: 90% }
+    @property --_col-c  { syntax: "<number>";     inherits: false; initial-value: 0.1 }
+    @property --_k      { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_l      { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_c      { syntax: "<number>";     inherits: false; initial-value: 0.018 }
+    @property --_h      { syntax: "<number>";     inherits: false; initial-value: 220 }
+    @property --_dark   { syntax: "<number>";     inherits: false; initial-value: 0 }
+
+    @layer core.color {
+        :where(*) {
+            --_naive:  calc(var(--cfg-color-top-l) - var(--depth) * var(--cfg-color-base-step));
+            --_t:      calc((var(--_naive) - var(--cfg-color-surf-mid)) / var(--cfg-color-surf-rng));
+            --_surf-l: calc((var(--_naive) - var(--depth) * var(--cfg-color-base-step) * var(--cfg-color-curve-k) * var(--_t) * var(--_t)) * 1%);
+
+            --_c01:   clamp(0, var(--bg), 1);
+            --_col-l: calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
+            --_col-c: calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
+
+            --_k: clamp(0, calc(var(--bg) + 1), 1);
+            --_l: calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k));
+            --_c: calc(var(--cfg-color-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k));
+            --_h: var(--hue, calc(var(--cfg-color-hue) + var(--hue-shift)));
+
+            /* Theme scalar derived from --cfg-color-top-l: 0 in light, 1 in dark.
+               top-l = 88 (light) → (60-88)/30 = -0.93 → clamped to 0
+               top-l = 33 (dark)  → (60-33)/30 =  0.90 → clamped to 1 */
+            --_dark: clamp(0, calc((60 - var(--cfg-color-top-l)) / 30), 1);
+
+            --_bg: oklch(
+                clamp(4%, calc(var(--_l) + var(--l-shift) * 100%), 97%)
+                calc(var(--_c) + var(--c-shift) * (var(--_l) / 100%))
+                var(--_h)
+                / var(--cfg-color-alpha)
+            );
+
+            /* Borders: theme-driven direction, not bg-driven.
+               (--_dark * 2 - 1) = -1 in light, +1 in dark.
+               --border  is neutral (low chroma).
+               --Border  is colored (~0.13 chroma, slight hue rotation). */
+            --border: oklch(
+                from var(--_bg)
+                calc(l + (var(--_dark) * 2 - 1) * 0.14)
+                calc(c * 0.3)
+                h
+            );
+            --Border: oklch(
+                from var(--_bg)
+                calc(l + (var(--_dark) * 2 - 1) * 0.22)
+                clamp(0.08, calc(c + 0.12), 0.18)
+                calc(h + 8)
+            );
+
+            color: oklch(
+                from var(--_bg)
+                calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--fg-contrast))
+                calc(c * (1 - var(--fg-contrast)) + var(--fg-chroma))
+                var(--fg-hue, h)
+            );
+        }
+
+        /* Default paint: every element gets a transparent --_bg unless it's
+           a surface. The --_k factor makes chromatic --bg values paint
+           themselves; --bg: -1 (default) yields _k=0 → fully transparent. */
+        :where(*) {
+            background-color: oklch(from var(--_bg) l c h / var(--_k));
+        }
+
+        /* Surfaces actually paint. .btn included so buttons get their --_bg
+           even at --bg: -1 (otherwise they'd be transparent). */
+        :where(body, .surface, .btn) {
+            background-color: var(--_bg);
+        }
+
+        /* Auto-nest depth tracking: a .surface containing nested .surfaces
+           gets a higher --depth, which the formula uses to lighten/darken. */
+        .surface:has(.surface)                            { --depth: 1 }
+        .surface:has(.surface .surface)                   { --depth: 2 }
+        .surface:has(.surface .surface .surface)          { --depth: 3 }
+        .surface:has(.surface .surface .surface .surface) { --depth: 4 }
+
+        /* SVG color bridging: descendants paint with the system's resolved
+           colors. Solid shapes use --_bg, lines/strokes use --_bg, text uses
+           currentColor so it picks up the same --fg-contrast/--fg-chroma/
+           --fg-hue formula as HTML text outside the SVG.
+
+           All three rules use :where() to keep specificity at (0,0,0) so
+           cascade order (later wins) decides — text rule is last so it
+           overrides the broad shape rule for text only. */
+        :where(svg) :where(*)                          { fill: var(--_bg); stroke: none }
+        :where(svg) :where(line, polyline, path.stroke) { fill: none; stroke: var(--_bg) }
+        :where(svg) :where(text, tspan)                { fill: currentColor; stroke: none }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## core.space
+    ```css
+    /* ============================================================
+       color.css — core.color
+
+       The color formula. Takes inputs (--bg, --hue, --depth,
+       --fg-contrast, etc.) and computes outputs (--_bg, color,
+       --border, --Border).
+
+       Includes:
+         - @property registrations for the color tokens
+         - the math (:where(*) rule that computes --_bg etc.)
+         - rules that resolve --_bg into actual paint
+         - the .surface depth cascade
+         - SVG color bridging (fill/stroke from --_bg, text from currentColor)
+
+       Does NOT include:
+         - theme blocks (prefers-color-scheme media, [data-ui-theme])
+           → theme.css, since they decide WHICH values, not HOW math runs
+         - semantic hue presets (.suc/.inf/.wrn/.dgr) → theme.css
+       ============================================================ */
+
+    @property --cfg-color-hue       { syntax: "<number>";     inherits: true; initial-value: 220 }
+    @property --cfg-color-surf-chroma { syntax: "<number>";   inherits: true; initial-value: 0.018 }
+    @property --cfg-color-alpha     { syntax: "<number>";     inherits: true; initial-value: 1 }
+    @property --cfg-color-muted-l   { syntax: "<percentage>"; inherits: true; initial-value: 90% }
+    @property --cfg-color-muted-c   { syntax: "<number>";     inherits: true; initial-value: 0.05 }
+    @property --cfg-color-vivid-l   { syntax: "<percentage>"; inherits: true; initial-value: 20% }
+    @property --cfg-color-vivid-c   { syntax: "<number>";     inherits: true; initial-value: 0.4 }
+    @property --cfg-color-top-l     { syntax: "<number>";     inherits: true; initial-value: 88 }
+    @property --cfg-color-base-step { syntax: "<number>";     inherits: true; initial-value: 4 }
+    @property --cfg-color-curve-k   { syntax: "<number>";     inherits: true; initial-value: 0.6 }
+    @property --cfg-color-surf-mid  { syntax: "<number>";     inherits: true; initial-value: 60.5 }
+    @property --cfg-color-surf-rng  { syntax: "<number>";     inherits: true; initial-value: 55 }
+
+    @property --depth      { syntax: "<number>"; inherits: false; initial-value: 0 }
+    @property --bg         { syntax: "<number>"; inherits: true;  initial-value: -1 }
+    @property --hue        { syntax: "*";        inherits: true }
+    @property --hue-shift  { syntax: "<number>"; inherits: true;  initial-value: 0 }
+    @property --fg-contrast { syntax: "<number>"; inherits: true; initial-value: 1 }
+    @property --fg-chroma   { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --fg-hue      { syntax: "*";        inherits: true }
+    @property --l-shift    { syntax: "<number>"; inherits: true;  initial-value: 0 }
+    @property --c-shift    { syntax: "<number>"; inherits: true;  initial-value: 0 }
+
+    /* Private computed tokens — do NOT assign these from consumer code. */
+    @property --_bg     { syntax: "<color>";      inherits: true;  initial-value: oklch(88% 0.018 220) }
+    @property --_naive  { syntax: "<number>";     inherits: false; initial-value: 88 }
+    @property --_t      { syntax: "<number>";     inherits: false; initial-value: 0.5 }
+    @property --_surf-l { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_c01    { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_col-l  { syntax: "<percentage>"; inherits: false; initial-value: 90% }
+    @property --_col-c  { syntax: "<number>";     inherits: false; initial-value: 0.1 }
+    @property --_k      { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_l      { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_c      { syntax: "<number>";     inherits: false; initial-value: 0.018 }
+    @property --_h      { syntax: "<number>";     inherits: false; initial-value: 220 }
+    @property --_dark   { syntax: "<number>";     inherits: false; initial-value: 0 }
+
+    @layer core.color {
+        :where(*) {
+            --_naive:  calc(var(--cfg-color-top-l) - var(--depth) * var(--cfg-color-base-step));
+            --_t:      calc((var(--_naive) - var(--cfg-color-surf-mid)) / var(--cfg-color-surf-rng));
+            --_surf-l: calc((var(--_naive) - var(--depth) * var(--cfg-color-base-step) * var(--cfg-color-curve-k) * var(--_t) * var(--_t)) * 1%);
+
+            --_c01:   clamp(0, var(--bg), 1);
+            --_col-l: calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
+            --_col-c: calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
+
+            --_k: clamp(0, calc(var(--bg) + 1), 1);
+            --_l: calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k));
+            --_c: calc(var(--cfg-color-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k));
+            --_h: var(--hue, calc(var(--cfg-color-hue) + var(--hue-shift)));
+
+            /* Theme scalar derived from --cfg-color-top-l: 0 in light, 1 in dark.
+               top-l = 88 (light) → (60-88)/30 = -0.93 → clamped to 0
+               top-l = 33 (dark)  → (60-33)/30 =  0.90 → clamped to 1 */
+            --_dark: clamp(0, calc((60 - var(--cfg-color-top-l)) / 30), 1);
+
+            --_bg: oklch(
+                clamp(4%, calc(var(--_l) + var(--l-shift) * 100%), 97%)
+                calc(var(--_c) + var(--c-shift) * (var(--_l) / 100%))
+                var(--_h)
+                / var(--cfg-color-alpha)
+            );
+
+            /* Borders: theme-driven direction, not bg-driven.
+               (--_dark * 2 - 1) = -1 in light, +1 in dark.
+               --border  is neutral (low chroma).
+               --Border  is colored (~0.13 chroma, slight hue rotation). */
+            --border: oklch(
+                from var(--_bg)
+                calc(l + (var(--_dark) * 2 - 1) * 0.14)
+                calc(c * 0.3)
+                h
+            );
+            --Border: oklch(
+                from var(--_bg)
+                calc(l + (var(--_dark) * 2 - 1) * 0.22)
+                clamp(0.08, calc(c + 0.12), 0.18)
+                calc(h + 8)
+            );
+
+            color: oklch(
+                from var(--_bg)
+                calc(l + (clamp(0, calc((0.5 - l) * 999), 1) - l) * var(--fg-contrast))
+                calc(c * (1 - var(--fg-contrast)) + var(--fg-chroma))
+                var(--fg-hue, h)
+            );
+        }
+
+        /* Default paint: every element gets a transparent --_bg unless it's
+           a surface. The --_k factor makes chromatic --bg values paint
+           themselves; --bg: -1 (default) yields _k=0 → fully transparent. */
+        :where(*) {
+            background-color: oklch(from var(--_bg) l c h / var(--_k));
+        }
+
+        /* Surfaces actually paint. .btn included so buttons get their --_bg
+           even at --bg: -1 (otherwise they'd be transparent). */
+        :where(body, .surface, .btn) {
+            background-color: var(--_bg);
+        }
+
+        /* Auto-nest depth tracking: a .surface containing nested .surfaces
+           gets a higher --depth, which the formula uses to lighten/darken. */
+        .surface:has(.surface)                            { --depth: 1 }
+        .surface:has(.surface .surface)                   { --depth: 2 }
+        .surface:has(.surface .surface .surface)          { --depth: 3 }
+        .surface:has(.surface .surface .surface .surface) { --depth: 4 }
+
+        /* SVG color bridging: descendants paint with the system's resolved
+           colors. Solid shapes use --_bg, lines/strokes use --_bg, text uses
+           currentColor so it picks up the same --fg-contrast/--fg-chroma/
+           --fg-hue formula as HTML text outside the SVG.
+
+           All three rules use :where() to keep specificity at (0,0,0) so
+           cascade order (later wins) decides — text rule is last so it
+           overrides the broad shape rule for text only. */
+        :where(svg) :where(*)                          { fill: var(--_bg); stroke: none }
+        :where(svg) :where(line, polyline, path.stroke) { fill: none; stroke: var(--_bg) }
+        :where(svg) :where(text, tspan)                { fill: currentColor; stroke: none }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## core type
+
+    ```css
+
+    /* ============================================================
+       type.css — core.type
+
+       Fluid type formula. Computes font-size by interpolating between
+       --cfg-type-min and --cfg-type-max as the viewport width crosses
+       from --cfg-fluid-min-vp to --cfg-fluid-max-vp.
+
+       Each element opts in to a step on the type ratio via --type
+       (default 0). Values like --type: 1 step up by the ratio,
+       --type: -1 step down.
+
+       Letter-spacing and line-height are also derived from --type so
+       larger type gets tighter spacing automatically.
+       ============================================================ */
+
+    @property --cfg-fluid-min-vp    { syntax: "<length>"; inherits: true; initial-value: 320px }
+    @property --cfg-fluid-max-vp    { syntax: "<length>"; inherits: true; initial-value: 1280px }
+    @property --cfg-type-scale      { syntax: "<number>"; inherits: true; initial-value: 1 }
+    @property --cfg-type-min-ratio  { syntax: "<number>"; inherits: true; initial-value: 1.2 }
+    @property --cfg-type-max-ratio  { syntax: "<number>"; inherits: true; initial-value: 1.28 }
+
+    @property --type { syntax: "<number>"; inherits: false; initial-value: 0 }
+
+    :root {
+        --cfg-type-min: 0.85rem;
+        --cfg-type-max: 1.0625rem;
+    }
+
+    @layer core.type {
+        :where(*) {
+            --_t-min: calc(var(--cfg-type-min) * pow(var(--cfg-type-min-ratio), var(--type)));
+            --_t-max: calc(var(--cfg-type-max) * pow(var(--cfg-type-max-ratio), var(--type)));
+
+            font-size: calc(
+                clamp(
+                    var(--_t-min),
+                    calc(
+                        var(--_t-min) +
+                        (var(--_t-max) - var(--_t-min)) *
+                        (100vi - var(--cfg-fluid-min-vp)) /
+                        (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp))
+                    ),
+                    var(--_t-max)
+                ) * var(--cfg-type-scale)
+            );
+
+            letter-spacing: calc(0.01em - var(--type) * 0.01em);
+            line-height: calc(1.5 - var(--type) * 0.075);
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Theme
+
+    ```css
+    /* ============================================================
+       theme.css — theme
+
+       Project-wide visual decisions. The "vibe" of the page lives
+       here. Anything you'd change to swap moods without touching
+       component logic.
+
+       Includes:
+         - light/dark theme value blocks
+         - semantic hue presets (.suc, .inf, .wrn, .dgr)
+         - state classes (.hover, .active, .disabled)
+         - selection and focus visuals
+         - decoration helpers (.shadow, .glow)
+         - density and motion presets
+         - font family declarations
+       ============================================================ */
+
+    @property --cfg-radius { syntax: "<length>"; inherits: true; initial-value: 8px }
+    @property --cfg-motion { syntax: "<number>"; inherits: true; initial-value: 1 }
+
+    :root {
+        --font-heading: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", P052, serif;
+        --font-body:    Avenir, Montserrat, Corbel, "URW Gothic", source-sans-pro, sans-serif;
+        --font-mono:    ui-monospace, "SF Mono", Monaco, Menlo, Consolas, monospace;
+        --font-kbd:     "Courier New", "Nimbus Mono PS", monospace;
+    }
+
+    @layer theme {
+
+        /* ── Light/dark theme values ──────────────────────────────
+           The MATH lives in core.color. These rules only set which
+           VALUES the math operates on for each theme. */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),
+            [data-ui-theme="system"] {
+                --cfg-color-top-l: 33;
+                --cfg-color-base-step: 2.5;
+                --cfg-color-surf-chroma: 0.010;
+                --cfg-color-surf-mid: 33.5;
+                --cfg-color-surf-rng: 27.5;
+            }
+        }
+        @media (prefers-color-scheme: light) {
+            [data-ui-theme="system"] {
+                --cfg-color-top-l: 88;
+                --cfg-color-base-step: 4;
+                --cfg-color-surf-chroma: 0.018;
+                --cfg-color-surf-mid: 60.5;
+                --cfg-color-surf-rng: 55;
+            }
+        }
+        [data-ui-theme="light"] {
+            --cfg-color-top-l: 88;
+            --cfg-color-base-step: 4;
+            --cfg-color-curve-k: 0.6;
+            --cfg-color-surf-chroma: 0.018;
+            --cfg-color-surf-mid: 60.5;
+            --cfg-color-surf-rng: 55;
+        }
+        [data-ui-theme="dark"] {
+            --cfg-color-top-l: 33;
+            --cfg-color-base-step: 2.5;
+            --cfg-color-curve-k: 0.6;
+            --cfg-color-surf-chroma: 0.010;
+            --cfg-color-surf-mid: 33.5;
+            --cfg-color-surf-rng: 27.5;
+        }
+
+        /* ── Semantic hue presets ─────────────────────────────────
+           Fixed-hue overrides for success/info/warning/danger.
+           Compose with --bg to choose how vivid. */
+        .suc { --hue: 145 }
+        .inf { --hue: 240 }
+        .wrn { --hue: 75 }
+        .dgr { --hue: 25 }
+
+        /* ── State classes ────────────────────────────────────────
+           These look like component logic but are project-wide
+           visual deltas to the color formula. The pointer-events
+           script toggles these classes uniformly across components,
+           which is why they live in theme — consistent state
+           appearance is a theme-level concern, not per-component. */
+        .hover {
+            --l-shift: 0.04;
+            --c-shift: 0.02;
+            --fg-contrast: calc(var(--fg-contrast, 1) + 0.15);
+        }
+        .active {
+            --l-shift: -0.04;
+            --c-shift: -0.10;
+            --fg-contrast: max(calc(var(--fg-contrast, 1) - 0.2), 0.4);
+        }
+        .disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+        /* ── Selection and focus ──────────────────────────────────
+           Visuals only; the JS for focus management is elsewhere. */
+        ::selection    { background: var(--Border); color: var(--_bg) }
+        :focus-visible { outline: 2px solid var(--Border); outline-offset: 2px }
+
+        /* ── Decoration filters ───────────────────────────────────
+           Vibe helpers. .shadow gives a hue-aware drop shadow,
+           .glow gives a hue-aware halo. Both respond to current --_bg. */
+        .shadow { filter: drop-shadow(0 6px 12px oklch(from var(--_bg) 20% 0.08 h / 0.4)) }
+        .glow   { filter: drop-shadow(0 0 12px oklch(from var(--_bg) 70% 0.20 h / 0.6)) }
+
+        /* ── Autofill overlay ─────────────────────────────────────
+           Browsers paint their own background on autofilled inputs.
+           Override with our --_bg so it stays themed.
+           (Was in reset.opinion in v1.x; moved here because it
+           consumes a core token, which reset.opinion forbids.) */
+        :where(input):autofill {
+            box-shadow: inset 0 0 0 1000px var(--_bg, transparent);
+        }
+
+        /* ── Motion presets ───────────────────────────────────────
+           --cfg-motion is consumed by transition-duration calcs in
+           components. 0 disables motion; "debug" slows everything 10×. */
+        @media (prefers-reduced-motion: reduce) {
+            :root { --cfg-motion: 0 }
+        }
+        [data-ui-motion="off"]   { --cfg-motion: 0 }
+        [data-ui-motion="on"]    { --cfg-motion: 1 }
+        [data-ui-motion="debug"] { --cfg-motion: 10 }
+
+        /* ── Density presets ──────────────────────────────────────
+           Bump or reduce overall type+space scale in one switch. */
+        [data-ui-size="sm"] { --cfg-type-scale: 0.875; --cfg-space-scale: 0.875 }
+        [data-ui-size="md"] { --cfg-type-scale: 1;     --cfg-space-scale: 1 }
+        [data-ui-size="lg"] { --cfg-type-scale: 1.25;  --cfg-space-scale: 1.1 }
+
+        /* Spacing-only density overrides (decouples space scale from type). */
+        [data-ui-space="sm"] { --cfg-space-scale: 0.875 }
+        [data-ui-space="md"] { --cfg-space-scale: 1 }
+        [data-ui-space="lg"] { --cfg-space-scale: 1.2 }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## layout.app
+
+    ```css
+    /* ============================================================
+       layout-app.css — layout.app
+
+       Application-shell layout: a 3×3 grid (header / nav · main · aside
+       / footer) with drawer-style nav and aside that collapse to fixed
+       modal drawers below a container-query breakpoint.
+
+       Opt in via <body class="app">. Nothing applies otherwise.
+
+       Drawer markup:
+         <body class="app">
+           <header id="header">...</header>
+           <dialog id="nav" open>...</dialog>     <!-- drawer -->
+           <main   id="main">...</main>
+           <dialog id="aside" open>...</dialog>   <!-- drawer -->
+           <footer id="footer">...</footer>
+         </body>
+
+       Why <dialog> for drawers: gets us free top-layer modal behavior
+       in narrow mode (showModal()) and keyboard accessibility. In wide
+       mode we override its UA styling to make it sit in a grid track.
+       ============================================================ */
+
+    @property --cfg-layout-radius   { syntax: "<length>"; inherits: true; initial-value: 4px }
+    @property --cfg-layout-page-gap { syntax: "<length>"; inherits: true; initial-value: 6px }
+
+    :where(html) {
+        /* These appear when the viewport hits the layout's design width.
+           The clamp(0px, calc(100vi - 100%) * 1e5, ...) trick is a
+           container-query approximation for cases where containers
+           can't be used. Will revisit. */
+        --cfg-layout-radius:   clamp(0px, calc(100vi - 100%) * 1e5, 0.5rem);
+        --cfg-layout-page-gap: clamp(0px, calc(100vi - 100%) * 1e5, 1rem);
+    }
+
+    @layer layout.app {
+
+        body.app {
+            font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
+            background: var(--_bg);
+            container: app-shell / inline-size;
+
+            /* Wide layout — 3×3 grid.
+               Columns are `auto 1fr auto` so nav/aside tracks size to
+               their explicit widths, and collapse to zero when those
+               dialogs leave the grid (position: fixed). */
+            display: grid;
+            grid-template:
+                "header header header" auto
+                "nav    main   aside"  1fr
+                "footer footer footer" auto /
+                auto    1fr    auto;
+            gap: 0;
+            height: 100svh;
+            overflow: hidden;  /* body never scrolls; #main does */
+        }
+
+        /* Only #main scrolls; header/footer stay pinned */
+        body.app #main {
+            overflow-y: auto;
+            min-height: 0;     /* critical in grid — lets child scroll */
+        }
+        body.app #header,
+        body.app #footer { min-height: 0 }
+
+        /* ── Grid-mode dialog reset ─────────────────────────────────
+           <dialog> comes with UA styles we need to neutralize so it
+           renders like a plain block in its grid slot. */
+        body.app #nav,
+        body.app #aside {
+            position: static;
+            display: block;            /* overrides dialog's display: none */
+            max-width: none;
+            max-height: none;
+            width: var(--drawer-width, auto);
+            height: auto;
+            margin: 0;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--cfg-layout-radius);
+            background: var(--_bg);
+            color: inherit;
+            overflow-y: auto;
+        }
+
+        body.app #nav {
+            grid-area: nav;
+            margin-right: var(--cfg-layout-page-gap);
+        }
+        body.app #aside {
+            grid-area: aside;
+            margin-left: var(--cfg-layout-page-gap);
+        }
+
+        body.app #main {
+            grid-area: main;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--cfg-layout-radius);
+            background: var(--_bg);
+        }
+        body.app #header {
+            grid-area: header;
+            margin-bottom: var(--cfg-layout-page-gap);
+        }
+        body.app #footer {
+            grid-area: footer;
+            margin-top: var(--cfg-layout-page-gap);
+        }
+
+        /* ── Narrow layout ──────────────────────────────────────────
+           Below 1024px container width: nav/aside leave the grid and
+           become fixed modal drawers. Triggered by container query so
+           it works in any context the app shell is embedded in. */
+        @container app-shell (width < 1024px) {
+            body.app #nav,
+            body.app #aside {
+                position: fixed;
+                inset: 0 auto 0 auto;       /* reset all sides; per-drawer below */
+                margin: 0;
+                width: min(85vw, 320px);
+                max-width: 85vw;
+                height: 100svh;
+                border-radius: 0;
+                border: 0;
+                background: var(--_bg);
+                padding: 1.5rem 1rem;
+                overflow-y: auto;
+
+                transition:
+                    translate calc(var(--cfg-motion) * 0.25s) ease-out,
+                    opacity   calc(var(--cfg-motion) * 0.25s) ease-out,
+                    display   calc(var(--cfg-motion) * 0.25s) allow-discrete,
+                    overlay   calc(var(--cfg-motion) * 0.25s) allow-discrete;
+                translate: 0 0;
+                opacity: 1;
+            }
+
+            body.app #nav   { left: 0; border-right: 1px solid var(--Border) }
+            body.app #aside { left: auto; right: 0; border-left: 1px solid var(--Border) }
+
+            body.app #nav:not([open])   { display: none; translate: -100% 0; opacity: 0 }
+            body.app #aside:not([open]) { display: none; translate:  100% 0; opacity: 0 }
+
+            @starting-style {
+                body.app #nav[open]   { translate: -100% 0; opacity: 0 }
+                body.app #aside[open] { translate:  100% 0; opacity: 0 }
+            }
+
+            body.app #nav::backdrop,
+            body.app #aside::backdrop {
+                background: oklch(0% 0 0 / 0.5);
+                transition:
+                    background-color calc(var(--cfg-motion) * 0.25s) ease-out,
+                    display          calc(var(--cfg-motion) * 0.25s) allow-discrete,
+                    overlay          calc(var(--cfg-motion) * 0.25s) allow-discrete;
+            }
+            body.app #nav:not([open])::backdrop,
+            body.app #aside:not([open])::backdrop {
+                background: oklch(0% 0 0 / 0);
+            }
+            @starting-style {
+                body.app #nav[open]::backdrop,
+                body.app #aside[open]::backdrop { background: oklch(0% 0 0 / 0) }
+            }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## layout.doc
+
+    ```css
+    /* ============================================================
+       layout-doc.css — layout.doc
+
+       Document/paper layout. A fixed-aspect "piece of paper" centered
+       on a backdrop, with print awareness. Used for resumes, posters,
+       single-page artifacts that need to look the same on screen and
+       in print.
+
+       Opt in via <body class="doc"> with a <article class="paper">
+       child:
+
+         <body class="doc">
+           <article class="paper">
+             ...content...
+           </article>
+         </body>
+
+       Defaults to US Letter portrait. Override --paper-w / --paper-h
+       on the .paper element for other sizes.
+
+       Paper sizing:
+         On screen — scales to fit viewport, preserves aspect ratio.
+         In print  — exact physical size, zero @page margin.
+
+       Type and space inside the paper are paper-relative (cqi units)
+       so screen and print render identically regardless of viewport.
+       ============================================================ */
+
+    @layer layout.doc {
+
+        body.doc {
+            margin: 0;
+            min-block-size: 100dvh;
+            display: grid;
+            place-items: center;
+            padding: 1rem;
+        }
+
+        /* The paper itself. Default geometry: US Letter portrait. */
+        body.doc .paper,
+        .paper {
+            --paper-w: 8.5in;
+            --paper-h: 11in;
+            --paper-aspect: calc(var(--paper-w) / var(--paper-h));
+
+            /* aspect-ratio doesn't accept the `<num> / <num>` slash form
+               with var() on either side — only literal numbers. Use the
+               single-number form via the precomputed --paper-aspect. */
+            aspect-ratio: var(--paper-aspect);
+
+            /* Fit the smaller of (viewport-height) or (width-derived height).
+               Whichever bound is tighter wins; aspect-ratio handles the other. */
+            block-size: min(
+                calc(100dvh - 2rem),
+                calc((100dvw - 2rem) / var(--paper-aspect))
+            );
+            inline-size: auto;
+
+            border: 1px solid var(--border);
+            border-radius: var(--cfg-radius, 0.5rem);
+            box-shadow: 0 1rem 3rem -1rem oklch(0% 0 0 / 0.4);
+            overflow: hidden;
+
+            /* CQ container — descendants size against paper width via cqi. */
+            container-type: size;
+            container-name: paper;
+        }
+
+        /* core.type and core.space both reference `100vi` in their formulas
+           — wrong for a fixed-aspect document where everything should track
+           the paper, not the viewport.
+
+           Override for descendants only (.paper *, NOT .paper itself).
+
+           Why: `--cfg-space-base` and `--paper-type-base` are registered
+           as <length> via @property. Registered length properties are
+           evaluated at the DECLARATION site — so setting `1cqi` on `.paper`
+           resolves it against the paper's PARENT (viewport), and the
+           already-resolved px value propagates to descendants. Bug.
+           Setting them on `.paper *` evaluates cqi at each descendant,
+           which IS inside the paper's container query → paper-relative.
+
+           --type and --space step ratios still apply, so hierarchy and
+           density still work — they just operate on a paper-relative
+           base instead of a viewport-fluid one. */
+        .paper * {
+            /* Paper-relative bases — declared on descendants so cqi
+               evaluates inside the paper's container query context. */
+            --paper-type-base: 1.75cqi;
+            --cfg-space-base: 1cqi;
+
+            font-size: calc(
+                var(--paper-type-base) *
+                pow(var(--cfg-type-min-ratio), var(--type)) *
+                var(--cfg-type-scale)
+            );
+            --s: calc(
+                var(--cfg-space-base) *
+                pow(var(--cfg-space-ratio), var(--space)) *
+                var(--cfg-space-scale)
+            );
+        }
+
+        @media print {
+            body.doc {
+                padding: 0;
+                min-block-size: auto;
+                display: block;
+            }
+            @page { size: letter; margin: 0 }
+
+            body.doc .paper,
+            .paper {
+                inline-size: var(--paper-w);
+                block-size: var(--paper-h);
+                aspect-ratio: auto;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## layout.compose
+
+    Honestly a wear layer, these do not alwas work well with grid / flex interaperability (need to clean up some day)
+
+    ```css
+    /* ============================================================
+       layout-compose.css — layout.composition
+
+       Stateless layout primitives. Each class arranges children with
+       no opinion about what the children are. Composes with anything.
+
+       Conventions:
+         gap: var(--s, fallback) — falls back if no space context.
+         --_col, --_flank — per-instance overrides for sizing.
+       ============================================================ */
+
+    @layer layout.composition {
+
+        .stack {
+            display: flex;
+            flex-direction: column;
+            gap: var(--s, 0.75rem);
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--s, 0.5rem);
+        }
+
+        .split {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: var(--s, 0.5rem);
+        }
+
+        .cluster {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: var(--s, 0.5rem);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(var(--_col, 15rem), 1fr));
+            gap: var(--s, 1rem);
+        }
+
+        /* .flank — first child stays its natural size (or --_flank);
+                    last child takes the remaining space. */
+        .flank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--s, 1rem);
+        }
+        .flank > :first-child { flex: 1   1 var(--_flank, auto) }
+        .flank > :last-child  { flex: 999 1 0 }
+
+        /* .flank-end — mirrored: first child takes remaining,
+                        last child stays its natural size (or --_flank). */
+        .flank-end {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--s, 1rem);
+        }
+        .flank-end > :first-child { flex: 999 1 0 }
+        .flank-end > :last-child  { flex: 1   1 var(--_flank, auto) }
+
+        /* Spans the full width of a parent .grid. */
+        .span { grid-column: 1 / -1 }
+
+        /* Wrap controls. */
+        .wrap   { flex-wrap: wrap }
+        .nowrap { flex-wrap: nowrap }
+
+        /* Right-align an element within a flex/grid context. */
+        .right {
+            margin-inline-start: auto;
+            text-align: end;
+        }
+
+        /* Floating action button row, anchored bottom-right. Uses --s
+           for inset and gap so it respects the active space scale. */
+        .fab-row {
+            position: fixed;
+            inset-block-end: var(--s, 1rem);
+            inset-inline-end: var(--s, 1rem);
+            display: flex;
+            gap: var(--s, 0.5rem);
+        }
+
+        /* ── Directional grid overlap helpers ────────────────────
+           Place children in fixed corner/edge slots of a 2×2 or 3×3
+           grid. Useful for badges, tooltips, overlays. */
+        .grid-2x2,
+        .grid-3x3,
+        .grid-overlap {
+            display: grid;
+            height: 100%;
+        }
+        .grid-2x2     { grid-template: 1fr 1fr     / 1fr 1fr     }
+        .grid-3x3     { grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr }
+        .grid-overlap { grid-template: 1fr / 1fr }
+        .grid-overlap > * { grid-area: 1/1/-1/-1 }
+
+        .↖ { grid-area: 1/1;  justify-self: start;  align-self: start  }
+        .↗ { grid-area: 1/-2; justify-self: end;    align-self: start  }
+        .↙ { grid-area: -2/1; justify-self: start;  align-self: end    }
+        .↘ { grid-area: -2/-2;justify-self: end;    align-self: end    }
+
+        .grid-3x3     > .↑, .grid-overlap > .↑ { grid-area: 1/2;  justify-self: center; align-self: start  }
+        .grid-3x3     > .←, .grid-overlap > .← { grid-area: 2/1;  justify-self: start;  align-self: center }
+        .grid-3x3     > .→, .grid-overlap > .→ { grid-area: 2/-2; justify-self: end;    align-self: center }
+        .grid-3x3     > .↓, .grid-overlap > .↓ { grid-area: -2/2; justify-self: center; align-self: end    }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## component.base
+
+    ```css
+    /* ============================================================
+       component-base.css — component.base
+
+       Default styling for unclassed HTML elements. Applies via tag
+       selectors so consumers get reasonable typography by default.
+
+       Each rule sets --type, --contrast, font-family — the formula
+       does the rest. No class selectors here; class versions of
+       these (.badge etc.) live in component.simple.
+       ============================================================ */
+
+    @layer component.base {
+        h1 { --type: 2; font-family: var(--font-heading) }
+        /* h2-h6 inherit defaults via type ratio steps; consumers can
+           override per-context with --type. Adjust here if the project
+           wants explicit step values for every heading. */
+
+        p {
+            --fg-contrast: 1;
+            font-family: var(--font-body);
+        }
+
+        small {
+            --type: -1.5;
+            --fg-contrast: 0.6;
+            font-family: var(--font-body);
+            text-transform: uppercase;
+        }
+
+        code {
+            --type: -0.5;
+            --fg-contrast: 0.8;
+            font-family: var(--font-mono);
+        }
+
+        pre {
+            --type: -0.5;
+            --fg-contrast: 0.75;
+            font-family: var(--font-mono);
+        }
+
+        figcaption {
+            --type: -0.5;
+            --fg-contrast: 0.7;
+        }
+
+        blockquote { --fg-contrast: 0.75 }
+        address    { --fg-contrast: 0.75 }
+        cite       { --fg-contrast: 0.7  }
+        mark       { --fg-contrast: 1    }
+
+        :where(hr) {
+            border-color: var(--border);
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## componnent.simple
+
+    ```css
+    /* ============================================================
+       component-simple.css — component.simple
+
+       Generic small components keyed by class. Each composes with
+       the color/type/space systems and works in any context.
+
+       "Simple" means: small in scope, doesn't assume surrounding
+       structure, generic enough to use in any project.
+       ============================================================ */
+
+    @layer component.simple {
+
+        /* ── Badge ────────────────────────────────────────────────
+           Inline pill, smaller than text. Use for counts, status
+           indicators, etc. */
+        :where(.badge) {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.15em 0.6em;
+            border-radius: 99px;
+        }
+
+        /* ── Tag ──────────────────────────────────────────────────
+           Pill chip, slightly larger than .badge, with a quiet border.
+           Use for skill tags, categories, filterable items. */
+        .tag {
+            --type: -2;
+            display: inline-flex;
+            align-items: center;
+            padding-inline: 0.6em;
+            padding-block: 0.15em;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        /* ── Card ─────────────────────────────────────────────────
+           Bordered container. .card uses the quiet --border;
+           .Card uses the louder --Border for stronger emphasis. */
+        .card {
+            border-radius: var(--cfg-radius);
+            border: 1px solid var(--border);
+        }
+        .Card {
+            border-radius: var(--cfg-radius);
+            border: 1px solid var(--Border);
+        }
+
+        /* ── Button ───────────────────────────────────────────────
+           Touch-friendly, icon-aware, type-scaled. State (.hover,
+           .active, .disabled) lives in theme.css and applies via
+           the pointer-events script. */
+        :where(.btn) {
+            --type: -1;
+            --fg-contrast: 0.85;
+
+            -webkit-tap-highlight-color: transparent;
+            min-width: 12ch;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5em;
+            padding: 0.35em 1em;
+            margin: 5px;
+            border: 1px solid var(--border);
+            border-radius: var(--cfg-radius);
+            font-family: var(--font-mono);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color, color, border-color;
+            transition-duration: calc(var(--cfg-motion) * 0.12s);
+            transition-timing-function: ease-out;
+
+            /* SVG sizing — text-only buttons miss this; combo and
+               icon-only both hit it. Keeps icons proportional to
+               current --type instead of hardcoded px. */
+            & > svg {
+                inline-size: 1.25em;
+                block-size: 1.25em;
+                pointer-events: none;
+                flex-shrink: 0;
+            }
+
+            /* Combo (icon + text): tighten left padding for icon
+               breathing room without pushing label off-center.
+               gap: 0.5em (inherited) handles icon↔text spacing. */
+            &:has(> svg):not(:has(> svg:only-child)) {
+                padding-inline-start: 0.75em;
+            }
+
+            /* Icon-only: square, no min-width. */
+            &:has(> svg:only-child) {
+                min-width: unset;
+                padding: 0.25em;
+                block-size: calc(2.5 * 1em);
+                aspect-ratio: 1;
+            }
+
+            /* Touch-device overrides. pointer: coarse catches
+               phones/tablets regardless of viewport width — more
+               reliable than width media queries for input mode. */
+            @media (pointer: coarse) {
+                min-block-size: 44px;
+                padding-block: 0.6em;
+
+                &:has(> svg:only-child) {
+                    /* 48px keeps us above 44px even at small --type. */
+                    block-size: 48px;
+                    inline-size: 48px;
+                }
+                &:has(> svg):not(:has(> svg:only-child)) {
+                    padding-inline: 1em 1.25em;
+                }
+            }
+        }
+
+        /* ── Popover ──────────────────────────────────────────────
+           Anchor-positioned popup. Uses CSS anchor positioning APIs
+           (Chrome 125+). Falls back to manual placement via class
+           modifier if anchor unsupported. */
+        [popover].popover {
+            position: fixed;
+            inset: auto;
+            margin: 0;
+            border: 1px solid var(--border);
+            min-width: clamp(10rem, 40vw, 18rem);
+            max-width: min(90vw, 24rem);
+            max-height: 80vh;
+            overflow: auto;
+
+            background: var(--_bg);
+            color: inherit;
+            border-radius: var(--cfg-radius);
+            box-shadow: 0 8px 24px oklch(from var(--_bg) 10% 0.05 h / 0.3);
+            padding: var(--s);
+
+            opacity: 1;
+            transform: scale(1);
+            position-area: block-start inline-end;
+            position-try-order: most-block-size;
+            position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+            position-visibility: anchors-visible;
+
+            transition:
+                opacity   calc(var(--cfg-motion) * 0.18s) ease-out,
+                transform calc(var(--cfg-motion) * 0.18s) ease-out,
+                display   calc(var(--cfg-motion) * 0.18s) allow-discrete,
+                overlay   calc(var(--cfg-motion) * 0.18s) allow-discrete;
+        }
+
+        [popover].popover:not(:popover-open) {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        /* Manual placement modifiers. */
+        [popover].popover.below-start { position-area: block-end inline-start }
+        [popover].popover.below-end   { position-area: block-end inline-end   }
+        [popover].popover.above-start { position-area: block-start inline-start }
+        [popover].popover.above-end   { position-area: block-start inline-end   }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## component.complex
+
+    ```css
+    /* ============================================================
+       component-complex.css — component.complex
+
+       Generic complex components — modal dialogs, calendars, data
+       tables, etc. Same purity rule as component.simple: anything
+       project-specific (timeline, sidebar, role cards, etc.) lives
+       in app code as me {} blocks, NOT here.
+
+       Was previously crowded with resume-specific components in
+       v1.x. Those have been extracted.
+       ============================================================ */
+
+    @layer component.complex {
+
+        /* ── Modal dialog ─────────────────────────────────────────
+           Pure modal, anchored to top-layer. .modal opt-in so plain
+           <dialog> (used as in-flow drawers by layout.app) doesn't
+           inherit modal styling. */
+        :where(dialog.modal) {
+            border: 1px solid var(--border);
+            border-radius: var(--cfg-radius);
+            padding: 0;
+            max-width: min(90vw, 32rem);
+            max-height: 85vh;
+            overflow: auto;
+            opacity: 1;
+            transform: translateY(0);
+            transition:
+                opacity   calc(var(--cfg-motion) * 0.25s) ease-out,
+                transform calc(var(--cfg-motion) * 0.25s) ease-out,
+                display   calc(var(--cfg-motion) * 0.25s) allow-discrete,
+                overlay   calc(var(--cfg-motion) * 0.25s) allow-discrete;
+
+            &:not([open]) {
+                opacity: 0;
+                transform: translateY(calc(var(--cfg-motion) * 0.5rem));
+            }
+
+            @starting-style {
+                opacity: 0;
+                transform: translateY(calc(var(--cfg-motion) * -0.5rem));
+            }
+
+            &::backdrop { background: transparent }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## utility
+
+    ```css
+    /* ============================================================
+       utility.css — utility.layout + utility.exceptions + utility.important
+
+       Three small utility layers consolidated. Kept together because
+       each has only a handful of rules and they're conceptually
+       adjacent (small classes that tweak behavior).
+
+       utility.layout    — display/wrap helpers, responsive show/hide
+       utility.exceptions — buffer layer; intentionally near-empty
+       utility.important — !important rules for cascade-immune cases
+       ============================================================ */
+
+    @layer utility.layout {
+        :where(.nowrap)   { white-space: nowrap }
+        :where(.truncate) {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Responsive show/hide. Matches viewport ranges; flips display
+           to `revert-layer` so the element gets its natural display value
+           back (block/inline/grid/etc.) without the consumer specifying. */
+        :where(.mobile, .tablet, .desktop) { display: none }
+        @media (         width <   480px) { :where(.mobile)  { display: revert-layer } }
+        @media (480px <= width <  1024px) { :where(.tablet)  { display: revert-layer } }
+        @media (         width >= 1024px) { :where(.desktop) { display: revert-layer } }
+
+        /* Print mode adjustments — generic enough to live here. */
+        @media print {
+            :where(body) { min-height: 0 }
+        }
+    }
+
+    @layer utility.exceptions {
+        /* Visually hidden — screen-reader-only content. */
+        :is(.vh) {
+            inline-size: 0;
+            block-size: 0;
+            overflow: hidden;
+        }
+    }
+
+    @layer utility.important {
+        :where([hidden]) { display: none !important }
+
+        /* No-print: hide an element when printing. */
+        @media print {
+            :where(.np) { display: none !important }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+if __name__ == "__main__":
+    app.run()
