@@ -22,7 +22,7 @@ def _(mo):
 
     The toolbox CSS uses cascade layers to make every rule's role explicit. The order is fixed; the meaning of each layer is fixed; deciding where a new rule goes should be a 10-second decision.
 
-    ```css
+    ```
     @layer
         reset.fix,
         reset.opinion,
@@ -679,17 +679,12 @@ def _(mo):
         .surface:has(.surface .surface .surface)          { --depth: 3 }
         .surface:has(.surface .surface .surface .surface) { --depth: 4 }
 
-        /* SVG color bridging: descendants paint with the system's resolved
-           colors. Solid shapes use --_bg, lines/strokes use --_bg, text uses
-           currentColor so it picks up the same --fg-contrast/--fg-chroma/
-           --fg-hue formula as HTML text outside the SVG.
-
-           All three rules use :where() to keep specificity at (0,0,0) so
-           cascade order (later wins) decides — text rule is last so it
-           overrides the broad shape rule for text only. */
-        :where(svg) :where(*)                          { fill: var(--_bg); stroke: none }
-        :where(svg) :where(line, polyline, path.stroke) { fill: none; stroke: var(--_bg) }
-        :where(svg) :where(text, tspan)                { fill: currentColor; stroke: none }
+        /* SVG color bridging: SVG elements inherit `color` from the formula
+           above. This single rule ensures any descendant using `currentColor`
+           (icons via `fill="currentColor"` or `stroke="currentColor"`,
+           designer SVGs with hardcoded fills, charts with `fill="none"` lines,
+           etc.) participates in the system's auto-contrast and theme. */
+        :where(svg) { color: currentColor }
     }
     ```
     """)
