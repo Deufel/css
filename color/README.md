@@ -1,159 +1,228 @@
-# Color Layer in Detail
+╔═══════════════════════════════════════════════════════════════════╗
+║              THE colorNtype MENTAL MODEL                          ║
+║                                                                   ║
+║   The whole system, in two axes and three hue tokens.             ║
+╚═══════════════════════════════════════════════════════════════════╝
 
-A formula-driven CSS color system. You set numeric inputs; the system computes every visible color so contrast, theme, and surface depth always work.
 
-## Public API
+   ┌─────────────────────────────────────────────────────────────┐
+   │                  EVERY ELEMENT HAS TWO KNOBS                │
+   │                                                             │
+   │   --bg : -1  ←──── 0 ────→ +1     PAINT THE BACKGROUND      │
+   │           (none)  (muted) (vivid)                           │
+   │                                                             │
+   │   --fg : -1  ←──── 0 ────→ +1     PAINT THE INK             │
+   │       (contrast) (none)  (chromatic)                        │
+   │                                                             │
+   │  Both axes are continuous. Both work in HTML and SVG.       │
+   └─────────────────────────────────────────────────────────────┘
 
-Set these on any element via inline `style` or class. All tokens cascade unless noted.
 
-| Token             | Range     | Default  | Effect                                                       |
-| ----------------- | --------- | -------- | ------------------------------------------------------------ |
-| `--bg`            | `-1`…`1`  | `-1`     | Background. `-1` = surface mode (no chromatic paint). `0`…`1` = muted to vivid chromatic, theme-independent. |
-| `--hue`           | `0`…`360` | inherits | Absolute hue override for a subtree (a section, card, or component that should reflow to a new hue). |
-| `--hue-shift`     | number    | `0`      | Additive offset from the inherited hue. Use for sibling rotation (categorical charts, accents). |
-| `--fg-contrast`   | `0`…`1`   | `1`      | Text ink strength. `1` = full contrast (black/white auto-flip). `0` = matches background (invisible). |
-| `--fg-chroma`     | `0`…`0.4` | `0`      | Tint retained in text. Use `0.08`–`0.15` for tinted captions/links. |
-| `--fg-hue`        | `0`…`360` | inherits | Hue override for text only.                                  |
-| `--l-shift`       | number    | `0`      | State-only lightness offset (used by `.hover`/`.active`).    |
-| `--c-shift`       | number    | `0`      | State-only chroma offset.                                    |
-| `--cfg-color-hue` | `0`…`360` | `220`    | **Global** hue. Set once at `:root`. For subtree changes, use `--hue` instead. |
+╔═══════════════════════════════════════════════════════════════════╗
+║   THE TWO ROLES — MUTUALLY EXCLUSIVE                              ║
+╚═══════════════════════════════════════════════════════════════════╝
 
-Classes:
+   ┌──────────────────────────────┐    ┌──────────────────────────────┐
+   │       .surface               │    │     CHROMATIC ACCENT         │
+   │  (structural container)      │    │  (semantic colored element)  │
+   ├──────────────────────────────┤    ├──────────────────────────────┤
+   │                              │    │                              │
+   │  Default --bg: -1            │    │  Set --bg: 0 … 1             │
+   │     transparent, tracks      │    │     explicit chromatic       │
+   │     parent                   │    │     paint                    │
+   │                              │    │                              │
+   │  Auto-depth via :has()       │    │  Theme-STABLE                │
+   │     more nesting = brighter  │    │     same color in light      │
+   │     surface (focus moves     │    │     and dark themes          │
+   │     toward the most-nested   │    │                              │
+   │     content)                 │    │  No structural role          │
+   │                              │    │     no auto-depth            │
+   │  Theme-FLIPS                 │    │     no theme tracking        │
+   │     light surfaces in light  │    │                              │
+   │     mode, dark surfaces in   │    │  Use for: chips, badges,     │
+   │     dark mode                │    │     status cards, brand      │
+   │                              │    │     callouts, swatches,      │
+   │  Use for: cards, panels,     │    │     buttons, avatars         │
+   │     modals, sections, the    │    │                              │
+   │     page itself, anything    │    │  Examples:                   │
+   │     holding content          │    │     <div                     │
+   │                              │    │       style="--bg: 0.55      │
+   │  Examples:                   │    │             --hue-lock: 145" │
+   │     <div class="surface">    │    │     >LIVE</div>              │
+   │       <h2>Title</h2>         │    │                              │
+   │       <p>Body…</p>           │    │     <button                  │
+   │     </div>                   │    │       style="--bg: 0.5">     │
+   │                              │    │       Continue               │
+   │                              │    │     </button>                │
+   └──────────────────────────────┘    └──────────────────────────────┘
 
-| Class                       | Effect                                                       |
-| --------------------------- | ------------------------------------------------------------ |
-| `.surface`                  | Paints a real background; auto-nests up to depth 4 (deeper surfaces are lighter/more prominent). |
-| `.suc` `.inf` `.wrn` `.dgr` | Set `--hue` to `145` / `240` / `75` / `25`.                  |
-| `.hover` `.active`          | State classes toggled via the pointer-events script (below). Each composes `--l-shift`, `--c-shift`, `--fg-contrast`. **Use these, not `:hover`/`:active`** — pseudos break on iOS. |
+       Pick ONE per element. Never both. If you feel like you want
+       both, you actually want a .surface CONTAINING a chromatic
+       child element.
 
-Attributes:
 
-| Attribute       | Values                  | Effect                                                       |
-| --------------- | ----------------------- | ------------------------------------------------------------ |
-| `data-ui-theme` | `light` `dark` `system` | Forces theme on element + subtree. Default follows `prefers-color-scheme`. |
+╔═══════════════════════════════════════════════════════════════════╗
+║   THE THREE HUE TOKENS                                            ║
+╚═══════════════════════════════════════════════════════════════════╝
 
-Computed outputs (read-only — never assign):
+      --hue           page-level default. Cascades freely.
+                      Set on :root or any subtree as a default
+                      for everything below.
 
-- `var(--_bg)` — resolved background color
-- `var(--border)` — quiet themed border
-- `var(--Border)` — louder themed border (note capital B)
+      --hue-shift     relative offset. Adds to the inherited
+                      --hue. Stacks with parent shifts.
+                      Use for: subtle subtree variation.
 
-## The `--bg` ramp — practical guidance
+      --hue-lock      absolute pin. Wins over --hue and
+                      --hue-shift from above.
+                      Use for: semantic colors (success/info/
+                      warning/danger), brand-color elements,
+                      anything that must be a specific hue
+                      regardless of cascade.
 
-Most of your work uses `.surface` and inherits everything. Reach for `--bg` only when you want chromatic paint.
+   ┌─────────────────────────────────────────────────────────┐
+   │  Resolution:                                            │
+   │                                                         │
+   │    --_h: var(--hue-lock,                                │
+   │            calc(var(--hue) + var(--hue-shift)))         │
+   │                                                         │
+   │  If --hue-lock is set anywhere up the cascade,          │
+   │  it wins. Otherwise: page hue + shifts.                 │
+   └─────────────────────────────────────────────────────────┘
 
-| Range          | Use for                                                      | Notes                                                        |
-| -------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| `-1` (default) | Plain text on inherited surface; transparent decorations.    | You never type this.                                         |
-| `0.01`–`0.05`  | Subtle buttons, badges, hovered list rows.                   | A button at `--bg: 0.02` is almost always nicer than `--bg: 0.5`. |
-| `0.1`–`0.3`    | Standard buttons, pills, tags, callouts.                     | Clear chromatic identity without shouting.                   |
-| `0.3`–`0.4`    | Strong buttons, primary CTAs, semantic toasts.               | Already sufficient for almost any component.                 |
-| `0.4`–`1.0`    | Dense data viz only — heatmaps, choropleth maps, intensity grids. | "Inky." Inappropriate for UI controls; the eye reads it as a value, not a state. |
 
-Rule of thumb: if you're styling a control and reach above `0.4`, you probably want a different design, not a louder color.
+╔═══════════════════════════════════════════════════════════════════╗
+║   WHAT CHANGES WITH THEME (light ↔ dark)                          ║
+╚═══════════════════════════════════════════════════════════════════╝
 
-## Patterns
+   .surface          ───►  FLIPS         (canvas inverts)
 
-**Surfaces are containers; text is content.** Put `.surface` (or `--bg`) on a wrapper, text inside as children. Don't put `.surface` or `--bg` directly on a `<p>` or `<h2>`.
+   --bg: 0…1         ───►  STABLE        (a 0.4 green stays
+                                          green in both themes —
+                                          by design)
 
-```html
-<div class="surface">
-  <h2>Title</h2>
-  <p>Body text inherits the surface's resolved background.</p>
-</div>
-```
+   --fg: -1…0        ───►  FLIPS         (contrast pole derives
+                                          from the surface, so
+                                          ink lands correctly
+                                          against either pole)
 
-**Surfaces auto-nest.** Don't manage depth.
+   --fg: 0…1         ───►  STABLE        (chromatic ink, same
+                                          color in both themes,
+                                          mirror of --bg)
 
-```html
-<div class="surface">                  <!-- depth 0 -->
-  <div class="surface">                <!-- depth 1, lighter -->
-    <div class="surface">              <!-- depth 2, lighter still -->
-      <p>Most prominent layer.</p>
-    </div>
-  </div>
-</div>
-```
+   --hue / --hue-lock /
+   --hue-shift       ───►  STABLE        (hue is theme-orthogonal)
 
-**Hue cascades.** Set `--hue` (or `--hue-shift`) on any parent to recolor the subtree.
+   --border          ───►  FLIPS
+   --Border          ───►  FLIPS
 
-```html
-<aside style="--hue: 280">
-  <button class="surface" style="--bg: 0.2">Purple by inheritance</button>
-</aside>
-```
 
-**Categorical color via sibling `--hue-shift`.**
+╔═══════════════════════════════════════════════════════════════════╗
+║   THE FG AXIS — TWO MODES IN ONE NUMBER                           ║
+╚═══════════════════════════════════════════════════════════════════╝
 
-```html
-<g style="--bg: 0.5">
-  <rect style="--hue-shift: 0"   .../>
-  <rect style="--hue-shift: 60"  .../>
-  <rect style="--hue-shift: 120" .../>
-</g>
-```
+       --fg : -1 ────────── 0 ────────── +1
+              │             │             │
+              │             │             │
+       max contrast    invisible      max chromatic
+       (theme-aware)   (= surface)    (theme-stable)
+              │                           │
+              │                           │
+       contextual ink                 brand ink
+       (titles, body                  (highlights,
+        text, default)                 chart lines,
+                                       deliberate
+                                       color)
 
-## SVG
+       Negative half = contrast against the surface.
+       Positive half = same color the surface would be at --bg = X.
 
-The same primitives work in SVG. The bridge:
+       This means:  --fg: 0.4 produces the same color as --bg: 0.4
+                    on a surface at the same hue.
 
-| Slot                   | HTML               | SVG                            |
-| ---------------------- | ------------------ | ------------------------------ |
-| `--bg` paints          | `background-color` | shape `fill`                   |
-| `--fg-contrast` paints | `color` (text)     | text `fill` via `currentColor` |
-| `--bg: -1` renders as  | transparent        | **opaque, in surface color**   |
 
-**Pattern: group + shape + text.** Put `--bg` on a `<g>`, both children inherit it. The shape paints itself with `--_bg`; the text computes contrast against the same `--_bg`.
+╔═══════════════════════════════════════════════════════════════════╗
+║   THE ONE FORMULA                                                 ║
+╚═══════════════════════════════════════════════════════════════════╝
 
-```html
-<svg viewBox="0 0 200 60">
-  <g style="--bg: 0.5; --hue: 145">
-    <rect width="200" height="60" rx="8"/>
-    <text x="100" y="38" text-anchor="middle">+12%</text>
-  </g>
-</svg>
-```
+   inputs ────────────────────► formula ──────────────► outputs
+   ──────                       ───────                 ───────
 
-**Pitfalls:**
+   --bg              (canvas)        │                  --_bg
+   --fg              (ink)           │                  color
+   --hue                             │                  fill (svg)
+   --hue-lock                        ├──── one math ──► stroke (svg)
+   --hue-shift                       │     pass         --border
+   --depth (auto)                    │                  --Border
+   theme (--cfg-color-*)             │
+   chromatic config (--cfg-color-    │
+     muted-l/c, vivid-l/c,           │
+     surf-chroma, fg-tint)           │
 
-1. **Text outside the colored group computes contrast against the page**, not the shape behind it. Always wrap shape and text in the same `<g>` with `--bg`.
-2. **`--bg: -1` in SVG is opaque** (paints the inherited surface color). For genuinely transparent SVG fills, use `fill="none"` directly.
 
-**Escape hatch:** inline `style` overrides the system's CSS for `fill`/`stroke`. Use when you need a specific color the system doesn't anticipate (e.g., gridlines that should always be a quiet edge):
+╔═══════════════════════════════════════════════════════════════════╗
+║   THE CASCADE IN ACTION                                           ║
+╚═══════════════════════════════════════════════════════════════════╝
 
-```html
-<line x1="0" y1="50" x2="100" y2="50" style="stroke: var(--border)"/>
-```
+   Change ONE input on a parent…
+   ─────────────────────────────
 
-## Theme and state
+      <body style="--hue: 145">         ← change this
+        <main class="surface">          ← surface re-resolves
+          <article class="surface">     ← deeper surface re-resolves
+            <h2>Title</h2>              ← --fg: -1 (default ink)
+                                          re-resolves contrast
+            <span style="--bg: 0.55">   ← chromatic accent ignores
+              new                         hue cascade IF it has
+            </span>                       --hue-lock; otherwise
+                                          tints with --hue
+            <button style="--bg: 0.5">  ← chromatic, picks up --hue
+              Go
+            </button>
+          </article>
+        </main>
+      </body>
 
-Theme is a single attribute. Colors recompute; no markup changes.
+   …and EVERYTHING below updates because every output is a
+   function of the same inputs through the same formula.
 
-```html
-<html data-ui-theme="dark">     <!-- forced -->
-<section data-ui-theme="light"> <!-- subtree override -->
-```
+   No coordination. No tokens to keep in sync. No light/dark
+   pairs to maintain.
 
-`--bg` is theme-independent by design — a heatmap cell at `--bg: 0.7` reads as the same vivid chroma in both themes. Surfaces and borders adapt to theme; chromatic paint does not.
+   Surfaces declare the canvas.
+   Chromatic --bg declares semantic color.
+   --fg declares ink intent.
+   The three hue tokens decide what hue to render in.
+   The formula does the rest.
 
-State on interactive elements uses `.hover` / `.active` classes toggled by the pointer-events helper, not CSS pseudos. Pseudos don't generalize across mouse, touch, and stylus (especially on iOS, where `:hover` sticks after a tap). Include the helper script once per page:
 
-```html
-<script src="https://cdn.jsdelivr.net/gh/Deufel/toolbox@latest/js/pointer_events.js"></script>
-```
+╔═══════════════════════════════════════════════════════════════════╗
+║   THE PUBLIC API, IN ONE BLOCK                                    ║
+╚═══════════════════════════════════════════════════════════════════╝
 
-Then style the classes. The system ships defaults; override per component if needed:
+   Per-element:
+   ──────────
+      --bg          -1 … 1     surface intensity (HTML elements)
+      --fg          -1 … 1     ink intensity
+      --hue         0 … 360    page-level hue (cascades)
+      --hue-shift   any        relative offset (cascades)
+      --hue-lock    0 … 360    absolute pin (cascades, overrides)
 
-```css
-.btn.hover  { --l-shift: 0.04;  --c-shift: 0.02 }
-.btn.active { --l-shift: -0.04; --c-shift: -0.06 }
-```
+   Class:
+   ─────
+      .surface                 declares structural container,
+                               participates in depth cascade
 
-## Don't
+   Designer config:
+   ───────────────
+      --cfg-color-muted-l       muted-end lightness  (--bg = 0)
+      --cfg-color-muted-c       muted-end chroma     (--bg = 0)
+      --cfg-color-vivid-l       vivid-end lightness  (--bg = 1)
+      --cfg-color-vivid-c       vivid-end chroma     (--bg = 1)
+      --cfg-color-surf-chroma   hue carry on neutral surfaces
+      --cfg-fg-tint             hue carry on contrast ink
 
-- Don't assign `--depth`, `--_bg`, or any `--_*` token. They're private.
-- Don't set `--cfg-*` config tokens outside `:root` or theme blocks. Set once.
-- Don't use `:hover` / `:active` pseudos. Use `.hover` / `.active` classes (see Theme and state).
-- Don't pair colors manually for light/dark. The system has one set of color math; theme is a single config flip.
-- Don't transition the resolved color. Transition the numeric inputs (`--bg`, `--hue`, `--fg-contrast`); the formula re-resolves each frame.
-
+   That's it. Six numbers tune the chromatic identity.
+   Two numbers per element say what color it wants to be.
+   Three tokens decide which hue to use.
+   One class makes a structural surface.
