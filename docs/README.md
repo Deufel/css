@@ -1,230 +1,94 @@
+# colorNtype — Quick Start
+
+A color system in two axes and three hue tokens. No tokens to memorize, no light/dark variants to maintain.
+
+## The whole API
+
+```css
+.surface          /* structural container — flips with theme */
+--bg: 0…1         /* chromatic background — theme-stable */
+--fg: -1…1        /* ink — negative is contrast, positive is chromatic */
+--hue: 0…360      /* page-level hue, cascades freely */
+--hue-shift: N    /* relative offset on inherited --hue */
+--hue-lock: 0…360 /* absolute pin, overrides --hue and --hue-shift */
+--border          /* quiet border on the current surface */
+--Border          /* loud border on the current surface */
 ```
-╔═══════════════════════════════════════════════════════════════════╗
-║              THE colorNtype MENTAL MODEL                          ║
-║                                                                   ║
-║   The whole system, in two axes and three hue tokens.             ║
-╚═══════════════════════════════════════════════════════════════════╝
 
+That's it. Six tokens, one class, two borders.
 
-   ┌─────────────────────────────────────────────────────────────┐
-   │                  EVERY ELEMENT HAS TWO KNOBS                │
-   │                                                             │
-   │   --bg : -1  ←──── 0 ────→ +1     PAINT THE BACKGROUND      │
-   │           (none)  (muted) (vivid)                           │
-   │                                                             │
-   │   --fg : -1  ←──── 0 ────→ +1     PAINT THE INK             │
-   │       (contrast) (none)  (chromatic)                        │
-   │                                                             │
-   │  Both axes are continuous. Both work in HTML and SVG.       │
-   └─────────────────────────────────────────────────────────────┘
+## Surfaces hold content
 
+`.surface` is the structural container. Cards, panels, modals, sections — anything that holds content goes on a surface. Surfaces auto-nest via `:has()` so deeper containers get progressively brighter, drawing focus to the most-nested content. They flip with theme automatically.
 
-╔═══════════════════════════════════════════════════════════════════╗
-║   THE TWO ROLES — MUTUALLY EXCLUSIVE                              ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-   ┌──────────────────────────────┐    ┌──────────────────────────────┐
-   │       .surface               │    │     CHROMATIC ACCENT         │
-   │  (structural container)      │    │  (semantic colored element)  │
-   ├──────────────────────────────┤    ├──────────────────────────────┤
-   │                              │    │                              │
-   │  Default --bg: -1            │    │  Set --bg: 0 … 1             │
-   │     transparent, tracks      │    │     explicit chromatic       │
-   │     parent                   │    │     paint                    │
-   │                              │    │                              │
-   │  Auto-depth via :has()       │    │  Theme-STABLE                │
-   │     more nesting = brighter  │    │     same color in light      │
-   │     surface (focus moves     │    │     and dark themes          │
-   │     toward the most-nested   │    │                              │
-   │     content)                 │    │  No structural role          │
-   │                              │    │     no auto-depth            │
-   │  Theme-FLIPS                 │    │     no theme tracking        │
-   │     light surfaces in light  │    │                              │
-   │     mode, dark surfaces in   │    │  Use for: chips, badges,     │
-   │     dark mode                │    │     status cards, brand      │
-   │                              │    │     callouts, swatches,      │
-   │  Use for: cards, panels,     │    │     buttons, avatars         │
-   │     modals, sections, the    │    │                              │
-   │     page itself, anything    │    │  Examples:                   │
-   │     holding content          │    │     <div                     │
-   │                              │    │       style="--bg: 0.55      │
-   │  Examples:                   │    │             --hue-lock: 145" │
-   │     <div class="surface">    │    │     >LIVE</div>              │
-   │       <h2>Title</h2>         │    │                              │
-   │       <p>Body…</p>           │    │     <button                  │
-   │     </div>                   │    │       style="--bg: 0.5">     │
-   │                              │    │       Continue               │
-   │                              │    │     </button>                │
-   └──────────────────────────────┘    └──────────────────────────────┘
-
-       Pick ONE per element. Never both. If you feel like you want
-       both, you actually want a .surface CONTAINING a chromatic
-       child element.
-
-
-╔═══════════════════════════════════════════════════════════════════╗
-║   THE THREE HUE TOKENS                                            ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-      --hue           page-level default. Cascades freely.
-                      Set on :root or any subtree as a default
-                      for everything below.
-
-      --hue-shift     relative offset. Adds to the inherited
-                      --hue. Stacks with parent shifts.
-                      Use for: subtle subtree variation.
-
-      --hue-lock      absolute pin. Wins over --hue and
-                      --hue-shift from above.
-                      Use for: semantic colors (success/info/
-                      warning/danger), brand-color elements,
-                      anything that must be a specific hue
-                      regardless of cascade.
-
-   ┌─────────────────────────────────────────────────────────┐
-   │  Resolution:                                            │
-   │                                                         │
-   │    --_h: var(--hue-lock,                                │
-   │            calc(var(--hue) + var(--hue-shift)))         │
-   │                                                         │
-   │  If --hue-lock is set anywhere up the cascade,          │
-   │  it wins. Otherwise: page hue + shifts.                 │
-   └─────────────────────────────────────────────────────────┘
-
-
-╔═══════════════════════════════════════════════════════════════════╗
-║   WHAT CHANGES WITH THEME (light ↔ dark)                          ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-   .surface          ───►  FLIPS         (canvas inverts)
-
-   --bg: 0…1         ───►  STABLE        (a 0.4 green stays
-                                          green in both themes —
-                                          by design)
-
-   --fg: -1…0        ───►  FLIPS         (contrast pole derives
-                                          from the surface, so
-                                          ink lands correctly
-                                          against either pole)
-
-   --fg: 0…1         ───►  STABLE        (chromatic ink, same
-                                          color in both themes,
-                                          mirror of --bg)
-
-   --hue / --hue-lock /
-   --hue-shift       ───►  STABLE        (hue is theme-orthogonal)
-
-   --border          ───►  FLIPS
-   --Border          ───►  FLIPS
-
-
-╔═══════════════════════════════════════════════════════════════════╗
-║   THE FG AXIS — TWO MODES IN ONE NUMBER                           ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-       --fg : -1 ────────── 0 ────────── +1
-              │             │             │
-              │             │             │
-       max contrast    invisible      max chromatic
-       (theme-aware)   (= surface)    (theme-stable)
-              │                           │
-              │                           │
-       contextual ink                 brand ink
-       (titles, body                  (highlights,
-        text, default)                 chart lines,
-                                       deliberate
-                                       color)
-
-       Negative half = contrast against the surface.
-       Positive half = same color the surface would be at --bg = X.
-
-       This means:  --fg: 0.4 produces the same color as --bg: 0.4
-                    on a surface at the same hue.
-
-
-╔═══════════════════════════════════════════════════════════════════╗
-║   THE ONE FORMULA                                                 ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-   inputs ────────────────────► formula ──────────────► outputs
-   ──────                       ───────                 ───────
-
-   --bg              (canvas)        │                  --_bg
-   --fg              (ink)           │                  color
-   --hue                             │                  fill (svg)
-   --hue-lock                        ├──── one math ──► stroke (svg)
-   --hue-shift                       │     pass         --border
-   --depth (auto)                    │                  --Border
-   theme (--cfg-color-*)             │
-   chromatic config (--cfg-color-    │
-     muted-l/c, vivid-l/c,           │
-     surf-chroma, fg-tint)           │
-
-
-╔═══════════════════════════════════════════════════════════════════╗
-║   THE CASCADE IN ACTION                                           ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-   Change ONE input on a parent…
-   ─────────────────────────────
-
-      <body style="--hue: 145">         ← change this
-        <main class="surface">          ← surface re-resolves
-          <article class="surface">     ← deeper surface re-resolves
-            <h2>Title</h2>              ← --fg: -1 (default ink)
-                                          re-resolves contrast
-            <span style="--bg: 0.55">   ← chromatic accent ignores
-              new                         hue cascade IF it has
-            </span>                       --hue-lock; otherwise
-                                          tints with --hue
-            <button style="--bg: 0.5">  ← chromatic, picks up --hue
-              Go
-            </button>
-          </article>
-        </main>
-      </body>
-
-   …and EVERYTHING below updates because every output is a
-   function of the same inputs through the same formula.
-
-   No coordination. No tokens to keep in sync. No light/dark
-   pairs to maintain.
-
-   Surfaces declare the canvas.
-   Chromatic --bg declares semantic color.
-   --fg declares ink intent.
-   The three hue tokens decide what hue to render in.
-   The formula does the rest.
-
-
-╔═══════════════════════════════════════════════════════════════════╗
-║   THE PUBLIC API, IN ONE BLOCK                                    ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-   Per-element:
-   ──────────
-      --bg          -1 … 1     surface intensity (HTML elements)
-      --fg          -1 … 1     ink intensity
-      --hue         0 … 360    page-level hue (cascades)
-      --hue-shift   any        relative offset (cascades)
-      --hue-lock    0 … 360    absolute pin (cascades, overrides)
-
-   Class:
-   ─────
-      .surface                 declares structural container,
-                               participates in depth cascade
-
-   Designer config:
-   ───────────────
-      --cfg-color-muted-l       muted-end lightness  (--bg = 0)
-      --cfg-color-muted-c       muted-end chroma     (--bg = 0)
-      --cfg-color-vivid-l       vivid-end lightness  (--bg = 1)
-      --cfg-color-vivid-c       vivid-end chroma     (--bg = 1)
-      --cfg-color-surf-chroma   hue carry on neutral surfaces
-      --cfg-fg-tint             hue carry on contrast ink
-
-   That's it. Six numbers tune the chromatic identity.
-   Two numbers per element say what color it wants to be.
-   Three tokens decide which hue to use.
-   One class makes a structural surface.
+```html
+<main class="surface">
+  <article class="surface">
+    <h2>Title</h2>
+    <p>Body text — picks up theme-correct ink for free.</p>
+  </article>
+</main>
 ```
+
+Most of your UI is surfaces. If something holds content, give it `.surface`.
+
+## Chromatic `--bg` for semantic color
+
+When you want a *colored* element — a status badge, a brand button, a callout — set `--bg: 0…1` directly. Don't add `.surface`. Chromatic elements are theme-stable: a green badge stays green in both light and dark mode.
+
+```html
+<span style="--bg: 0.55; --hue-lock: 145">LIVE</span>
+<button style="--bg: 0.5">Continue</button>
+```
+
+**Pick one role per element.** A thing is either a surface (structural, theme-tracking) or a chromatic accent (semantic color, theme-stable). Never both. If you want a "colored card with content," make a `.surface` containing a chromatic child.
+
+## `--fg` for ink
+
+One axis covers all ink intent. Negative values produce *contrast* against the surface — readable in both themes automatically. Positive values produce *chromatic* ink — same color in both themes, useful for chart lines, deliberate accents, branded text.
+
+```css
+--fg: -1     /* max contrast — body text, default */
+--fg: -0.6   /* secondary text, subdued */
+--fg: -0.3   /* hints, captions */
+--fg: 0      /* invisible (= surface color) */
+--fg: 0.55   /* mid-chromatic — chart line, callout */
+--fg: 0.85   /* deep chromatic — accent icon, badge text */
+```
+
+## Hue: three tokens, three roles
+
+```css
+--hue: 220        /* set on :root or any subtree → cascades down */
+--hue-shift: 30   /* nudge: parent hue + 30°, stacks with parents */
+--hue-lock: 145   /* pin: this subtree is hue 145, ignore cascade */
+```
+
+Use `--hue` to brand the whole page or a subtree. Use `--hue-shift` to make a section subtly different from its parent. Use `--hue-lock` for semantic colors (success, warning, danger) that must be specific hues regardless of context.
+
+## Borders
+
+`--border` and `--Border` are pre-resolved against the current surface — capital is louder, lowercase is quieter.
+
+```css
+border: 1px solid var(--border);  /* subtle */
+border: 1px solid var(--Border);  /* prominent */
+```
+
+## A complete card component
+
+```html
+<article class="surface" style="border: 1px solid var(--border)">
+  <h3>Quarterly results</h3>
+  <p style="--fg: -0.7">Revenue beat expectations on solid customer growth.</p>
+  <div style="display: flex; gap: 0.5rem">
+    <button style="--bg: 0.55">Continue</button>
+    <button class="surface" style="border: 1px solid var(--border)">Cancel</button>
+    <span style="--bg: 0.55; --hue-lock: 145">LIVE</span>
+  </div>
+</article>
+```
+
+The card flips with theme. The "Continue" button stays its brand color. The "Cancel" button is a structural surface that flips. The "LIVE" badge stays green forever. The body text reads correctly against any background.
+
+No tokens. No theme variants. No coordination.
