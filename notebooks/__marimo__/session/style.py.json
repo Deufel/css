@@ -14,14 +14,7 @@
     {
       "id": "Hbol",
       "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
@@ -65,7 +58,7 @@
     },
     {
       "id": "lEQa",
-      "code_hash": "4ab86b5e017b6a09a06047ae69b900d9",
+      "code_hash": "8a8d3653219a267088fcab0cf2631caf",
       "outputs": [
         {
           "type": "data",
