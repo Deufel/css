@@ -1,3 +1,4 @@
+```
 ╔═══════════════════════════════════════════════════════════════════╗
 ║              THE colorNtype MENTAL MODEL                          ║
 ║                                                                   ║
@@ -226,3 +227,4 @@
    Two numbers per element say what color it wants to be.
    Three tokens decide which hue to use.
    One class makes a structural surface.
+```
