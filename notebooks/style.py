@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App()
+app = marimo.App(width="full")
 
 with app.setup:
     from pathlib import Path
@@ -217,10 +217,8 @@ def _(mo):
       reset.opinion,
       core.color,
       core.type,
-      core.space,
       theme,
       layout.app,
-      layout.doc,
       layout.composition,
       component.base,
       component.simple,
@@ -467,13 +465,6 @@ def _(mo):
     ## core.color
 
     ```css
-    /* ════════════════════════════════════════════════════════════════
-       core.color — the color formula
-       Single layer, single job: take inputs (--bg, --hue, --depth,
-       etc.), compute outputs (--_bg, color, --border, --Border).
-       Includes the rules that resolve --_bg into actual paint and the
-       surface depth cascade. Theme blocks live in @layer theme, not here.
-       ════════════════════════════════════════════════════════════ */
     @layer core.color {
       :root {
         --hue: 38;
@@ -521,20 +512,270 @@ def _(mo):
 
         --border: oklch(from var(--_bg) calc(l + (var(--_dark) * 2 - 1) * 0.14) calc(c * 0.3) h);
         --Border: oklch(from var(--_bg) calc(l + (var(--_dark) * 2 - 1) * 0.22) clamp(0.08, calc(c + 0.12), 0.18) calc(h + 8));
+
+        --surf-up:   oklch(from var(--_bg) calc(l + var(--cfg-color-base-step) * 0.01) c h);
+        --surf-down: oklch(from var(--_bg) calc(l - var(--cfg-color-base-step) * 0.01) c h);
       }
 
       :where(*) { background-color: oklch(from var(--_bg) l c h / var(--_k)) }
       :where(body, .surface) { background-color: var(--_bg) }
+      :where(.btn, .chip, .tag) {
+        background-color: color-mix(in oklch, var(--surf-down), var(--_bg) calc(var(--_k) * 100%));
+      }
       .surface:has(.surface)                   { --depth: 1 }
       .surface:has(.surface .surface)          { --depth: 2 }
       .surface:has(.surface .surface .surface) { --depth: 3 }
+    /* ════════════════════════════════════════════════════════════════
+       core.color.css
 
-      /* SVG color bridge — translates the same outputs to fill/stroke */
-      :where(svg) { color: currentColor }
-      :where(svg) :where(*) { fill: currentColor; stroke: none }
-      :where(svg) :where(line, polyline, .stroke) { fill: none; stroke: currentColor }
+       The color formula. One axis (--bg) for surface, one axis (--fg)
+       for text. Both run through three bands:
+
+         [-1, 0]  surface / contrast-ink  (mode-flip at zero)
+         [0, 1]   chromatic ramp          (muted → vivid)
+         [3, 4]   P3                      (vivid → P3 endpoint)
+
+       Values in (1, 3) clamp to chromatic max — intentional dead zone.
+       Authors reach for chromatic OR P3 deliberately; no smooth ramp
+       between them.
+
+       Outputs:
+         --_bg     resolved background color
+         color     resolved text color (computed automatically from --fg)
+         --border  quiet border, theme-aware
+         --Border  louder border, theme-aware
+
+       Required outside any @layer (CSS spec): all the @property
+       declarations below.
+       ════════════════════════════════════════════════════════════════ */
+
+
+    /* ────────────────────────────────────────────────────────────
+       @property declarations — must live OUTSIDE @layer per spec.
+       These give the formula tokens proper types, defaults, and
+       make them animatable.
+       ──────────────────────────────────────────────────────────── */
+
+    /* ── Public inputs ──────────────────────────────────────────── */
+    @property --bg          { syntax: "<number>"; inherits: true; initial-value: -1 }
+    @property --fg          { syntax: "<number>"; inherits: true; initial-value: -1 }
+    @property --hue         { syntax: "<number>"; inherits: true; initial-value: 220 }
+    @property --hue-lock    { syntax: "*";        inherits: true }
+    @property --hue-shift   { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --depth       { syntax: "<number>"; inherits: false; initial-value: 0 }
+    @property --l-shift     { syntax: "<number>"; inherits: false; initial-value: 0 }
+    @property --c-shift     { syntax: "<number>"; inherits: false; initial-value: 0 }
+
+    /* ── Config — chromatic endpoints ───────────────────────────── */
+    @property --cfg-color-muted-l     { syntax: "<percentage>"; inherits: true; initial-value: 96% }
+    @property --cfg-color-muted-c     { syntax: "<number>";     inherits: true; initial-value: 0.025 }
+    @property --cfg-color-vivid-l     { syntax: "<percentage>"; inherits: true; initial-value: 35% }
+    @property --cfg-color-vivid-c     { syntax: "<number>";     inherits: true; initial-value: 0.18 }
+
+    /* ── Config — P3 endpoints (used by both --bg and --fg) ─────── */
+    @property --cfg-color-p3-l        { syntax: "<percentage>"; inherits: true; initial-value: 80% }
+    @property --cfg-color-p3-c        { syntax: "<number>";     inherits: true; initial-value: 0.38 }
+
+    /* ── Config — surface curve and theme knobs ─────────────────── */
+    @property --cfg-color-surf-chroma { syntax: "<number>";     inherits: true; initial-value: 0.008 }
+    @property --cfg-fg-tint           { syntax: "<number>";     inherits: true; initial-value: 0.012 }
+    @property --cfg-color-top-l       { syntax: "<number>";     inherits: true; initial-value: 88 }
+    @property --cfg-color-base-step   { syntax: "<number>";     inherits: true; initial-value: 4 }
+    @property --cfg-color-curve-k     { syntax: "<number>";     inherits: true; initial-value: 0.6 }
+    @property --cfg-color-surf-mid    { syntax: "<number>";     inherits: true; initial-value: 60.5 }
+    @property --cfg-color-surf-rng    { syntax: "<number>";     inherits: true; initial-value: 55 }
+    @property --cfg-color-alpha       { syntax: "<number>";     inherits: true; initial-value: 1 }
+
+    /* ── Private computed tokens — DO NOT assign these directly ── */
+    @property --_bg          { syntax: "<color>";      inherits: true;  initial-value: oklch(88% 0.018 220) }
+    @property --_naive       { syntax: "<number>";     inherits: false; initial-value: 88 }
+    @property --_t           { syntax: "<number>";     inherits: false; initial-value: 0.5 }
+    @property --_surf-l      { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_c01         { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_col-l       { syntax: "<percentage>"; inherits: false; initial-value: 90% }
+    @property --_col-c       { syntax: "<number>";     inherits: false; initial-value: 0.1 }
+    @property --_k           { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_p3          { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_chrom-l     { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_chrom-c     { syntax: "<number>";     inherits: false; initial-value: 0.018 }
+    @property --_l           { syntax: "<percentage>"; inherits: false; initial-value: 88% }
+    @property --_c           { syntax: "<number>";     inherits: false; initial-value: 0.018 }
+    @property --_h           { syntax: "<number>";     inherits: false; initial-value: 220 }
+    @property --_dark        { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_fg-pos      { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_fg-neg      { syntax: "<number>";     inherits: false; initial-value: 1 }
+    @property --_fg-p3       { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_fg-onpos    { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_fg-pole     { syntax: "<percentage>"; inherits: false; initial-value: 4% }
+    @property --_fg-ramp-l   { syntax: "<percentage>"; inherits: false; initial-value: 90% }
+    @property --_fg-ramp-c   { syntax: "<number>";     inherits: false; initial-value: 0.05 }
+    @property --_fg-chrom-l  { syntax: "<percentage>"; inherits: false; initial-value: 4% }
+    @property --_fg-chrom-c  { syntax: "<number>";     inherits: false; initial-value: 0.02 }
+    @property --_fg-l        { syntax: "<percentage>"; inherits: false; initial-value: 4% }
+    @property --_fg-c        { syntax: "<number>";     inherits: false; initial-value: 0.02 }
+    @property --_surf-dark   { syntax: "<number>";     inherits: false; initial-value: 0 }
+
+
+    /* ════════════════════════════════════════════════════════════════
+       The formula — runs on every element, computes --_bg + color
+       ════════════════════════════════════════════════════════════════ */
+    @layer core.color {
+
+      :root {
+        --hue: 38;
+        --cfg-color-muted-l: 96%;
+        --cfg-color-muted-c: 0.025;
+        --cfg-color-vivid-l: 35%;
+        --cfg-color-vivid-c: 0.180;
+        --cfg-color-surf-chroma: 0.005;
+        --cfg-fg-tint: 0.012;
+      }
+
+      /* ── Light/dark theme blocks ────────────────────────────────
+         These set the values that --bg's surface band consumes.
+         The math itself doesn't change between themes — only the
+         range it operates within. */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),
+        [data-ui-theme="system"] {
+          --cfg-color-top-l: 33;
+          --cfg-color-base-step: 2.5;
+          --cfg-color-surf-chroma: 0.010;
+          --cfg-color-surf-mid: 33.5;
+          --cfg-color-surf-rng: 27.5;
+        }
+      }
+      [data-ui-theme="light"] {
+        --cfg-color-top-l: 88;
+        --cfg-color-base-step: 4;
+        --cfg-color-surf-chroma: 0.018;
+        --cfg-color-surf-mid: 60.5;
+        --cfg-color-surf-rng: 55;
+      }
+      [data-ui-theme="dark"] {
+        --cfg-color-top-l: 33;
+        --cfg-color-base-step: 2.5;
+        --cfg-color-surf-chroma: 0.010;
+        --cfg-color-surf-mid: 33.5;
+        --cfg-color-surf-rng: 27.5;
+      }
+
+      :where(*) {
+        /* ── Hue resolution ───────────────────────────────────────
+           --hue-lock wins if set; otherwise --hue + --hue-shift. */
+        --_h: var(--hue-lock, calc(var(--hue) + var(--hue-shift)));
+
+        /* ── Surface depth math ───────────────────────────────────
+           --depth steps the lightness down with a curve that softens
+           near the perceptual midpoint. */
+        --_naive:  calc(var(--cfg-color-top-l) - var(--depth) * var(--cfg-color-base-step));
+        --_t:      calc((var(--_naive) - var(--cfg-color-surf-mid)) / var(--cfg-color-surf-rng));
+        --_surf-l: calc((var(--_naive) - var(--depth) * var(--cfg-color-base-step) * var(--cfg-color-curve-k) * var(--_t) * var(--_t)) * 1%);
+
+        /* ── --bg intensity scalars ───────────────────────────────
+           Three bands isolated by clamp(). Each is 0..1, with the
+           transition fixed at the band boundaries. */
+        --_c01: clamp(0, var(--bg), 1);                          /* muted → vivid */
+        --_k:   clamp(0, calc(var(--bg) + 1), 1);                /* surface → chromatic */
+        --_p3:  clamp(0, calc(var(--bg) - 3), 1);                /* vivid → P3 */
+
+        /* ── --bg chromatic ramp ──────────────────────────────────
+           Lerp between muted and vivid endpoints. */
+        --_col-l: calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
+        --_col-c: calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
+
+        /* ── --bg chromatic-mode result (with state shifts) ───────
+           This is what the formula produces in the [-1, 1] range.
+           --l-shift/--c-shift apply here so hover/active states
+           compose naturally. */
+        --_chrom-l: calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k) + var(--l-shift) * 100%);
+        --_chrom-c: calc(var(--cfg-color-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k) + var(--c-shift));
+
+        /* ── --bg final lightness/chroma ──────────────────────────
+           Lerp from chromatic-mode toward the P3 endpoint. At
+           --bg <= 3, --_p3 is 0 and chromatic wins. At --bg = 4,
+           P3 endpoint wins exactly. */
+        --_l: calc(var(--_chrom-l) * (1 - var(--_p3)) + var(--cfg-color-p3-l) * var(--_p3));
+        --_c: calc(var(--_chrom-c) * (1 - var(--_p3)) + var(--cfg-color-p3-c) * var(--_p3));
+
+        --_dark: clamp(0, calc((60 - var(--cfg-color-top-l)) / 30), 1);
+        --_bg: oklch(clamp(4%, var(--_l), 97%) var(--_c) var(--_h) / var(--cfg-color-alpha));
+
+
+        /* ── --fg intensity scalars ───────────────────────────────
+           Same three-band structure as --bg, applied to text color. */
+        --_fg-pos: clamp(0, var(--fg), 1);                       /* chromatic ramp magnitude */
+        --_fg-neg: clamp(0, calc(-1 * var(--fg)), 1);            /* contrast-ink magnitude */
+        --_fg-p3:  clamp(0, calc(var(--fg) - 3), 1);             /* chromatic → P3 */
+        --_fg-onpos: clamp(0, calc(var(--_fg-pos) * 1000000), 1);  /* "is fg > 0?" hard switch */
+
+        /* ── --fg contrast-ink branch ─────────────────────────────
+           When fg < 0, pick dark or light ink based on surface
+           lightness. This branch never enters P3 — contrast ink is
+           inherently neutral. */
+        --_surf-dark: clamp(0, calc((50% - var(--_l)) / 1% * 20), 1);
+        --_fg-pole: calc(4% * (1 - var(--_surf-dark)) + 97% * var(--_surf-dark));
+
+        /* ── --fg chromatic-ramp branch ───────────────────────────
+           When fg > 0, map intensity onto the muted-to-vivid ramp,
+           same endpoints as --bg. */
+        --_fg-ramp-l: calc(var(--cfg-color-muted-l) + var(--_fg-pos) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
+        --_fg-ramp-c: calc(var(--cfg-color-muted-c) + var(--_fg-pos) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
+
+        /* ── --fg chromatic-mode result (intermediate) ────────────
+           --_fg-onpos hard-switches between contrast-ink and
+           chromatic-ramp. This is the "what color is the text in
+           the [-1, 1] range" answer. */
+        --_fg-chrom-l: calc(
+          (clamp(4%, var(--_l), 97%) * (1 - var(--_fg-neg)) + var(--_fg-pole) * var(--_fg-neg)) * (1 - var(--_fg-onpos))
+            + var(--_fg-ramp-l) * var(--_fg-onpos)
+        );
+        --_fg-chrom-c: calc(
+          (var(--_c) * (1 - var(--_fg-neg)) + var(--cfg-fg-tint) * var(--_fg-neg)) * (1 - var(--_fg-onpos))
+            + var(--_fg-ramp-c) * var(--_fg-onpos)
+        );
+
+        /* ── --fg final lightness/chroma ──────────────────────────
+           Lerp the chromatic-mode result toward the P3 endpoint.
+           At --fg <= 3, --_fg-p3 is 0 and chromatic wins. At --fg = 4,
+           P3 endpoint wins. Note: --_fg-p3 is 0 for any --fg <= 3,
+           which means contrast-ink (negative --fg) is never affected
+           by the P3 lerp — its result already has --_fg-p3 = 0. */
+        --_fg-l: calc(var(--_fg-chrom-l) * (1 - var(--_fg-p3)) + var(--cfg-color-p3-l) * var(--_fg-p3));
+        --_fg-c: calc(var(--_fg-chrom-c) * (1 - var(--_fg-p3)) + var(--cfg-color-p3-c) * var(--_fg-p3));
+
+        color: oklch(clamp(4%, var(--_fg-l), 97%) var(--_fg-c) var(--_h) / 1);
+
+
+        /* ── Border helpers ───────────────────────────────────────
+           --border: quiet (low-chroma, theme-aware luminance shift)
+           --Border: louder (more chroma, slight hue rotation) */
+        --border: oklch(from var(--_bg) calc(l + (var(--_dark) * 2 - 1) * 0.14) calc(c * 0.3) h);
+        --Border: oklch(from var(--_bg) calc(l + (var(--_dark) * 2 - 1) * 0.22) clamp(0.08, calc(c + 0.12), 0.18) calc(h + 8));
+      }
+
+
+      /* ── Paint resolution ───────────────────────────────────────
+         Default: every element renders --_bg at alpha=--_k. At --bg
+         of -1 (default), --_k is 0, so unscoped elements stay
+         transparent. Surfaces force opaque paint. */
+      :where(*) {
+        background-color: oklch(from var(--_bg) l c h / var(--_k));
+      }
+      :where(body, .surface) {
+        background-color: var(--_bg);
+      }
+
+
+      /* ── Surface depth cascade ──────────────────────────────────
+         A .surface containing nested .surfaces lifts its depth, which
+         the formula uses to step lightness down. Body sits at depth 4
+         so any top-level surface visually pops forward. */
+      :where(body)                             { --depth: 4 }
+      .surface:has(.surface)                   { --depth: 1 }
+      .surface:has(.surface .surface)          { --depth: 2 }
+      .surface:has(.surface .surface .surface) { --depth: 3 }
     }
-
     ```
     """)
     return
@@ -842,174 +1083,25 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## layout.app
+    ### layout.app
 
     ```css
-    /* ============================================================
-       layout-app.css — layout.app
-
-       Application-shell layout: a 3×3 grid (header / nav · main · aside
-       / footer) with drawer-style nav and aside that collapse to fixed
-       modal drawers below a container-query breakpoint.
-
-       Opt in via <body class="app">. Nothing applies otherwise.
-
-       Drawer markup:
-         <body class="app">
-           <header id="header">...</header>
-           <dialog id="nav" open>...</dialog>     <!-- drawer -->
-           <main   id="main">...</main>
-           <dialog id="aside" open>...</dialog>   <!-- drawer -->
-           <footer id="footer">...</footer>
-         </body>
-
-       Why <dialog> for drawers: gets us free top-layer modal behavior
-       in narrow mode (showModal()) and keyboard accessibility. In wide
-       mode we override its UA styling to make it sit in a grid track.
-       ============================================================ */
-
-    @property --cfg-layout-radius   { syntax: "<length>"; inherits: true; initial-value: 4px }
-    @property --cfg-layout-page-gap { syntax: "<length>"; inherits: true; initial-value: 6px }
-
-    :where(html) {
-        /* These appear when the viewport hits the layout's design width.
-           The clamp(0px, calc(100vi - 100%) * 1e5, ...) trick is a
-           container-query approximation for cases where containers
-           can't be used. Will revisit. */
-        --cfg-layout-radius:   clamp(0px, calc(100vi - 100%) * 1e5, 0.5rem);
-        --cfg-layout-page-gap: clamp(0px, calc(100vi - 100%) * 1e5, 1rem);
-    }
-
     @layer layout.app {
-
         body.app {
-            font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
-            background: var(--_bg);
-            container: app-shell / inline-size;
-
-            /* Wide layout — 3×3 grid.
-               Columns are `auto 1fr auto` so nav/aside tracks size to
-               their explicit widths, and collapse to zero when those
-               dialogs leave the grid (position: fixed). */
             display: grid;
             grid-template:
-                "header header header" auto
-                "nav    main   aside"  1fr
-                "footer footer footer" auto /
-                auto    1fr    auto;
-            gap: 0;
+                "h h h" auto
+                "n m a" 1fr
+                "f f f" auto /
+                auto 1fr auto;
             height: 100svh;
-            overflow: hidden;  /* body never scrolls; #main does */
-        }
+            overflow: hidden;
 
-        /* Only #main scrolls; header/footer stay pinned */
-        body.app #main {
-            overflow-y: auto;
-            min-height: 0;     /* critical in grid — lets child scroll */
-        }
-        body.app #header,
-        body.app #footer { min-height: 0 }
-
-        /* ── Grid-mode dialog reset ─────────────────────────────────
-           <dialog> comes with UA styles we need to neutralize so it
-           renders like a plain block in its grid slot. */
-        body.app #nav,
-        body.app #aside {
-            position: static;
-            display: block;            /* overrides dialog's display: none */
-            max-width: none;
-            max-height: none;
-            width: var(--drawer-width, auto);
-            height: auto;
-            margin: 0;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--cfg-layout-radius);
-            background: var(--_bg);
-            color: inherit;
-            overflow-y: auto;
-        }
-
-        body.app #nav {
-            grid-area: nav;
-            margin-right: var(--cfg-layout-page-gap);
-        }
-        body.app #aside {
-            grid-area: aside;
-            margin-left: var(--cfg-layout-page-gap);
-        }
-
-        body.app #main {
-            grid-area: main;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--cfg-layout-radius);
-            background: var(--_bg);
-        }
-        body.app #header {
-            grid-area: header;
-            margin-bottom: var(--cfg-layout-page-gap);
-        }
-        body.app #footer {
-            grid-area: footer;
-            margin-top: var(--cfg-layout-page-gap);
-        }
-
-        /* ── Narrow layout ──────────────────────────────────────────
-           Below 1024px container width: nav/aside leave the grid and
-           become fixed modal drawers. Triggered by container query so
-           it works in any context the app shell is embedded in. */
-        @container app-shell (width < 1024px) {
-            body.app #nav,
-            body.app #aside {
-                position: fixed;
-                inset: 0 auto 0 auto;       /* reset all sides; per-drawer below */
-                margin: 0;
-                width: min(85vw, 320px);
-                max-width: 85vw;
-                height: 100svh;
-                border-radius: 0;
-                border: 0;
-                background: var(--_bg);
-                padding: 1.5rem 1rem;
-                overflow-y: auto;
-
-                transition:
-                    translate calc(var(--cfg-motion) * 0.25s) ease-out,
-                    opacity   calc(var(--cfg-motion) * 0.25s) ease-out,
-                    display   calc(var(--cfg-motion) * 0.25s) allow-discrete,
-                    overlay   calc(var(--cfg-motion) * 0.25s) allow-discrete;
-                translate: 0 0;
-                opacity: 1;
-            }
-
-            body.app #nav   { left: 0; border-right: 1px solid var(--Border) }
-            body.app #aside { left: auto; right: 0; border-left: 1px solid var(--Border) }
-
-            body.app #nav:not([open])   { display: none; translate: -100% 0; opacity: 0 }
-            body.app #aside:not([open]) { display: none; translate:  100% 0; opacity: 0 }
-
-            @starting-style {
-                body.app #nav[open]   { translate: -100% 0; opacity: 0 }
-                body.app #aside[open] { translate:  100% 0; opacity: 0 }
-            }
-
-            body.app #nav::backdrop,
-            body.app #aside::backdrop {
-                background: oklch(0% 0 0 / 0.5);
-                transition:
-                    background-color calc(var(--cfg-motion) * 0.25s) ease-out,
-                    display          calc(var(--cfg-motion) * 0.25s) allow-discrete,
-                    overlay          calc(var(--cfg-motion) * 0.25s) allow-discrete;
-            }
-            body.app #nav:not([open])::backdrop,
-            body.app #aside:not([open])::backdrop {
-                background: oklch(0% 0 0 / 0);
-            }
-            @starting-style {
-                body.app #nav[open]::backdrop,
-                body.app #aside[open]::backdrop { background: oklch(0% 0 0 / 0) }
-            }
+            > #header { grid-area: h; }
+            > #footer { grid-area: f; }
+            > #nav    { grid-area: n; overflow-y: auto; scrollbar-gutter: stable; }
+            > #main   { grid-area: m; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            > #aside  { grid-area: a; overflow-y: auto; scrollbar-gutter: stable; }
         }
     }
     ```
@@ -1020,128 +1112,57 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## layout.doc
+    ### layout.drawers
 
     ```css
-    /* ============================================================
-       layout-doc.css — layout.doc
+    @layer component.complex {
+        .drawer {
+            --_dur: calc(var(--cfg-motion) * 0.25s);
 
-       Document/paper layout. A fixed-aspect "piece of paper" centered
-       on a backdrop, with print awareness. Used for resumes, posters,
-       single-page artifacts that need to look the same on screen and
-       in print.
-
-       Opt in via <body class="doc"> with a <article class="paper">
-       child:
-
-         <body class="doc">
-           <article class="paper">
-             ...content...
-           </article>
-         </body>
-
-       Defaults to US Letter portrait. Override --paper-w / --paper-h
-       on the .paper element for other sizes.
-
-       Paper sizing:
-         On screen — scales to fit viewport, preserves aspect ratio.
-         In print  — exact physical size, zero @page margin.
-
-       Type and space inside the paper are paper-relative (cqi units)
-       so screen and print render identically regardless of viewport.
-       ============================================================ */
-
-    @layer layout.doc {
-
-        body.doc {
+            position: fixed;
+            inset: auto;
             margin: 0;
-            min-block-size: 100dvh;
-            display: grid;
-            place-items: center;
-            padding: 1rem;
-        }
+            max-block-size: none;
+            max-inline-size: none;
+            transition:
+                translate var(--_dur) ease-out,
+                opacity   var(--_dur) ease-out,
+                display   var(--_dur) allow-discrete,
+                overlay   var(--_dur) allow-discrete;
+            translate: 0 0;
+            opacity: 1;
 
-        /* The paper itself. Default geometry: US Letter portrait. */
-        body.doc .paper,
-        .paper {
-            --paper-w: 8.5in;
-            --paper-h: 11in;
-            --paper-aspect: calc(var(--paper-w) / var(--paper-h));
-
-            /* aspect-ratio doesn't accept the `<num> / <num>` slash form
-               with var() on either side — only literal numbers. Use the
-               single-number form via the precomputed --paper-aspect. */
-            aspect-ratio: var(--paper-aspect);
-
-            /* Fit the smaller of (viewport-height) or (width-derived height).
-               Whichever bound is tighter wins; aspect-ratio handles the other. */
-            block-size: min(
-                calc(100dvh - 2rem),
-                calc((100dvw - 2rem) / var(--paper-aspect))
-            );
-            inline-size: auto;
-
-            border: 1px solid var(--border);
-            border-radius: var(--cfg-radius, 0.5rem);
-            box-shadow: 0 1rem 3rem -1rem oklch(0% 0 0 / 0.4);
-            overflow: hidden;
-
-            /* CQ container — descendants size against paper width via cqi. */
-            container-type: size;
-            container-name: paper;
-        }
-
-        /* core.type and core.space both reference `100vi` in their formulas
-           — wrong for a fixed-aspect document where everything should track
-           the paper, not the viewport.
-
-           Override for descendants only (.paper *, NOT .paper itself).
-
-           Why: `--cfg-space-base` and `--paper-type-base` are registered
-           as <length> via @property. Registered length properties are
-           evaluated at the DECLARATION site — so setting `1cqi` on `.paper`
-           resolves it against the paper's PARENT (viewport), and the
-           already-resolved px value propagates to descendants. Bug.
-           Setting them on `.paper *` evaluates cqi at each descendant,
-           which IS inside the paper's container query → paper-relative.
-
-           --type and --space step ratios still apply, so hierarchy and
-           density still work — they just operate on a paper-relative
-           base instead of a viewport-fluid one. */
-        .paper * {
-            /* Paper-relative bases — declared on descendants so cqi
-               evaluates inside the paper's container query context. */
-            --paper-type-base: 1.75cqi;
-            --cfg-space-base: 1cqi;
-
-            font-size: calc(
-                var(--paper-type-base) *
-                pow(var(--cfg-type-min-ratio), var(--type)) *
-                var(--cfg-type-scale)
-            );
-            --s: calc(
-                var(--cfg-space-base) *
-                pow(var(--cfg-space-ratio), var(--space)) *
-                var(--cfg-space-scale)
-            );
-        }
-
-        @media print {
-            body.doc {
-                padding: 0;
-                min-block-size: auto;
-                display: block;
+            &:not(:is([open], :popover-open)) {
+                opacity: 0;
+                translate: var(--_translate-closed);
             }
-            @page { size: letter; margin: 0 }
+            @starting-style {
+                &:is([open], :popover-open) {
+                    opacity: 0;
+                    translate: var(--_translate-closed);
+                }
+            }
 
-            body.doc .paper,
-            .paper {
-                inline-size: var(--paper-w);
-                block-size: var(--paper-h);
-                aspect-ratio: auto;
-                border: 0;
-                border-radius: 0;
-                box-shadow: none;
+            &.left   { --_translate-closed: -100% 0; inset: 0 auto 0 0; inline-size: min(85vw, 320px); block-size: 100svh; }
+            &.right  { --_translate-closed:  100% 0; inset: 0 0 0 auto; inline-size: min(85vw, 320px); block-size: 100svh; }
+            &.top    { --_translate-closed: 0 -100%; inset: 0 0 auto 0; inline-size: 100vw; block-size: min(85svh, 240px); }
+            &.bottom { --_translate-closed: 0  100%; inset: auto 0 0 0; inline-size: 100vw; block-size: min(85svh, 240px); }
+        }
+
+        dialog.drawer {
+            --_dur: calc(var(--cfg-motion) * 0.25s);
+            --_dim: oklch(0% 0 0 / 0.5);
+
+            &::backdrop {
+                background: var(--_dim);
+                transition:
+                    background-color var(--_dur) ease-out,
+                    display          var(--_dur) allow-discrete,
+                    overlay          var(--_dur) allow-discrete;
+            }
+            &:not([open])::backdrop { background: oklch(0% 0 0 / 0); }
+            @starting-style {
+                &[open]::backdrop { background: oklch(0% 0 0 / 0); }
             }
         }
     }
@@ -1305,205 +1326,34 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## componnent.simple
+    ## Components Simple
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Rule
+    > element = `<hr>` or `<hr class="vr">`
+    Native `<hr>` for horizontal dividers. Add `.vr` to flip orientation for vertical dividers in flex/inline rows. Vertical sized in em so it scales with the parent's font.
+    use: `<hr>` between sections in a column; `<hr class="vr">` between items in a toolbar or status row.
 
     ```css
-    /* ============================================================
-       component-simple.css — component.simple
-
-       Generic small components keyed by class. Each composes with
-       the color/type/space systems and works in any context.
-
-       "Simple" means: small in scope, doesn't assume surrounding
-       structure, generic enough to use in any project.
-       ============================================================ */
-
     @layer component.simple {
-
-      /* ── .tap — behavior marker ─────────────────────────────────
-         Pointer helper adds .hover / .active / .disabled to any
-         element with .tap (or .btn). Use .tap for things that need
-         pointer states but aren't visual buttons — tabs, nav links,
-         steppers. The state visuals themselves live in @layer theme. */
-      .tap {
-        cursor: pointer;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .tap:focus-visible {
-        outline: 2px solid var(--Border);
-        outline-offset: 2px;
-      }
-
-
-      /* ── .btn — unified button ──────────────────────────────────
-         One class, no variants. Auto-detects shape via :has():
-           text only        → min-width 12ch, normal padding
-           icon + text      → tighter left padding, icon breathing room
-           icon only        → square, no min-width
-         Color/intensity per-instance via --bg and --hue-lock.
-         Sizing via --type. Padding in em scales with the type. */
-      :where(.btn) {
-        --type: -1;
-
-        cursor: pointer;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5em;
-        min-inline-size: 12ch;
-        padding: 0.4em 1em;
-        border: 1px solid var(--border);
-        border-radius: var(--cfg-radius);
-        font: inherit;
-        font-weight: 600;
-        line-height: 1;
-
-        transition: background-color, color, border-color;
-        transition-duration: calc(var(--cfg-motion) * 0.12s);
-        transition-timing-function: ease-out;
-      }
-      .btn:focus-visible {
-        outline: 2px solid var(--Border);
-        outline-offset: 2px;
-      }
-      .btn > svg {
-        inline-size: 1.25em;
-        block-size: 1.25em;
-        pointer-events: none;
-        flex-shrink: 0;
-      }
-      .btn:has(> svg):not(:has(> svg:only-child)) {
-        padding-inline-start: 0.75em;
-      }
-      .btn:has(> svg:only-child) {
-        min-inline-size: unset;
-        padding: 0.4em;
-        block-size: calc(2.5 * 1em);
-        aspect-ratio: 1;
-      }
-      @media (pointer: coarse) {
-        .btn { min-block-size: 44px; padding-block: 0.6em }
-        .btn:has(> svg:only-child) { block-size: 48px; inline-size: 48px }
-        .btn:has(> svg):not(:has(> svg:only-child)) { padding-inline: 1em 1.25em }
-      }
-
-
-      /* ── .vr — vertical rule for flex/inline rows ──────────────
-         Sized in em so it scales with parent's font. */
-      .vr {
-        inline-size: 1px;
-        block-size: 1.5em;
-        background: var(--border);
-        flex-shrink: 0;
-      }
-
-
-      /* ── .tab-bar — connected underline tab strip ──────────────
-         Top-level nav pattern. The bar itself has no border — its
-         container provides the bottom edge. The active item shows a
-         2px accent border that reads as the tab indicator.
-
-         Each tab carries a data-label attr matching its visible text;
-         a hidden ::before pseudo with that label at font-weight 600
-         defines the cell width. The visible text (in a <span>) stacks
-         in the same grid cell. Result: switching the active tab to
-         bold doesn't widen its cell — width is always the bold width,
-         so no layout shift on tab change.
-
-         Mark the active item with aria-current="page" (for nav links)
-         or aria-pressed="true" (for toggle buttons). Both selectors
-         are styled. */
-      .tab-bar {
-        display: inline-flex;
-        align-self: end;
-        align-items: end;
-      }
-      :where(.tab-bar > *) {
-        --type: -1;
-        --fg: -0.5;
-        font: inherit;
-        text-decoration: none;
-        background: transparent;
-        border: 0;
-        padding: 0.5rem 0.9rem;
-        border-block-end: 2px solid transparent;
-        cursor: pointer;
-        display: inline-grid;
-        place-items: center;
-        transition: color, border-color;
-        transition-duration: calc(var(--cfg-motion) * 0.12s);
-        transition-timing-function: ease-out;
-      }
-      /* Hidden bold ghost reserves the cell width. */
-      :where(.tab-bar > *)::before {
-        content: attr(data-label);
-        grid-area: 1 / 1;
-        font-weight: 600;
-        visibility: hidden;
-      }
-      /* Visible label stacks in the same cell. */
-      :where(.tab-bar > * > span) {
-        grid-area: 1 / 1;
-      }
-      .tab-bar > [aria-current="page"],
-      .tab-bar > [aria-pressed="true"] {
-        --fg: 0.5;
-        border-block-end-color: currentColor;
-        font-weight: 600;
-      }
-
-
-
-
-
-        /* ── Popover ──────────────────────────────────────────────
-           Anchor-positioned popup. Uses CSS anchor positioning APIs
-           (Chrome 125+). Falls back to manual placement via class
-           modifier if anchor unsupported. */
-        [popover].popover {
-            position: fixed;
-            inset: auto;
+        :where(hr) {
+            block-size: 1px;
+            inline-size: 100%;
             margin: 0;
-            border: 1px solid var(--border);
-            min-width: clamp(10rem, 40vw, 18rem);
-            max-width: min(90vw, 24rem);
-            max-height: 80vh;
-            overflow: auto;
+            background: var(--border);
+            border: 0;
 
-            background: var(--_bg);
-            color: inherit;
-            border-radius: var(--cfg-radius);
-            box-shadow: 0 8px 24px oklch(from var(--_bg) 10% 0.05 h / 0.3);
-            padding: var(--s);
-
-            opacity: 1;
-            transform: scale(1);
-            position-area: block-start inline-end;
-            position-try-order: most-block-size;
-            position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
-            position-visibility: anchors-visible;
-
-            transition:
-                opacity   calc(var(--cfg-motion) * 0.18s) ease-out,
-                transform calc(var(--cfg-motion) * 0.18s) ease-out,
-                display   calc(var(--cfg-motion) * 0.18s) allow-discrete,
-                overlay   calc(var(--cfg-motion) * 0.18s) allow-discrete;
+            &.vr {
+                inline-size: 1px;
+                block-size: 1.5em;
+                flex-shrink: 0;
+            }
         }
-
-        [popover].popover:not(:popover-open) {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-
-        /* Manual placement modifiers. */
-        [popover].popover.below-start { position-area: block-end inline-start }
-        [popover].popover.below-end   { position-area: block-end inline-end   }
-        [popover].popover.above-start { position-area: block-start inline-start }
-        [popover].popover.above-end   { position-area: block-start inline-end   }
     }
     ```
     """)
@@ -1513,53 +1363,229 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## component.complex
+    ### Tab bar
+    > class = ".tab-bar"
+    Connected underline tab strip. The active item shows a 2px accent border that reads as the tab indicator. Each child carries `data-label` matching its visible text; a hidden ghost in `::before` reserves the bold-weight cell width so switching the active tab doesn't shift layout.
+
+    Mark the active item with `aria-current="page"` (for nav links) or `aria-pressed="true"` (for toggle buttons). Both selectors are styled.
+
+    use: top-level page nav, settings panel section switcher, any "one of N" view selector.
 
     ```css
-    /* ============================================================
-       component-complex.css — component.complex
+    @layer component.simple {
+        :where(.tab-bar) {
+            display: inline-flex;
+            align-self: end;
+            align-items: end;
 
-       Generic complex components — modal dialogs, calendars, data
-       tables, etc. Same purity rule as component.simple: anything
-       project-specific (timeline, sidebar, role cards, etc.) lives
-       in app code as me {} blocks, NOT here.
+            & > * {
+                --type: -1;
+                --fg: -0.5;
+                font: inherit;
+                text-decoration: none;
+                background: transparent;
+                border: 0;
+                padding: 0.5rem 0.9rem;
+                border-block-end: 2px solid transparent;
+                cursor: pointer;
+                display: inline-grid;
+                place-items: center;
+                transition: color, border-color;
+                transition-duration: calc(var(--cfg-motion) * 0.12s);
+                transition-timing-function: ease-out;
 
-       Was previously crowded with resume-specific components in
-       v1.x. Those have been extracted.
-       ============================================================ */
+                /* Hidden bold ghost reserves the cell width so weight
+                   changes on activation don't shift layout. */
+                &::before {
+                    content: attr(data-label);
+                    grid-area: 1 / 1;
+                    font-weight: 600;
+                    visibility: hidden;
+                }
+                /* Visible label stacks in the same cell as the ghost. */
+                & > span {
+                    grid-area: 1 / 1;
+                }
+                &[aria-current="page"],
+                &[aria-pressed="true"] {
+                    --fg: 0.5;
+                    border-block-end-color: currentColor;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+    ```
+    """)
+    return
 
-    @layer component.complex {
 
-        /* ── Modal dialog ─────────────────────────────────────────
-           Pure modal, anchored to top-layer. .modal opt-in so plain
-           <dialog> (used as in-flow drawers by layout.app) doesn't
-           inherit modal styling. */
-        :where(dialog.modal) {
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Chip
+    > class = ".chip"
+    Info-display pill. Stateless. May contain inner action buttons (add, dismiss).
+    use: filter terms, status indicators, read-only tags.
+
+    ```css
+    @layer component.simple {
+        :where(.chip) {
+            --type: -1;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4ch;
+            padding: 0.25em 0.85em;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font: inherit;
+            line-height: 1;
+
+            & .btn {
+                min-inline-size: unset;
+                block-size: 1.25em;
+                inline-size: 1.25em;
+                aspect-ratio: 1;
+                padding: 0;
+                border: 0;
+                background: transparent;
+                font-weight: 400;
+                margin-inline-end: -0.35em;
+
+                & > svg {
+                    inline-size: 1em;
+                    block-size: 1em;
+                }
+            }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Tag
+    > class = ".tag"
+    Toggleable on/off marker via `aria-pressed`. Click to flip. Active translate on press.
+    use: filter toggles, multi-select chips, persistent boolean settings.
+
+    ```css
+    @layer component.simple {
+        :where(.tag) {
+            --type: -1;
+            --fg: -0.6;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4ch;
+            padding: 0.25em 0.7em;
+            border: 1px solid var(--border);
+            border-radius: 0.4em;
+            font: inherit;
+            font-weight: 600;
+            line-height: 1;
+            transition: background-color, color, border-color, translate;
+            transition-duration: calc(var(--cfg-motion) * 0.08s);
+            transition-timing-function: ease-out;
+
+            &[aria-pressed="true"] {
+                --bg: 0.3;
+                --fg: 0.9;
+                border-color: var(--Border);
+            }
+            &.active { translate: 0 1px }
+            &.disabled { --fg: -0.35 }
+            &:focus-visible {
+                outline: 2px solid var(--Border);
+                outline-offset: 2px;
+            }
+        }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Button
+    > class = ".btn"
+    Clickable action, no persistent state. Press for active translate.
+    use: any tap target shaped like a button — actions, submits, dismiss buttons inside chips.
+
+    ```css
+    @layer component.simple {
+        :where(.btn) {
+            --type: -1;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5em;
+            min-inline-size: 12ch;
+            padding: 0.4em 1em;
             border: 1px solid var(--border);
             border-radius: var(--cfg-radius);
-            padding: 0;
-            max-width: min(90vw, 32rem);
-            max-height: 85vh;
-            overflow: auto;
-            opacity: 1;
-            transform: translateY(0);
-            transition:
-                opacity   calc(var(--cfg-motion) * 0.25s) ease-out,
-                transform calc(var(--cfg-motion) * 0.25s) ease-out,
-                display   calc(var(--cfg-motion) * 0.25s) allow-discrete,
-                overlay   calc(var(--cfg-motion) * 0.25s) allow-discrete;
+            font: inherit;
+            font-weight: 600;
+            line-height: 1;
+            transition: background-color, color, border-color, translate;
+            transition-duration: calc(var(--cfg-motion) * 0.08s);
+            transition-timing-function: ease-out;
 
-            &:not([open]) {
-                opacity: 0;
-                transform: translateY(calc(var(--cfg-motion) * 0.5rem));
+            &.active {
+                translate: 0 1px;
+                --fg: -0.6;
             }
-
-            @starting-style {
-                opacity: 0;
-                transform: translateY(calc(var(--cfg-motion) * -0.5rem));
+            &:focus-visible {
+                outline: 2px solid var(--Border);
+                outline-offset: 2px;
             }
+            & > svg {
+                inline-size: 1.25em;
+                block-size: 1.25em;
+                pointer-events: none;
+                flex-shrink: 0;
+            }
+            /* Icon-only auto-detection: a button with no accessible text content
+               must carry aria-label, so we use that as the signal. Pure :has(> svg)
+               would also match icon+text buttons because text nodes don't break
+               :only-child. */
+            &[aria-label]:has(> svg) {
+                min-inline-size: unset;
+                padding: 0.4em;
+                aspect-ratio: 1;
+            }
+        }
+    }
+    ```
+    """)
+    return
 
-            &::backdrop { background: transparent }
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Tap
+    > class = ".tap"
+    Behavior marker for non-button-shaped tappable things. Hover emphasis without click cursor. No padding, no border — just the interaction signals.
+    use: data table rows, clickable cards, list items.
+
+    ```css
+    @layer component.simple {
+        :where(.tap) {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+
+            &.hover, &.active { background-color: var(--_bg) }
         }
     }
     ```
@@ -1625,6 +1651,14 @@ def _(mo):
         }
     }
     ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Scratch work;
     """)
     return
 

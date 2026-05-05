@@ -1,13 +1,14 @@
+    /* ════════════════════════════════════════════════════════════════
+       May 4th 2026
+       ════════════════════════════════════════════════════════════ */
 
     @layer
       reset.fix,
       reset.opinion,
       core.color,
       core.type,
-      core.space,
       theme,
       layout.app,
-      layout.doc,
       layout.composition,
       component.base,
       component.simple,
@@ -285,11 +286,6 @@
       .surface:has(.surface)                   { --depth: 1 }
       .surface:has(.surface .surface)          { --depth: 2 }
       .surface:has(.surface .surface .surface) { --depth: 3 }
-
-      /* SVG color bridge — translates the same outputs to fill/stroke */
-      :where(svg) { color: currentColor }
-      :where(svg) :where(*) { fill: currentColor; stroke: none }
-      :where(svg) :where(line, polyline, .stroke) { fill: none; stroke: currentColor }
     }
 
     
@@ -572,293 +568,73 @@
       }
     }
     
-    /* ============================================================
-       layout-app.css — layout.app
-
-       Application-shell layout: a 3×3 grid (header / nav · main · aside
-       / footer) with drawer-style nav and aside that collapse to fixed
-       modal drawers below a container-query breakpoint.
-
-       Opt in via <body class="app">. Nothing applies otherwise.
-
-       Drawer markup:
-         <body class="app">
-           <header id="header">...</header>
-           <dialog id="nav" open>...</dialog>     <!-- drawer -->
-           <main   id="main">...</main>
-           <dialog id="aside" open>...</dialog>   <!-- drawer -->
-           <footer id="footer">...</footer>
-         </body>
-
-       Why <dialog> for drawers: gets us free top-layer modal behavior
-       in narrow mode (showModal()) and keyboard accessibility. In wide
-       mode we override its UA styling to make it sit in a grid track.
-       ============================================================ */
-
-    @property --cfg-layout-radius   { syntax: "<length>"; inherits: true; initial-value: 4px }
-    @property --cfg-layout-page-gap { syntax: "<length>"; inherits: true; initial-value: 6px }
-
-    :where(html) {
-        /* These appear when the viewport hits the layout's design width.
-           The clamp(0px, calc(100vi - 100%) * 1e5, ...) trick is a
-           container-query approximation for cases where containers
-           can't be used. Will revisit. */
-        --cfg-layout-radius:   clamp(0px, calc(100vi - 100%) * 1e5, 0.5rem);
-        --cfg-layout-page-gap: clamp(0px, calc(100vi - 100%) * 1e5, 1rem);
-    }
-
     @layer layout.app {
-
         body.app {
-            font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
-            background: var(--_bg);
-            container: app-shell / inline-size;
-
-            /* Wide layout — 3×3 grid.
-               Columns are `auto 1fr auto` so nav/aside tracks size to
-               their explicit widths, and collapse to zero when those
-               dialogs leave the grid (position: fixed). */
             display: grid;
             grid-template:
-                "header header header" auto
-                "nav    main   aside"  1fr
-                "footer footer footer" auto /
-                auto    1fr    auto;
-            gap: 0;
+                "h h h" auto
+                "n m a" 1fr
+                "f f f" auto /
+                auto 1fr auto;
             height: 100svh;
-            overflow: hidden;  /* body never scrolls; #main does */
-        }
+            overflow: hidden;
 
-        /* Only #main scrolls; header/footer stay pinned */
-        body.app #main {
-            overflow-y: auto;
-            min-height: 0;     /* critical in grid — lets child scroll */
-        }
-        body.app #header,
-        body.app #footer { min-height: 0 }
-
-        /* ── Grid-mode dialog reset ─────────────────────────────────
-           <dialog> comes with UA styles we need to neutralize so it
-           renders like a plain block in its grid slot. */
-        body.app #nav,
-        body.app #aside {
-            position: static;
-            display: block;            /* overrides dialog's display: none */
-            max-width: none;
-            max-height: none;
-            width: var(--drawer-width, auto);
-            height: auto;
-            margin: 0;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--cfg-layout-radius);
-            background: var(--_bg);
-            color: inherit;
-            overflow-y: auto;
-        }
-
-        body.app #nav {
-            grid-area: nav;
-            margin-right: var(--cfg-layout-page-gap);
-        }
-        body.app #aside {
-            grid-area: aside;
-            margin-left: var(--cfg-layout-page-gap);
-        }
-
-        body.app #main {
-            grid-area: main;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--cfg-layout-radius);
-            background: var(--_bg);
-        }
-        body.app #header {
-            grid-area: header;
-            margin-bottom: var(--cfg-layout-page-gap);
-        }
-        body.app #footer {
-            grid-area: footer;
-            margin-top: var(--cfg-layout-page-gap);
-        }
-
-        /* ── Narrow layout ──────────────────────────────────────────
-           Below 1024px container width: nav/aside leave the grid and
-           become fixed modal drawers. Triggered by container query so
-           it works in any context the app shell is embedded in. */
-        @container app-shell (width < 1024px) {
-            body.app #nav,
-            body.app #aside {
-                position: fixed;
-                inset: 0 auto 0 auto;       /* reset all sides; per-drawer below */
-                margin: 0;
-                width: min(85vw, 320px);
-                max-width: 85vw;
-                height: 100svh;
-                border-radius: 0;
-                border: 0;
-                background: var(--_bg);
-                padding: 1.5rem 1rem;
-                overflow-y: auto;
-
-                transition:
-                    translate calc(var(--cfg-motion) * 0.25s) ease-out,
-                    opacity   calc(var(--cfg-motion) * 0.25s) ease-out,
-                    display   calc(var(--cfg-motion) * 0.25s) allow-discrete,
-                    overlay   calc(var(--cfg-motion) * 0.25s) allow-discrete;
-                translate: 0 0;
-                opacity: 1;
-            }
-
-            body.app #nav   { left: 0; border-right: 1px solid var(--Border) }
-            body.app #aside { left: auto; right: 0; border-left: 1px solid var(--Border) }
-
-            body.app #nav:not([open])   { display: none; translate: -100% 0; opacity: 0 }
-            body.app #aside:not([open]) { display: none; translate:  100% 0; opacity: 0 }
-
-            @starting-style {
-                body.app #nav[open]   { translate: -100% 0; opacity: 0 }
-                body.app #aside[open] { translate:  100% 0; opacity: 0 }
-            }
-
-            body.app #nav::backdrop,
-            body.app #aside::backdrop {
-                background: oklch(0% 0 0 / 0.5);
-                transition:
-                    background-color calc(var(--cfg-motion) * 0.25s) ease-out,
-                    display          calc(var(--cfg-motion) * 0.25s) allow-discrete,
-                    overlay          calc(var(--cfg-motion) * 0.25s) allow-discrete;
-            }
-            body.app #nav:not([open])::backdrop,
-            body.app #aside:not([open])::backdrop {
-                background: oklch(0% 0 0 / 0);
-            }
-            @starting-style {
-                body.app #nav[open]::backdrop,
-                body.app #aside[open]::backdrop { background: oklch(0% 0 0 / 0) }
-            }
+            > #header { grid-area: h; }
+            > #footer { grid-area: f; }
+            > #nav    { grid-area: n; overflow-y: auto; scrollbar-gutter: stable; }
+            > #main   { grid-area: m; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            > #aside  { grid-area: a; overflow-y: auto; scrollbar-gutter: stable; }
         }
     }
     
-    /* ============================================================
-       layout-doc.css — layout.doc
+    @layer component.complex {
+        .drawer {
+            --_dur: calc(var(--cfg-motion) * 0.25s);
 
-       Document/paper layout. A fixed-aspect "piece of paper" centered
-       on a backdrop, with print awareness. Used for resumes, posters,
-       single-page artifacts that need to look the same on screen and
-       in print.
-
-       Opt in via <body class="doc"> with a <article class="paper">
-       child:
-
-         <body class="doc">
-           <article class="paper">
-             ...content...
-           </article>
-         </body>
-
-       Defaults to US Letter portrait. Override --paper-w / --paper-h
-       on the .paper element for other sizes.
-
-       Paper sizing:
-         On screen — scales to fit viewport, preserves aspect ratio.
-         In print  — exact physical size, zero @page margin.
-
-       Type and space inside the paper are paper-relative (cqi units)
-       so screen and print render identically regardless of viewport.
-       ============================================================ */
-
-    @layer layout.doc {
-
-        body.doc {
+            position: fixed;
+            inset: auto;
             margin: 0;
-            min-block-size: 100dvh;
-            display: grid;
-            place-items: center;
-            padding: 1rem;
-        }
+            max-block-size: none;
+            max-inline-size: none;
+            transition:
+                translate var(--_dur) ease-out,
+                opacity   var(--_dur) ease-out,
+                display   var(--_dur) allow-discrete,
+                overlay   var(--_dur) allow-discrete;
+            translate: 0 0;
+            opacity: 1;
 
-        /* The paper itself. Default geometry: US Letter portrait. */
-        body.doc .paper,
-        .paper {
-            --paper-w: 8.5in;
-            --paper-h: 11in;
-            --paper-aspect: calc(var(--paper-w) / var(--paper-h));
-
-            /* aspect-ratio doesn't accept the `<num> / <num>` slash form
-               with var() on either side — only literal numbers. Use the
-               single-number form via the precomputed --paper-aspect. */
-            aspect-ratio: var(--paper-aspect);
-
-            /* Fit the smaller of (viewport-height) or (width-derived height).
-               Whichever bound is tighter wins; aspect-ratio handles the other. */
-            block-size: min(
-                calc(100dvh - 2rem),
-                calc((100dvw - 2rem) / var(--paper-aspect))
-            );
-            inline-size: auto;
-
-            border: 1px solid var(--border);
-            border-radius: var(--cfg-radius, 0.5rem);
-            box-shadow: 0 1rem 3rem -1rem oklch(0% 0 0 / 0.4);
-            overflow: hidden;
-
-            /* CQ container — descendants size against paper width via cqi. */
-            container-type: size;
-            container-name: paper;
-        }
-
-        /* core.type and core.space both reference `100vi` in their formulas
-           — wrong for a fixed-aspect document where everything should track
-           the paper, not the viewport.
-
-           Override for descendants only (.paper *, NOT .paper itself).
-
-           Why: `--cfg-space-base` and `--paper-type-base` are registered
-           as <length> via @property. Registered length properties are
-           evaluated at the DECLARATION site — so setting `1cqi` on `.paper`
-           resolves it against the paper's PARENT (viewport), and the
-           already-resolved px value propagates to descendants. Bug.
-           Setting them on `.paper *` evaluates cqi at each descendant,
-           which IS inside the paper's container query → paper-relative.
-
-           --type and --space step ratios still apply, so hierarchy and
-           density still work — they just operate on a paper-relative
-           base instead of a viewport-fluid one. */
-        .paper * {
-            /* Paper-relative bases — declared on descendants so cqi
-               evaluates inside the paper's container query context. */
-            --paper-type-base: 1.75cqi;
-            --cfg-space-base: 1cqi;
-
-            font-size: calc(
-                var(--paper-type-base) *
-                pow(var(--cfg-type-min-ratio), var(--type)) *
-                var(--cfg-type-scale)
-            );
-            --s: calc(
-                var(--cfg-space-base) *
-                pow(var(--cfg-space-ratio), var(--space)) *
-                var(--cfg-space-scale)
-            );
-        }
-
-        @media print {
-            body.doc {
-                padding: 0;
-                min-block-size: auto;
-                display: block;
+            &:not(:is([open], :popover-open)) {
+                opacity: 0;
+                translate: var(--_translate-closed);
             }
-            @page { size: letter; margin: 0 }
+            @starting-style {
+                &:is([open], :popover-open) {
+                    opacity: 0;
+                    translate: var(--_translate-closed);
+                }
+            }
 
-            body.doc .paper,
-            .paper {
-                inline-size: var(--paper-w);
-                block-size: var(--paper-h);
-                aspect-ratio: auto;
-                border: 0;
-                border-radius: 0;
-                box-shadow: none;
+            &.left   { --_translate-closed: -100% 0; inset: 0 auto 0 0; inline-size: min(85vw, 320px); block-size: 100svh; }
+            &.right  { --_translate-closed:  100% 0; inset: 0 0 0 auto; inline-size: min(85vw, 320px); block-size: 100svh; }
+            &.top    { --_translate-closed: 0 -100%; inset: 0 0 auto 0; inline-size: 100vw; block-size: min(85svh, 240px); }
+            &.bottom { --_translate-closed: 0  100%; inset: auto 0 0 0; inline-size: 100vw; block-size: min(85svh, 240px); }
+        }
+
+        dialog.drawer {
+            --_dur: calc(var(--cfg-motion) * 0.25s);
+            --_dim: oklch(0% 0 0 / 0.5);
+
+            &::backdrop {
+                background: var(--_dim);
+                transition:
+                    background-color var(--_dur) ease-out,
+                    display          var(--_dur) allow-discrete,
+                    overlay          var(--_dur) allow-discrete;
+            }
+            &:not([open])::backdrop { background: oklch(0% 0 0 / 0); }
+            @starting-style {
+                &[open]::backdrop { background: oklch(0% 0 0 / 0); }
             }
         }
     }
@@ -993,248 +769,184 @@
       /* (filled in as the system grows) */
     }
     
-    /* ============================================================
-       component-simple.css — component.simple
-
-       Generic small components keyed by class. Each composes with
-       the color/type/space systems and works in any context.
-
-       "Simple" means: small in scope, doesn't assume surrounding
-       structure, generic enough to use in any project.
-       ============================================================ */
-
     @layer component.simple {
-
-      /* ── .tap — behavior marker ─────────────────────────────────
-         Pointer helper adds .hover / .active / .disabled to any
-         element with .tap (or .btn). Use .tap for things that need
-         pointer states but aren't visual buttons — tabs, nav links,
-         steppers. The state visuals themselves live in @layer theme. */
-      .tap {
-        cursor: pointer;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .tap:focus-visible {
-        outline: 2px solid var(--Border);
-        outline-offset: 2px;
-      }
-
-
-      /* ── .btn — unified button ──────────────────────────────────
-         One class, no variants. Auto-detects shape via :has():
-           text only        → min-width 12ch, normal padding
-           icon + text      → tighter left padding, icon breathing room
-           icon only        → square, no min-width
-         Color/intensity per-instance via --bg and --hue-lock.
-         Sizing via --type. Padding in em scales with the type. */
-      :where(.btn) {
-        --type: -1;
-
-        cursor: pointer;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5em;
-        min-inline-size: 12ch;
-        padding: 0.4em 1em;
-        border: 1px solid var(--border);
-        border-radius: var(--cfg-radius);
-        font: inherit;
-        font-weight: 600;
-        line-height: 1;
-
-        transition: background-color, color, border-color;
-        transition-duration: calc(var(--cfg-motion) * 0.12s);
-        transition-timing-function: ease-out;
-      }
-      .btn:focus-visible {
-        outline: 2px solid var(--Border);
-        outline-offset: 2px;
-      }
-      .btn > svg {
-        inline-size: 1.25em;
-        block-size: 1.25em;
-        pointer-events: none;
-        flex-shrink: 0;
-      }
-      .btn:has(> svg):not(:has(> svg:only-child)) {
-        padding-inline-start: 0.75em;
-      }
-      .btn:has(> svg:only-child) {
-        min-inline-size: unset;
-        padding: 0.4em;
-        block-size: calc(2.5 * 1em);
-        aspect-ratio: 1;
-      }
-      @media (pointer: coarse) {
-        .btn { min-block-size: 44px; padding-block: 0.6em }
-        .btn:has(> svg:only-child) { block-size: 48px; inline-size: 48px }
-        .btn:has(> svg):not(:has(> svg:only-child)) { padding-inline: 1em 1.25em }
-      }
-
-
-      /* ── .vr — vertical rule for flex/inline rows ──────────────
-         Sized in em so it scales with parent's font. */
-      .vr {
-        inline-size: 1px;
-        block-size: 1.5em;
-        background: var(--border);
-        flex-shrink: 0;
-      }
-
-
-      /* ── .tab-bar — connected underline tab strip ──────────────
-         Top-level nav pattern. The bar itself has no border — its
-         container provides the bottom edge. The active item shows a
-         2px accent border that reads as the tab indicator.
-
-         Each tab carries a data-label attr matching its visible text;
-         a hidden ::before pseudo with that label at font-weight 600
-         defines the cell width. The visible text (in a <span>) stacks
-         in the same grid cell. Result: switching the active tab to
-         bold doesn't widen its cell — width is always the bold width,
-         so no layout shift on tab change.
-
-         Mark the active item with aria-current="page" (for nav links)
-         or aria-pressed="true" (for toggle buttons). Both selectors
-         are styled. */
-      .tab-bar {
-        display: inline-flex;
-        align-self: end;
-        align-items: end;
-      }
-      :where(.tab-bar > *) {
-        --type: -1;
-        --fg: -0.5;
-        font: inherit;
-        text-decoration: none;
-        background: transparent;
-        border: 0;
-        padding: 0.5rem 0.9rem;
-        border-block-end: 2px solid transparent;
-        cursor: pointer;
-        display: inline-grid;
-        place-items: center;
-        transition: color, border-color;
-        transition-duration: calc(var(--cfg-motion) * 0.12s);
-        transition-timing-function: ease-out;
-      }
-      /* Hidden bold ghost reserves the cell width. */
-      :where(.tab-bar > *)::before {
-        content: attr(data-label);
-        grid-area: 1 / 1;
-        font-weight: 600;
-        visibility: hidden;
-      }
-      /* Visible label stacks in the same cell. */
-      :where(.tab-bar > * > span) {
-        grid-area: 1 / 1;
-      }
-      .tab-bar > [aria-current="page"],
-      .tab-bar > [aria-pressed="true"] {
-        --fg: 0.5;
-        border-block-end-color: currentColor;
-        font-weight: 600;
-      }
-
-
-
-
-
-        /* ── Popover ──────────────────────────────────────────────
-           Anchor-positioned popup. Uses CSS anchor positioning APIs
-           (Chrome 125+). Falls back to manual placement via class
-           modifier if anchor unsupported. */
-        [popover].popover {
-            position: fixed;
-            inset: auto;
+        :where(hr) {
+            block-size: 1px;
+            inline-size: 100%;
             margin: 0;
-            border: 1px solid var(--border);
-            min-width: clamp(10rem, 40vw, 18rem);
-            max-width: min(90vw, 24rem);
-            max-height: 80vh;
-            overflow: auto;
+            background: var(--border);
+            border: 0;
 
-            background: var(--_bg);
-            color: inherit;
-            border-radius: var(--cfg-radius);
-            box-shadow: 0 8px 24px oklch(from var(--_bg) 10% 0.05 h / 0.3);
-            padding: var(--s);
-
-            opacity: 1;
-            transform: scale(1);
-            position-area: block-start inline-end;
-            position-try-order: most-block-size;
-            position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
-            position-visibility: anchors-visible;
-
-            transition:
-                opacity   calc(var(--cfg-motion) * 0.18s) ease-out,
-                transform calc(var(--cfg-motion) * 0.18s) ease-out,
-                display   calc(var(--cfg-motion) * 0.18s) allow-discrete,
-                overlay   calc(var(--cfg-motion) * 0.18s) allow-discrete;
+            &.vr {
+                inline-size: 1px;
+                block-size: 1.5em;
+                flex-shrink: 0;
+            }
         }
-
-        [popover].popover:not(:popover-open) {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-
-        /* Manual placement modifiers. */
-        [popover].popover.below-start { position-area: block-end inline-start }
-        [popover].popover.below-end   { position-area: block-end inline-end   }
-        [popover].popover.above-start { position-area: block-start inline-start }
-        [popover].popover.above-end   { position-area: block-start inline-end   }
     }
     
-    /* ============================================================
-       component-complex.css — component.complex
+    @layer component.simple {
+        :where(.tab-bar) {
+            display: inline-flex;
+            align-self: end;
+            align-items: end;
 
-       Generic complex components — modal dialogs, calendars, data
-       tables, etc. Same purity rule as component.simple: anything
-       project-specific (timeline, sidebar, role cards, etc.) lives
-       in app code as me {} blocks, NOT here.
+            & > * {
+                --type: -1;
+                --fg: -0.5;
+                font: inherit;
+                text-decoration: none;
+                background: transparent;
+                border: 0;
+                padding: 0.5rem 0.9rem;
+                border-block-end: 2px solid transparent;
+                cursor: pointer;
+                display: inline-grid;
+                place-items: center;
+                transition: color, border-color;
+                transition-duration: calc(var(--cfg-motion) * 0.12s);
+                transition-timing-function: ease-out;
 
-       Was previously crowded with resume-specific components in
-       v1.x. Those have been extracted.
-       ============================================================ */
+                /* Hidden bold ghost reserves the cell width so weight
+                   changes on activation don't shift layout. */
+                &::before {
+                    content: attr(data-label);
+                    grid-area: 1 / 1;
+                    font-weight: 600;
+                    visibility: hidden;
+                }
+                /* Visible label stacks in the same cell as the ghost. */
+                & > span {
+                    grid-area: 1 / 1;
+                }
+                &[aria-current="page"],
+                &[aria-pressed="true"] {
+                    --fg: 0.5;
+                    border-block-end-color: currentColor;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+    
+    @layer component.simple {
+        :where(.chip) {
+            --type: -1;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4ch;
+            padding: 0.25em 0.85em;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font: inherit;
+            line-height: 1;
 
-    @layer component.complex {
+            & .btn {
+                min-inline-size: unset;
+                block-size: 1.25em;
+                inline-size: 1.25em;
+                aspect-ratio: 1;
+                padding: 0;
+                border: 0;
+                background: transparent;
+                font-weight: 400;
+                margin-inline-end: -0.35em;
 
-        /* ── Modal dialog ─────────────────────────────────────────
-           Pure modal, anchored to top-layer. .modal opt-in so plain
-           <dialog> (used as in-flow drawers by layout.app) doesn't
-           inherit modal styling. */
-        :where(dialog.modal) {
+                & > svg {
+                    inline-size: 1em;
+                    block-size: 1em;
+                }
+            }
+        }
+    }
+    
+    @layer component.simple {
+        :where(.tag) {
+            --type: -1;
+            --fg: -0.6;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4ch;
+            padding: 0.25em 0.7em;
+            border: 1px solid var(--border);
+            border-radius: 0.4em;
+            font: inherit;
+            font-weight: 600;
+            line-height: 1;
+            transition: background-color, color, border-color, translate;
+            transition-duration: calc(var(--cfg-motion) * 0.08s);
+            transition-timing-function: ease-out;
+
+            &[aria-pressed="true"] {
+                --bg: 0.3;
+                --fg: 0.9;
+                border-color: var(--Border);
+            }
+            &.active { translate: 0 1px }
+            &.disabled { --fg: -0.35 }
+            &:focus-visible {
+                outline: 2px solid var(--Border);
+                outline-offset: 2px;
+            }
+        }
+    }
+    
+    @layer component.simple {
+        :where(.btn) {
+            --type: -1;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5em;
+            min-inline-size: 12ch;
+            padding: 0.4em 1em;
             border: 1px solid var(--border);
             border-radius: var(--cfg-radius);
-            padding: 0;
-            max-width: min(90vw, 32rem);
-            max-height: 85vh;
-            overflow: auto;
-            opacity: 1;
-            transform: translateY(0);
-            transition:
-                opacity   calc(var(--cfg-motion) * 0.25s) ease-out,
-                transform calc(var(--cfg-motion) * 0.25s) ease-out,
-                display   calc(var(--cfg-motion) * 0.25s) allow-discrete,
-                overlay   calc(var(--cfg-motion) * 0.25s) allow-discrete;
+            font: inherit;
+            font-weight: 600;
+            line-height: 1;
+            transition: background-color, color, border-color, translate;
+            transition-duration: calc(var(--cfg-motion) * 0.08s);
+            transition-timing-function: ease-out;
 
-            &:not([open]) {
-                opacity: 0;
-                transform: translateY(calc(var(--cfg-motion) * 0.5rem));
+            &.active {
+                translate: 0 1px;
+                --fg: -0.6;
             }
-
-            @starting-style {
-                opacity: 0;
-                transform: translateY(calc(var(--cfg-motion) * -0.5rem));
+            &:focus-visible {
+                outline: 2px solid var(--Border);
+                outline-offset: 2px;
             }
+            & > svg {
+                inline-size: 1.25em;
+                block-size: 1.25em;
+                pointer-events: none;
+                flex-shrink: 0;
+            }
+            /* Icon-only auto-detection: a button with no accessible text content
+               must carry aria-label, so we use that as the signal. Pure :has(> svg)
+               would also match icon+text buttons because text nodes don't break
+               :only-child. */
+            &[aria-label]:has(> svg) {
+                min-inline-size: unset;
+                padding: 0.4em;
+                aspect-ratio: 1;
+            }
+        }
+    }
+    
+    @layer component.simple {
+        :where(.tap) {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
 
-            &::backdrop { background: transparent }
+            &.hover, &.active { background-color: var(--_bg) }
         }
     }
     
