@@ -236,56 +236,13 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ## Property Declarations
+    > later mmove to be closer to their layer (locality of behavior prefeared here)
 
     ```css
     /* ════════════════════════════════════════════════════════════════
        @property declarations
        These must live outside @layer (CSS spec requirement).
        ════════════════════════════════════════════════════════════ */
-
-    /* Color */
-    @property --bg         { syntax: "<number>"; inherits: true; initial-value: -1 }
-    @property --fg         { syntax: "<number>"; inherits: true; initial-value: -1 }
-    @property --hue        { syntax: "<number>"; inherits: true; initial-value: 220 }
-    @property --hue-lock   { syntax: "*";        inherits: true }
-    @property --hue-shift  { syntax: "<number>"; inherits: true; initial-value: 0 }
-    @property --depth      { syntax: "<number>"; inherits: false; initial-value: 0 }
-
-    @property --cfg-color-muted-l     { syntax: "<percentage>"; inherits: true; initial-value: 96% }
-    @property --cfg-color-muted-c     { syntax: "<number>";     inherits: true; initial-value: 0.025 }
-    @property --cfg-color-vivid-l     { syntax: "<percentage>"; inherits: true; initial-value: 35% }
-    @property --cfg-color-vivid-c     { syntax: "<number>";     inherits: true; initial-value: 0.18 }
-    @property --cfg-color-surf-chroma { syntax: "<number>";     inherits: true; initial-value: 0.008 }
-    @property --cfg-fg-tint           { syntax: "<number>";     inherits: true; initial-value: 0.012 }
-
-    @property --cfg-color-top-l     { syntax: "<number>"; inherits: true; initial-value: 88 }
-    @property --cfg-color-base-step { syntax: "<number>"; inherits: true; initial-value: 4 }
-    @property --cfg-color-curve-k   { syntax: "<number>"; inherits: true; initial-value: 0.6 }
-    @property --cfg-color-surf-mid  { syntax: "<number>"; inherits: true; initial-value: 60.5 }
-    @property --cfg-color-surf-rng  { syntax: "<number>"; inherits: true; initial-value: 55 }
-    @property --cfg-color-alpha     { syntax: "<number>"; inherits: true; initial-value: 1 }
-
-    @property --_bg        { syntax: "<color>";      inherits: true;  initial-value: oklch(88% 0.018 220) }
-    @property --_naive     { syntax: "<number>";     inherits: false; initial-value: 88 }
-    @property --_t         { syntax: "<number>";     inherits: false; initial-value: 0.5 }
-    @property --_surf-l    { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_c01       { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_col-l     { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-    @property --_col-c     { syntax: "<number>";     inherits: false; initial-value: 0.1 }
-    @property --_k         { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_l         { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_c         { syntax: "<number>";     inherits: false; initial-value: 0.018 }
-    @property --_h         { syntax: "<number>";     inherits: false; initial-value: 220 }
-    @property --_dark      { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_fg-pos    { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_fg-neg    { syntax: "<number>";     inherits: false; initial-value: 1 }
-    @property --_fg-l      { syntax: "<percentage>"; inherits: false; initial-value: 4% }
-    @property --_fg-c      { syntax: "<number>";     inherits: false; initial-value: 0.02 }
-    @property --_fg-onpos  { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_fg-pole   { syntax: "<percentage>"; inherits: false; initial-value: 4% }
-    @property --_fg-ramp-l { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-    @property --_fg-ramp-c { syntax: "<number>";     inherits: false; initial-value: 0.05 }
-    @property --_surf-dark { syntax: "<number>";     inherits: false; initial-value: 0 }
 
     /* State shift hooks — applied per-element. See @layer theme. */
     @property --l-shift { syntax: "<number>"; inherits: false; initial-value: 0 }
@@ -295,13 +252,7 @@ def _(mo):
     @property --cfg-radius { syntax: "<length>"; inherits: true; initial-value: 6px }
     @property --cfg-motion { syntax: "<number>"; inherits: true; initial-value: 1 }
 
-    /* Type */
-    @property --cfg-fluid-min-vp    { syntax: "<length>"; inherits: true; initial-value: 320px }
-    @property --cfg-fluid-max-vp    { syntax: "<length>"; inherits: true; initial-value: 1280px }
-    @property --cfg-type-scale      { syntax: "<number>"; inherits: true; initial-value: 1 }
-    @property --cfg-type-min-ratio  { syntax: "<number>"; inherits: true; initial-value: 1.2 }
-    @property --cfg-type-max-ratio  { syntax: "<number>"; inherits: true; initial-value: 1.28 }
-    @property --type                { syntax: "<number>"; inherits: false; initial-value: 0 }
+
 
     /* Layout */
     @property --gap { syntax: "<length>"; inherits: true; initial-value: 8px }
@@ -465,40 +416,140 @@ def _(mo):
     ## core.color
 
     ```css
+    /* ════════════════════════════════════════════════════════════════
+       stick.css v3 — color formula (surface-anchored)
+
+       Public API (5 tokens):
+         --bg          [0, 1]   surface (0) → loud (1)
+         --fg          [-1, 1]  neutral ink (-1) → 0 → chromatic ink (1)
+         --hue         [0, 360] base hue
+         --hue-shift   delta added to --hue (semantic palettes, charts)
+         --hue-lock    overrides hue+shift when set (branded content)
+
+       Configuration: 19 cfg-* tokens for theme tuning.
+       Curves and floor are hardcoded system constants.
+       ════════════════════════════════════════════════════════════ */
+
+    @layer core.color;
+
+    /* ── Public API ─────────────────────────────────────────────── */
+    @property --bg         { syntax: "<number>"; inherits: true; initial-value: 0 }
+    @property --fg         { syntax: "<number>"; inherits: true; initial-value: -1 }
+    @property --hue        { syntax: "<number>"; inherits: true; initial-value: 220 }
+    @property --hue-lock   { syntax: "*";        inherits: true }
+    @property --hue-shift  { syntax: "<number>"; inherits: true; initial-value: 0 }
+
+    /* ── Configuration: theme switch ────────────────────────────── */
+    @property --cfg-dark { syntax: "<number>"; inherits: true; initial-value: 0 }
+
+    /* ── Configuration: chroma ramp endpoints ───────────────────── */
+    @property --cfg-color-loud-l-light  { syntax: "<percentage>"; inherits: true; initial-value: 50% }
+    @property --cfg-color-loud-c-light  { syntax: "<number>";     inherits: true; initial-value: 0.22 }
+    @property --cfg-color-loud-l-dark   { syntax: "<percentage>"; inherits: true; initial-value: 70% }
+    @property --cfg-color-loud-c-dark   { syntax: "<number>";     inherits: true; initial-value: 0.22 }
+    @property --cfg-color-surf-chroma   { syntax: "<number>";     inherits: true; initial-value: 0.018 }
+    @property --cfg-fg-tint             { syntax: "<number>";     inherits: true; initial-value: 0.02 }
+    @property --cfg-color-alpha         { syntax: "<number>";     inherits: true; initial-value: 1 }
+
+    /* ── Configuration: surface ramp ────────────────────────────── */
+    @property --cfg-surf-top-light   { syntax: "<number>"; inherits: true; initial-value: 97 }
+    @property --cfg-surf-bot-light   { syntax: "<number>"; inherits: true; initial-value: 90 }
+    @property --cfg-surf-top-dark    { syntax: "<number>"; inherits: true; initial-value: 28 }
+    @property --cfg-surf-bot-dark    { syntax: "<number>"; inherits: true; initial-value: 10 }
+
+    /* ── Configuration: contrast flip ───────────────────────────── */
+    @property --cfg-fg-flip { syntax: "<number>"; inherits: true; initial-value: 0.55 }
+
+    /* ── Configuration: interaction states ──────────────────────── */
+    @property --cfg-hover-bg-shift  { syntax: "<number>"; inherits: true; initial-value: 0.12 }
+    @property --cfg-active-bg-shift { syntax: "<number>"; inherits: true; initial-value: -0.06 }
+    @property --cfg-active-fg-mul   { syntax: "<number>"; inherits: true; initial-value: 0.7 }
+
+    /* ── Structural ─────────────────────────────────────────────── */
+    @property --depth { syntax: "<number>"; inherits: false; initial-value: 0 }
+
+    /* ── Private intermediates ──────────────────────────────────── */
+    @property --_bg              { syntax: "<color>";      inherits: true;  initial-value: oklch(97% 0.018 220) }
+    @property --_h               { syntax: "<number>";     inherits: false; initial-value: 220 }
+    @property --_surf-top        { syntax: "<number>";     inherits: false; initial-value: 97 }
+    @property --_surf-bot        { syntax: "<number>";     inherits: false; initial-value: 90 }
+    @property --_t-stage         { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_surf-l          { syntax: "<percentage>"; inherits: true;  initial-value: 97% }
+    @property --_bg-clamped      { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_bg-chromatic    { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_bg-effective    { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_bg-curved       { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_floor           { syntax: "<number>";     inherits: false; initial-value: 0.08 }
+    @property --_l               { syntax: "<percentage>"; inherits: false; initial-value: 97% }
+    @property --_c               { syntax: "<number>";     inherits: false; initial-value: 0.018 }
+    @property --_loud-l          { syntax: "<percentage>"; inherits: false; initial-value: 50% }
+    @property --_loud-c          { syntax: "<number>";     inherits: false; initial-value: 0.22 }
+    @property --_fg-pos          { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_fg-neg          { syntax: "<number>";     inherits: false; initial-value: 1 }
+    @property --_fg-pos-curved   { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_fg-onpos        { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_fg-pole         { syntax: "<percentage>"; inherits: false; initial-value: 4% }
+    @property --_fg-ramp-l       { syntax: "<percentage>"; inherits: false; initial-value: 90% }
+    @property --_fg-ramp-c       { syntax: "<number>";     inherits: false; initial-value: 0.05 }
+    @property --_fg-l            { syntax: "<percentage>"; inherits: false; initial-value: 4% }
+    @property --_fg-c            { syntax: "<number>";     inherits: false; initial-value: 0.02 }
+    @property --_surf-dark       { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_flip-threshold  { syntax: "<percentage>"; inherits: false; initial-value: 55% }
+    @property --_chroma-present  { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_interact-bg     { syntax: "<number>";     inherits: false; initial-value: 0 }
+    @property --_interact-fg-mul { syntax: "<number>";     inherits: false; initial-value: 1 }
+    @property --_fg-effective    { syntax: "<number>";     inherits: false; initial-value: -1 }
+
     @layer core.color {
-      :root {
-        --hue: 38;
-        --cfg-color-muted-l: 96%;
-        --cfg-color-muted-c: 0.025;
-        --cfg-color-vivid-l: 35%;
-        --cfg-color-vivid-c: 0.180;
-        --cfg-color-surf-chroma: 0.005;
-        --cfg-fg-tint: 0.012;
-      }
 
       :where(*) {
+        /* Hue resolution — lock overrides shift+base */
         --_h: var(--hue-lock, calc(var(--hue) + var(--hue-shift)));
-        --_naive:  calc(var(--cfg-color-top-l) - var(--depth) * var(--cfg-color-base-step));
-        --_t:      calc((var(--_naive) - var(--cfg-color-surf-mid)) / var(--cfg-color-surf-rng));
-        --_surf-l: calc((var(--_naive) - var(--depth) * var(--cfg-color-base-step) * var(--cfg-color-curve-k) * var(--_t) * var(--_t)) * 1%);
-        --_c01:   clamp(0, var(--bg), 1);
-        --_col-l: calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
-        --_col-c: calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
-        --_k: clamp(0, calc(var(--bg) + 1), 1);
-        --_l: calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k) + var(--l-shift) * 100%);
-        --_c: calc(var(--cfg-color-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k) + var(--c-shift));
-        --_dark: clamp(0, calc((60 - var(--cfg-color-top-l)) / 30), 1);
+
+        /* Theme-aware loud endpoint */
+        --_loud-l: calc(var(--cfg-color-loud-l-light) * (1 - var(--cfg-dark)) + var(--cfg-color-loud-l-dark) * var(--cfg-dark));
+        --_loud-c: calc(var(--cfg-color-loud-c-light) * (1 - var(--cfg-dark)) + var(--cfg-color-loud-c-dark) * var(--cfg-dark));
+
+        /* Theme-aware floor: light needs a tiny floor (0.05) so low --bg
+           cells have a visible chromatic step. Dark needs more (0.22)
+           because perceptual L deltas in dark range require larger jumps. */
+        --_floor: calc(0.05 * (1 - var(--cfg-dark)) + 0.22 * var(--cfg-dark));
+
+        /* Chroma ramp pipeline (surface-anchored, [0, 1]).
+           Interaction perturbs --bg directly; L/C lifts emerge from ramp. */
+        --_bg-clamped:   clamp(0, calc(var(--bg) + var(--_interact-bg)), 1);
+        --_bg-chromatic: clamp(0, calc(var(--_bg-clamped) * 1000000), 1);
+        --_bg-effective: calc((var(--_floor) + (1 - var(--_floor)) * var(--_bg-clamped)) * var(--_bg-chromatic));
+        --_bg-curved:    pow(var(--_bg-effective), 1.5);
+
+        /* Final L/C: lerp from inherited surface to theme loud endpoint */
+        --_l: calc(var(--_surf-l) * (1 - var(--_bg-curved)) + var(--_loud-l) * var(--_bg-curved));
+        --_c: calc(var(--cfg-color-surf-chroma) * (1 - var(--_bg-curved)) + var(--_loud-c) * var(--_bg-curved));
 
         --_bg: oklch(clamp(4%, var(--_l), 97%) var(--_c) var(--_h) / var(--cfg-color-alpha));
 
-        --_fg-pos: clamp(0, var(--fg), 1);
-        --_fg-neg: clamp(0, calc(-1 * var(--fg)), 1);
-        --_surf-dark: clamp(0, calc((50% - var(--_l)) / 1% * 20), 1);
+        /* Foreground: --fg < 0 → neutral ink, --fg > 0 → chromatic ink */
+        --_fg-effective: calc(var(--fg) * var(--_interact-fg-mul));
+        --_fg-pos: clamp(0, var(--_fg-effective), 1);
+        --_fg-neg: clamp(0, calc(-1 * var(--_fg-effective)), 1);
+
+        /* Contrast pole flip — chroma-biased so high-chroma cells flip earlier */
+        --_chroma-present: clamp(0, calc(var(--_c) * 30), 1);
+        --_flip-threshold: calc(
+          var(--cfg-fg-flip) * 100%
+          + var(--_chroma-present) * 3%
+          + var(--_c) * 60%
+        );
+        --_surf-dark: clamp(0, calc((var(--_flip-threshold) - var(--_l)) / 1% * 20), 1);
         --_fg-pole: calc(4% * (1 - var(--_surf-dark)) + 97% * var(--_surf-dark));
-        --_fg-ramp-l: calc(var(--cfg-color-muted-l) + var(--_fg-pos) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
-        --_fg-ramp-c: calc(var(--cfg-color-muted-c) + var(--_fg-pos) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
+
+        /* Chromatic-ink ramp (positive --fg side) — same shape as bg */
+        --_fg-pos-curved: pow(var(--_fg-pos), 1.5);
+        --_fg-ramp-l: calc(var(--_surf-l) + var(--_fg-pos-curved) * (var(--_loud-l) - var(--_surf-l)));
+        --_fg-ramp-c: calc(var(--cfg-color-surf-chroma) + var(--_fg-pos-curved) * (var(--_loud-c) - var(--cfg-color-surf-chroma)));
         --_fg-onpos: clamp(0, calc(var(--_fg-pos) * 1000000), 1);
 
+        /* Merge neutral and chromatic fg branches via step function */
         --_fg-l: calc(
           (clamp(4%, var(--_l), 97%) * (1 - var(--_fg-neg)) + var(--_fg-pole) * var(--_fg-neg)) * (1 - var(--_fg-onpos))
           + var(--_fg-ramp-l) * var(--_fg-onpos)
@@ -510,271 +561,65 @@ def _(mo):
 
         color: oklch(clamp(4%, var(--_fg-l), 97%) var(--_fg-c) var(--_h) / 1);
 
-        --border: oklch(from var(--_bg) calc(l + (var(--_dark) * 2 - 1) * 0.14) calc(c * 0.3) h);
-        --Border: oklch(from var(--_bg) calc(l + (var(--_dark) * 2 - 1) * 0.22) clamp(0.08, calc(c + 0.12), 0.18) calc(h + 8));
-
-        --surf-up:   oklch(from var(--_bg) calc(l + var(--cfg-color-base-step) * 0.01) c h);
-        --surf-down: oklch(from var(--_bg) calc(l - var(--cfg-color-base-step) * 0.01) c h);
-      }
-
-      :where(*) { background-color: oklch(from var(--_bg) l c h / var(--_k)) }
-      :where(body, .surface) { background-color: var(--_bg) }
-      :where(.btn, .chip, .tag) {
-        background-color: color-mix(in oklch, var(--surf-down), var(--_bg) calc(var(--_k) * 100%));
-      }
-      .surface:has(.surface)                   { --depth: 1 }
-      .surface:has(.surface .surface)          { --depth: 2 }
-      .surface:has(.surface .surface .surface) { --depth: 3 }
-    /* ════════════════════════════════════════════════════════════════
-       core.color.css
-
-       The color formula. One axis (--bg) for surface, one axis (--fg)
-       for text. Both run through three bands:
-
-         [-1, 0]  surface / contrast-ink  (mode-flip at zero)
-         [0, 1]   chromatic ramp          (muted → vivid)
-         [3, 4]   P3                      (vivid → P3 endpoint)
-
-       Values in (1, 3) clamp to chromatic max — intentional dead zone.
-       Authors reach for chromatic OR P3 deliberately; no smooth ramp
-       between them.
-
-       Outputs:
-         --_bg     resolved background color
-         color     resolved text color (computed automatically from --fg)
-         --border  quiet border, theme-aware
-         --Border  louder border, theme-aware
-
-       Required outside any @layer (CSS spec): all the @property
-       declarations below.
-       ════════════════════════════════════════════════════════════════ */
-
-
-    /* ────────────────────────────────────────────────────────────
-       @property declarations — must live OUTSIDE @layer per spec.
-       These give the formula tokens proper types, defaults, and
-       make them animatable.
-       ──────────────────────────────────────────────────────────── */
-
-    /* ── Public inputs ──────────────────────────────────────────── */
-    @property --bg          { syntax: "<number>"; inherits: true; initial-value: -1 }
-    @property --fg          { syntax: "<number>"; inherits: true; initial-value: -1 }
-    @property --hue         { syntax: "<number>"; inherits: true; initial-value: 220 }
-    @property --hue-lock    { syntax: "*";        inherits: true }
-    @property --hue-shift   { syntax: "<number>"; inherits: true; initial-value: 0 }
-    @property --depth       { syntax: "<number>"; inherits: false; initial-value: 0 }
-    @property --l-shift     { syntax: "<number>"; inherits: false; initial-value: 0 }
-    @property --c-shift     { syntax: "<number>"; inherits: false; initial-value: 0 }
-
-    /* ── Config — chromatic endpoints ───────────────────────────── */
-    @property --cfg-color-muted-l     { syntax: "<percentage>"; inherits: true; initial-value: 96% }
-    @property --cfg-color-muted-c     { syntax: "<number>";     inherits: true; initial-value: 0.025 }
-    @property --cfg-color-vivid-l     { syntax: "<percentage>"; inherits: true; initial-value: 35% }
-    @property --cfg-color-vivid-c     { syntax: "<number>";     inherits: true; initial-value: 0.18 }
-
-    /* ── Config — P3 endpoints (used by both --bg and --fg) ─────── */
-    @property --cfg-color-p3-l        { syntax: "<percentage>"; inherits: true; initial-value: 80% }
-    @property --cfg-color-p3-c        { syntax: "<number>";     inherits: true; initial-value: 0.38 }
-
-    /* ── Config — surface curve and theme knobs ─────────────────── */
-    @property --cfg-color-surf-chroma { syntax: "<number>";     inherits: true; initial-value: 0.008 }
-    @property --cfg-fg-tint           { syntax: "<number>";     inherits: true; initial-value: 0.012 }
-    @property --cfg-color-top-l       { syntax: "<number>";     inherits: true; initial-value: 88 }
-    @property --cfg-color-base-step   { syntax: "<number>";     inherits: true; initial-value: 4 }
-    @property --cfg-color-curve-k     { syntax: "<number>";     inherits: true; initial-value: 0.6 }
-    @property --cfg-color-surf-mid    { syntax: "<number>";     inherits: true; initial-value: 60.5 }
-    @property --cfg-color-surf-rng    { syntax: "<number>";     inherits: true; initial-value: 55 }
-    @property --cfg-color-alpha       { syntax: "<number>";     inherits: true; initial-value: 1 }
-
-    /* ── Private computed tokens — DO NOT assign these directly ── */
-    @property --_bg          { syntax: "<color>";      inherits: true;  initial-value: oklch(88% 0.018 220) }
-    @property --_naive       { syntax: "<number>";     inherits: false; initial-value: 88 }
-    @property --_t           { syntax: "<number>";     inherits: false; initial-value: 0.5 }
-    @property --_surf-l      { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_c01         { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_col-l       { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-    @property --_col-c       { syntax: "<number>";     inherits: false; initial-value: 0.1 }
-    @property --_k           { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_p3          { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_chrom-l     { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_chrom-c     { syntax: "<number>";     inherits: false; initial-value: 0.018 }
-    @property --_l           { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-    @property --_c           { syntax: "<number>";     inherits: false; initial-value: 0.018 }
-    @property --_h           { syntax: "<number>";     inherits: false; initial-value: 220 }
-    @property --_dark        { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_fg-pos      { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_fg-neg      { syntax: "<number>";     inherits: false; initial-value: 1 }
-    @property --_fg-p3       { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_fg-onpos    { syntax: "<number>";     inherits: false; initial-value: 0 }
-    @property --_fg-pole     { syntax: "<percentage>"; inherits: false; initial-value: 4% }
-    @property --_fg-ramp-l   { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-    @property --_fg-ramp-c   { syntax: "<number>";     inherits: false; initial-value: 0.05 }
-    @property --_fg-chrom-l  { syntax: "<percentage>"; inherits: false; initial-value: 4% }
-    @property --_fg-chrom-c  { syntax: "<number>";     inherits: false; initial-value: 0.02 }
-    @property --_fg-l        { syntax: "<percentage>"; inherits: false; initial-value: 4% }
-    @property --_fg-c        { syntax: "<number>";     inherits: false; initial-value: 0.02 }
-    @property --_surf-dark   { syntax: "<number>";     inherits: false; initial-value: 0 }
-
-
-    /* ════════════════════════════════════════════════════════════════
-       The formula — runs on every element, computes --_bg + color
-       ════════════════════════════════════════════════════════════════ */
-    @layer core.color {
-
-      :root {
-        --hue: 38;
-        --cfg-color-muted-l: 96%;
-        --cfg-color-muted-c: 0.025;
-        --cfg-color-vivid-l: 35%;
-        --cfg-color-vivid-c: 0.180;
-        --cfg-color-surf-chroma: 0.005;
-        --cfg-fg-tint: 0.012;
-      }
-
-      /* ── Light/dark theme blocks ────────────────────────────────
-         These set the values that --bg's surface band consumes.
-         The math itself doesn't change between themes — only the
-         range it operates within. */
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-ui-theme="light"]):not([data-ui-theme="dark"]),
-        [data-ui-theme="system"] {
-          --cfg-color-top-l: 33;
-          --cfg-color-base-step: 2.5;
-          --cfg-color-surf-chroma: 0.010;
-          --cfg-color-surf-mid: 33.5;
-          --cfg-color-surf-rng: 27.5;
-        }
-      }
-      [data-ui-theme="light"] {
-        --cfg-color-top-l: 88;
-        --cfg-color-base-step: 4;
-        --cfg-color-surf-chroma: 0.018;
-        --cfg-color-surf-mid: 60.5;
-        --cfg-color-surf-rng: 55;
-      }
-      [data-ui-theme="dark"] {
-        --cfg-color-top-l: 33;
-        --cfg-color-base-step: 2.5;
-        --cfg-color-surf-chroma: 0.010;
-        --cfg-color-surf-mid: 33.5;
-        --cfg-color-surf-rng: 27.5;
-      }
-
-      :where(*) {
-        /* ── Hue resolution ───────────────────────────────────────
-           --hue-lock wins if set; otherwise --hue + --hue-shift. */
-        --_h: var(--hue-lock, calc(var(--hue) + var(--hue-shift)));
-
-        /* ── Surface depth math ───────────────────────────────────
-           --depth steps the lightness down with a curve that softens
-           near the perceptual midpoint. */
-        --_naive:  calc(var(--cfg-color-top-l) - var(--depth) * var(--cfg-color-base-step));
-        --_t:      calc((var(--_naive) - var(--cfg-color-surf-mid)) / var(--cfg-color-surf-rng));
-        --_surf-l: calc((var(--_naive) - var(--depth) * var(--cfg-color-base-step) * var(--cfg-color-curve-k) * var(--_t) * var(--_t)) * 1%);
-
-        /* ── --bg intensity scalars ───────────────────────────────
-           Three bands isolated by clamp(). Each is 0..1, with the
-           transition fixed at the band boundaries. */
-        --_c01: clamp(0, var(--bg), 1);                          /* muted → vivid */
-        --_k:   clamp(0, calc(var(--bg) + 1), 1);                /* surface → chromatic */
-        --_p3:  clamp(0, calc(var(--bg) - 3), 1);                /* vivid → P3 */
-
-        /* ── --bg chromatic ramp ──────────────────────────────────
-           Lerp between muted and vivid endpoints. */
-        --_col-l: calc(var(--cfg-color-muted-l) + var(--_c01) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
-        --_col-c: calc(var(--cfg-color-muted-c) + var(--_c01) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
-
-        /* ── --bg chromatic-mode result (with state shifts) ───────
-           This is what the formula produces in the [-1, 1] range.
-           --l-shift/--c-shift apply here so hover/active states
-           compose naturally. */
-        --_chrom-l: calc(var(--_surf-l) * (1 - var(--_k)) + var(--_col-l) * var(--_k) + var(--l-shift) * 100%);
-        --_chrom-c: calc(var(--cfg-color-surf-chroma) * (1 - var(--_k)) + var(--_col-c) * var(--_k) + var(--c-shift));
-
-        /* ── --bg final lightness/chroma ──────────────────────────
-           Lerp from chromatic-mode toward the P3 endpoint. At
-           --bg <= 3, --_p3 is 0 and chromatic wins. At --bg = 4,
-           P3 endpoint wins exactly. */
-        --_l: calc(var(--_chrom-l) * (1 - var(--_p3)) + var(--cfg-color-p3-l) * var(--_p3));
-        --_c: calc(var(--_chrom-c) * (1 - var(--_p3)) + var(--cfg-color-p3-c) * var(--_p3));
-
-        --_dark: clamp(0, calc((60 - var(--cfg-color-top-l)) / 30), 1);
-        --_bg: oklch(clamp(4%, var(--_l), 97%) var(--_c) var(--_h) / var(--cfg-color-alpha));
-
-
-        /* ── --fg intensity scalars ───────────────────────────────
-           Same three-band structure as --bg, applied to text color. */
-        --_fg-pos: clamp(0, var(--fg), 1);                       /* chromatic ramp magnitude */
-        --_fg-neg: clamp(0, calc(-1 * var(--fg)), 1);            /* contrast-ink magnitude */
-        --_fg-p3:  clamp(0, calc(var(--fg) - 3), 1);             /* chromatic → P3 */
-        --_fg-onpos: clamp(0, calc(var(--_fg-pos) * 1000000), 1);  /* "is fg > 0?" hard switch */
-
-        /* ── --fg contrast-ink branch ─────────────────────────────
-           When fg < 0, pick dark or light ink based on surface
-           lightness. This branch never enters P3 — contrast ink is
-           inherently neutral. */
-        --_surf-dark: clamp(0, calc((50% - var(--_l)) / 1% * 20), 1);
-        --_fg-pole: calc(4% * (1 - var(--_surf-dark)) + 97% * var(--_surf-dark));
-
-        /* ── --fg chromatic-ramp branch ───────────────────────────
-           When fg > 0, map intensity onto the muted-to-vivid ramp,
-           same endpoints as --bg. */
-        --_fg-ramp-l: calc(var(--cfg-color-muted-l) + var(--_fg-pos) * (var(--cfg-color-vivid-l) - var(--cfg-color-muted-l)));
-        --_fg-ramp-c: calc(var(--cfg-color-muted-c) + var(--_fg-pos) * (var(--cfg-color-vivid-c) - var(--cfg-color-muted-c)));
-
-        /* ── --fg chromatic-mode result (intermediate) ────────────
-           --_fg-onpos hard-switches between contrast-ink and
-           chromatic-ramp. This is the "what color is the text in
-           the [-1, 1] range" answer. */
-        --_fg-chrom-l: calc(
-          (clamp(4%, var(--_l), 97%) * (1 - var(--_fg-neg)) + var(--_fg-pole) * var(--_fg-neg)) * (1 - var(--_fg-onpos))
-            + var(--_fg-ramp-l) * var(--_fg-onpos)
+        /* Border tokens derived from current bg */
+        --border: oklch(
+          from var(--_bg)
+          calc(l + (var(--cfg-dark) * 2 - 1) * 0.14)
+          calc(c * 0.3)
+          h
         );
-        --_fg-chrom-c: calc(
-          (var(--_c) * (1 - var(--_fg-neg)) + var(--cfg-fg-tint) * var(--_fg-neg)) * (1 - var(--_fg-onpos))
-            + var(--_fg-ramp-c) * var(--_fg-onpos)
+        --Border: oklch(
+          from var(--_bg)
+          calc(l + (var(--cfg-dark) * 2 - 1) * 0.22)
+          clamp(0.08, calc(c + 0.12), 0.18)
+          calc(h + 8)
         );
-
-        /* ── --fg final lightness/chroma ──────────────────────────
-           Lerp the chromatic-mode result toward the P3 endpoint.
-           At --fg <= 3, --_fg-p3 is 0 and chromatic wins. At --fg = 4,
-           P3 endpoint wins. Note: --_fg-p3 is 0 for any --fg <= 3,
-           which means contrast-ink (negative --fg) is never affected
-           by the P3 lerp — its result already has --_fg-p3 = 0. */
-        --_fg-l: calc(var(--_fg-chrom-l) * (1 - var(--_fg-p3)) + var(--cfg-color-p3-l) * var(--_fg-p3));
-        --_fg-c: calc(var(--_fg-chrom-c) * (1 - var(--_fg-p3)) + var(--cfg-color-p3-c) * var(--_fg-p3));
-
-        color: oklch(clamp(4%, var(--_fg-l), 97%) var(--_fg-c) var(--_h) / 1);
-
-
-        /* ── Border helpers ───────────────────────────────────────
-           --border: quiet (low-chroma, theme-aware luminance shift)
-           --Border: louder (more chroma, slight hue rotation) */
-        --border: oklch(from var(--_bg) calc(l + (var(--_dark) * 2 - 1) * 0.14) calc(c * 0.3) h);
-        --Border: oklch(from var(--_bg) calc(l + (var(--_dark) * 2 - 1) * 0.22) clamp(0.08, calc(c + 0.12), 0.18) calc(h + 8));
       }
 
-
-      /* ── Paint resolution ───────────────────────────────────────
-         Default: every element renders --_bg at alpha=--_k. At --bg
-         of -1 (default), --_k is 0, so unscoped elements stay
-         transparent. Surfaces force opaque paint. */
-      :where(*) {
-        background-color: oklch(from var(--_bg) l c h / var(--_k));
-      }
+      /* Surface ramp — only surfaces compute --_surf-l. Descendants
+         inherit, so chips/text/buttons anchor their chroma ramp to
+         whatever surface they're sitting in. */
       :where(body, .surface) {
-        background-color: var(--_bg);
+        --_surf-top: calc(var(--cfg-surf-top-light) * (1 - var(--cfg-dark)) + var(--cfg-surf-top-dark) * var(--cfg-dark));
+        --_surf-bot: calc(var(--cfg-surf-bot-light) * (1 - var(--cfg-dark)) + var(--cfg-surf-bot-dark) * var(--cfg-dark));
+        --_t-stage:  clamp(0, calc(var(--depth) / 3), 1);
+        --_surf-l:   calc((var(--_surf-top) + var(--_t-stage) * (var(--_surf-bot) - var(--_surf-top))) * 1%);
       }
 
+      /* Stage cascade: a surface's stage = how many surfaces nest INSIDE it.
+         Leaf surface (no nested .surface) stays at stage 0 — brightest.
+         Each containing layer increments. Inverts the usual depth convention
+         so the leaf — what the user is focused on — is always brightest. */
+      .surface                                          { --depth: 0 }
+      .surface:has(.surface)                            { --depth: 1 }
+      .surface:has(.surface .surface)                   { --depth: 2 }
+      .surface:has(.surface .surface .surface)          { --depth: 3 }
 
-      /* ── Surface depth cascade ──────────────────────────────────
-         A .surface containing nested .surfaces lifts its depth, which
-         the formula uses to step lightness down. Body sits at depth 4
-         so any top-level surface visually pops forward. */
-      :where(body)                             { --depth: 4 }
-      .surface:has(.surface)                   { --depth: 1 }
-      .surface:has(.surface .surface)          { --depth: 2 }
-      .surface:has(.surface .surface .surface) { --depth: 3 }
+      /* Paint: surfaces always paint their bg. Non-surfaces paint only
+         when --bg > 0 (--_bg-chromatic acts as the alpha gate). */
+      :where(*)              { background-color: oklch(from var(--_bg) l c h / var(--_bg-chromatic)) }
+      :where(body, .surface) { background-color: var(--_bg) }
+
+      :where(svg) { color: currentColor }
+
+      /* Interaction states — hover/active perturb --bg directly, sliding
+         the element along the surface→loud axis. L and C lifts emerge
+         automatically from the ramp.
+           .clickable  — full interactive treatment, gets pointer cursor
+           .hoverable  — hover response only, no cursor, no active state */
+      :where(button, a, [role="button"], [tabindex], .clickable):not([tabindex="-1"]) {
+        cursor: pointer;
+      }
+      :where(button, a, [role="button"], [tabindex], .clickable):not([tabindex="-1"]):hover {
+        --_interact-bg: var(--cfg-hover-bg-shift);
+      }
+      :where(button, a, [role="button"], [tabindex], .clickable):not([tabindex="-1"]):active {
+        --_interact-bg: var(--cfg-active-bg-shift);
+        --_interact-fg-mul: var(--cfg-active-fg-mul);
+      }
+      :where(.hoverable):hover {
+        --_interact-bg: var(--cfg-hover-bg-shift);
+      }
     }
     ```
     """)
@@ -787,6 +632,13 @@ def _(mo):
     ## core.type
 
     ```css
+    /* Type */
+    @property --cfg-fluid-min-vp    { syntax: "<length>"; inherits: true; initial-value: 320px }
+    @property --cfg-fluid-max-vp    { syntax: "<length>"; inherits: true; initial-value: 1280px }
+    @property --cfg-type-scale      { syntax: "<number>"; inherits: true; initial-value: 1 }
+    @property --cfg-type-min-ratio  { syntax: "<number>"; inherits: true; initial-value: 1.2 }
+    @property --cfg-type-max-ratio  { syntax: "<number>"; inherits: true; initial-value: 1.28 }
+    @property --type                { syntax: "<number>"; inherits: false; initial-value: 0 }
     /* ════════════════════════════════════════════════════════════════
        core.type — the fluid type formula
        --cfg-type-min/max plus the viewport-clamped font-size, with
@@ -1334,26 +1186,32 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Rule
-    > element = `<hr>` or `<hr class="vr">`
-    Native `<hr>` for horizontal dividers. Add `.vr` to flip orientation for vertical dividers in flex/inline rows. Vertical sized in em so it scales with the parent's font.
-    use: `<hr>` between sections in a column; `<hr class="vr">` between items in a toolbar or status row.
+    ### Button
+
+    > class = ".btn"
 
     ```css
     @layer component.simple {
-        :where(hr) {
-            block-size: 1px;
-            inline-size: 100%;
-            margin: 0;
-            background: var(--border);
-            border: 0;
+      /* btn — neutral interactive control. Base for text and icon+text.
+         Use .icon-btn for square icon-only.                   */
+      .btn {
+        --bg: 0;
+        --fg: -1;
+        --type: -1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4em;
+        padding: 0.3em 0.7em;
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+        font-weight: 600;
+        white-space: nowrap;
+        user-select: none;
 
-            &.vr {
-                inline-size: 1px;
-                block-size: 1.5em;
-                flex-shrink: 0;
-            }
-        }
+        & * { --type: -1; }
+        & svg { inline-size: 1em; block-size: 1em; display: block; flex-shrink: 0; }
+      }
     }
     ```
     """)
@@ -1363,101 +1221,28 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Tab bar
-    > class = ".tab-bar"
-    Connected underline tab strip. The active item shows a 2px accent border that reads as the tab indicator. Each child carries `data-label` matching its visible text; a hidden ghost in `::before` reserves the bold-weight cell width so switching the active tab doesn't shift layout.
-
-    Mark the active item with `aria-current="page"` (for nav links) or `aria-pressed="true"` (for toggle buttons). Both selectors are styled.
-
-    use: top-level page nav, settings panel section switcher, any "one of N" view selector.
+    ### Icon Button
+    > class = ".icon-btn"
 
     ```css
     @layer component.simple {
-        :where(.tab-bar) {
-            display: inline-flex;
-            align-self: end;
-            align-items: end;
+      .icon-btn {
+        --bg: 0;
+        --fg: -1;
+        --type: -1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.6em;
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+        aspect-ratio: 1;
+        line-height: 1;
+        user-select: none;
 
-            & > * {
-                --type: -1;
-                --fg: -0.5;
-                font: inherit;
-                text-decoration: none;
-                background: transparent;
-                border: 0;
-                padding: 0.5rem 0.9rem;
-                border-block-end: 2px solid transparent;
-                cursor: pointer;
-                display: inline-grid;
-                place-items: center;
-                transition: color, border-color;
-                transition-duration: calc(var(--cfg-motion) * 0.12s);
-                transition-timing-function: ease-out;
-
-                /* Hidden bold ghost reserves the cell width so weight
-                   changes on activation don't shift layout. */
-                &::before {
-                    content: attr(data-label);
-                    grid-area: 1 / 1;
-                    font-weight: 600;
-                    visibility: hidden;
-                }
-                /* Visible label stacks in the same cell as the ghost. */
-                & > span {
-                    grid-area: 1 / 1;
-                }
-                &[aria-current="page"],
-                &[aria-pressed="true"] {
-                    --fg: 0.5;
-                    border-block-end-color: currentColor;
-                    font-weight: 600;
-                }
-            }
-        }
-    }
-    ```
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ### Chip
-    > class = ".chip"
-    Info-display pill. Stateless. May contain inner action buttons (add, dismiss).
-    use: filter terms, status indicators, read-only tags.
-
-    ```css
-    @layer component.simple {
-        :where(.chip) {
-            --type: -1;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4ch;
-            padding: 0.25em 0.85em;
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            font: inherit;
-            line-height: 1;
-
-            & .btn {
-                min-inline-size: unset;
-                block-size: 1.25em;
-                inline-size: 1.25em;
-                aspect-ratio: 1;
-                padding: 0;
-                border: 0;
-                background: transparent;
-                font-weight: 400;
-                margin-inline-end: -0.35em;
-
-                & > svg {
-                    inline-size: 1em;
-                    block-size: 1em;
-                }
-            }
-        }
+        & * { --type: -1; }
+        & svg { inline-size: 1em; block-size: 1em; display: block; }
+      }
     }
     ```
     """)
@@ -1474,37 +1259,44 @@ def _(mo):
 
     ```css
     @layer component.simple {
-        :where(.tag) {
-            --type: -1;
-            --fg: -0.6;
-            cursor: pointer;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4ch;
-            padding: 0.25em 0.7em;
-            border: 1px solid var(--border);
-            border-radius: 0.4em;
-            font: inherit;
-            font-weight: 600;
-            line-height: 1;
-            transition: background-color, color, border-color, translate;
-            transition-duration: calc(var(--cfg-motion) * 0.08s);
-            transition-timing-function: ease-out;
+     /* tag — labeled state indicator. Use a <span> for a static label
+         (always shows the vivid "on" look). Use a <button> with
+         aria-pressed for an interactive toggle:
+           aria-pressed="false" → off state (transparent, dim)
+           aria-pressed="true"  → on state  (vivid chromatic, same
+                                             as a static tag)
+         Same component, two intents disambiguated by element + ARIA.   */
+      .tag {
+        --bg: 0.8;
+        --fg: -1;
+        --type: -2;
+        display: inline-flex;
+        align-items: center;
+        padding: 0.3em 0.5em 0.2em;
+        border: 1px solid transparent;
+        border-radius: var(--cfg-radius);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        line-height: 1;
+        user-select: none;
+        transition:
+          background-color calc(var(--cfg-motion) * 0.1s) ease-out,
+          color            calc(var(--cfg-motion) * 0.1s) ease-out,
+          border-color     calc(var(--cfg-motion) * 0.1s) ease-out;
 
-            &[aria-pressed="true"] {
-                --bg: 0.3;
-                --fg: 0.9;
-                border-color: var(--Border);
-            }
-            &.active { translate: 0 1px }
-            &.disabled { --fg: -0.35 }
-            &:focus-visible {
-                outline: 2px solid var(--Border);
-                outline-offset: 2px;
-            }
+        & * { --type: -2; }
+
+        &[aria-pressed="false"] {
+          --bg: 0;
+          --fg: -0.6;
+          border-color: var(--border);
         }
+        &:focus-visible {
+          outline: 2px solid var(--Border);
+          outline-offset: 2px;
+        }
+      }
     }
     ```
     """)
@@ -1514,57 +1306,39 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Button
-    > class = ".btn"
-    Clickable action, no persistent state. Press for active translate.
-    use: any tap target shaped like a button — actions, submits, dismiss buttons inside chips.
+    ### tabs - box
 
     ```css
     @layer component.simple {
-        :where(.btn) {
-            --type: -1;
-            cursor: pointer;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5em;
-            min-inline-size: 12ch;
-            padding: 0.4em 1em;
-            border: 1px solid var(--border);
-            border-radius: var(--cfg-radius);
-            font: inherit;
-            font-weight: 600;
-            line-height: 1;
-            transition: background-color, color, border-color, translate;
-            transition-duration: calc(var(--cfg-motion) * 0.08s);
-            transition-timing-function: ease-out;
+          /* tabs — segmented control. Container is a neutral pill; each tab
+         is transparent until aria-selected="true", at which point it
+         pops chromatic.                                                 */
+      .tabs {
+        --bg: 0;
+        display: inline-flex;
+        padding: 0.2em;
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+        gap: 0.15em;
 
-            &.active {
-                translate: 0 1px;
-                --fg: -0.6;
-            }
-            &:focus-visible {
-                outline: 2px solid var(--Border);
-                outline-offset: 2px;
-            }
-            & > svg {
-                inline-size: 1.25em;
-                block-size: 1.25em;
-                pointer-events: none;
-                flex-shrink: 0;
-            }
-            /* Icon-only auto-detection: a button with no accessible text content
-               must carry aria-label, so we use that as the signal. Pure :has(> svg)
-               would also match icon+text buttons because text nodes don't break
-               :only-child. */
-            &[aria-label]:has(> svg) {
-                min-inline-size: unset;
-                padding: 0.4em;
-                aspect-ratio: 1;
-            }
+        & > button {
+          --bg: -1;
+          --fg: -0.55;
+          --type: -1;
+          border: 0;
+          padding: 0.25em 0.85em;
+          border-radius: max(0px, calc(var(--cfg-radius) - 0.2em));
+          font-weight: 600;
+          white-space: nowrap;
+          user-select: none;
         }
+        & > button * { --type: -1; }
+        & > button[aria-selected="true"] {
+          --bg: var(--cfg-bg-loud);
+          --fg: -1;
+        }
+      }
+
     }
     ```
     """)
@@ -1574,19 +1348,336 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Tap
-    > class = ".tap"
-    Behavior marker for non-button-shaped tappable things. Hover emphasis without click cursor. No padding, no border — just the interaction signals.
-    use: data table rows, clickable cards, list items.
+    ### breadcrumbs
+
+    ```css
+     /* crumbs — breadcrumb trail. <a> for clickable steps,
+         <span aria-current="page"> for the current page. Separators
+         are rendered via ::before, painted with --border so they sit
+         quieter than the crumb labels.                                  */
+
+    @layer component.simple {
+      .crumbs {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5em;
+
+        & > * {
+          --type: -1;
+          --fg: -0.55;
+          text-decoration: none;
+        }
+        & > a:hover {
+          --fg: 0.8;
+          --_interact-bg: 0;
+        }
+        & > [aria-current] {
+          --fg: -1;
+          font-weight: 600;
+        }
+        & > * + *::before {
+          content: "/";
+          margin-inline-end: 0.5em;
+          color: var(--border);
+        }
+      }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Avatar
+
+    ```css
+
+    @layer component.simple {
+          /* avatar — rounded square holder for initials or image. Editorial
+         serif so initials read as a personal mark rather than UI.       */
+      .avatar {
+        --bg: 0.2;
+        --fg: -1;
+        --type: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.4em;
+        aspect-ratio: 1;
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+        font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        line-height: 1;
+
+        & * { --type: 1; }
+      }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Progress
 
     ```css
     @layer component.simple {
-        :where(.tap) {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+          /* progress — native <progress>. The parent runs both formulas
+         simultaneously: --bg computes the low-chromatic track, --fg
+         computes the high-chromatic fill. Track paints from --_bg, fill
+         paints from currentColor (the resolved --fg). Indeterminate
+         uses an animated gradient on the parent.                        */
+      progress {
+        --bg: 0.2;
+        --fg: 0.8;
+        appearance: none;
+        inline-size: 12em;
+        block-size: 0.5em;
+        border: 1px solid var(--border);
+        border-radius: 999em;
+        overflow: hidden;
 
-            &.hover, &.active { background-color: var(--_bg) }
+        &::-webkit-progress-bar {
+          background: var(--_bg);
+          border-radius: 999em;
         }
+        &::-webkit-progress-value {
+          background: currentColor;
+          border-radius: 999em;
+          transition: inline-size 0.2s;
+        }
+        &::-moz-progress-bar {
+          background: currentColor;
+          border-radius: 999em;
+        }
+        &:indeterminate {
+          animation: progress-pulse 1.2s ease-in-out infinite;
+          &::-webkit-progress-bar { background: var(--_bg); }
+          &::-webkit-progress-value { background: currentColor; }
+          &::-moz-progress-bar { background: currentColor; }
+        }
+      }
+      @keyframes progress-pulse {
+        0%, 100% { opacity: 0.5 }
+        50%      { opacity: 1   }
+      }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### link
+
+    ```css
+    @layer component.simple {
+          /* link — for in-prose anchors. Chromatic ink so the link reads
+         as clickable amid neutral text; underline sits in the quiet-
+         tone band so it whispers rather than competes with the word.
+         On hover, the underline brightens to currentColor.              */
+      .link {
+        --fg: 0.8;
+        text-decoration: underline;
+        text-decoration-color: var(--border);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.18em;
+        transition: text-decoration-color 0.15s;
+
+        &:hover {
+          --_interact-bg: 0;
+          --fg: 1;
+          text-decoration-color: var(--Border);
+        }
+      }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### hr
+
+    ```css
+    @layer component.simple {
+      /* hr — horizontal divider. Painted from --border to match the
+         quiet-tone band used throughout.                                */
+      hr {
+        block-size: 0;
+        border: 0;
+        border-block-start: 1px solid var(--border);
+        margin-block: 1em;
+        inline-size: 100%;
+      }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Inputs (mehh not much to see here)
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Form
+    > will need some clean up
+    >
+
+    ```css
+    @layer component.simple {
+        /* card — bordered container. A .surface that's also bounded.   */
+      .card {
+        --bg: 0;
+        padding: 1em;
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+      }
+
+      /* fieldset — semantic input grouping that lays out as a row of
+         equal-width siblings. Reset UA chrome (border, padding,
+         legend), then make it a flex container with each direct child
+         taking equal share. Use for first/last name, city/state/zip,
+         date pickers split into day/month/year — anything that should
+         read as one logical row of related inputs.                   */
+      fieldset {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        min-inline-size: 0;
+        display: flex;
+        gap: 0.5em;
+
+        & > * {
+          flex: 1;
+          min-inline-size: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.2em;
+        }
+      }
+
+      /* Form input auto-stretch — donut scope. Inputs inside a <form>
+         stretch to fill the form's inline size, except where a
+         <fieldset> holds them (those size naturally as flex items in
+         the fieldset row). The triple declaration covers Safari and
+         Firefox legacy keywords; standard `stretch` overrides for
+         browsers that support it.                                     */
+      @scope (form) to (fieldset) {
+        .input {
+          inline-size: -webkit-fill-available;
+          inline-size: -moz-available;
+          inline-size: stretch;
+        }
+      }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Inputs - General
+    revisit when time allows for it
+
+
+    ```css
+
+    @layer component.simple {
+    /* input — text inputs, textareas, selects. Same neutral surface
+         as .btn so they line up in forms. Border shifts from --border
+         to --Border on focus — louder derived color, no hardcoded ring. */
+      .input {
+        --bg: 0;
+        --fg: -1;
+        --type: -1;
+        padding: 0.3em 0.7em;
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+        font: inherit;
+        min-inline-size: 0;
+
+        & * { --type: -1; }
+        &:focus {
+          border-color: var(--Border);
+          outline: none;
+        }
+        &::placeholder { color: var(--border); }
+      }
+
+      /* select — strip native chevron, draw our own via --border color. */
+      select.input {
+        appearance: none;
+        padding-inline-end: 1.8em;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.6em center;
+      }
+
+      /* textarea — natural block-size, but matches the rest. */
+      textarea.input {
+        block-size: 6em;
+        resize: vertical;
+        line-height: 1.5;
+      }
+
+      /* check, radio — toggle indicators. --bg flips from quiet to loud
+         when checked. The checkmark is drawn via SVG inline-image with
+         currentColor so it inherits the formula's --fg.                 */
+      .check, .radio {
+        --bg: 0;
+        appearance: none;
+        margin: 0;
+        inline-size: 1em;
+        block-size: 1em;
+        border: 1px solid var(--border);
+        border-radius: 0.25em;
+        flex-shrink: 0;
+        cursor: pointer;
+
+        &:checked {
+          --bg: var(--cfg-bg-loud);
+          --fg: -1;
+          border-color: transparent;
+        }
+        &:focus-visible {
+          outline: 2px solid var(--Border);
+          outline-offset: 2px;
+        }
+      }
+      .radio { border-radius: 50%; }
+
+      .check:checked {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='4 12 10 18 20 6'/%3E%3C/svg%3E");
+        background-size: 70%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      .radio:checked {
+        background-image: radial-gradient(circle, currentColor 32%, transparent 36%);
+      }
+
     }
     ```
     """)

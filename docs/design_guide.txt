@@ -1,16 +1,9 @@
 ```
-╔═══════════════════════════════════════════════════════════════════╗
-║              THE colorNtype MENTAL MODEL                          ║
-║                                                                   ║
-║   The whole system, in two axes and three hue tokens.             ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-
    ┌─────────────────────────────────────────────────────────────┐
    │                  EVERY ELEMENT HAS TWO KNOBS                │
    │                                                             │
    │   --bg : -1  ←──── 0 ────→ +1     PAINT THE BACKGROUND      │
-   │           (none)  (muted) (vivid)                           │
+   │           (none)  (muted) (loud)                            │
    │                                                             │
    │   --fg : -1  ←──── 0 ────→ +1     PAINT THE INK             │
    │       (contrast) (none)  (chromatic)                        │
@@ -32,27 +25,31 @@
    │     transparent, tracks      │    │     explicit chromatic       │
    │     parent                   │    │     paint                    │
    │                              │    │                              │
-   │  Auto-depth via :has()       │    │  Theme-STABLE                │
-   │     more nesting = brighter  │    │     same color in light      │
-   │     surface (focus moves     │    │     and dark themes          │
-   │     toward the most-nested   │    │                              │
-   │     content)                 │    │  No structural role          │
+   │  Auto-depth via :has()       │    │  Theme-AWARE                 │
+   │     more nesting = brighter  │    │     same --bg value renders  │
+   │     surface (focus moves     │    │     theme-correct paint —    │
+   │     toward the most-nested   │    │     muted endpoint sits      │
+   │     content)                 │    │     near the active surface, │
+   │                              │    │     loud endpoint shifts     │
+   │  Theme-FLIPS                 │    │     between chromatic vivid  │
+   │     light surfaces in light  │    │     (light) and P3 (dark)    │
+   │     mode, dark surfaces in   │    │                              │
+   │     dark mode                │    │  No structural role          │
    │                              │    │     no auto-depth            │
-   │  Theme-FLIPS                 │    │     no theme tracking        │
-   │     light surfaces in light  │    │                              │
-   │     mode, dark surfaces in   │    │  Use for: chips, badges,     │
-   │     dark mode                │    │     status cards, brand      │
-   │                              │    │     callouts, swatches,      │
-   │  Use for: cards, panels,     │    │     buttons, avatars         │
-   │     modals, sections, the    │    │                              │
-   │     page itself, anything    │    │  Examples:                   │
-   │     holding content          │    │     <div                     │
-   │                              │    │       style="--bg: 0.55      │
-   │  Examples:                   │    │             --hue-lock: 145" │
-   │     <div class="surface">    │    │     >LIVE</div>              │
-   │       <h2>Title</h2>         │    │                              │
-   │       <p>Body…</p>           │    │     <button                  │
-   │     </div>                   │    │       style="--bg: 0.5">     │
+   │  Use for: cards, panels,     │    │                              │
+   │     modals, sections, the    │    │  Use for: chips, badges,     │
+   │     page itself, anything    │    │     status cards, brand      │
+   │     holding content          │    │     callouts, swatches,      │
+   │                              │    │     buttons, avatars         │
+   │  Examples:                   │    │                              │
+   │     <div class="surface">    │    │  Examples:                   │
+   │       <h2>Title</h2>         │    │     <div                     │
+   │       <p>Body…</p>           │    │       style="--bg: 0.55      │
+   │     </div>                   │    │             --hue-lock: 145" │
+   │                              │    │     >LIVE</div>              │
+   │                              │    │                              │
+   │                              │    │     <button                  │
+   │                              │    │       style="--bg: 0.5">     │
    │                              │    │       Continue               │
    │                              │    │     </button>                │
    └──────────────────────────────┘    └──────────────────────────────┘
@@ -60,6 +57,11 @@
        Pick ONE per element. Never both. If you feel like you want
        both, you actually want a .surface CONTAINING a chromatic
        child element.
+
+       Content always lives on .surface. Color is reserved for
+       signals — buttons, badges, status, brand callouts. If your
+       calendar event is a colored block, you're announcing it as
+       a notification. If it's a surface, it's content.
 
 
 ╔═══════════════════════════════════════════════════════════════════╗
@@ -72,7 +74,8 @@
 
       --hue-shift     relative offset. Adds to the inherited
                       --hue. Stacks with parent shifts.
-                      Use for: subtle subtree variation.
+                      Use for: subtle subtree variation, families
+                      of related-but-distinct cards.
 
       --hue-lock      absolute pin. Wins over --hue and
                       --hue-shift from above.
@@ -91,31 +94,50 @@
    │  it wins. Otherwise: page hue + shifts.                 │
    └─────────────────────────────────────────────────────────┘
 
+       Setting --hue-shift on a card and letting it cascade is
+       the idiomatic way to make a row of related-but-distinct
+       elements (KPI cards, category tiles, color-coded series
+       in charts). Shift on the parent, inherit on the children,
+       and any chromatic descendant — including SVG paths —
+       picks up the rotated hue automatically.
+
 
 ╔═══════════════════════════════════════════════════════════════════╗
 ║   WHAT CHANGES WITH THEME (light ↔ dark)                          ║
 ╚═══════════════════════════════════════════════════════════════════╝
 
-   .surface          ───►  FLIPS         (canvas inverts)
+   .surface          ───►  FLIPS         (canvas inverts: light
+                                          surfaces in light mode,
+                                          dark surfaces in dark)
 
-   --bg: 0…1         ───►  STABLE        (a 0.4 green stays
-                                          green in both themes —
-                                          by design)
+   --bg: 0…1         ───►  THEME-AWARE   (a 0.4 green renders as
+                                          chromatic-vivid green in
+                                          light mode, P3 green in
+                                          dark mode — same --bg
+                                          value, theme-correct paint)
 
    --fg: -1…0        ───►  FLIPS         (contrast pole derives
                                           from the surface, so
                                           ink lands correctly
                                           against either pole)
 
-   --fg: 0…1         ───►  STABLE        (chromatic ink, same
-                                          color in both themes,
-                                          mirror of --bg)
+   --fg: 0…1         ───►  THEME-AWARE   (chromatic ink, mirrors
+                                          the --bg behavior at
+                                          the same value)
 
    --hue / --hue-lock /
-   --hue-shift       ───►  STABLE        (hue is theme-orthogonal)
+   --hue-shift       ───►  STABLE        (hue is theme-orthogonal —
+                                          a hue value of 145 stays
+                                          145 in both themes)
 
    --border          ───►  FLIPS
    --Border          ───►  FLIPS
+
+       Theme-aware ≠ theme-changing. The DESIGNER never writes
+       theme-specific values — the same --bg: 0.55 produces a
+       light-appropriate paint in light mode and a dark-appropriate
+       paint in dark mode. Both are "the brand at this intensity"
+       — the formula picks the right one for the active theme.
 
 
 ╔═══════════════════════════════════════════════════════════════════╗
@@ -126,7 +148,7 @@
               │             │             │
               │             │             │
        max contrast    invisible      max chromatic
-       (theme-aware)   (= surface)    (theme-stable)
+       (theme-aware)   (= surface)    (theme-aware)
               │                           │
               │                           │
        contextual ink                 brand ink
@@ -140,6 +162,63 @@
 
        This means:  --fg: 0.4 produces the same color as --bg: 0.4
                     on a surface at the same hue.
+
+       Combine with --hue-shift for chart series that participate
+       in the cascade. Each series becomes "chromatic ink at hue
+       offset N from the parent" — relative to the brand, not
+       hardcoded.
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║   INTERACTION STATES                                              ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+   Two markers, two intents:
+
+      .clickable      Full interactive treatment.
+                      Hover lifts (L + chroma), active presses
+                      (L drops, contrast reduces). Cursor pointer.
+                      Use for: anything you can click or tap.
+
+      .hoverable      Soft response only.
+                      Hover lifts (L + chroma). No active state,
+                      no cursor change.
+                      Use for: KPI cards, status displays, table
+                      rows that highlight without navigating —
+                      acknowledgment-only UI.
+
+   ┌──────────────────────────────────────────────────────────────┐
+   │  Buttons, links, [role="button"], and [tabindex] elements    │
+   │  are .clickable by default. You don't add the class to them. │
+   │                                                              │
+   │  For non-semantic interactive elements (cards, list items,   │
+   │  gallery tiles), add the marker explicitly.                  │
+   └──────────────────────────────────────────────────────────────┘
+
+   How it works:
+   ────────────
+
+      Hover  →  +L shift          (lift toward brighter)
+                +chroma injection  (inject baseline tint —
+                                    crucial: a near-neutral
+                                    surface needs SOMETHING for
+                                    the L shift to anchor against,
+                                    so the hover always brings
+                                    color even into pure neutrals)
+
+      Active →  -L shift          (press toward darker)
+                fg multiplier <1  (text contrast drops, reinforces
+                                    the recessive/pressed feel)
+
+   Both apply through the same formula that paints rest state.
+   No hardcoded hover colors. No light/dark pairs. The interaction
+   is a token-level perturbation; everything downstream re-resolves
+   coherently — including borders, text contrast, chromatic ramp
+   position, perception toggle, theme awareness.
+
+       Don't write per-component :hover rules with hardcoded colors.
+       That bypasses the system. Use the markers; tune the magnitudes
+       at the config layer (see below) if needed.
 
 
 ╔═══════════════════════════════════════════════════════════════════╗
@@ -155,10 +234,13 @@
    --hue-lock                        ├──── one math ──► stroke (svg)
    --hue-shift                       │     pass         --border
    --depth (auto)                    │                  --Border
-   theme (--cfg-color-*)             │
-   chromatic config (--cfg-color-    │
-     muted-l/c, vivid-l/c,           │
-     surf-chroma, fg-tint)           │
+   theme (--cfg-dark)                │
+   interaction state                 │
+     (--_interact-l/c/fg-mul)        │
+   chromatic config                  │
+     (--cfg-color-*)                 │
+   surface config                    │
+     (--cfg-surf-*)                  │
 
 
 ╔═══════════════════════════════════════════════════════════════════╗
@@ -178,8 +260,9 @@
             </span>                       --hue-lock; otherwise
                                           tints with --hue
             <button style="--bg: 0.5">  ← chromatic, picks up --hue
-              Go
-            </button>
+              Go                          (and gets hover/active
+            </button>                     for free — buttons are
+                                          .clickable by default)
           </article>
         </main>
       </body>
@@ -188,13 +271,88 @@
    function of the same inputs through the same formula.
 
    No coordination. No tokens to keep in sync. No light/dark
-   pairs to maintain.
+   pairs to maintain. No per-state hover colors.
 
    Surfaces declare the canvas.
    Chromatic --bg declares semantic color.
    --fg declares ink intent.
    The three hue tokens decide what hue to render in.
+   Markers declare interaction intent.
    The formula does the rest.
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║   THE CONFIG LAYER — SET ONCE, TUNE PROJECT-WIDE                  ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+   Config tokens live on :root (or any subtree for scoped overrides).
+   Grouped by what kind of decision they encode.
+
+   ─── Brand ────────────────────────────────────────────────────────
+
+      --hue              0…360         your brand hue
+      --fg               -1…1          default ink intent
+                                         (-1 = max contrast text)
+
+   ─── Color character ──────────────────────────────────────────────
+
+      --cfg-color-muted-l-light       muted endpoint L (light theme)
+      --cfg-color-muted-l-dark        muted endpoint L (dark theme)
+      --cfg-color-muted-c             muted endpoint chroma (shared)
+      --cfg-color-loud-l-light        loud endpoint L (light theme)
+      --cfg-color-loud-c-light        loud endpoint chroma (light)
+      --cfg-color-loud-l-dark         loud endpoint L (dark theme)
+      --cfg-color-loud-c-dark         loud endpoint chroma (dark)
+      --cfg-color-curve               ramp easing exponent
+                                         (1 = linear, 2 = quadratic
+                                          bias toward muted)
+      --cfg-color-surf-chroma         hue carry on neutral surfaces
+                                         (0 = pure gray, ~0.02 =
+                                          subtle warm/cool tint)
+      --cfg-fg-tint                   hue carry on contrast ink
+
+   ─── Surface depth ────────────────────────────────────────────────
+
+      --cfg-surf-top-l-light          top-of-stack L (light)
+      --cfg-surf-top-l-dark           top-of-stack L (dark)
+      --cfg-surf-step-light           L drop per nesting (light)
+      --cfg-surf-step-dark            L drop per nesting (dark)
+      --cfg-surf-curve-light          depth curve (light)
+      --cfg-surf-curve-dark           depth curve (dark)
+      --cfg-surf-mid-light            depth midpoint (light)
+      --cfg-surf-mid-dark             depth midpoint (dark)
+      --cfg-surf-rng-light            depth range (light)
+      --cfg-surf-rng-dark             depth range (dark)
+
+   ─── Contrast perception ──────────────────────────────────────────
+
+      --cfg-contrast-perception       0 = WCAG-strict
+                                       1 = chroma-aware flip
+                                           (compensates for
+                                            Helmholtz-Kohlrausch —
+                                            saturated cells flip
+                                            to pale ink earlier)
+      --cfg-contrast-perception-base  base shift for chromatic cells
+      --cfg-contrast-perception-bias  per-chroma scaling factor
+
+   ─── Interaction tuning ───────────────────────────────────────────
+
+      --cfg-hover-l-shift             L lift on hover (% points)
+      --cfg-hover-c-shift             chroma injection on hover
+      --cfg-active-l-shift            L drop on active (% points)
+      --cfg-active-fg-mul             contrast multiplier on active
+                                         (<1 = lower contrast)
+
+   ─── Theme switch ─────────────────────────────────────────────────
+
+      Set on <html> via [data-ui-theme]:
+
+         [data-ui-theme="light"] { --cfg-dark: 0 }
+         [data-ui-theme="dark"]  { --cfg-dark: 1 }
+
+      Every theme-split token lerps between -light and -dark
+      counterparts based on this flag. Set the attribute, the
+      whole system re-resolves.
 
 
 ╔═══════════════════════════════════════════════════════════════════╗
@@ -209,22 +367,28 @@
       --hue-shift   any        relative offset (cascades)
       --hue-lock    0 … 360    absolute pin (cascades, overrides)
 
-   Class:
-   ─────
-      .surface                 declares structural container,
-                               participates in depth cascade
+   Markers:
+   ───────
+      .surface                 structural container, depth cascade
+      .clickable               click target, hover + active state
+      .hoverable               soft hover acknowledgment, no active
 
-   Designer config:
-   ───────────────
-      --cfg-color-muted-l       muted-end lightness  (--bg = 0)
-      --cfg-color-muted-c       muted-end chroma     (--bg = 0)
-      --cfg-color-vivid-l       vivid-end lightness  (--bg = 1)
-      --cfg-color-vivid-c       vivid-end chroma     (--bg = 1)
-      --cfg-color-surf-chroma   hue carry on neutral surfaces
-      --cfg-fg-tint             hue carry on contrast ink
+   Project config (set once, on :root):
+   ──────────────────────────────────
+      Brand:                   --hue, --fg
+      Color character:         11 tokens (muted, loud, curve, tints)
+      Surface depth:           10 tokens (top, step, curve, mid, rng)
+      Contrast perception:     3 tokens (mode + tunings)
+      Interaction tuning:      4 tokens (hover/active magnitudes)
+      Theme switch:            data-ui-theme attribute on <html>
 
-   That's it. Six numbers tune the chromatic identity.
-   Two numbers per element say what color it wants to be.
-   Three tokens decide which hue to use.
-   One class makes a structural surface.
+   That's it.
+
+   Five tokens per element say what color and ink it wants.
+   Three markers say what role and interaction it has.
+   The config layer is set once and tunes the whole system.
+   Themes flip via one attribute.
+
+   Surfaces hold content. Chromatic accents signal action or status.
+   Markers declare interactivity. The cascade does the rest.
 ```
