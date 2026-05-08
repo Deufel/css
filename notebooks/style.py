@@ -79,10 +79,7 @@ def _(mo):
 
     ## core.space
 
-    Same shape as `core.type`, but for spacing. The `--s` length is a fluid value derived from `--space` step + base + ratio + viewport clamp. Utility shorthands `.m/.p/.mx/.my/.px/.py` apply `--s` to the conventional axes.
-
-    **Belongs:** the space formula, the four shorthand classes.
-    **Doesn't belong:** layout primitives that *use* `--s` for `gap` (those are `layout.composition`).
+    [removed]
 
     ## theme
 
@@ -109,6 +106,7 @@ def _(mo):
 
     ## layout.doc
 
+    [removed may add back at some point]
     The document/paper layout. Used when the consumer wants a fixed-aspect "piece of paper" centered on a backdrop, with print awareness. Opt-in via `<body class="doc">` or applied directly via a `.paper` class on a child article. Sets up the backdrop, the paper's aspect-ratio container, the print `@page` rules.
 
     **Belongs:** paper sizing math, backdrop centering, print media rules for fixed-page documents.
@@ -900,6 +898,47 @@ def _(mo):
             & > .pg-footer            { grid-area: f;  }
         }
     }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Temp
+    ```css
+    @layer layout.page {
+        .page {
+            display: grid;
+            grid-template:
+                "b  b  b" auto
+                "h  h  h" auto
+                "s  s  s" auto
+                "n  mh a" auto
+                "n  m  a" 1fr
+                "n  mf a" auto
+                "f  f  f" auto /
+                auto 1fr auto;
+            height: 100svh;
+            overflow: hidden;
+
+            & > [class ^="pg-"]       { padding: var(--gap); }
+
+            & > .pg-banner            { grid-area: b;  }
+            & > .pg-header            { grid-area: h;  }
+            & > .pg-subheader         { grid-area: s;  }
+            & > .pg-navigation        { grid-area: n;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0;
+                                        display: grid;  gird-template-columns: auto 1fr auto;
+                                      }
+            & > .pg-main-header       { grid-area: mh; }
+            & > .pg-main              { grid-area: m;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            & > .pg-main-footer       { grid-area: mf; }
+            & > .pg-aside             { grid-area: a;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            & > .pg-footer            { grid-area: f;  }
+        }
+    }
+
     ```
     """)
     return
