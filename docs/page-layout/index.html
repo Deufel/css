@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en" data-ui-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page layout — stick.css</title>
+<meta name="description" content="body.page provides an eleven-slot grid for application root layouts. Opt-in via pg-* slot classes.">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@ddd1642/css/style.css">
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.1/bundles/datastar.js"></script>
+
+<style>
+  :root { --hue: 18 }
+</style>
+</head>
+
+<body id="page" class="page surface">
+
+  <!-- ── pg-header ──────────────────────────────────────── -->
+  <div class="pg-header flank-end" style="border-block-end: 1px solid var(--border)">
+    <a href="../" style="--type: 1; font-family: var(--font-display); color: inherit; text-decoration: none">stick.css</a>
+    <div class="row">
+      <a class="btn" href="https://github.com/Deufel/css" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+
+  <!-- ── pg-subheader ───────────────────────────────────── -->
+  <div class="pg-subheader" style="--bg: 0.08; --type: -1; border-block-end: 1px solid var(--border)">
+    <nav class="crumbs">
+      <a href="../">Documentation</a>
+      <span aria-current="page">Page layout</span>
+    </nav>
+  </div>
+
+  <!-- ── pg-navigation-header ───────────────────────────── -->
+  <div class="pg-navigation-header tablet desktop" style="border-inline-end: 1px solid var(--border); border-block-end: 1px solid var(--border)">
+    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">Documentation</span>
+  </div>
+
+  <!-- ── pg-navigation ──────────────────────────────────── -->
+  <nav class="pg-navigation tablet desktop" style="inline-size: 14rem; border-inline-end: 1px solid var(--border)">
+    <style>
+      @scope {
+        :scope > .column { --gap: 0.15rem }
+        :scope > .column > a {
+          padding: 0.45rem 0.6rem;
+          border-radius: 0.4rem;
+          text-decoration: none;
+          color: inherit;
+        }
+        :scope > .column > a:hover { --bg: 0.15 }
+        :scope > .column > a[aria-current="page"] { --bg: 0.25; --fg: -1 }
+      }
+    </style>
+    <div class="column">
+      <a href="../">Home</a>
+      <a href="../mental-model/">Mental model</a>
+      <a href="../color/">Color</a>
+      <a href="../type/">Type</a>
+      <a href="../surfaces/">Surfaces</a>
+      <a href="../layout-primitives/">Layout primitives</a>
+      <a href="./" aria-current="page">Page layout</a>
+      <a href="../components/">Components</a>
+      <a href="../authoring/">Authoring</a>
+      <a href="../charts/">Charts</a>
+      <a href="../recipes/">Recipes</a>
+      <a href="../anti-patterns/">What NOT to do</a>
+      <a href="../summary/">Summary</a>
+      <a href="../llms.txt">llms.txt</a>
+    </div>
+  </nav>
+
+  <!-- ── pg-navigation-footer ───────────────────────────── -->
+  <div class="pg-navigation-footer tablet desktop" style="--type: -1.5; --fg: -0.4; border-inline-end: 1px solid var(--border); border-block-start: 1px solid var(--border)">
+    <span>v0.1 · <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">source</a></span>
+  </div>
+
+  <!-- ── pg-main-header ─────────────────────────────────── -->
+  <div class="pg-main-header" style="border-block-end: 1px solid var(--border)">
+    <h1 style="--type: 2; font-family: var(--font-display); margin: 0">Page layout</h1>
+  </div>
+
+  <!-- ── pg-main ────────────────────────────────────────── -->
+  <main class="pg-main column" style="--gap: 2.5rem">
+
+    <style>
+      @scope {
+        :scope section.section { --gap: 0.75rem }
+        :scope section.section > h2 {
+          --type: 1.25;
+          font-family: var(--font-display);
+          margin: 0;
+        }
+        :scope section.section > .lede {
+          margin: 0;
+          max-inline-size: 65ch;
+          --fg: -0.7;
+        }
+        :scope p { margin: 0; max-inline-size: 65ch }
+        :scope pre.code {
+          margin: 0;
+          padding: 1rem;
+          --bg: 0.05;
+          border-radius: 0.5rem;
+          overflow-x: auto;
+          --type: -0.5;
+          line-height: 1.5;
+        }
+
+        /* ── Page mockup — visualizes .page slot positions
+              without nesting body.page ────────────────── */
+        :scope .page-mockup {
+          display: grid;
+          grid-template:
+            "b  b  b" auto
+            "h  h  h" auto
+            "s  s  s" auto
+            "nh mh a" auto
+            "n  m  a" 1fr
+            "nf mf a" auto
+            "f  f  f" auto /
+            7rem 1fr 6rem;
+          block-size: 28rem;
+          border: 1px solid var(--border);
+          border-radius: 0.5rem;
+          overflow: hidden;
+          font-family: var(--font-mono);
+          --type: -1;
+        }
+        :scope .page-mockup > * {
+          padding: 0.5rem 0.75rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
+        :scope .page-mockup .b  { grid-area: b;  --bg: 0.85 }
+        :scope .page-mockup .h  { grid-area: h;  --bg: 0.55 }
+        :scope .page-mockup .s  { grid-area: s;  --bg: 0.3 }
+        :scope .page-mockup .nh { grid-area: nh; --bg: 0.15; --hue-shift: 90 }
+        :scope .page-mockup .n  { grid-area: n;  --bg: 0.4;  --hue-shift: 90 }
+        :scope .page-mockup .nf { grid-area: nf; --bg: 0.15; --hue-shift: 90 }
+        :scope .page-mockup .mh { grid-area: mh; --bg: 0.1 }
+        :scope .page-mockup .m  { grid-area: m;  --bg: 0.06 }
+        :scope .page-mockup .mf { grid-area: mf; --bg: 0.1 }
+        :scope .page-mockup .a  { grid-area: a;  --bg: 0.3;  --hue-shift: 200 }
+        :scope .page-mockup .f  { grid-area: f;  --bg: 0.3;  --hue-shift: 200 }
+
+        /* ── Slot semantics table ─────────────────── */
+        :scope .slot-table {
+          inline-size: 100%;
+          border-collapse: collapse;
+          --type: -0.5;
+        }
+        :scope .slot-table th, :scope .slot-table td {
+          text-align: start;
+          padding: 0.5rem 0.75rem;
+          border-block-end: 1px solid var(--border);
+          vertical-align: top;
+        }
+        :scope .slot-table th {
+          --fg: -0.5;
+          font-weight: 600;
+          --type: -1;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        :scope .slot-table td:first-child { font-family: var(--font-mono); inline-size: 14rem }
+        :scope .slot-table td:nth-child(2) { inline-size: 8rem; --fg: -0.6 }
+      }
+    </style>
+
+    <p style="--type: 0">
+      <code>body.page</code> provides an eleven-slot grid for application root
+      layouts. The grid is fixed; slots opt in by carrying a <code>pg-*</code>
+      class. Only <code>pg-main</code> is required; everything else is optional
+      and collapses to zero when absent.
+    </p>
+
+    <!-- ── Slot diagram ───────────────────────────────── -->
+    <section class="section column" id="slot-diagram">
+      <h2>The eleven slots</h2>
+      <p class="lede">
+        Three full-width bands at the top, three at the bottom (well — two; the
+        page footer plus optional main-footer), and a middle band split into
+        three columns. The navigation and main columns each have their own
+        internal header / body / footer rows. The aside spans the full middle
+        band.
+      </p>
+
+      <div class="page-mockup">
+        <div class="b">pg-banner</div>
+        <div class="h">pg-header</div>
+        <div class="s">pg-subheader</div>
+        <div class="nh">pg-navigation-header</div>
+        <div class="n">pg-navigation</div>
+        <div class="nf">pg-navigation-footer</div>
+        <div class="mh">pg-main-header</div>
+        <div class="m">pg-main</div>
+        <div class="mf">pg-main-footer</div>
+        <div class="a">pg-aside</div>
+        <div class="f">pg-footer</div>
+      </div>
+
+      <p style="--type: -0.5; --fg: -0.5">
+        The diagram renders the same grid template <code>.page</code> uses, at
+        fixed dimensions. The actual page lays your application out at viewport
+        scale; the chrome around this content uses these exact slots.
+      </p>
+    </section>
+
+    <!-- ── Anatomy ────────────────────────────────────── -->
+    <section class="section column" id="anatomy">
+      <h2>Anatomy</h2>
+      <p class="lede">
+        Wrap the application root in <code>body.page</code> and place children
+        with their <code>pg-*</code> slot classes. Order in the markup doesn't
+        matter — the grid template assigns each slot to its named area.
+      </p>
+
+<pre class="code"><code>&lt;body class="page surface"&gt;
+  &lt;div class="pg-banner"&gt;…&lt;/div&gt;
+  &lt;div class="pg-header"&gt;…&lt;/div&gt;
+  &lt;div class="pg-subheader"&gt;…&lt;/div&gt;
+  &lt;div class="pg-navigation-header"&gt;…&lt;/div&gt;
+  &lt;nav class="pg-navigation"&gt;…&lt;/nav&gt;
+  &lt;div class="pg-navigation-footer"&gt;…&lt;/div&gt;
+  &lt;div class="pg-main-header"&gt;…&lt;/div&gt;
+  &lt;main class="pg-main"&gt;…&lt;/main&gt;
+  &lt;div class="pg-main-footer"&gt;…&lt;/div&gt;
+  &lt;aside class="pg-aside"&gt;…&lt;/aside&gt;
+  &lt;div class="pg-footer"&gt;…&lt;/div&gt;
+&lt;/body&gt;</code></pre>
+
+      <p style="--type: -0.5; --fg: -0.5">
+        Semantic elements (<code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>,
+        <code>&lt;aside&gt;</code>) on the slots that map to landmarks help with
+        accessibility but are not required by the layout.
+      </p>
+    </section>
+
+    <!-- ── Slot semantics ─────────────────────────────── -->
+    <section class="section column" id="slot-semantics">
+      <h2>Slot semantics</h2>
+      <p class="lede">
+        Each slot has a default role. These are starting points, not
+        constraints — content can migrate across slots at different viewports
+        (see "Migrating content" below), but starting from the natural home
+        keeps pages predictable.
+      </p>
+
+      <div style="overflow-x: auto">
+        <table class="slot-table">
+          <thead>
+            <tr>
+              <th>Slot</th>
+              <th>Track</th>
+              <th>Default role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>pg-banner</td>
+              <td>full width</td>
+              <td>Site-wide announcements, environment indicators, browser-upgrade nags.</td>
+            </tr>
+            <tr>
+              <td>pg-header</td>
+              <td>full width</td>
+              <td>Primary chrome. Brand, top navigation, account / settings.</td>
+            </tr>
+            <tr>
+              <td>pg-subheader</td>
+              <td>full width</td>
+              <td>Secondary chrome. Breadcrumbs, page title bar, persistent filters.</td>
+            </tr>
+            <tr>
+              <td>pg-navigation-header</td>
+              <td>nav column top</td>
+              <td>Workspace switcher, search input, section caption.</td>
+            </tr>
+            <tr>
+              <td>pg-navigation</td>
+              <td>nav column body, scrolls</td>
+              <td>Primary navigation. Section list, persistent in-app navigation.</td>
+            </tr>
+            <tr>
+              <td>pg-navigation-footer</td>
+              <td>nav column bottom</td>
+              <td>User profile, version info, sign-out.</td>
+            </tr>
+            <tr>
+              <td>pg-main-header</td>
+              <td>main column top</td>
+              <td>Page title, page-level tabs, action toolbar.</td>
+            </tr>
+            <tr>
+              <td>pg-main</td>
+              <td>main column body, scrolls</td>
+              <td>The content the user came for. The most important region; required.</td>
+            </tr>
+            <tr>
+              <td>pg-main-footer</td>
+              <td>main column bottom</td>
+              <td>Status bar, persistent action row, sync indicator.</td>
+            </tr>
+            <tr>
+              <td>pg-aside</td>
+              <td>right column, scrolls</td>
+              <td>Secondary context. Related items, activity feed, table of contents.</td>
+            </tr>
+            <tr>
+              <td>pg-footer</td>
+              <td>full width</td>
+              <td>Dock. Copyright, footer links, search hint.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="--type: -0.5; --fg: -0.5">
+        Three regions scroll independently: <code>pg-navigation</code>,
+        <code>pg-main</code>, and <code>pg-aside</code>. Every other slot pins.
+        That's the default; per-instance overrides are normal CSS.
+      </p>
+    </section>
+
+    <!-- ── Opt-in (donut scoping) ─────────────────────── -->
+    <section class="section column" id="opt-in">
+      <h2>Opt-in via pg-* class</h2>
+      <p class="lede">
+        The grid template only assigns positions to direct children that carry
+        a <code>pg-*</code> class. Children without one don't get a grid area
+        and aren't placed in the template. Drawers, scripts, and other top-layer
+        content can live as direct children of <code>&lt;body&gt;</code> without
+        leaking into the layout.
+      </p>
+
+<pre class="code"><code>&lt;body class="page surface"&gt;
+  &lt;main class="pg-main"&gt;…&lt;/main&gt;
+
+  &lt;!-- These don't get a grid area; they live outside
+       the page layout, in the top layer or hidden --&gt;
+  &lt;dialog class="drawer left"&gt;…&lt;/dialog&gt;
+  &lt;div popover class="drawer right"&gt;…&lt;/div&gt;
+&lt;/body&gt;</code></pre>
+
+      <p style="--type: -0.5; --fg: -0.5">
+        The opt-in rule is a positive: slots are recognized by the
+        <code>pg-*</code> prefix. The system does not actively hide unrecognized
+        children — they participate in the document normally, just not in the
+        page grid. Drawers handle their own positioning via <code>position:
+        fixed</code> and the popover top layer.
+      </p>
+    </section>
+
+    <!-- ── Default padding ────────────────────────────── -->
+    <section class="section column" id="default-padding">
+      <h2>Default padding</h2>
+      <p class="lede">
+        The <code>.page</code> rule applies <code>padding: var(--gap)</code> to
+        every <code>pg-*</code> slot. The padding scales with the fluid
+        <code>--gap</code> token — tight on phones, generous on TV-scale displays.
+        Authors don't write inline padding on slots.
+      </p>
+
+<pre class="code"><code>.page {
+  &gt; [class^="pg-"] { padding: var(--gap) }
+  /* … grid template and per-slot grid-area assignments … */
+}</code></pre>
+
+      <p style="--type: -0.5; --fg: -0.5">
+        If a particular slot needs different padding, set it from CSS with a
+        more specific selector. Per-instance inline padding overrides on slots
+        opt out of the system's fluid scaling and lose consistency across the
+        page.
+      </p>
+    </section>
+
+    <!-- ── Slot orientation rules ─────────────────────── -->
+    <section class="section column" id="orientation">
+      <h2>Slot orientation rules</h2>
+      <p class="lede">
+        Each <code>pg-*</code> class is bound to its grid area and orientation.
+        <code>pg-navigation</code> is always the left middle column;
+        <code>pg-aside</code> is always the right; full-width slots always span
+        the full width. Variants inside a slot can change its internal layout
+        and width but not its position in the page.
+      </p>
+
+      <p>
+        Variants sharing a slot must share that slot's orientation. A
+        <code>pg-navigation</code> can hold a full sidebar and an icon-only rail
+        as siblings (both vertical, both in the left column), but not a sidebar
+        and a horizontal top bar — the horizontal bar would belong in
+        <code>pg-header</code> instead.
+      </p>
+    </section>
+
+    <!-- ── Responsive viewport classes ────────────────── -->
+    <section class="section column" id="viewport-classes">
+      <h2>Responsive viewport classes</h2>
+      <p class="lede">
+        The <code>.mobile</code>, <code>.tablet</code>, and <code>.desktop</code>
+        classes gate participation by viewport width. Default (no class) is
+        always on. Adding any class restricts the element to matching viewports.
+        Combine for ranges as unions: <code>class="tablet desktop"</code> means
+        "everywhere except mobile."
+      </p>
+
+<pre class="code"><code>&lt;!-- Visible only at desktop --&gt;
+&lt;aside class="pg-aside desktop"&gt;…&lt;/aside&gt;
+
+&lt;!-- Visible at tablet and desktop, hidden at mobile --&gt;
+&lt;nav class="pg-navigation tablet desktop"&gt;…&lt;/nav&gt;
+
+&lt;!-- Visible only at mobile --&gt;
+&lt;button class="icon-btn mobile"&gt;☰&lt;/button&gt;</code></pre>
+
+      <p>
+        Slots whose children don't participate at the current breakpoint
+        collapse to zero. At mobile, <code>&lt;nav class="pg-navigation tablet
+        desktop"&gt;</code> is hidden, so the entire navigation column track
+        disappears and main expands to fill the freed space.
+      </p>
+
+      <h3 style="--type: 0.5; margin: 1rem 0 0; --fg: -0.6">Cascade rule</h3>
+      <p>
+        A viewport class controls its element's <code>display</code> via
+        <code>revert-layer !important</code>. That rule beats any
+        <code>display</code> declaration on the same element from layout
+        primitives, inline <code>@scope</code> blocks, or per-instance styles.
+      </p>
+      <p>
+        Authors must not put a layout primitive class
+        (<code>.row</code>, <code>.column</code>, <code>.grid</code>,
+        <code>.flank</code>, <code>.hero</code>, etc.) on the same element as a
+        viewport class. The layout primitive's <code>display</code> will be
+        silently overridden and the element will lay out with its native default.
+        Wrap the content in a child element and put the layout primitive on the
+        wrapper.
+      </p>
+
+<pre class="code"><code>&lt;!-- Wrong — .column is silently overridden --&gt;
+&lt;nav class="pg-navigation column tablet desktop"&gt;
+  &lt;a href="..."&gt;…&lt;/a&gt;
+&lt;/nav&gt;
+
+&lt;!-- Right — wrapper carries the layout --&gt;
+&lt;nav class="pg-navigation tablet desktop"&gt;
+  &lt;div class="column"&gt;
+    &lt;a href="..."&gt;…&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+    </section>
+
+    <!-- ── Coverage rule ──────────────────────────────── -->
+    <section class="section column" id="coverage">
+      <h2>The coverage rule</h2>
+      <p class="lede">
+        Viewport classes partition the viewport range. Cover the full range
+        when gating an element: a <code>.mobile</code>-only element disappears
+        at tablet and desktop, leaving a hole unless something else fills the
+        slot at those sizes. Think in partitions, not in isolated additions.
+      </p>
+
+      <p>
+        Most layouts settle into one of two patterns. A <strong>two-way
+        split</strong> has one shape persistent across two breakpoints and
+        another for the third (typical: persistent on desktop, drawer on mobile
+        and tablet). A <strong>three-way split</strong> has a different shape
+        per breakpoint, all sharing the slot's grid track. The next section
+        shows both.
+      </p>
+    </section>
+
+    <!-- ── Duplication pattern ────────────────────────── -->
+    <section class="section column" id="duplication">
+      <h2>The duplication pattern</h2>
+      <p class="lede">
+        When a slot needs to look different at different viewports, author each
+        shape and let viewport classes pick which is live. Drawers fill the
+        breakpoints where the persistent slot is hidden.
+      </p>
+
+      <h3 style="--type: 0.5; margin: 0.5rem 0 0; --fg: -0.6">Two-way case</h3>
+      <p>
+        The slot carries the viewport class. A page-level HUD with a FAB trigger
+        opens the drawer at the breakpoints where the slot is hidden.
+      </p>
+
+<pre class="code"><code>&lt;body class="page surface"&gt;
+  &lt;nav class="pg-navigation desktop"&gt;
+    &lt;!-- nav content --&gt;
+  &lt;/nav&gt;
+
+  &lt;main class="pg-main"&gt;…&lt;/main&gt;
+
+  &lt;!-- HUD overlay with mobile + tablet trigger --&gt;
+  &lt;div class="hud" style="position: fixed; inset: 0;
+                          pointer-events: none"&gt;
+    &lt;button class="↙ icon-btn mobile tablet"
+            style="margin: 1rem"
+            onclick="document.getElementById('nav-drawer').showModal()"&gt;
+      ☰
+    &lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;dialog id="nav-drawer" class="drawer left hero surface"&gt;
+    &lt;div class="top"&gt;…search…&lt;/div&gt;
+    &lt;div class="main"&gt;…links…&lt;/div&gt;
+    &lt;div class="bottom"&gt;…user info…&lt;/div&gt;
+  &lt;/dialog&gt;
+&lt;/body&gt;</code></pre>
+
+      <p>
+        On desktop, the persistent <code>pg-navigation</code> shows in its
+        track and the FAB is hidden. On smaller screens, the slot's track
+        collapses, the FAB appears, and tapping it opens a modal drawer that
+        composes <code>.drawer</code> (positioning + animation), <code>.hero</code>
+        (internal three-region layout), and <code>.surface</code> (paint).
+      </p>
+
+      <h3 style="--type: 0.5; margin: 1rem 0 0; --fg: -0.6">Three-way case</h3>
+      <p>
+        The slot holds multiple persistent shapes nested inside, gated by
+        viewport classes. The drawer covers the remaining breakpoint.
+      </p>
+
+<pre class="code"><code>&lt;nav class="pg-navigation"&gt;
+  &lt;section class="desktop"&gt;
+    &lt;!-- full sidebar with text labels --&gt;
+  &lt;/section&gt;
+  &lt;section class="tablet"&gt;
+    &lt;!-- narrow icon-only rail, same vertical orientation --&gt;
+  &lt;/section&gt;
+&lt;/nav&gt;
+
+&lt;dialog id="nav-drawer" class="drawer left hero surface"&gt;
+  &lt;!-- drawer shape, opened by mobile-only FAB --&gt;
+&lt;/dialog&gt;</code></pre>
+
+      <p>
+        Each variant typically wants its own internal layout. Use inline
+        <code>@scope</code> on a wrapper <code>&lt;div&gt;</code> for layout
+        rules so the cascade rule above doesn't silently override
+        <code>display</code>.
+      </p>
+    </section>
+
+    <!-- ── Drawers ────────────────────────────────────── -->
+    <section class="section column" id="drawers">
+      <h2>Drawers</h2>
+      <p class="lede">
+        Two flavors, distinguished by element type and chosen by intent.
+      </p>
+
+      <h3 style="--type: 0.5; margin: 0.5rem 0 0; --fg: -0.6">Modal drawer — &lt;dialog&gt;</h3>
+      <p>
+        Use when the drawer demands full attention: navigation, confirmations,
+        focused tasks. Opens with <code>showModal()</code>, has a dim backdrop,
+        traps focus, makes the page underneath inert.
+      </p>
+
+<pre class="code"><code>&lt;dialog class="drawer left"&gt;…&lt;/dialog&gt;
+
+&lt;button onclick="document.querySelector('dialog.drawer.left').showModal()"&gt;
+  open nav
+&lt;/button&gt;</code></pre>
+
+      <h3 style="--type: 0.5; margin: 1rem 0 0; --fg: -0.6">Non-modal drawer — &lt;div popover&gt;</h3>
+      <p>
+        Use when the user needs to keep working on the page while the drawer
+        is open. The canonical case: a form referencing content elsewhere on
+        the page. Opens via <code>popovertarget</code> on a button (no JS) or
+        <code>element.showPopover()</code>.
+      </p>
+
+<pre class="code"><code>&lt;div id="filters" popover class="drawer right"&gt;…&lt;/div&gt;
+
+&lt;button popovertarget="filters"&gt;open filters&lt;/button&gt;</code></pre>
+
+      <p>
+        Animation and positioning are identical between the two flavors; only
+        modality differs. Drawer positions are <code>.left</code>,
+        <code>.right</code>, <code>.top</code>, <code>.bottom</code>. Source
+        order: drawers should be placed after the page slots, not nested inside
+        a slot — they live in the top layer or as positioned popovers and
+        don't need a place in the grid.
+      </p>
+    </section>
+
+    <!-- ── Try it ─────────────────────────────────────── -->
+    <section class="section column" id="try-it" style="margin-block-start: 1rem">
+      <h2>Try it</h2>
+      <p class="lede">
+        The chrome around this page uses these slots. The brand area is
+        <code>pg-header</code>, the breadcrumb above is <code>pg-subheader</code>,
+        the navigation list on the left is <code>pg-navigation</code>, the table
+        of contents on the right (visible at desktop) is <code>pg-aside</code>,
+        and so on. Resize the window to see the navigation and aside collapse
+        at narrower widths.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- ── pg-aside ───────────────────────────────────────── -->
+  <aside class="pg-aside desktop" style="inline-size: 14rem; border-inline-start: 1px solid var(--border)">
+    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">On this page</span>
+    <div class="column" style="--gap: 0.3rem; --type: -0.5">
+      <a href="#slot-diagram" style="color: inherit; text-decoration: none">The eleven slots</a>
+      <a href="#anatomy" style="color: inherit; text-decoration: none">Anatomy</a>
+      <a href="#slot-semantics" style="color: inherit; text-decoration: none">Slot semantics</a>
+      <a href="#opt-in" style="color: inherit; text-decoration: none">Opt-in via pg-*</a>
+      <a href="#default-padding" style="color: inherit; text-decoration: none">Default padding</a>
+      <a href="#orientation" style="color: inherit; text-decoration: none">Orientation rules</a>
+      <a href="#viewport-classes" style="color: inherit; text-decoration: none">Viewport classes</a>
+      <a href="#coverage" style="color: inherit; text-decoration: none">Coverage rule</a>
+      <a href="#duplication" style="color: inherit; text-decoration: none">Duplication pattern</a>
+      <a href="#drawers" style="color: inherit; text-decoration: none">Drawers</a>
+      <a href="#try-it" style="color: inherit; text-decoration: none">Try it</a>
+    </div>
+  </aside>
+
+  <!-- ── pg-footer ──────────────────────────────────────── -->
+  <div class="pg-footer flank-end" style="--type: -1.5; --fg: -0.4; border-block-start: 1px solid var(--border)">
+    <span>© 2026 stick.css</span>
+    <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">github.com/Deufel/css</a>
+  </div>
+
+</body>
+</html>

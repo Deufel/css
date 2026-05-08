@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en" data-ui-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout primitives — stick.css</title>
+<meta name="description" content="The thirteen composition primitives: row, column, split, spread, lcr, tmb, flank, grid, frame, stack, hud, hud-grid, hero.">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@ddd1642/css/style.css">
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.1/bundles/datastar.js"></script>
+
+<style>
+  :root { --hue: 18 }
+</style>
+</head>
+
+<body id="page" class="page surface">
+
+  <!-- ── pg-header ──────────────────────────────────────── -->
+  <div class="pg-header flank-end" style="border-block-end: 1px solid var(--border)">
+    <a href="../" style="--type: 1; font-family: var(--font-display); color: inherit; text-decoration: none">stick.css</a>
+    <div class="row">
+      <a class="btn" href="https://github.com/Deufel/css" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+
+  <!-- ── pg-subheader ───────────────────────────────────── -->
+  <div class="pg-subheader" style="--bg: 0.08; --type: -1; border-block-end: 1px solid var(--border)">
+    <nav class="crumbs">
+      <a href="../">Documentation</a>
+      <span aria-current="page">Layout primitives</span>
+    </nav>
+  </div>
+
+  <!-- ── pg-navigation-header ───────────────────────────── -->
+  <div class="pg-navigation-header tablet desktop" style="border-inline-end: 1px solid var(--border); border-block-end: 1px solid var(--border)">
+    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">Documentation</span>
+  </div>
+
+  <!-- ── pg-navigation ──────────────────────────────────── -->
+  <nav class="pg-navigation tablet desktop" style="inline-size: 14rem; border-inline-end: 1px solid var(--border)">
+    <style>
+      @scope {
+        :scope > .column { --gap: 0.15rem }
+        :scope > .column > a {
+          padding: 0.45rem 0.6rem;
+          border-radius: 0.4rem;
+          text-decoration: none;
+          color: inherit;
+        }
+        :scope > .column > a:hover { --bg: 0.15 }
+        :scope > .column > a[aria-current="page"] { --bg: 0.25; --fg: -1 }
+      }
+    </style>
+    <div class="column">
+      <a href="../">Home</a>
+      <a href="../mental-model/">Mental model</a>
+      <a href="../color/">Color</a>
+      <a href="../type/">Type</a>
+      <a href="../surfaces/">Surfaces</a>
+      <a href="./" aria-current="page">Layout primitives</a>
+      <a href="../page-layout/">Page layout</a>
+      <a href="../components/">Components</a>
+      <a href="../authoring/">Authoring</a>
+      <a href="../charts/">Charts</a>
+      <a href="../recipes/">Recipes</a>
+      <a href="../anti-patterns/">What NOT to do</a>
+      <a href="../summary/">Summary</a>
+      <a href="../llms.txt">llms.txt</a>
+    </div>
+  </nav>
+
+  <!-- ── pg-navigation-footer ───────────────────────────── -->
+  <div class="pg-navigation-footer tablet desktop" style="--type: -1.5; --fg: -0.4; border-inline-end: 1px solid var(--border); border-block-start: 1px solid var(--border)">
+    <span>v0.1 · <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">source</a></span>
+  </div>
+
+  <!-- ── pg-main-header ─────────────────────────────────── -->
+  <div class="pg-main-header" style="border-block-end: 1px solid var(--border)">
+    <h1 style="--type: 2; font-family: var(--font-display); margin: 0">Layout primitives</h1>
+  </div>
+
+  <!-- ── pg-main ────────────────────────────────────────── -->
+  <main class="pg-main column" style="--gap: 2.5rem"
+        data-signals="{_gap: ''}"
+        data-on:load__window="$_gap = getComputedStyle(document.documentElement).getPropertyValue('--gap').trim()"
+        data-on:resize__window="$_gap = getComputedStyle(document.documentElement).getPropertyValue('--gap').trim()">
+
+    <style>
+      @scope {
+        :scope .demo {
+          padding: 1rem;
+          border: 1px solid var(--border);
+          border-radius: 0.5rem;
+        }
+        :scope .demo > * + * { margin-block-start: 0 }
+        :scope .demo .placeholder {
+          --bg: 0.4;
+          padding: 0.6rem 0.9rem;
+          border-radius: 0.4rem;
+          --type: -0.5;
+        }
+        :scope .demo-pair {
+          --grid-min: 22rem;
+          align-items: stretch;
+        }
+        :scope pre.code {
+          margin: 0;
+          padding: 1rem;
+          --bg: 0.05;
+          border-radius: 0.5rem;
+          overflow-x: auto;
+          --type: -0.5;
+          line-height: 1.5;
+        }
+        :scope section.primitive { --gap: 0.75rem }
+        :scope section.primitive > h2 {
+          --type: 1.25;
+          font-family: var(--font-display);
+          margin: 0;
+        }
+        :scope section.primitive > .lede {
+          margin: 0;
+          max-inline-size: 60ch;
+          --fg: -0.7;
+        }
+      }
+    </style>
+
+    <p style="--type: 0; max-inline-size: 60ch; margin: 0">
+      The composition primitives are stateless layout classes. Each one solves
+      one geometric problem and composes with the others. Most layouts are built
+      by stacking these without writing custom CSS.
+    </p>
+
+    <p style="margin: 0; max-inline-size: 60ch; --type: -0.5; --fg: -0.5">
+      All primitives use <code>var(--gap)</code> for spacing between siblings.
+      Override per-instance with <code>style="--gap: 0.4rem"</code> for tighter
+      groups or <code>style="--gap: 1.5rem"</code> for airier ones.
+    </p>
+
+    <!-- ── .column ────────────────────────────────────── -->
+    <section class="primitive column" id="column">
+      <h2><code>.column</code></h2>
+      <p class="lede">Vertical stack with gap between siblings.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="column">
+            <div class="placeholder">A</div>
+            <div class="placeholder">B</div>
+            <div class="placeholder">C</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="column"&gt;
+  &lt;div&gt;A&lt;/div&gt;
+  &lt;div&gt;B&lt;/div&gt;
+  &lt;div&gt;C&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .row ───────────────────────────────────────── -->
+    <section class="primitive column" id="row">
+      <h2><code>.row</code></h2>
+      <p class="lede">Horizontal stack with gap. Wraps to a new line when content exceeds the container width. Items align vertically centered by default.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="row">
+            <div class="placeholder">A</div>
+            <div class="placeholder">B</div>
+            <div class="placeholder">C</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="row"&gt;
+  &lt;div&gt;A&lt;/div&gt;
+  &lt;div&gt;B&lt;/div&gt;
+  &lt;div&gt;C&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .split ─────────────────────────────────────── -->
+    <section class="primitive column" id="split">
+      <h2><code>.split</code></h2>
+      <p class="lede">Two equal columns. Each child takes 1fr regardless of content size.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="split">
+            <div class="placeholder">left</div>
+            <div class="placeholder">right</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="split"&gt;
+  &lt;div&gt;left&lt;/div&gt;
+  &lt;div&gt;right&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .spread ────────────────────────────────────── -->
+    <section class="primitive column" id="spread">
+      <h2><code>.spread</code></h2>
+      <p class="lede">Horizontal layout with first child pushed to the start, last to the end, and middle children distributed evenly. Common for top bars and toolbars.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="spread">
+            <div class="placeholder">brand</div>
+            <div class="placeholder">center</div>
+            <div class="placeholder">menu</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="spread"&gt;
+  &lt;div&gt;brand&lt;/div&gt;
+  &lt;div&gt;center&lt;/div&gt;
+  &lt;div&gt;menu&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .lcr ───────────────────────────────────────── -->
+    <section class="primitive column" id="lcr">
+      <h2><code>.lcr</code></h2>
+      <p class="lede">Three-region horizontal layout: leading, center, trailing. The center child is centered in the container regardless of the leading and trailing widths.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="lcr">
+            <div class="placeholder">left</div>
+            <div class="placeholder">centered</div>
+            <div class="placeholder">right</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="lcr"&gt;
+  &lt;div&gt;left&lt;/div&gt;
+  &lt;div&gt;centered&lt;/div&gt;
+  &lt;div&gt;right&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .tmb ───────────────────────────────────────── -->
+    <section class="primitive column" id="tmb">
+      <h2><code>.tmb</code></h2>
+      <p class="lede">Three-region vertical layout: top, middle, bottom. Mirrors <code>.lcr</code> on the vertical axis. Useful for cards and panels with pinned edges and centered content.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="tmb" style="block-size: 12rem">
+            <div class="placeholder">top</div>
+            <div class="placeholder">centered</div>
+            <div class="placeholder">bottom</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="tmb" style="block-size: 12rem"&gt;
+  &lt;div&gt;top&lt;/div&gt;
+  &lt;div&gt;centered&lt;/div&gt;
+  &lt;div&gt;bottom&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .flank / .flank-end ────────────────────────── -->
+    <section class="primitive column" id="flank">
+      <h2><code>.flank</code> · <code>.flank-end</code></h2>
+      <p class="lede">A leading and trailing pair where one is fixed and the other grows. <code>.flank</code> grows the trailing child (use for icon + label rows). <code>.flank-end</code> grows the leading child (use for label + control rows).</p>
+
+      <div class="grid demo-pair">
+        <div class="demo column">
+          <div class="flank">
+            <div class="placeholder">icon</div>
+            <div class="placeholder" style="flex: 1; text-align: center">leading is fixed, trailing grows</div>
+          </div>
+          <div class="flank-end">
+            <div class="placeholder" style="flex: 1; text-align: center">leading grows, trailing is fixed</div>
+            <div class="placeholder">btn</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="flank"&gt;
+  &lt;div&gt;icon&lt;/div&gt;
+  &lt;div&gt;label&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="flank-end"&gt;
+  &lt;div&gt;label&lt;/div&gt;
+  &lt;div&gt;btn&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .grid ──────────────────────────────────────── -->
+    <section class="primitive column" id="grid">
+      <h2><code>.grid</code></h2>
+      <p class="lede">Auto-fit responsive grid. Children fit as many columns as will accommodate <code>--grid-min</code> (default 16rem). Each cell is at least <code>--grid-min</code> wide and at most one full row.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="grid" style="--grid-min: 8rem">
+            <div class="placeholder">1</div>
+            <div class="placeholder">2</div>
+            <div class="placeholder">3</div>
+            <div class="placeholder">4</div>
+            <div class="placeholder">5</div>
+            <div class="placeholder">6</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="grid" style="--grid-min: 8rem"&gt;
+  &lt;div&gt;1&lt;/div&gt;
+  &lt;div&gt;2&lt;/div&gt;
+  &lt;div&gt;3&lt;/div&gt;
+  &lt;!-- … --&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .frame ─────────────────────────────────────── -->
+    <section class="primitive column" id="frame">
+      <h2><code>.frame</code></h2>
+      <p class="lede">Fixed aspect ratio container (16:9 by default). The first child fills the frame with <code>object-fit: cover</code>. Use for image and video placeholders that maintain their aspect ratio while the content adapts.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="frame" style="--bg: 0.4; border-radius: 0.4rem">
+            <div style="display: flex; align-items: center; justify-content: center; --type: 0.5">16:9 frame</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="frame"&gt;
+  &lt;img src="…" alt="…"&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .stack ─────────────────────────────────────── -->
+    <section class="primitive column" id="stack">
+      <h2><code>.stack</code></h2>
+      <p class="lede">Single-cell grid where every child occupies the same cell. Use for layered content — a hero image with text overlaid, a chart with annotations on top, a card with a corner badge.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="stack" style="block-size: 8rem">
+            <div class="placeholder" style="--bg: 0.6">background layer</div>
+            <div class="placeholder" style="--bg: var(--cfg-bg-loud); --fg: -1; justify-self: end; align-self: start">badge</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="stack"&gt;
+  &lt;div&gt;background&lt;/div&gt;
+  &lt;div style="justify-self: end;
+              align-self: start"&gt;
+    badge
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .hud ───────────────────────────────────────── -->
+    <section class="primitive column" id="hud">
+      <h2><code>.hud</code></h2>
+      <p class="lede">Single-cell overlay with nine directional anchor slots: <code>↖ ↑ ↗ ← • → ↙ ↓ ↘</code>. Children are sized to their content and pinned to the slot they're tagged with. The container is hit-test transparent; children opt back in to receive clicks. Used for KPI cards (label + value + tag), chart legends, badges, reticles.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="hud" style="block-size: 10rem; padding: 0.75rem; border-radius: 0.4rem; --bg: 0.1; pointer-events: auto">
+            <span class="↖" style="--type: -2; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">label</span>
+            <span class="↗ tag suc">+12%</span>
+            <span class="•" style="--type: 2; font-family: var(--font-display)">$284k</span>
+            <span class="↙" style="--type: -1.5; --fg: -0.5">footnote</span>
+            <span class="↘" style="--type: -1.5; --fg: -0.5">2026 Q4</span>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="hud"&gt;
+  &lt;span class="↖"&gt;label&lt;/span&gt;
+  &lt;span class="↗"&gt;+12%&lt;/span&gt;
+  &lt;span class="•"&gt;$284k&lt;/span&gt;
+  &lt;span class="↙"&gt;footnote&lt;/span&gt;
+  &lt;span class="↘"&gt;Q4&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .hud-grid ──────────────────────────────────── -->
+    <section class="primitive column" id="hud-grid">
+      <h2><code>.hud-grid</code></h2>
+      <p class="lede">Same nine anchor slots as <code>.hud</code>, but as actual grid cells with content sizes. The center row stretches; corners and edges take their content size. Use when the slots need to <em>occupy</em> space rather than overlay it.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="hud-grid" style="block-size: 10rem">
+            <div class="↖ placeholder">↖</div>
+            <div class="↑ placeholder">↑</div>
+            <div class="↗ placeholder">↗</div>
+            <div class="← placeholder">←</div>
+            <div class="• placeholder">•</div>
+            <div class="→ placeholder">→</div>
+            <div class="↙ placeholder">↙</div>
+            <div class="↓ placeholder">↓</div>
+            <div class="↘ placeholder">↘</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="hud-grid"&gt;
+  &lt;div class="↖"&gt;↖&lt;/div&gt;
+  &lt;div class="↑"&gt;↑&lt;/div&gt;
+  &lt;div class="↗"&gt;↗&lt;/div&gt;
+  &lt;!-- … nine total cells --&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── .hero ──────────────────────────────────────── -->
+    <section class="primitive column" id="hero">
+      <h2><code>.hero</code></h2>
+      <p class="lede">Five-slot panel with chrome around scrollable content. <code>.top</code> and <code>.bottom</code> span the full width; <code>.left</code> and <code>.right</code> flank the middle; <code>.main</code> scrolls. Used inside drawers, modals, and split-pane regions.</p>
+
+      <div class="grid demo-pair">
+        <div class="demo">
+          <div class="hero" style="block-size: 12rem; --bg: 0.04; border-radius: 0.4rem">
+            <div class="top placeholder">top</div>
+            <div class="left placeholder">left</div>
+            <div class="main placeholder" style="text-align: center">main (scrolls)</div>
+            <div class="right placeholder">right</div>
+            <div class="bottom placeholder">bottom</div>
+          </div>
+        </div>
+<pre class="code"><code>&lt;div class="hero"&gt;
+  &lt;div class="top"&gt;…&lt;/div&gt;
+  &lt;div class="left"&gt;…&lt;/div&gt;
+  &lt;div class="main"&gt;…&lt;/div&gt;
+  &lt;div class="right"&gt;…&lt;/div&gt;
+  &lt;div class="bottom"&gt;…&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+
+      <p style="margin: 0; max-inline-size: 60ch; --type: -0.5; --fg: -0.5">
+        All slots are optional except <code>.main</code>. Omit any others and
+        their tracks collapse to zero. <code>.hero</code> fills its container,
+        not the viewport — for application-root layouts use <code>.page</code>
+        instead.
+      </p>
+    </section>
+
+    <!-- ── Setting gap ────────────────────────────────── -->
+    <section class="primitive column" id="setting-gap" style="margin-block-start: 1rem">
+      <h2>Setting gap</h2>
+      <p class="lede">All composition primitives use <code>var(--gap)</code> for spacing between siblings. The system value is fluid: it stays tight across phone-to-desktop widths and only ramps up at projector and TV scale.</p>
+
+<pre class="code"><code>:root {
+  --gap: clamp(
+    0.25rem,
+    calc(0.25rem + 1.75rem * pow(100vi / 3000px, 3)),
+    2rem
+  );
+}</code></pre>
+
+      <div class="column" style="--gap: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem">
+        <div class="flank-end">
+          <span style="--type: -1; --fg: -0.5">Current resolved value at this viewport width</span>
+          <span data-text="$_gap" style="--type: 0.5; font-family: var(--font-mono); --fg: -1"></span>
+        </div>
+      </div>
+
+      <p style="margin: 0; max-inline-size: 60ch; --type: -0.5; --fg: -0.5">
+        Per-instance overrides opt out of the fluid behavior:
+        <code>style="--gap: 0.4rem"</code> for a tight chip row,
+        <code>style="--gap: 1.5rem"</code> for an airy section. The fluid
+        behavior resumes everywhere else.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- ── pg-aside ───────────────────────────────────────── -->
+  <aside class="pg-aside desktop" style="inline-size: 14rem; border-inline-start: 1px solid var(--border)">
+    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">On this page</span>
+    <div class="column" style="--gap: 0.3rem; --type: -0.5">
+      <a href="#column" style="color: inherit; text-decoration: none"><code>.column</code></a>
+      <a href="#row" style="color: inherit; text-decoration: none"><code>.row</code></a>
+      <a href="#split" style="color: inherit; text-decoration: none"><code>.split</code></a>
+      <a href="#spread" style="color: inherit; text-decoration: none"><code>.spread</code></a>
+      <a href="#lcr" style="color: inherit; text-decoration: none"><code>.lcr</code></a>
+      <a href="#tmb" style="color: inherit; text-decoration: none"><code>.tmb</code></a>
+      <a href="#flank" style="color: inherit; text-decoration: none"><code>.flank</code></a>
+      <a href="#grid" style="color: inherit; text-decoration: none"><code>.grid</code></a>
+      <a href="#frame" style="color: inherit; text-decoration: none"><code>.frame</code></a>
+      <a href="#stack" style="color: inherit; text-decoration: none"><code>.stack</code></a>
+      <a href="#hud" style="color: inherit; text-decoration: none"><code>.hud</code></a>
+      <a href="#hud-grid" style="color: inherit; text-decoration: none"><code>.hud-grid</code></a>
+      <a href="#hero" style="color: inherit; text-decoration: none"><code>.hero</code></a>
+      <a href="#setting-gap" style="color: inherit; text-decoration: none">Setting gap</a>
+    </div>
+  </aside>
+
+  <!-- ── pg-footer ──────────────────────────────────────── -->
+  <div class="pg-footer flank-end" style="--type: -1.5; --fg: -0.4; border-block-start: 1px solid var(--border)">
+    <span>© 2026 stick.css</span>
+    <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">github.com/Deufel/css</a>
+  </div>
+
+</body>
+</html>
