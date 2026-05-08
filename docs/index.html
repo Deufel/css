@@ -3,1433 +3,200 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>stick.css · color tour</title>
+<title>stick.css — a small, formula-driven CSS design system</title>
+<meta name="description" content="A CSS design system organized around three formulas — color, type, space — and a small set of layout primitives.">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@ddd1642/css/style.css">
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.1/bundles/datastar.js"></script>
+
 <style>
-/* ════════════════════════════════════════════════════════════════
-   stick.css — color formula
-   ════════════════════════════════════════════════════════════ */
-/* ════════════════════════════════════════════════════════════════
-   PUBLIC TOKENS — the consumer-facing surface
-
-   The five tokens designers actually compose with. Set on any
-   element to express intent; the system resolves to paint.
-   ════════════════════════════════════════════════════════════ */
-@property --bg         { syntax: "<number>"; inherits: true; initial-value: -1 }
-@property --fg         { syntax: "<number>"; inherits: true; initial-value: -1 }
-@property --hue        { syntax: "<number>"; inherits: true; initial-value: 220 }
-@property --hue-lock   { syntax: "*";        inherits: true }
-@property --hue-shift  { syntax: "<number>"; inherits: true; initial-value: 0 }
-
-/* ════════════════════════════════════════════════════════════════
-   CONFIGURATION TOKENS — set once on :root for project-wide tuning
-
-   Organized by decision category. Tokens with -light/-dark suffix
-   pairs are theme-split (different value per theme). Tokens without
-   are theme-shared (one value works in both).
-   ════════════════════════════════════════════════════════════ */
-
-/* ── Theme switch (set by [data-ui-theme] block) ───────────── */
-@property --cfg-dark { syntax: "<number>"; inherits: true; initial-value: 0 }
-
-/* ── Color character ───────────────────────────────────────── */
-@property --cfg-color-muted-l-light  { syntax: "<percentage>"; inherits: true; initial-value: 90% }
-@property --cfg-color-muted-l-dark   { syntax: "<percentage>"; inherits: true; initial-value: 38% }
-@property --cfg-color-muted-c        { syntax: "<number>";     inherits: true; initial-value: 0.05 }
-@property --cfg-color-loud-l-light   { syntax: "<percentage>"; inherits: true; initial-value: 20% }
-@property --cfg-color-loud-c-light   { syntax: "<number>";     inherits: true; initial-value: 0.4 }
-@property --cfg-color-loud-l-dark    { syntax: "<percentage>"; inherits: true; initial-value: 80% }
-@property --cfg-color-loud-c-dark    { syntax: "<number>";     inherits: true; initial-value: 0.38 }
-@property --cfg-color-curve          { syntax: "<number>";     inherits: true; initial-value: 1.6 }
-@property --cfg-color-surf-chroma    { syntax: "<number>";     inherits: true; initial-value: 0.018 }
-@property --cfg-fg-tint              { syntax: "<number>";     inherits: true; initial-value: 0.02 }
-@property --cfg-color-alpha          { syntax: "<number>";     inherits: true; initial-value: 1 }
-
-/* ── Surface depth ─────────────────────────────────────────── */
-@property --cfg-surf-top-l-light  { syntax: "<number>"; inherits: true; initial-value: 97 }
-@property --cfg-surf-top-l-dark   { syntax: "<number>"; inherits: true; initial-value: 28 }
-@property --cfg-surf-step-light   { syntax: "<number>"; inherits: true; initial-value: 2 }
-@property --cfg-surf-step-dark    { syntax: "<number>"; inherits: true; initial-value: 5 }
-@property --cfg-surf-curve-light  { syntax: "<number>"; inherits: true; initial-value: 0.3 }
-@property --cfg-surf-curve-dark   { syntax: "<number>"; inherits: true; initial-value: 0.3 }
-@property --cfg-surf-mid-light    { syntax: "<number>"; inherits: true; initial-value: 60.5 }
-@property --cfg-surf-mid-dark     { syntax: "<number>"; inherits: true; initial-value: 33.5 }
-@property --cfg-surf-rng-light    { syntax: "<number>"; inherits: true; initial-value: 55 }
-@property --cfg-surf-rng-dark     { syntax: "<number>"; inherits: true; initial-value: 27.5 }
-
-/* ── Contrast perception ───────────────────────────────────── */
-@property --cfg-contrast-perception      { syntax: "<number>"; inherits: true; initial-value: 0 }
-@property --cfg-contrast-perception-base { syntax: "<number>"; inherits: true; initial-value: 3 }
-@property --cfg-contrast-perception-bias { syntax: "<number>"; inherits: true; initial-value: 60 }
-
-/* ── Interaction states ────────────────────────────────────────
-   Hover and active perturb the formula directly:
-     - --cfg-hover-l-shift / --cfg-active-l-shift adjust final L by
-       a fixed percentage. Direct L shift (rather than --bg shift)
-       gives perceptually consistent feedback across the whole ramp.
-     - --cfg-hover-c-shift adds baseline chroma on hover. Crucial
-       for low-chroma surfaces — without it, hover on a near-neutral
-       card produces "lightness only" feedback that the eye can
-       barely register. The chroma shift gives the hover something
-       to *become* rather than just lift toward.
-     - --cfg-active-fg-mul scales --fg toward 0 on active, reducing
-       text contrast subtly to reinforce the "pressed" feel.
-   Positive L = lifted/brighter, negative L = darker. Multiplier
-   below 1 = lower contrast, multiplier above 1 = higher contrast. */
-@property --cfg-hover-l-shift  { syntax: "<number>"; inherits: true; initial-value: 4 }
-@property --cfg-hover-c-shift  { syntax: "<number>"; inherits: true; initial-value: 0.025 }
-@property --cfg-active-l-shift { syntax: "<number>"; inherits: true; initial-value: -3 }
-@property --cfg-active-fg-mul  { syntax: "<number>"; inherits: true; initial-value: 0.7 }
-
-/* ── Structural ────────────────────────────────────────────── */
-@property --depth { syntax: "<number>"; inherits: false; initial-value: 0 }
-
-/* ════════════════════════════════════════════════════════════════
-   PRIVATE INTERMEDIATES — formula plumbing, not consumer-facing.
-   These are computed by the :where(*) rule and consumed downstream.
-   ════════════════════════════════════════════════════════════ */
-@property --_bg            { syntax: "<color>";      inherits: true;  initial-value: oklch(88% 0.018 220) }
-@property --_h             { syntax: "<number>";     inherits: false; initial-value: 220 }
-@property --_naive         { syntax: "<number>";     inherits: false; initial-value: 88 }
-@property --_t             { syntax: "<number>";     inherits: false; initial-value: 0.5 }
-@property --_surf-l        { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-@property --_surf-top-l    { syntax: "<number>";     inherits: false; initial-value: 88 }
-@property --_surf-step     { syntax: "<number>";     inherits: false; initial-value: 4 }
-@property --_surf-curve    { syntax: "<number>";     inherits: false; initial-value: 0.6 }
-@property --_surf-mid      { syntax: "<number>";     inherits: false; initial-value: 60.5 }
-@property --_surf-rng      { syntax: "<number>";     inherits: false; initial-value: 55 }
-@property --_c01           { syntax: "<number>";     inherits: false; initial-value: 0 }
-@property --_c01-curved    { syntax: "<number>";     inherits: false; initial-value: 0 }
-@property --_k             { syntax: "<number>";     inherits: false; initial-value: 0 }
-@property --_l             { syntax: "<percentage>"; inherits: false; initial-value: 88% }
-@property --_c             { syntax: "<number>";     inherits: false; initial-value: 0.018 }
-@property --_loud-l        { syntax: "<percentage>"; inherits: false; initial-value: 20% }
-@property --_loud-c        { syntax: "<number>";     inherits: false; initial-value: 0.4 }
-@property --_muted-l       { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-@property --_col-l         { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-@property --_col-c         { syntax: "<number>";     inherits: false; initial-value: 0.1 }
-@property --_fg-pos        { syntax: "<number>";     inherits: false; initial-value: 0 }
-@property --_fg-neg        { syntax: "<number>";     inherits: false; initial-value: 1 }
-@property --_fg-pos-curved { syntax: "<number>";     inherits: false; initial-value: 0 }
-@property --_fg-onpos      { syntax: "<number>";     inherits: false; initial-value: 0 }
-@property --_fg-pole       { syntax: "<percentage>"; inherits: false; initial-value: 4% }
-@property --_fg-ramp-l     { syntax: "<percentage>"; inherits: false; initial-value: 90% }
-@property --_fg-ramp-c     { syntax: "<number>";     inherits: false; initial-value: 0.05 }
-@property --_fg-l          { syntax: "<percentage>"; inherits: false; initial-value: 4% }
-@property --_fg-c          { syntax: "<number>";     inherits: false; initial-value: 0.02 }
-@property --_surf-dark     { syntax: "<number>";     inherits: false; initial-value: 0 }
-@property --_flip-threshold { syntax: "<percentage>"; inherits: false; initial-value: 50% }
-@property --_chroma-present { syntax: "<number>";    inherits: false; initial-value: 0 }
-@property --_interact-l     { syntax: "<number>";    inherits: false; initial-value: 0 }
-@property --_interact-c     { syntax: "<number>";    inherits: false; initial-value: 0 }
-@property --_interact-fg-mul { syntax: "<number>";   inherits: false; initial-value: 1 }
-@property --_fg-effective   { syntax: "<number>";    inherits: false; initial-value: -1 }
-
-:where(*) {
-  --_h: var(--hue-lock, calc(var(--hue) + var(--hue-shift)));
-
-  /* ── Theme-aware token resolution ────────────────────────
-     Every theme-split cfg-* token follows the same lerp pattern:
-       value = light * (1 - dark) + dark_value * dark
-     Computed per element so per-component overrides take effect
-     locally (a card can override surf-step, a region can override
-     loud-l, etc., without disturbing the rest of the page). */
-  --_loud-l: calc(var(--cfg-color-loud-l-light) * (1 - var(--cfg-dark)) + var(--cfg-color-loud-l-dark) * var(--cfg-dark));
-  --_loud-c: calc(var(--cfg-color-loud-c-light) * (1 - var(--cfg-dark)) + var(--cfg-color-loud-c-dark) * var(--cfg-dark));
-  --_muted-l: calc(var(--cfg-color-muted-l-light) * (1 - var(--cfg-dark)) + var(--cfg-color-muted-l-dark) * var(--cfg-dark));
-
-  /* Surface depth tokens — same lerp pattern, applied to the
-     surface palette parameters that vary per theme. */
-  --_surf-top-l: calc(var(--cfg-surf-top-l-light) * (1 - var(--cfg-dark)) + var(--cfg-surf-top-l-dark) * var(--cfg-dark));
-  --_surf-step:  calc(var(--cfg-surf-step-light)  * (1 - var(--cfg-dark)) + var(--cfg-surf-step-dark)  * var(--cfg-dark));
-  --_surf-curve: calc(var(--cfg-surf-curve-light) * (1 - var(--cfg-dark)) + var(--cfg-surf-curve-dark) * var(--cfg-dark));
-  --_surf-mid:   calc(var(--cfg-surf-mid-light)   * (1 - var(--cfg-dark)) + var(--cfg-surf-mid-dark)   * var(--cfg-dark));
-  --_surf-rng:   calc(var(--cfg-surf-rng-light)   * (1 - var(--cfg-dark)) + var(--cfg-surf-rng-dark)   * var(--cfg-dark));
-
-  /* ── Surface lightness from depth ────────────────────────
-     Linear depth × step, then quadratic correction near midpoint
-     to compress the palette and prevent banding. */
-  --_naive:  calc(var(--_surf-top-l) - var(--depth) * var(--_surf-step));
-  --_t:      calc((var(--_naive) - var(--_surf-mid)) / var(--_surf-rng));
-  --_surf-l: calc((var(--_naive) - var(--depth) * var(--_surf-step) * var(--_surf-curve) * var(--_t) * var(--_t)) * 1%);
-
-  /* ── --bg axis scalars ───────────────────────────────────
-     --_k:   0 → 1 across [-1, 0] (surface band)
-     --_c01: 0 → 1 across [0, 1]  (chromatic band)  */
-  --_k:   clamp(0, calc(var(--bg) + 1), 1);
-  --_c01: clamp(0, var(--bg), 1);
-
-  /* ── Chromatic ramp ──────────────────────────────────────
-     Curve-eased lerp from theme-aware muted to theme-aware loud.
-     Endpoints (0 and 1) preserved by any power, so muted and
-     loud stay exact — only the in-between gets reshaped. */
-  --_c01-curved: pow(var(--_c01), var(--cfg-color-curve));
-  --_col-l: calc(var(--_muted-l) + var(--_c01-curved) * (var(--_loud-l) - var(--_muted-l)));
-  --_col-c: calc(var(--cfg-color-muted-c) + var(--_c01-curved) * (var(--_loud-c) - var(--cfg-color-muted-c)));
-
-  /* ── Final lightness/chroma — surface to chromatic ──────
-     Interaction state perturbs final L directly (in percentage
-     points) so hover/active feel perceptually consistent across
-     the whole ramp — independent of where on the curve we sit.
-     --_interact-c adds baseline chroma on hover, crucial for
-     low-chroma surfaces that would otherwise have nothing for
-     the L shift to anchor against. */
-  --_l: calc(
-    var(--_surf-l) * (1 - var(--_k))
-    + var(--_col-l) * var(--_k)
-    + var(--_interact-l) * 1%
-  );
-  --_c: calc(
-    var(--cfg-color-surf-chroma) * (1 - var(--_k))
-    + var(--_col-c) * var(--_k)
-    + var(--_interact-c)
-  );
-
-  --_bg: oklch(clamp(4%, var(--_l), 97%) var(--_c) var(--_h) / var(--cfg-color-alpha));
-
-  /* ── Foreground ──────────────────────────────────────────
-     Negative --fg = neutral contrast ink (lerps toward pole)
-     Positive --fg = chromatic ink (lerps from muted toward loud)
-     --_interact-fg-mul scales --fg toward 0 (lower contrast) on
-     active states. Default 1 = no change; values <1 reduce contrast,
-     values >1 amplify it. Works for both signs of --fg. */
-  --_fg-effective: calc(var(--fg) * var(--_interact-fg-mul));
-  --_fg-pos: clamp(0, var(--_fg-effective), 1);
-  --_fg-neg: clamp(0, calc(-1 * var(--_fg-effective)), 1);
-
-  /* Contrast pole flip threshold. Defaults to 50% L (WCAG-aligned).
-     When --cfg-contrast-perception is 1, two adjustments stack:
-     (1) a constant base shift gated to chromatic cells only via
-     --_chroma-present, and (2) a linear bias scaled by chroma.
-     Together they bias the flip earlier on saturated cells while
-     leaving neutrals at the WCAG midpoint. */
-  --_chroma-present: clamp(0, calc(var(--_c) * 30), 1);
-  --_flip-threshold: calc(
-    50%
-    + var(--cfg-contrast-perception) * var(--_chroma-present) * var(--cfg-contrast-perception-base) * 1%
-    + var(--cfg-contrast-perception) * var(--_c) * var(--cfg-contrast-perception-bias) * 1%
-  );
-  --_surf-dark: clamp(0, calc((var(--_flip-threshold) - var(--_l)) / 1% * 20), 1);
-  --_fg-pole: calc(4% * (1 - var(--_surf-dark)) + 97% * var(--_surf-dark));
-
-  --_fg-pos-curved: pow(var(--_fg-pos), var(--cfg-color-curve));
-  --_fg-ramp-l: calc(var(--_muted-l) + var(--_fg-pos-curved) * (var(--_loud-l) - var(--_muted-l)));
-  --_fg-ramp-c: calc(var(--cfg-color-muted-c) + var(--_fg-pos-curved) * (var(--_loud-c) - var(--cfg-color-muted-c)));
-  --_fg-onpos: clamp(0, calc(var(--_fg-pos) * 1000000), 1);
-
-  --_fg-l: calc(
-    (clamp(4%, var(--_l), 97%) * (1 - var(--_fg-neg)) + var(--_fg-pole) * var(--_fg-neg)) * (1 - var(--_fg-onpos))
-    + var(--_fg-ramp-l) * var(--_fg-onpos)
-  );
-  --_fg-c: calc(
-    (var(--_c) * (1 - var(--_fg-neg)) + var(--cfg-fg-tint) * var(--_fg-neg)) * (1 - var(--_fg-onpos))
-    + var(--_fg-ramp-c) * var(--_fg-onpos)
-  );
-
-  color: oklch(clamp(4%, var(--_fg-l), 97%) var(--_fg-c) var(--_h) / 1);
-
-  --border: oklch(
-    from var(--_bg)
-    calc(l + (var(--cfg-dark) * 2 - 1) * 0.14)
-    calc(c * 0.3)
-    h
-  );
-  --Border: oklch(
-    from var(--_bg)
-    calc(l + (var(--cfg-dark) * 2 - 1) * 0.22)
-    clamp(0.08, calc(c + 0.12), 0.18)
-    calc(h + 8)
-  );
-}
-
-:where(*) { background-color: oklch(from var(--_bg) l c h / var(--_k)) }
-:where(body, .surface) { background-color: var(--_bg) }
-.surface:has(.surface)                            { --depth: 1 }
-.surface:has(.surface .surface)                   { --depth: 2 }
-.surface:has(.surface .surface .surface)          { --depth: 3 }
-
-:where(svg) { color: currentColor }
-
-/* ── Interaction states ──────────────────────────────────────
-   Two markers for two intents:
-     .clickable — for elements you can click/tap. Gets hover lift,
-       active press (darker + lower contrast), and pointer cursor.
-       Buttons, links, [role="button"], and [tabindex] elements
-       are .clickable by default.
-     .hoverable — for elements that respond to pointer presence
-       but aren't clickable. Gets hover lift only — no active
-       state, no cursor change. KPI cards, status displays,
-       acknowledgment-only UI.
-   Both apply the formula change instantly. Override per
-   component if individual elements need different magnitudes. */
-
-/* Clickable: full interactive treatment */
-:where(button, a, [role="button"], [tabindex], .clickable):not([tabindex="-1"]) {
-  cursor: pointer;
-}
-:where(button, a, [role="button"], [tabindex], .clickable):not([tabindex="-1"]):hover {
-  --_interact-l: var(--cfg-hover-l-shift);
-  --_interact-c: var(--cfg-hover-c-shift);
-}
-:where(button, a, [role="button"], [tabindex], .clickable):not([tabindex="-1"]):active {
-  --_interact-l: var(--cfg-active-l-shift);
-  --_interact-fg-mul: var(--cfg-active-fg-mul);
-}
-
-/* Hoverable: soft response only — hover lift + chroma, no active, no cursor */
-:where(.hoverable):hover {
-  --_interact-l: var(--cfg-hover-l-shift);
-  --_interact-c: var(--cfg-hover-c-shift);
-}
-
-/* ════════════════════════════════════════════════════════════════
-   stick.css configuration
-   
-   Override any token below on :root to retune the system project-
-   wide. Override on any element (or class scope) to retune locally.
-   All tokens are @property-registered, so changes animate smoothly
-   when transitioned.
-   ════════════════════════════════════════════════════════════ */
-:root {
-  /* ─── Brand ─────────────────────────────────────────────  */
-  --hue: 220;
-  --fg: -1;
-
-  /* Smooth animation when toggling the contrast perception flag. */
-  transition: --cfg-contrast-perception 0.5s ease;
-}
-
-/* Theme switch — set on <html> via [data-ui-theme]. The formula's
-   :where(*) rule lerps every theme-split cfg-* token between its
-   -light and -dark counterparts based on this flag. */
-[data-ui-theme="light"] { --cfg-dark: 0 }
-[data-ui-theme="dark"]  { --cfg-dark: 1 }
-
-
-/* ════════════════════════════════════════════════════════════════
-   PAGE
-   ════════════════════════════════════════════════════════════ */
-* { box-sizing: border-box; margin: 0 }
-html, body { min-block-size: 100dvh }
-body {
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace }
-
-.topbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem 1rem;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-}
-.topbar h1 {
-  font-family: ui-monospace, monospace;
-  font-size: 16px; font-weight: 700;
-  margin: 0;
-  margin-inline-end: auto;
-}
-.topbar h1 span { --fg: -0.5; font-weight: 400 }
-.topbar .blurb {
-  --fg: -0.6;
-  font-size: 12px;
-  flex: 1;
-  margin-inline-start: 0.5rem;
-}
-.topbar .hue-override {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  --fg: -0.6;
-}
-.topbar .hue-override input[type=checkbox] { accent-color: var(--Border); margin: 0; }
-.topbar .hue-override input[type=range] { inline-size: 110px; accent-color: var(--Border); }
-.topbar .hue-override code { --fg: -0.85; min-inline-size: 2.2rem }
-.seg {
-  display: inline-flex;
-  border: 1px solid var(--border);
-  border-radius: 6px; overflow: hidden;
-}
-.seg button {
-  background: transparent; border: 0;
-  padding: 0.3em 0.8em;
-  font-family: ui-monospace, monospace; font-size: 11px;
-  color: inherit; cursor: pointer;
-}
-.seg button[aria-pressed="true"] { background: var(--Border); color: var(--_bg) }
-
-.disclaimer {
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  --fg: -0.55;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: 1px dashed var(--border);
-  --bg: -1;
-}
-.disclaimer strong { --fg: -0.85 }
-.disclaimer .new { --fg: 0.5; --hue-lock: 290; font-weight: 700 }
-
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.preset-card {
-  border-radius: 10px;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  transition:
-    --cfg-color-muted-l-light 0.6s,
-    --cfg-color-muted-c 0.6s,
-    --cfg-color-muted-l-dark 0.6s,
-    --cfg-color-loud-l-light 0.6s,
-    --cfg-color-loud-c-light 0.6s,
-    --cfg-color-loud-l-dark 0.6s,
-    --cfg-color-loud-c-dark 0.6s,
-    --cfg-color-surf-chroma 0.6s,
-    --cfg-fg-tint 0.6s,
-    --cfg-color-curve 0.6s,
-    --hue 0.6s;
-}
-
-.preset-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-.preset-header .name {
-  font-family: ui-monospace, monospace;
-  font-weight: 700;
-  font-size: 13px;
-}
-.preset-header .tag {
-  font-family: ui-monospace, monospace;
-  font-size: 9px;
-  --fg: -0.5;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.2em 0.5em;
-  border-radius: 3px;
-  --bg: 0.05;
-}
-.preset-blurb {
-  font-size: 12px;
-  --fg: -0.6;
-  line-height: 1.45;
-  min-block-size: 2.6rem;
-}
-
-.preset-config {
-  font-family: ui-monospace, monospace;
-  font-size: 9.5px;
-  --fg: -0.6;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.1rem 0.6rem;
-  padding: 0.4rem 0.6rem;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-}
-.preset-config .row { display: flex; justify-content: space-between }
-.preset-config .row .name { --fg: -0.5 }
-.preset-config .row .val { --fg: -0.85; font-weight: 600 }
-.preset-config .row.loud .name { --fg: 0.5; --hue-lock: 290 }
-.preset-config .row.loud .val  { --fg: 0.85; --hue-lock: 290 }
-
-.showcase {
-  display: flex; flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.6rem;
-  border-radius: 6px;
-  --bg: -1;
-  flex: 1;
-  min-block-size: 0;
-}
-.showcase .navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.4rem 0.6rem;
-  border-radius: 4px;
-  --bg: -1;
-  border: 1px solid var(--border);
-  font-size: 11px;
-}
-.showcase .navbar .brand { font-weight: 700; font-family: ui-monospace, monospace }
-.showcase .navbar .links { display: flex; gap: 0.6rem; --fg: -0.7 }
-.showcase .navbar .links span { font-size: 10px }
-.showcase .navbar .right { display: flex; align-items: center; gap: 0.4rem }
-
-/* Pro badge — uses --bg: 0.85 (high-end of chromatic). The new
-   formula resolves this to deep saturated color in light mode,
-   and to P3 luminance in dark mode. Same value, theme-correct. */
-.showcase .navbar .pro {
-  font-family: ui-monospace, monospace;
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.15em 0.45em;
-  border-radius: 2px;
-  --bg: 0.85;
-  --fg: -1;
-  background: var(--_bg);
-}
-
-.showcase .navbar .avatar {
-  inline-size: 18px; block-size: 18px;
-  border-radius: 50%;
-  --bg: 0.5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.showcase .navbar .avatar svg {
-  --fg: 0.85;
-  inline-size: 100%;
-  block-size: 100%;
-}
-
-.showcase .content-card {
-  padding: 0.6rem 0.7rem;
-  border-radius: 5px;
-  border: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  position: relative;
-}
-
-/* Metric row — 4 sibling .surface cards demonstrating --hue-shift.
-   Each card rotates hue by a different amount from the preset's
-   base, showing how the system handles related-but-distinct
-   chromatic family members. The cards sit on a parent surface
-   so depth cascade increases — they read as nested elements. */
-.showcase .metrics-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.4rem;
-}
-.showcase .metric-card {
-  padding: 0.4rem 0.5rem;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  min-inline-size: 0;
-}
-.showcase .metric-label {
-  --fg: -0.55;
-  font-size: 9px;
-  font-family: ui-monospace, monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.showcase .metric-value {
-  font-size: 18px;
-  font-weight: 700;
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-}
-
-/* Calendar — surface depth stress test in a realistic UI shape.
-   Three nesting levels exercise depth cascade:
-     calendar (depth 1) → cal-day (depth 2) → cal-event (depth 3)
-   Events also vary --bg and --hue-shift to show how chromatic
-   children read against neutral grandparent surfaces. */
-.showcase .calendar {
-  border-radius: 5px;
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.55rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-.showcase .cal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-.showcase .cal-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-.showcase .cal-meta {
-  --fg: -0.55;
-  font-size: 9px;
-  font-family: ui-monospace, monospace;
-  letter-spacing: 0.04em;
-}
-.showcase .cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.25rem;
-}
-.showcase .cal-day {
-  border-radius: 3px;
-  border: 1px solid var(--border);
-  padding: 0.3rem 0.25rem;
-  min-block-size: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-.showcase .cal-day.today {
-  --hue-shift: 0;
-  --bg: -0.5;
-}
-.showcase .cal-day.weekend {
-  --fg: -0.4;
-}
-.showcase .cal-dow {
-  font-size: 8px;
-  font-family: ui-monospace, monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  --fg: -0.55;
-}
-.showcase .cal-date {
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1;
-  margin-block-end: 0.15rem;
-}
-.showcase .cal-event {
-  border-radius: 2px;
-  padding: 0.15rem 0.3rem;
-  display: flex;
-  gap: 0.3rem;
-  align-items: baseline;
-  font-size: 8.5px;
-  line-height: 1.2;
-  min-inline-size: 0;
-}
-.showcase .cal-event-time {
-  --fg: -0.55;
-  font-family: ui-monospace, monospace;
-  font-size: 7.5px;
-  flex-shrink: 0;
-}
-.showcase .cal-event-title {
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Side-by-side row holding the line chart and heatmap */
-.showcase .charts {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 0.6rem;
-  margin-block-start: 0.2rem;
-  align-items: stretch;
-}
-.showcase .chart-pane {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-inline-size: 0;
-}
-.showcase .chart-label {
-  font: 8px ui-monospace, monospace;
-  --fg: -0.55;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Mini heatmap — each cell paints itself via the formula by
-   setting --bg from the data value. The system handles the
-   rest: theme-aware loud endpoint, drain support, hue, surf
-   chroma — every aspect of the preset's character flows
-   through unchanged. */
-.heatmap {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: repeat(7, 1fr);
-  gap: 1.5px;
-  flex: 1;
-  min-block-size: 36px;
-}
-.heatmap > div {
-  border-radius: 1px;
-}
-
-/* Live indicator — uses --bg: 1 (max loud, theme-aware) plus
-   hue-lock to green. In light mode this is deep saturated green;
-   in dark mode it's glowing P3 green. The component code doesn't
-   change between themes — the system handles it. */
-.showcase .live-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font: 9.5px ui-monospace, monospace;
-  --fg: -0.45;
-  margin-block-start: 0.2rem;
-}
-.showcase .live-row::before {
-  content: "";
-  inline-size: 6px;
-  block-size: 6px;
-  border-radius: 50%;
-  --bg: 1;
-  --hue-lock: 145;
-  background: var(--_bg);
-  box-shadow: 0 0 4px var(--_bg);
-  animation: live-pulse 1.6s ease-in-out infinite;
-}
-@keyframes live-pulse {
-  0%, 100% { box-shadow: 0 0 3px var(--_bg); }
-  50%      { box-shadow: 0 0 7px var(--_bg); }
-}
-
-.showcase h4 {
-  font-size: 12px;
-  font-weight: 600;
-  margin: 0;
-}
-.showcase .body {
-  font-size: 11px;
-  --fg: -0.7;
-  line-height: 1.5;
-}
-.showcase .meta {
-  font-family: ui-monospace, monospace;
-  font-size: 9px;
-  --fg: -0.5;
-  display: flex;
-  gap: 0.5rem;
-}
-.showcase .sparkline {
-  inline-size: 100%;
-  block-size: 36px;
-  margin-block-start: 0.2rem;
-  --fg: 0.55;
-}
-.showcase .sparkline .line {
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.showcase .sparkline .line-prev {
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 2 2;
-  opacity: 0.75;
-}
-.showcase .sparkline .axis {
-  stroke-width: 1;
-}
-.showcase .sparkline .endpoint { r: 2.2; }
-
-.showcase .button-row {
-  display: flex;
-  gap: 0.4rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.showcase button {
-  font-family: inherit;
-  font-size: 10.5px;
-  font-weight: 500;
-  padding: 0.4em 0.85em;
-  border-radius: 5px;
-  border: 1px solid var(--border);
-  background: var(--_bg);
-}
-.showcase button.primary {
-  --bg: 0.55;
-  --fg: -1;
-  border-color: transparent;
-  font-weight: 600;
-}
-.showcase button.secondary {
-  --bg: -1;
-}
-.showcase .badge {
-  font-family: ui-monospace, monospace;
-  font-size: 9px;
-  font-weight: 600;
-  padding: 0.2em 0.5em;
-  border-radius: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  --fg: -1;
-}
-.showcase .badge.success { --hue-lock: 145; --bg: 0.55 }
-.showcase .badge.warn    { --hue-lock: 75;  --bg: 0.55 }
-.showcase .badge.danger  { --hue-lock: 25;  --bg: 0.55 }
-
-/* Palette section — chromatic continuous ramp on the left edge,
-   stacked palette rows on the right. The continuous ramp visualizes
-   the formula's exact curve from --bg: 0 to --bg: 1 by stacking 50
-   thin slices, each setting a stepped --bg value. Cheaper than per-
-   pixel and live-reactive to theme/perception/drain toggles. */
-.palette-section {
-  display: flex;
-  gap: 0.5rem;
-  align-items: stretch;
-}
-.palette-rows {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-}
-.continuous-ramp {
-  inline-size: 6px;
-  border-radius: 3px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-.continuous-ramp > div {
-  flex: 1;
-  /* No explicit background — the universal :where(*) rule paints
-     each slice with oklch(from var(--_bg) l c h / var(--_k)), and
-     since --_k is 1 throughout [0,1], slices paint opaque. */
-}
-
-.swatch-row, .accent-row, .depth-row, .signal-row {
-  display: grid;
-  gap: 1px;
-  block-size: 20px;
-  border-radius: 3px;
-  overflow: hidden;
-}
-.swatch-row { grid-template-columns: repeat(8, 1fr) }
-.accent-row { grid-template-columns: repeat(8, 1fr) }
-.depth-row  { grid-template-columns: repeat(4, 1fr) }
-.signal-row { grid-template-columns: repeat(8, 1fr) }
-.swatch-row > div, .accent-row > div, .depth-row > div, .signal-row > div {
-  border-radius: 1px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  font-family: ui-monospace, monospace;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0;
-  user-select: none;
-}
-/* Each contrast letter inherits the swatch's --bg/--hue context but
-   overrides --fg locally to test contrast at four ink intensities.
-   A barely visible (low neg --fg) → D maximum contrast (full neg --fg) */
-.swatch-row > div > span, .accent-row > div > span,
-.depth-row > div > span, .signal-row > div > span {
-  display: inline-block;
-}
-
-.swatch-label {
-  font-family: ui-monospace, monospace;
-  font-size: 9px;
-  --fg: -0.45;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-block-end: -2px;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-.swatch-label .hint {
-  --fg: -0.65;
-  font-size: 8.5px;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 400;
-}
-.swatch-label .new {
-  --fg: 0.5;
-  --hue-lock: 290;
-  font-weight: 700;
-  font-size: 8px;
-  letter-spacing: 0.06em;
-  padding: 0 0.3em;
-}
+  :root { --hue: 18 }
 </style>
 </head>
-<body>
 
-<header class="surface topbar">
-  <h1>stick.css <span>· color tour</span></h1>
-  <label class="hue-override">
-    <input id="hue-override-on" type="checkbox">
-    <span>force hue</span>
-    <input id="hue-override" type="range" min="0" max="360" value="180" step="1" disabled>
-    <code id="hue-override-val">—</code>
-  </label>
-  <div class="seg" role="group">
-    <button data-theme="light" aria-pressed="true">light</button>
-    <button data-theme="dark"  aria-pressed="false">dark</button>
-  </div>
-  <div class="seg" role="group" id="chroma-toggle">
-    <button data-chroma="on"  aria-pressed="true">colorize</button>
-    <button data-chroma="off" aria-pressed="false">drain</button>
-  </div>
-  <div class="seg" role="group" id="perception-toggle">
-    <button data-perception="off" aria-pressed="true">wcag</button>
-    <button data-perception="on"  aria-pressed="false">perception</button>
-  </div>
-</header>
+<body id="page" class="page surface">
 
-<div class="surface disclaimer">
-  use the toggles to stress-test the system across theme, chroma, and contrast axes — every paint decision flows through one formula.
-</div>
-
-<main class="gallery" id="gallery"></main>
-
-<script>
-// ── Presets ──────────────────────────────────────────────────
-const PRESETS = [
-  {
-    id: 'default',
-    name: 'Default',
-    tag: 'stick.css',
-    blurb: 'understated luxury — pearl surfaces, oxblood accents, high curve. the loud endpoint is reserved for editorial flourish; mid-range stays muted by design. quiet luxury never glows.',
-    config: {
-      '--cfg-color-muted-l-light': '96%',
-      '--cfg-color-muted-c': 0.025,
-      '--cfg-color-muted-l-dark': '36%',
-      '--cfg-color-loud-l-light': '35%',
-      '--cfg-color-loud-c-light': 0.18,
-      '--cfg-color-loud-l-dark': '55%',
-      '--cfg-color-loud-c-dark': 0.20,
-      '--cfg-color-surf-chroma': 0.008,
-      '--cfg-fg-tint': 0.012,
-      '--cfg-color-curve': 2.0,
-      '--hue': 35,
-    },
-  },
-  {
-    id: 'paper',
-    name: 'Paper',
-    tag: 'reading',
-    blurb: 'aged-paper warmth — surfaces carry visible cream tint, depth steps cut deeper than the default for clear stratification. high curve keeps the ramp restrained but the sepia loud endpoint earns its place through the entire warm spectrum: cream → tan → walnut → oxblood-brown.',
-    config: {
-      '--cfg-color-muted-l-light': '92%',
-      '--cfg-color-muted-c': 0.04,
-      '--cfg-color-muted-l-dark': '38%',
-      '--cfg-color-loud-l-light': '30%',
-      '--cfg-color-loud-c-light': 0.16,
-      '--cfg-color-loud-l-dark': '68%',
-      '--cfg-color-loud-c-dark': 0.18,
-      '--cfg-color-surf-chroma': 0.022,
-      '--cfg-fg-tint': 0.03,
-      '--cfg-color-curve': 1.9,
-      '--hue': 70,
-      // Per-preset surface depth — deeper steps for visible
-      // depth contrast, slightly off-white top for paper feel.
-      '--cfg-surf-top-l-light': 95,
-      '--cfg-surf-step-light': 4,
-      '--cfg-surf-curve-light': 0.5,
-      '--cfg-surf-top-l-dark': 32,
-      '--cfg-surf-step-dark': 6,
-      '--cfg-surf-curve-dark': 0.4,
-    },
-  },
-];
-
-const gallery = document.getElementById('gallery');
-
-function makeShowcase() {
-  return `
-    <div class="showcase surface">
-      <div class="navbar surface">
-        <span class="brand">acme.co</span>
-        <span class="links"><span>home</span><span>docs</span><span>pricing</span></span>
-        <span class="right">
-          <span class="pro">Pro</span>
-          <span class="avatar"></span>
-        </span>
-      </div>
-      <div class="content-card surface">
-        <div class="metrics-row">
-          <div class="metric-card surface hoverable" style="--hue-shift: -30">
-            <span class="metric-label">MRR</span>
-            <span class="metric-value" style="--fg: 0.8">$48.2k</span>
-          </div>
-          <div class="metric-card surface hoverable" style="--hue-shift: -15">
-            <span class="metric-label">sessions</span>
-            <span class="metric-value" style="--fg: 0.8">184k</span>
-          </div>
-          <div class="metric-card surface hoverable" style="--hue-shift: 15">
-            <span class="metric-label">conv</span>
-            <span class="metric-value" style="--fg: 0.8">4.7%</span>
-          </div>
-          <div class="metric-card surface hoverable" style="--hue-shift: 30">
-            <span class="metric-label">NPS</span>
-            <span class="metric-value" style="--fg: 0.8">62</span>
-          </div>
-        </div>
-        <h4>Quarterly results</h4>
-        <p class="body">Revenue beat expectations on solid customer growth and improving margins.</p>
-        <div class="meta">
-          <span>jan 24</span>
-          <span>·</span>
-          <span>4 min read</span>
-        </div>
-        <div class="charts">
-          <div class="chart-pane">
-            <span class="chart-label">trend</span>
-            <svg class="sparkline" viewBox="0 0 200 36" preserveAspectRatio="none">
-              <line class="axis" x1="0" y1="34" x2="200" y2="34"
-                    stroke="currentColor" style="--fg: -0.7"
-                    vector-effect="non-scaling-stroke"/>
-              <path class="line-prev" d="" fill="none" stroke="currentColor"
-                    style="--hue-shift: 60"
-                    vector-effect="non-scaling-stroke"/>
-              <path class="line" d="" fill="none" stroke="currentColor"
-                    vector-effect="non-scaling-stroke"/>
-              <circle class="endpoint" cx="0" cy="0" fill="currentColor"/>
-            </svg>
-          </div>
-          <div class="chart-pane">
-            <span class="chart-label">activity · 7d × 12h</span>
-            <div class="heatmap"></div>
-          </div>
-        </div>
-        <span class="live-row">streaming · last update 2s ago</span>
-      </div>
-      <div class="calendar surface">
-        <div class="cal-header">
-          <span class="cal-title">this week</span>
-          <span class="cal-meta">jan 22 — 28</span>
-        </div>
-        <div class="cal-grid">
-          <div class="cal-day surface">
-            <span class="cal-dow">mon</span>
-            <span class="cal-date">22</span>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">9a</span>
-              <span class="cal-event-title">standup</span>
-            </div>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">2p</span>
-              <span class="cal-event-title">1:1 ana</span>
-            </div>
-          </div>
-          <div class="cal-day surface">
-            <span class="cal-dow">tue</span>
-            <span class="cal-date">23</span>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">9a</span>
-              <span class="cal-event-title">standup</span>
-            </div>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">11a</span>
-              <span class="cal-event-title">design rev</span>
-            </div>
-          </div>
-          <div class="cal-day surface">
-            <span class="cal-dow">wed</span>
-            <span class="cal-date">24</span>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">9a</span>
-              <span class="cal-event-title">standup</span>
-            </div>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">2p</span>
-              <span class="cal-event-title">1:1 ana</span>
-            </div>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">4p</span>
-              <span class="cal-event-title">launch</span>
-            </div>
-          </div>
-          <div class="cal-day surface today">
-            <span class="cal-dow">thu</span>
-            <span class="cal-date">25</span>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">9a</span>
-              <span class="cal-event-title">standup</span>
-            </div>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">10a</span>
-              <span class="cal-event-title">all-hands</span>
-            </div>
-          </div>
-          <div class="cal-day surface">
-            <span class="cal-dow">fri</span>
-            <span class="cal-date">26</span>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">9a</span>
-              <span class="cal-event-title">standup</span>
-            </div>
-            <div class="cal-event surface hoverable">
-              <span class="cal-event-time">2p</span>
-              <span class="cal-event-title">1:1 ana</span>
-            </div>
-          </div>
-          <div class="cal-day surface weekend">
-            <span class="cal-dow">sat</span>
-            <span class="cal-date">27</span>
-          </div>
-          <div class="cal-day surface weekend">
-            <span class="cal-dow">sun</span>
-            <span class="cal-date">28</span>
-          </div>
-        </div>
-      </div>
-      <div class="button-row">
-        <button class="primary">Continue</button>
-        <button class="secondary">Cancel</button>
-        <span class="badge success">live</span>
-        <span class="badge warn">draft</span>
-        <span class="badge danger">err</span>
-      </div>
-      <div class="palette-section">
-        <div class="continuous-ramp"></div>
-        <div class="palette-rows">
-          <span class="swatch-label">surface palette · --depth 1 → 4</span>
-          <div class="depth-row">
-            <div class="surface" style="--depth: 1"></div>
-            <div class="surface" style="--depth: 2"></div>
-            <div class="surface" style="--depth: 3"></div>
-            <div class="surface" style="--depth: 4"></div>
-          </div>
-          <span class="swatch-label">
-            <span>chromatic ramp · --bg 0 → 1 at preset hue</span>
-            <span class="hint">theme-aware loud endpoint</span>
-          </span>
-          <div class="swatch-row">
-            <div style="--bg: 0"></div>
-            <div style="--bg: 0.15"></div>
-            <div style="--bg: 0.3"></div>
-            <div style="--bg: 0.45"></div>
-            <div style="--bg: 0.6"></div>
-            <div style="--bg: 0.75"></div>
-            <div style="--bg: 0.9"></div>
-            <div style="--bg: 1"></div>
-          </div>
-          <span class="swatch-label">accent palette · --bg: 0.55 across hues</span>
-          <div class="accent-row">
-            <div style="--bg: 0.55; --hue-lock: 25"></div>
-            <div style="--bg: 0.55; --hue-lock: 60"></div>
-            <div style="--bg: 0.55; --hue-lock: 90"></div>
-            <div style="--bg: 0.55; --hue-lock: 145"></div>
-            <div style="--bg: 0.55; --hue-lock: 200"></div>
-            <div style="--bg: 0.55; --hue-lock: 240"></div>
-            <div style="--bg: 0.55; --hue-lock: 290"></div>
-            <div style="--bg: 0.55; --hue-lock: 330"></div>
-          </div>
-          <span class="swatch-label">
-            <span>signal palette · --bg: 1 across hues</span>
-            <span class="new">theme-flips</span>
-          </span>
-          <div class="signal-row">
-            <div style="--bg: 1; --hue-lock: 25"></div>
-            <div style="--bg: 1; --hue-lock: 60"></div>
-            <div style="--bg: 1; --hue-lock: 90"></div>
-            <div style="--bg: 1; --hue-lock: 145"></div>
-            <div style="--bg: 1; --hue-lock: 200"></div>
-            <div style="--bg: 1; --hue-lock: 240"></div>
-            <div style="--bg: 1; --hue-lock: 290"></div>
-            <div style="--bg: 1; --hue-lock: 330"></div>
-          </div>
-        </div>
-      </div>
+  <!-- ── pg-header ──────────────────────────────────────── -->
+  <div class="pg-header flank-end" style="border-block-end: 1px solid var(--border)">
+    <a href="/" style="--type: 1; font-family: var(--font-display); color: inherit; text-decoration: none">stick.css</a>
+    <div class="row">
+      <a class="btn" href="https://github.com/Deufel/css" target="_blank" rel="noopener">GitHub</a>
     </div>
-  `;
-}
+  </div>
 
-function makeConfigReadout(config) {
-  const labels = {
-    '--cfg-color-muted-l-light': 'muted L',
-    '--cfg-color-muted-c': 'muted C',
-    '--cfg-color-muted-l-dark': 'muted L (dk)',
-    '--cfg-color-loud-l-light': 'light loud L',
-    '--cfg-color-loud-c-light': 'light loud C',
-    '--cfg-color-loud-l-dark': 'dark loud L',
-    '--cfg-color-loud-c-dark': 'dark loud C',
-    '--cfg-color-surf-chroma': 'surf C',
-    '--cfg-fg-tint': 'fg tint',
-    '--cfg-color-curve': 'curve',
-    '--hue': 'hue',
-  };
-  // Only show character tokens. The --cfg-surf-* surface depth
-  // overrides are intentionally hidden from the readout — they're
-  // meta-config for surface tuning, not part of the preset's color
-  // identity. Same goes for any other non-character token.
-  const rows = Object.entries(config)
-    .filter(([k]) => labels[k] !== undefined)
-    .map(([k, v]) => {
-      const isDark = k === '--cfg-color-loud-l-dark' || k === '--cfg-color-loud-c-dark' || k === '--cfg-color-muted-l-dark';
-      return `<div class="row${isDark ? ' loud' : ''}"><span class="name">${labels[k]}</span><span class="val">${v}</span></div>`;
-    }).join('');
-  return `<div class="preset-config surface">${rows}</div>`;
-}
+  <!-- ── pg-subheader (empty on home; carries breadcrumb on subpages) ── -->
 
-function makeCard(preset) {
-  const card = document.createElement('article');
-  card.className = 'preset-card surface';
-  Object.entries(preset.config).forEach(([k, v]) => {
-    card.style.setProperty(k, v);
-  });
-  card.innerHTML = `
-    <div class="preset-header">
-      <span class="name">${preset.name}</span>
-      <span class="tag surface">${preset.tag}</span>
-    </div>
-    ${makeShowcase()}
-  `;
-  return card;
-}
+  <!-- ── pg-navigation-header ───────────────────────────── -->
+  <div class="pg-navigation-header tablet desktop" style="border-inline-end: 1px solid var(--border); border-block-end: 1px solid var(--border)">
+    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">Documentation</span>
+  </div>
 
-PRESETS.forEach(p => gallery.appendChild(makeCard(p)));
-
-// ── Continuous chromatic ramp ────────────────────────────────
-// Populate each .continuous-ramp with N stepped slices so the
-// formula renders the full --bg: 0 → 1 ramp continuously. Lives
-// in the formula, so theme/perception/drain toggles all flow
-// through naturally — no JS recomputation needed.
-(function populateContinuousRamps() {
-  const STEPS = 50;
-  document.querySelectorAll('.continuous-ramp').forEach(strip => {
-    for (let i = 0; i < STEPS; i++) {
-      const bg = i / (STEPS - 1);
-      const slice = document.createElement('div');
-      slice.style.setProperty('--bg', bg.toFixed(4));
-      strip.appendChild(slice);
-    }
-  });
-})();
-
-// ── Sparklines ───────────────────────────────────────────────
-(function populateSparklines() {
-  const W = 200, H = 36, PAD_Y = 4;
-  const data = [
-    0.42, 0.38, 0.51, 0.46, 0.55, 0.62,
-    0.58, 0.71, 0.65, 0.74, 0.81, 0.76,
-    0.85, 0.79, 0.92, 0.96
-  ];
-  // Previous-period series — plotted at the same scale, but with
-  // lower amplitude and a different shape so it reads as comparison
-  // data rather than a parallel series. Tests --hue-shift inheritance
-  // through SVG.
-  const dataPrev = [
-    0.30, 0.32, 0.28, 0.34, 0.31, 0.40,
-    0.38, 0.45, 0.41, 0.48, 0.46, 0.52,
-    0.50, 0.54, 0.51, 0.58
-  ];
-  const allValues = data.concat(dataPrev);
-  const yMin = Math.min(...allValues), yMax = Math.max(...allValues);
-  const xs = data.map((_, i) => (i / (data.length - 1)) * W);
-  const ys = data.map(v =>
-    H - PAD_Y - ((v - yMin) / (yMax - yMin)) * (H - PAD_Y * 2)
-  );
-  const ysPrev = dataPrev.map(v =>
-    H - PAD_Y - ((v - yMin) / (yMax - yMin)) * (H - PAD_Y * 2)
-  );
-
-  function smoothPath(xs, ys) {
-    const n = xs.length;
-    if (n < 2) return '';
-    let d = `M ${xs[0].toFixed(2)},${ys[0].toFixed(2)}`;
-    const t = 1 / 6;
-    for (let i = 0; i < n - 1; i++) {
-      const x0 = xs[Math.max(0, i - 1)],     y0 = ys[Math.max(0, i - 1)];
-      const x1 = xs[i],                      y1 = ys[i];
-      const x2 = xs[i + 1],                  y2 = ys[i + 1];
-      const x3 = xs[Math.min(n - 1, i + 2)], y3 = ys[Math.min(n - 1, i + 2)];
-      const cp1x = x1 + (x2 - x0) * t, cp1y = y1 + (y2 - y0) * t;
-      const cp2x = x2 - (x3 - x1) * t, cp2y = y2 - (y3 - y1) * t;
-      d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${x2.toFixed(2)},${y2.toFixed(2)}`;
-    }
-    return d;
-  }
-
-  const linePath = smoothPath(xs, ys);
-  const linePrevPath = smoothPath(xs, ysPrev);
-  const endX = xs[xs.length - 1].toFixed(1);
-  const endY = ys[ys.length - 1].toFixed(1);
-
-  document.querySelectorAll('.sparkline').forEach(svg => {
-    svg.querySelector('.line').setAttribute('d', linePath);
-    svg.querySelector('.line-prev').setAttribute('d', linePrevPath);
-    const endpoint = svg.querySelector('.endpoint');
-    endpoint.setAttribute('cx', endX);
-    endpoint.setAttribute('cy', endY);
-  });
-})();
-
-(function injectAvatars() {
-  const svg = `
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="9" r="4"/>
-      <path d="M 4 24 Q 4 16 12 16 Q 20 16 20 24 Z"/>
-    </svg>
-  `;
-  document.querySelectorAll('.avatar').forEach(el => {
-    el.innerHTML = svg;
-  });
-})();
-
-// ── ABCD contrast letters ────────────────────────────────────
-// Each swatch gets four single-character spans, each with a
-// different --fg value. Demonstrates how foreground ink behaves
-// at four contrast levels against the swatch's --bg context.
-//   A: --fg: -0.2 — barely visible (weakest contrast)
-//   B: --fg: -0.6 — moderate contrast
-//   C: --fg: -0.8 — strong contrast
-//   D: --fg: -1   — maximum contrast (default ink)
-// At a glance you can see which palette colors retain readability
-// at low-contrast --fg values and which require full --fg: -1.
-(function injectContrastLetters() {
-  const letters = [
-    { char: 'A', fg: -0.2 },
-    { char: 'B', fg: -0.6 },
-    { char: 'C', fg: -0.8 },
-    { char: 'D', fg: -1   },
-  ];
-  const html = letters.map(l =>
-    `<span style="--fg: ${l.fg}">${l.char}</span>`
-  ).join('');
-  document.querySelectorAll('.swatch-row > div, .accent-row > div, .depth-row > div, .signal-row > div').forEach(swatch => {
-    swatch.innerHTML = html;
-  });
-})();
-
-// ── Mini heatmap ─────────────────────────────────────────────
-// 7 rows × 12 columns of activity. Each cell maps a value to a
-// --bg between 0.05 and 0.85 — squarely in the chromatic range.
-// The system does the rest: theme-aware loud endpoint, drain
-// support, preset character all flow through automatically.
-//
-// Same dataset across every card so the comparison is purely
-// about how each preset renders the same data. Hour-of-day
-// peaks Mon-Fri (weekday business hours), drops on weekends.
-(function populateHeatmaps() {
-  const ROWS = 7, COLS = 12;
-  const data = [];
-  for (let r = 0; r < ROWS; r++) {
-    const isWeekend = r === 5 || r === 6;
-    for (let c = 0; c < COLS; c++) {
-      // Bell-ish curve peaking at column 5 (mid-day)
-      const hourFactor = Math.exp(-Math.pow((c - 5) / 3, 2));
-      const dayFactor = isWeekend ? 0.35 : 1;
-      // Add noise so cells aren't perfectly smooth
-      const noise = (Math.sin(r * 7 + c * 3) + 1) / 2 * 0.3 + 0.7;
-      const value = hourFactor * dayFactor * noise;
-      // Map to --bg range. Sub-zero values produce surfaces
-      // (darker than muted), which gives "low activity" cells
-      // a depth-recessed look rather than a tinted one.
-      const bg = value < 0.15 ? -0.5 : 0.05 + value * 0.8;
-      data.push(bg);
-    }
-  }
-
-  document.querySelectorAll('.heatmap').forEach(grid => {
-    grid.innerHTML = data.map(bg =>
-      `<div style="--bg: ${bg.toFixed(2)};"></div>`
-    ).join('');
-  });
-})();
-
-// ── Theme toggle (scoped to its own .seg) ────────────────────
-const themeButtons = document.querySelectorAll('.seg [data-theme]');
-themeButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const theme = btn.dataset.theme;
-    document.documentElement.dataset.uiTheme = theme;
-    themeButtons.forEach(b =>
-      b.setAttribute('aria-pressed', b.dataset.theme === theme));
-  });
-});
-
-// ── Drain / colorize toggle ──────────────────────────────────
-// When drained, all five chroma tokens are forced to 0 on each
-// preset card, overriding the preset's own values. The card's
-// existing transition rule fades the change smoothly. When
-// colorized, the preset's original values are restored.
-const chromaButtons = document.querySelectorAll('#chroma-toggle button');
-const CHROMA_TOKENS = [
-  '--cfg-color-muted-c',
-  '--cfg-color-loud-c-light',
-  '--cfg-color-loud-c-dark',
-  '--cfg-color-surf-chroma',
-  '--cfg-fg-tint',
-];
-
-function applyChromaState(drained) {
-  document.querySelectorAll('.preset-card').forEach((card, i) => {
-    const preset = PRESETS[i];
-    CHROMA_TOKENS.forEach(token => {
-      if (drained) {
-        card.style.setProperty(token, 0);
-      } else {
-        card.style.setProperty(token, preset.config[token]);
+  <!-- ── pg-navigation ──────────────────────────────────── -->
+  <nav class="pg-navigation tablet desktop" style="inline-size: 14rem; border-inline-end: 1px solid var(--border)">
+    <style>
+      @scope {
+        :scope > .column { --gap: 0.15rem }
+        :scope > .column > a {
+          padding: 0.45rem 0.6rem;
+          border-radius: 0.4rem;
+          text-decoration: none;
+          color: inherit;
+        }
+        :scope > .column > a:hover { --bg: 0.15 }
+        :scope > .column > a[aria-current="page"] { --bg: 0.25; --fg: -1 }
       }
-    });
-  });
-}
+    </style>
+    <div class="column">
+      <a href="/docs/" aria-current="page">Home</a>
+      <a href="/docs/mental-model/" data-on:click="@get('/docs/mental-model/')">Mental model</a>
+      <a href="/docs/color/" data-on:click="@get('/docs/color/')">Color</a>
+      <a href="/docs/type/" data-on:click="@get('/docs/type/')">Type</a>
+      <a href="/docs/surfaces/" data-on:click="@get('/docs/surfaces/')">Surfaces</a>
+      <a href="/docs/layout-primitives/" data-on:click="@get('/docs/layout-primitives/')">Layout primitives</a>
+      <a href="/docs/page-layout/" data-on:click="@get('/docs/page-layout/')">Page layout</a>
+      <a href="/docs/components/" data-on:click="@get('/docs/components/')">Components</a>
+      <a href="/docs/authoring/" data-on:click="@get('/docs/authoring/')">Authoring</a>
+      <a href="/docs/charts/" data-on:click="@get('/docs/charts/')">Charts</a>
+      <a href="/docs/recipes/" data-on:click="@get('/docs/recipes/')">Recipes</a>
+      <a href="/docs/anti-patterns/" data-on:click="@get('/docs/anti-patterns/')">What NOT to do</a>
+      <a href="/docs/summary/" data-on:click="@get('/docs/summary/')">Summary</a>
+      <a href="/docs/llms.txt">llms.txt</a>
+    </div>
+  </nav>
 
-chromaButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const drained = btn.dataset.chroma === 'off';
-    applyChromaState(drained);
-    chromaButtons.forEach(b =>
-      b.setAttribute('aria-pressed', b.dataset.chroma === btn.dataset.chroma));
-  });
-});
+  <!-- ── pg-navigation-footer ───────────────────────────── -->
+  <div class="pg-navigation-footer tablet desktop" style="--type: -1.5; --fg: -0.4; border-inline-end: 1px solid var(--border); border-block-start: 1px solid var(--border)">
+    <span>v0.1 · <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">source</a></span>
+  </div>
 
-// ── Contrast perception toggle ───────────────────────────────
-// When ON, sets --cfg-contrast-perception: 1 on :root, which biases
-// the contrast pole flip threshold by chroma. Saturated cells flip
-// to pale ink earlier than neutrals at the same L, accounting for
-// the Helmholtz-Kohlrausch effect (saturated colors look brighter
-// than their L value suggests).
-const perceptionButtons = document.querySelectorAll('#perception-toggle button');
-perceptionButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const enabled = btn.dataset.perception === 'on';
-    document.documentElement.style.setProperty('--cfg-contrast-perception', enabled ? 1 : 0);
-    perceptionButtons.forEach(b =>
-      b.setAttribute('aria-pressed', b.dataset.perception === btn.dataset.perception));
-  });
-});
+  <!-- ── pg-main-header ─────────────────────────────────── -->
+  <div class="pg-main-header" style="border-block-end: 1px solid var(--border)">
+    <h1 style="--type: 2; font-family: var(--font-display); margin: 0">stick.css</h1>
+  </div>
 
-const overrideOn = document.getElementById('hue-override-on');
-const overrideSlider = document.getElementById('hue-override');
-const overrideVal = document.getElementById('hue-override-val');
+  <!-- ── pg-main ────────────────────────────────────────── -->
+  <main class="pg-main column" style="--gap: 1.5rem">
 
-function applyHueOverride() {
-  const enabled = overrideOn.checked;
-  const value = overrideSlider.value;
-  overrideSlider.disabled = !enabled;
-  overrideVal.textContent = enabled ? `${value}°` : '—';
+    <p style="--type: 0; max-inline-size: 60ch; margin: 0">
+      A CSS design system organized around three formulas — color, type, space —
+      and a small set of layout primitives. Set tokens on any element, compose
+      layouts from declarative classes, ship.
+    </p>
 
-  document.querySelectorAll('.preset-card').forEach((card, i) => {
-    if (enabled) {
-      card.style.setProperty('--hue', value);
-    } else {
-      card.style.setProperty('--hue', PRESETS[i].config['--hue']);
-    }
-  });
-}
+    <section class="column" style="--gap: 0.5rem">
+      <h2 style="--type: 0; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin: 0">The three formulas</h2>
 
-overrideOn.addEventListener('change', applyHueOverride);
-overrideSlider.addEventListener('input', applyHueOverride);
-</script>
+      <div class="column" style="--gap: 1rem; max-inline-size: 60ch">
+        <p style="margin: 0">
+          <strong style="--fg: -1">Color</strong> comes from one OKLCH formula. Set
+          <code>--bg</code> for surface presence, <code>--fg</code> for ink contrast,
+          and <code>--hue</code> for identity. Themes, dark mode, and contrast
+          flip automatically.
+        </p>
+        <p style="margin: 0">
+          <strong style="--fg: -1">Type</strong> comes from one ratio.
+          Set <code>--type</code> per element. Integer steps, body is 0,
+          line-height and letter-spacing adjust automatically.
+        </p>
+        <p style="margin: 0">
+          <strong style="--fg: -1">Space</strong> comes from one fluid token.
+          <code>--gap</code> stays tight across phone-to-desktop widths and
+          ramps at projector scale. Layout primitives use it; the page layout
+          uses it for slot padding.
+        </p>
+      </div>
+    </section>
+
+    <section class="column" style="--gap: 0.75rem">
+      <h2 style="--type: 0; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin: 0">Install</h2>
+
+      <p style="margin: 0; max-inline-size: 60ch">Add the link tag to your HTML:</p>
+
+      <pre style="margin: 0; padding: 1rem; --bg: 0.05; border-radius: 0.5rem; overflow-x: auto; --type: -0.5"><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@ddd1642/css/style.css"&gt;</code></pre>
+
+      <p style="margin: 0; --type: -1; --fg: -0.5; max-inline-size: 60ch">
+        That's the whole installation. No build step, no configuration file,
+        no JavaScript required for styling.
+      </p>
+    </section>
+
+    <section class="column" style="--gap: 0.75rem">
+      <h2 style="--type: 0; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin: 0">Where to go next</h2>
+
+      <div class="grid" style="--grid-min: 16rem">
+        <style>
+          @scope {
+            :scope > a {
+              text-decoration: none;
+              color: inherit;
+            }
+            :scope > a > .Card {
+              padding: 1rem;
+              block-size: 100%;
+            }
+            :scope > a > .Card:hover { --bg: 0.06 }
+            :scope > a > .Card > .heading {
+              --type: 0.5;
+              font-family: var(--font-display);
+              margin: 0 0 0.4rem;
+            }
+            :scope > a > .Card > .body {
+              margin: 0;
+              --type: -0.5;
+              --fg: -0.5;
+            }
+          }
+        </style>
+
+        <a href="/docs/mental-model/" data-on:click="@get('/docs/mental-model/')">
+          <div class="Card surface">
+            <p class="heading">Mental model</p>
+            <p class="body">Sixty seconds on the formulas. Live demos for color, type, and space.</p>
+          </div>
+        </a>
+
+        <a href="/docs/layout-primitives/" data-on:click="@get('/docs/layout-primitives/')">
+          <div class="Card surface">
+            <p class="heading">Layout primitives</p>
+            <p class="body">.row, .column, .grid, .hero, and the rest of the composition kit.</p>
+          </div>
+        </a>
+
+        <a href="/docs/page-layout/" data-on:click="@get('/docs/page-layout/')">
+          <div class="Card surface">
+            <p class="heading">Page layout</p>
+            <p class="body">body.page with eleven slots, viewport gating, drawers.</p>
+          </div>
+        </a>
+
+        <a href="/docs/llms.txt">
+          <div class="Card surface">
+            <p class="heading">llms.txt</p>
+            <p class="body">Plain text reference for LLM tools. Same content, no chrome.</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── pg-aside (desktop only — empty on home) ─────────── -->
+  <aside class="pg-aside desktop" style="inline-size: 16rem; border-inline-start: 1px solid var(--border)">
+    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">On this page</span>
+    <div class="column" style="--gap: 0.4rem; --type: -0.5">
+      <a href="#three-formulas" style="color: inherit; text-decoration: none">The three formulas</a>
+      <a href="#install" style="color: inherit; text-decoration: none">Install</a>
+      <a href="#next" style="color: inherit; text-decoration: none">Where to go next</a>
+    </div>
+  </aside>
+
+  <!-- ── pg-footer ──────────────────────────────────────── -->
+  <div class="pg-footer flank-end" style="--type: -1.5; --fg: -0.4; border-block-start: 1px solid var(--border)">
+    <span>© 2026 stick.css</span>
+    <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">github.com/Deufel/css</a>
+  </div>
+
+  <!-- ── HUD overlay with mobile FABs (deferred — drawers come later) ── -->
+
 </body>
 </html>

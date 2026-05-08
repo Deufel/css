@@ -218,7 +218,7 @@ def _(mo):
       core.color,
       core.type,
       theme,
-      layout.app,
+      layout.page,
       layout.composition,
       component.base,
       component.simple,
@@ -685,6 +685,33 @@ def _(mo):
        ════════════════════════════════════════════════════════════ */
     @layer theme {
 
+        :root {
+          /* Identity */
+          --hue: 220;
+          --cfg-color-loud-l-light: 45%;
+          --cfg-color-loud-c-light: 0.18;
+          --cfg-color-loud-l-dark: 65%;
+          --cfg-color-loud-c-dark: 0.18;
+          --cfg-color-surf-chroma: 0.012;
+          --cfg-fg-tint: 0.005;
+
+          /* Surfaces — light mode warm cream, dark mode warm charcoal */
+          --cfg-surf-top-light: 99;
+          --cfg-surf-bot-light: 91;
+          --cfg-surf-top-dark: 22;    /* was 28 — slightly darker leaf */
+          --cfg-surf-bot-dark: 12;    /* was 10 — body lightens */
+
+          /* Geometry & motion */
+          --cfg-radius: 6px;
+          --gap: 0.75rem;
+
+          /* Fonts */
+          --font-ui:    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+          --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+          --font-mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        }
+        body { font-family: var(--font-ui); }
+
         @media (prefers-color-scheme: dark) { :root:not([data-ui-theme]) { --cfg-dark: 1 } }
         [data-ui-theme="light"] { --cfg-dark: 0 }
         [data-ui-theme="dark"]  { --cfg-dark: 1 }
@@ -693,6 +720,7 @@ def _(mo):
         .inf { --hue-lock: 240 }
         .wrn { --hue-lock: 75  }
         .dgr { --hue-lock: 25  }
+        .bw { --cfg-color-surf-chroma: 0; --cfg-color-loud-c-light: 0; --cfg-color-loud-c-dark: 0; }
 
         [data-ui-motion="off"]   { --cfg-motion: 0 }
         [data-ui-motion="on"]    { --cfg-motion: 1 }
@@ -838,25 +866,38 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### layout.app
+    ## Layout.page
 
     ```css
-    @layer layout.app {
-        body.app {
+
+    @layer layout.page {
+        .page {
             display: grid;
             grid-template:
-                "h h h" auto
-                "n m a" 1fr
-                "f f f" auto /
+                "b  b  b" auto
+                "h  h  h" auto
+                "s  s  s" auto
+                "nh mh a" auto
+                "n  m  a" 1fr
+                "nf mf a" auto
+                "f  f  f" auto /
                 auto 1fr auto;
             height: 100svh;
             overflow: hidden;
 
-            > #header { grid-area: h; }
-            > #footer { grid-area: f; }
-            > #nav    { grid-area: n; overflow-y: auto; scrollbar-gutter: stable; }
-            > #main   { grid-area: m; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
-            > #aside  { grid-area: a; overflow-y: auto; scrollbar-gutter: stable; }
+            & > [class ^="pg-"]       { padding: var(--gap); }
+
+            & > .pg-banner            { grid-area: b;  }
+            & > .pg-header            { grid-area: h;  }
+            & > .pg-subheader         { grid-area: s;  }
+            & > .pg-navigation-header { grid-area: nh; }
+            & > .pg-navigation        { grid-area: n;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            & > .pg-navigation-footer { grid-area: nf; }
+            & > .pg-main-header       { grid-area: mh; }
+            & > .pg-main              { grid-area: m;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            & > .pg-main-footer       { grid-area: mf; }
+            & > .pg-aside             { grid-area: a;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            & > .pg-footer            { grid-area: f;  }
         }
     }
     ```
@@ -867,7 +908,8 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### layout.drawers
+    ##
+    layout.drawers
 
     ```css
     @layer component.complex {
@@ -929,7 +971,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## layout.compose
+    ## Layout.compose
 
     Honestly a wear layer, these do not alwas work well with grid / flex interaperability (need to clean up some day)
 
@@ -939,6 +981,15 @@ def _(mo):
        ════════════════════════════════════════════════════════════ */
 
     @layer layout.composition {
+      :root {
+        --gap: clamp(
+          0.25rem,
+          calc(0.25rem + 1.75rem * pow(100vi / 3000px, 3)),
+          2rem
+        );
+      }
+
+
       .column { display: flex; flex-direction: column; gap: var(--gap) }
       .row    { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--gap); align-items: center }
 
@@ -958,35 +1009,49 @@ def _(mo):
       }
 
       .lcr {
-        display: grid; grid-template-columns: 1fr auto 1fr;
-        align-items: center; gap: var(--gap);
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+          gap: var(--gap);
 
-        & > :first-child  { justify-self: start }
-        & > :nth-child(2) { justify-self: center }
-        & > :last-child   { justify-self: end }
-      }
+          & > :first-child:not(style):not(script)         { justify-self: start  }
+          & > :nth-child(2 of :not(style):not(script))    { justify-self: center }
+          & > :last-child:not(style):not(script)          { justify-self: end    }
 
-      .tmb {
-        display: grid; grid-template-rows: 1fr auto 1fr;
-        justify-items: center; gap: var(--gap);
+          & > style, & > script { display: none }
+        }
 
-        & > :first-child  { align-self: start }
-        & > :nth-child(2) { align-self: center }
-        & > :last-child   { align-self: end }
-      }
+        .tmb {
+          display: grid;
+          grid-template-rows: 1fr auto 1fr;
+          justify-items: center;
+          gap: var(--gap);
+
+          & > :first-child:not(style):not(script)         { align-self: start  }
+          & > :nth-child(2 of :not(style):not(script))    { align-self: center }
+          & > :last-child:not(style):not(script)          { align-self: end    }
+
+          & > style, & > script { display: none }
+        }
 
       /* ── .flank — leading/trailing fixed, the other grows ──── */
-      .flank, .flank-start, .flank-end {
-        display: flex; flex-direction: row; align-items: center; gap: var(--gap);
-      }
-      .flank, .flank-start {
-        & > :first-child { flex: 0 0 auto }
-        & > :last-child  { flex: 1 1 auto; min-inline-size: 0 }
-      }
-      .flank-end {
-        & > :first-child { flex: 1 1 auto; min-inline-size: 0 }
-        & > :last-child  { flex: 0 0 auto }
-      }
+        .flank, .flank-start {
+          display: flex; flex-direction: row; align-items: center; gap: var(--gap);
+
+          & > :first-child:not(style):not(script) { flex: 0 0 auto }
+          & > :last-child:not(style):not(script)  { flex: 1 1 auto; min-inline-size: 0 }
+
+          & > style, & > script { display: none }
+        }
+
+        .flank-end {
+          display: flex; flex-direction: row; align-items: center; gap: var(--gap);
+
+          & > :first-child:not(style):not(script) { flex: 1 1 auto; min-inline-size: 0 }
+          & > :last-child:not(style):not(script)  { flex: 0 0 auto }
+
+          & > style, & > script { display: none }
+        }
 
       .frame {
         aspect-ratio: 16 / 9;
@@ -1006,6 +1071,48 @@ def _(mo):
 
         & > * { grid-area: stack }
       }
+
+        .hero {
+            display: grid;
+            grid-template:
+                "t t t" auto
+                "l m r" 1fr
+                "b b b" auto /
+                auto 1fr auto;
+            height: 100%;
+            overflow: hidden;
+
+            & > .top    { grid-area: t; }
+            & > .bottom { grid-area: b; }
+            & > .left   { grid-area: l; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            & > .main   { grid-area: m; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            & > .right  { grid-area: r; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+        }
+          /* ── .hud-grid ─────────────────────────────────────────────────
+         A grid with 9 directional anchor slots. this is the no overlap version of .hud
+         Slots: ↖ ↑ ↗ / ← • → / ↙ ↓ ↘
+         ──────────────────────────────────────────────────────── */
+
+       .hud-grid {
+            display: grid;
+            grid-template:
+         Slots: "↖ ↑ ↗" auto
+                "← • →" 1fr
+                "↙ ↓ ↘" auto /
+             auto 1fr auto;
+            height: 100svh;
+            overflow: hidden;
+
+            > .↖ { grid-area: ↖; }
+            > .↑ { grid-area: ↑; }
+            > .↗ { grid-area: ↗; }
+            > .← { grid-area: ←; overflow-y: auto; scrollbar-gutter: stable; }
+            > .• { grid-area: •; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+            > .→ { grid-area: →; overflow-y: auto; scrollbar-gutter: stable; }
+            > .↙ { grid-area: ↙; }
+            > .↓ { grid-area: ↓; }
+            > .↘ { grid-area: ↘; }
+        }
 
       /* ── .hud ─────────────────────────────────────────────────
          A .stack with 9 directional anchor slots. Children are
@@ -1081,6 +1188,36 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    ### KBD
+
+    ```css
+    @layer component.base {
+     /* kbd — keyboard key marker. Mono surface that evokes a physical
+         keycap. Border slightly louder than .input so keys pop in prose. */
+      kbd {
+        --bg: 0;
+        --fg: -1;
+        --type: -1.5;
+        display: inline-flex;
+        align-items: center;
+        padding: 0.1em 0.45em;
+        border: 1px solid var(--Border);
+        border-radius: 0.35em;
+        font-family: ui-monospace, monospace;
+        font-weight: 600;
+        line-height: 1.4;
+
+        & * { --type: -1.5; }
+      }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ## Components Simple
     """)
     return
@@ -1133,18 +1270,43 @@ def _(mo):
         --bg: 0;
         --fg: -1;
         --type: -1;
+
         display: inline-flex;
         align-items: center;
         justify-content: center;
+
+        /* Lock to font-size; do not let parent layout stretch us */
+        flex: 0 0 auto;
+        align-self: center;
+        inline-size: 2.2em;     /* 1em icon + 2 × 0.6em padding */
+        block-size: 2.2em;
+        aspect-ratio: 1;        /* redundant but harmless and self-documenting */
+
         padding: 0.6em;
         border: 1px solid var(--border);
         border-radius: var(--cfg-radius);
-        aspect-ratio: 1;
         line-height: 1;
         user-select: none;
 
-        & * { --type: -1; }
-        & svg { inline-size: 1em; block-size: 1em; display: block; }
+        /* Removed: `& * { --type: -1 }` — --type cascades naturally,
+           and forcing it on `*` blocks legitimate overrides like
+           a small label inside the button. */
+
+        & svg {
+          inline-size: 1em;
+          block-size: 1em;
+          display: block;
+        }
+      }
+
+      /* Ensure tap target is large enough on touch devices.
+         Using max-width: 480px because that's the conventional mobile
+         breakpoint stick.css already uses for .mobile / .tablet / .desktop. */
+      @media (max-width: 480px) {
+        .icon-btn {
+          min-inline-size: 44px;
+          min-block-size: 44px;
+        }
       }
     }
     ```
@@ -1213,7 +1375,7 @@ def _(mo):
 
     ```css
     @layer component.simple {
-          /* tabs — segmented control. Container is a neutral pill; each tab
+        /* tabs — segmented control. Container is a neutral pill; each tab
          is transparent until aria-selected="true", at which point it
          pops chromatic.                                                 */
       .tabs {
@@ -1234,11 +1396,40 @@ def _(mo):
           font-weight: 600;
           white-space: nowrap;
           user-select: none;
+          transition:
+            background-color calc(var(--cfg-motion) * 0.2s) ease-out,
+            color            calc(var(--cfg-motion) * 0.2s) ease-out,
+            border-color     calc(var(--cfg-motion) * 0.2s) ease-out;
         }
         & > button * { --type: -1; }
+        & > button:hover { --fg: -1; }
         & > button[aria-selected="true"] {
           --bg: var(--cfg-bg-loud);
           --fg: -1;
+        }
+
+        /* underline — alternate look. Drops the pill container, keeps
+           a quiet baseline, and marks the selected tab with a chromatic
+           underline drawn from currentColor.                           */
+        &.underline {
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          border-block-end: 1px solid var(--border);
+          gap: 0;
+
+          & > button {
+            --bg: 0;
+            margin-block-end: -1px;
+            padding: 0.4em 0.85em;
+            border-radius: 0.4em 0.4em 0 0;
+            border-block-end: 2px solid transparent;
+          }
+          & > button[aria-selected="true"] {
+            --bg: 0;
+            --fg: 0.8;
+            border-block-end-color: currentColor;
+          }
         }
       }
 
@@ -1302,9 +1493,9 @@ def _(mo):
           /* avatar — rounded square holder for initials or image. Editorial
          serif so initials read as a personal mark rather than UI.       */
       .avatar {
-        --bg: 0.2;
+        --bg: 0;
         --fg: -1;
-        --type: 1;
+        --type: 0;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -1424,6 +1615,29 @@ def _(mo):
         border-block-start: 1px solid var(--border);
         margin-block: 1em;
         inline-size: 100%;
+      }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### card
+
+    ```css
+    @layer component.simple {
+      .card {
+        padding: 1em;
+        border: 1px solid var(--border);
+        border-radius: var(--cfg-radius);
+      }
+      .Card {
+        padding: 1em;
+        border: 1px solid var(--Border);
+        border-radius: var(--cfg-radius);
       }
     }
     ```
@@ -1613,14 +1827,6 @@ def _(mo):
             text-overflow: ellipsis;
         }
 
-        /* Responsive show/hide. Matches viewport ranges; flips display
-           to `revert-layer` so the element gets its natural display value
-           back (block/inline/grid/etc.) without the consumer specifying. */
-        :where(.mobile, .tablet, .desktop) { display: none }
-        @media (         width <   480px) { :where(.mobile)  { display: revert-layer } }
-        @media (480px <= width <  1024px) { :where(.tablet)  { display: revert-layer } }
-        @media (         width >= 1024px) { :where(.desktop) { display: revert-layer } }
-
         /* Print mode adjustments — generic enough to live here. */
         @media print {
             :where(body) { min-height: 0 }
@@ -1638,6 +1844,15 @@ def _(mo):
 
     @layer utility.important {
         :where([hidden]) { display: none !important }
+
+        /* Responsive show/hide. The viewport class is a participation gate —
+           it has to win against any inline `@scope` rule that sets `display`
+           on the element to define its internal layout. `revert-layer` returns
+           the element to its natural display when it should be visible. */
+        :where(.mobile, .tablet, .desktop) { display: none !important }
+        @media (         width <   480px) { :where(.mobile)  { display: revert-layer !important } }
+        @media (480px <= width <  1024px) { :where(.tablet)  { display: revert-layer !important } }
+        @media (         width >= 1024px) { :where(.desktop) { display: revert-layer !important } }
 
         /* No-print: hide an element when printing. */
         @media print {

@@ -1,0 +1,1232 @@
+# stick.css
+
+A design system for HTML. You compose interfaces from a small set of tokens, layout primitives, and components. The system handles theming, dark mode, hue rotation, and contrast automatically. Stop thinking about colors as hex codes — describe intent and the system computes the result.
+
+## How to use this guide
+
+Read top to bottom once. Then keep it open while you work. Every API you need is here. The formula behind these tokens is intentionally hidden — trust the surface, ignore the internals.
+
+### Conventions
+
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
+
+Used sparingly, where authors hit real failure modes if they ignore the rule. Most guidance is prose; reach for the keywords when something silently breaks otherwise.
+
+## Setup
+
+Add the CDN link to your HTML:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@<commit>/css/style.css">
+```
+
+Use a commit hash during development (always fresh) or a tag for production.
+
+Set your brand identity in a single `:root` block:
+
+```html
+<style>
+  :root {
+    --hue: 18;                    /* brand hue 0-360 */
+    --cfg-color-loud-c-light: 0.32;  /* punch in light mode */
+    --cfg-color-loud-c-dark: 0.30;
+  }
+</style>
+```
+
+Set the theme on `<html>`:
+
+```html
+<html data-ui-theme="light">  <!-- or "dark" -->
+```
+
+## The mental model (60 seconds)
+
+**Color has two independent axes:**
+- `--bg` (0 to 1) — surface presence. 0 = blends in, 1 = loud chromatic.
+- `--fg` (-1 to 1) — ink contrast. -1 = neutral high contrast, 0 = dim, 1 = vivid chromatic.
+
+**Hue:**
+- `--hue` — base brand hue, set on `:root`
+- `--hue-shift` — local rotation, used for variety
+- `--hue-lock` — overrides everything, used for semantic colors
+
+**Type:** `--type` integer steps. 0 = body, positive = bigger, negative = smaller.
+
+**Spacing:** `--gap` is a fluid token (rem-based, scales with viewport via a `pow()` curve). Used by all layout primitives and by `.page`'s slot padding. Override per-instance with a static value when fixed spacing is wanted.
+
+**Structure:** wrap content regions in `.surface` to make them paint. Compose layouts from `.row .column .split .spread .lcr .tmb .flank .grid .hud .hud-grid .hero .stack`. Use `body.page` for application root layouts (eleven `pg-*` slots: banner, header, subheader, navigation column with its own header/footer, main column with its own header/footer, aside, page footer).
+
+That's the whole system. Everything below is detail.
+
+## Color tokens
+
+### --bg [0, 1]
+
+Surface presence. On non-surface elements, `--bg: 0` is transparent — the inherited surface shows through. As `--bg` rises, the element paints with progressively more chromatic surface.
+
+```html
+<div style="--bg: 0">         <!-- transparent on parent surface -->
+<div style="--bg: 0.2">        <!-- soft chromatic tint -->
+<div style="--bg: 0.55">       <!-- moderate -->
+<div style="--bg: 0.8">        <!-- loud (use for tags, primary CTAs) -->
+<div style="--bg: 1">          <!-- maximum chromatic -->
+```
+
+The surface always paints regardless of `--bg`. Other elements only paint when `--bg > 0`.
+
+### --fg [-1, 1]
+
+Ink contrast and chromatic level for text and SVG `currentColor`.
+
+- **Negative values = neutral ink.** -1 is full contrast, 0 matches the surface (invisible), positive crosses into chromatic.
+- **Positive values = chromatic ink.** 0.5 is mid-vivid, 1 is maximum chromatic.
+
+```html
+<span style="--fg: -1">     <!-- body text, full contrast -->
+<span style="--fg: -0.5">   <!-- secondary text, dimmed -->
+<span style="--fg: -0.3">   <!-- captions, very dim -->
+<span style="--fg: 0.5">    <!-- chromatic accent text -->
+<span style="--fg: 0.8">    <!-- vivid links, primary actions -->
+<span style="--fg: 1">      <!-- maximum chromatic -->
+```
+
+### --hue, --hue-shift, --hue-lock
+
+Three ways to set color identity.
+
+```html
+<!-- Brand hue applies everywhere by default -->
+<style>:root { --hue: 18 }</style>
+
+<!-- Shift rotates relative to brand — for variety in cards, charts -->
+<div style="--hue-shift: 90">    <!-- shifted +90° -->
+<div style="--hue-shift: -120">  <!-- shifted -120° -->
+
+<!-- Lock overrides everything — for semantic / branded content -->
+<div style="--hue-lock: 145">    <!-- always green -->
+```
+
+### Semantic helpers (built-in)
+
+```html
+<span class="suc">  <!-- green: success, approved, live -->
+<span class="inf">  <!-- blue: info, neutral status -->
+<span class="wrn">  <!-- yellow: warning -->
+<span class="dgr">  <!-- red: danger, error, alert -->
+<span class="bw">   <!-- grayscale: zero chroma -->
+```
+
+These set `--hue-lock` (and for `.bw`, the loud chroma) so the element renders in that semantic color regardless of brand hue.
+
+### Border tokens (derived)
+
+Two border colors are computed from each element's current `--bg`:
+
+- `var(--border)` — quiet, low-chroma. Use for default borders.
+- `var(--Border)` — louder, slightly chromatic. Use for emphasis, focus, hover states.
+
+Authors **MUST NOT** assign to these tokens directly. They are derived from `--bg` by the formula; overriding them desyncs borders from the surface they live on. Read them in styles:
+
+```html
+<div style="border: 1px solid var(--border)">
+<input style="border: 1px solid var(--Border)">
+```
+
+### Reading SVG with the system
+
+SVG strokes and fills color through `currentColor`. The `<svg>` element's `color` is computed from `--fg`, so any descendant using `currentColor` participates in the system automatically — including theme switches, hue rotation, and contrast flipping.
+
+```html
+<!-- Vivid primary line -->
+<g style="--fg: 0.8" stroke="currentColor">
+
+<!-- Muted neutral baseline -->
+<g style="--fg: -0.4" stroke="currentColor">
+
+<!-- Hue-shifted accent (e.g. blue forecast against red brand) -->
+<g style="--hue-shift: 200; --fg: 0.8" stroke="currentColor">
+```
+
+Authors **MUST** color SVG via `--fg`. `--bg` is the background axis and does not propagate through `currentColor`; using it for strokes or fills produces nothing useful and breaks theme switching. Negative `--fg` for neutral lines (grids, baselines), positive `--fg` for chromatic ink (data lines, accents). Use `--hue-shift` or `--hue-lock` on the `<g>` to vary color per series.
+
+## Type system
+
+Set `--type` on any element. Integer steps, body is 0; decimals work (`--type: -0.5`, `--type: 1.5`).
+
+```html
+<span style="--type: 3">     <!-- big display number -->
+<span style="--type: 2">     <!-- page title -->
+<span style="--type: 1">     <!-- section title -->
+<span style="--type: 0">     <!-- body (default) -->
+<span style="--type: -0.5">  <!-- slightly smaller -->
+<span style="--type: -1">    <!-- secondary text -->
+<span style="--type: -1.5">  <!-- captions -->
+<span style="--type: -2">    <!-- micro labels, all-caps tags -->
+```
+
+Letter-spacing and line-height adjust automatically — bigger text gets tighter spacing.
+
+`--type` does not cascade. Set it on each element that needs sizing; children do not inherit the parent's `--type`.
+
+### Font tokens
+
+```html
+<span style="font-family: var(--font-ui)">       <!-- system sans (default for body) -->
+<span style="font-family: var(--font-display)">  <!-- editorial serif for titles -->
+<span style="font-family: var(--font-mono)">     <!-- monospace -->
+```
+
+## Surfaces
+
+A surface is a region that paints its own background. Wrap content regions in `.surface`:
+
+```html
+<body class="surface">                    <!-- whole page is a surface -->
+  <main class="surface">                  <!-- main content area -->
+    <div class="card surface">            <!-- card -->
+      <div class="surface">…</div>        <!-- nested surface -->
+    </div>
+  </main>
+</body>
+```
+
+**Depth cascades automatically.** Surfaces nested inside other surfaces get progressively darker (in light mode) or lighter (in dark mode). The leaf surface — the one the user is focused on — is brightest.
+
+You can override depth manually when needed:
+
+```html
+<div class="surface" style="--depth: 2">  <!-- force this surface 2 stages deeper -->
+```
+
+This is useful for overlays, legends, or nested chips that should read as "stepped down" from their container.
+
+## Layout primitives
+
+Stateless containers that arrange children. No opinions about what the children are.
+
+### Flow
+
+```html
+<div class="row">      <!-- horizontal flex with wrap, gap absorbs slack -->
+<div class="column">   <!-- vertical flex with gap -->
+<div class="stack">    <!-- children overlap in same grid cell -->
+```
+
+### Equal-distribute
+
+```html
+<div class="split">    <!-- rigid 50/50 grid, two columns -->
+<div class="spread">   <!-- flex with space-between, forgiving -->
+```
+
+**Use `.spread` by default.** It sizes children to content and absorbs slack in the gap. Use `.split` only when you specifically need exactly 50/50 at all viewport sizes (rare — usually for things like profile-and-activity panes that should always read as paired halves).
+
+### Three-region
+
+```html
+<div class="lcr">      <!-- left, center, right (3-column grid) -->
+<div class="tmb">      <!-- top, middle, bottom (3-row grid) -->
+```
+
+### Flank (one fixed, one fills)
+
+```html
+<div class="flank">       <!-- first child fixed size, last fills -->
+<div class="flank-end">   <!-- mirrored: first fills, last fixed -->
+```
+
+### Grid (auto-fit responsive)
+
+```html
+<div class="grid" style="--grid-min: 14rem">  <!-- fills with min 14rem cards -->
+```
+
+### HUD (overlay anchors)
+
+A single cell where children *stack* (overlay each other), anchored by directional class:
+
+```html
+<div class="hud">
+  <span class="↖">top-left</span>
+  <span class="↑">top-center</span>
+  <span class="↗">top-right</span>
+  <span class="←">middle-left</span>
+  <span class="•">center</span>
+  <span class="→">middle-right</span>
+  <span class="↙">bottom-left</span>
+  <span class="↓">bottom-center</span>
+  <span class="↘">bottom-right</span>
+</div>
+```
+
+Children all sit in the same grid cell, anchored by `justify-self`/`align-self`. Siblings are *geometrically independent* — a giant `↖` panel cannot push a centered `•` child off-axis. Use `.hud` when you want overlays on top of underlying content: KPI cards (label `↖`, tag `↗`, big number `•`), chart legends pinned over the chart (`↘`), badges, reticles, watermarks.
+
+### HUD-grid (nine distributed cells)
+
+Same nine directional class names as `.hud`, but children go into *nine separate* grid cells instead of overlaying. The middle row stretches; left/right middle slots and the center scroll independently. Use `.hud-grid` when you want a real nine-region layout — e.g. an immersive viewer with persistent corner controls and a scrollable center.
+
+```html
+<div class="hud-grid">
+  <header class="↖">…</header>      <!-- fixed -->
+  <div class="↑">…</div>             <!-- fixed -->
+  <header class="↗">…</header>      <!-- fixed -->
+  <aside class="←">…</aside>         <!-- scrolls -->
+  <main class="•">…</main>           <!-- scrolls (the focus) -->
+  <aside class="→">…</aside>         <!-- scrolls -->
+  <footer class="↙">…</footer>      <!-- fixed -->
+  <div class="↓">…</div>             <!-- fixed -->
+  <footer class="↘">…</footer>      <!-- fixed -->
+</div>
+```
+
+Distinct from `.hud` (overlays in one cell) — the same `↖ ↑ ↗ ← • → ↙ ↓ ↘` class names work in both, but in `.hud-grid` they place children into separate cells, in `.hud` they stack them with anchors.
+
+### Hero (chrome around scrollable content)
+
+A five-slot panel primitive: optional top, optional bottom, optional left, optional right, and a middle that scrolls. Used wherever you want chrome (header, footer, side rails) framing a scrolling content area — drawers, modal contents, split-pane sections, anywhere the "page within a page" pattern is wanted.
+
+```html
+<div class="hero">
+  <div class="top">…</div>
+  <div class="left">…</div>
+  <div class="main">…</div>
+  <div class="right">…</div>
+  <div class="bottom">…</div>
+</div>
+```
+
+`.top` and `.bottom` span the full width. `.left` and `.right` flank the middle. `.main` is the only region that scrolls; `.left` and `.right` also scroll if their content exceeds the height. All slots are optional except `.main` — omit any others and their tracks collapse.
+
+`.hero` is distinct from `.page`. `.page` is the application root (eleven slots, browser viewport-sized, opt-in via `pg-*` classes). `.hero` is a smaller-scale primitive that fits inside any container — it fills its parent's box, not the viewport. Common compositions: `.hero` inside a `<dialog class="drawer">` to give the drawer its own internal chrome, or `.hero` inside `pg-main` to create a split-view region with its own headers and rails.
+
+### Frame (aspect ratio)
+
+```html
+<div class="frame">     <!-- 16:9 ratio with overflow hidden -->
+  <img>                 <!-- child fills with object-fit: cover -->
+</div>
+```
+
+### Setting gap
+
+`--gap` is the spacing token used by every layout primitive's `gap` property and by `.page`'s default slot padding. The system value is fluid:
+
+```css
+:root {
+  --gap: clamp(
+    0.25rem,
+    calc(0.25rem + 1.75rem * pow(100vi / 3000px, 3)),
+    2rem
+  );
+}
+```
+
+The cubic curve keeps `--gap` near the floor (~4-8px) across phone-through-desktop widths and only ramps up at projector / TV scale (1920px+, peaking at 2rem on viewports past 3000px). Layout density stays consistent across the range most users see.
+
+Override per-instance with a static value when fixed spacing is wanted:
+
+```html
+<div class="row" style="--gap: 0.4rem">      <!-- tight chip row -->
+<div class="column" style="--gap: 1.5rem">   <!-- airy section spacing -->
+```
+
+A static override breaks out of the fluid behavior for that instance. The system value resumes everywhere else.
+
+## Layout
+
+Layout is one system in three parts: **the page** (a fixed grid every application uses), **responsive viewport classes** (which control what participates at each breakpoint), and **drawers** (which hold content removed from the page at smaller viewports). They're designed together. Read this section as a unit.
+
+### The page layout
+
+Wrap your application root in `body.page` to get an eleven-slot grid:
+
+```html
+<body class="page surface">
+  <div class="pg-banner">…</div>
+  <div class="pg-header">…</div>
+  <div class="pg-subheader">…</div>
+  <div class="pg-navigation-header">…</div>
+  <nav class="pg-navigation">…</nav>
+  <div class="pg-navigation-footer">…</div>
+  <div class="pg-main-header">…</div>
+  <main class="pg-main">…</main>
+  <div class="pg-main-footer">…</div>
+  <aside class="pg-aside">…</aside>
+  <div class="pg-footer">…</div>
+</body>
+```
+
+The grid template is fixed — banner / header / subheader stack at the top, the page footer pins to the bottom, navigation and main columns share the middle band (each with its own internal header / body / footer), and aside spans the full middle band on the right. Only the navigation, main, and aside columns scroll; every chrome slot pins.
+
+A page using `body.page` **MUST** contain a `pg-main`. All other slots are optional; omit any of them and its grid track collapses.
+
+`.page` is **opt-in**: the grid only assigns positions to direct children with `pg-*` classes. Children without a `pg-*` class don't get a `grid-area` and aren't placed in the grid template. This makes drawers, scripts, and other top-layer content safe to live as direct children of `<body>` without leaking into the layout.
+
+`.page` provides default `padding: var(--gap)` on every `pg-*` slot. Authors don't write inline padding on slots; the system provides it and it scales with the fluid `--gap` token.
+
+Each `pg-*` class is bound to its grid area. `pg-navigation` is always the left middle column, `pg-aside` is always the right middle column, banner / header / subheader / footer always span the full width. Variants inside a slot can change its internal layout and width, but not its position in the page. Variants sharing a slot **MUST** share that slot's grid orientation: `pg-navigation` can hold a full sidebar and an icon-only rail as siblings (both vertical, both in the left column), but not a sidebar and a horizontal top bar.
+
+#### Slot semantics
+
+Each slot has a default role. Defaults, not requirements — content can live wherever fits a breakpoint (see "Migrating content across slots") — but starting from the natural home keeps pages predictable.
+
+- **`pg-banner`** — full-width topmost strip. Site-wide announcements, environment indicators (staging / dev), browser-upgrade nags. Horizontal track.
+- **`pg-header`** — primary chrome. Brand, top navigation, account / settings buttons. Horizontal track.
+- **`pg-subheader`** — secondary chrome. Breadcrumbs, page title bar, persistent filters. Horizontal track.
+- **`pg-navigation-header`** — chrome at the top of the navigation column. Workspace switcher, search input, section caption.
+- **`pg-navigation`** — primary navigation. Section list, persistent in-app navigation. Vertical track on the left; scrolls.
+- **`pg-navigation-footer`** — chrome at the bottom of the navigation column. User profile, version info, sign-out.
+- **`pg-main-header`** — chrome above main content. Page title, page-level tabs, action toolbar.
+- **`pg-main`** — the reason the user is on the page. The most important content; scrolls.
+- **`pg-main-footer`** — chrome below main content. Status bar, persistent action row, sync indicator.
+- **`pg-aside`** — secondary context. Right-side metadata, related items, activity feed. Vertical track on the right; scrolls.
+- **`pg-footer`** — dock. Copyright, footer links, search hint. Horizontal track at the bottom.
+
+`pg-main`'s width varies across breakpoints — 320px on mobile, 1400px on desktop, depending on which sibling slots are present. Components authored for `pg-main` **MUST** scale across that range. Sidebars and drawers can rely on fixed widths because their tracks are bounded; `pg-main` cannot. When a component in `pg-main` has a non-trivial internal layout, wrap it in a `@container` query so it responds to its own width rather than the viewport.
+
+#### Migrating content across slots
+
+The slots are named tracks with fixed orientations, not containers that own a kind of content. A single concept can be authored across multiple slots — one shape per slot, each gated by a viewport class — and exactly one shape participates at any given breakpoint. A navigation can be a vertical sidebar in `pg-navigation` at desktop, a horizontal pill bar in `pg-header` at tablet, and a thumb-reachable bottom toolbar in `pg-footer` at mobile.
+
+```html
+<div class="pg-header">
+  <span class="brand">stick.css</span>
+
+  <!-- Tablet shape of nav lives here — pg-header's track is horizontal -->
+  <nav class="tablet">
+    <a href="#" aria-current="page">Overview</a>
+    <a href="#">Accounts</a>
+    <!-- … -->
+  </nav>
+</div>
+
+<!-- Desktop shape: vertical sidebar in pg-navigation's left column -->
+<nav class="pg-navigation desktop">…</nav>
+
+<main class="pg-main">…</main>
+
+<div class="pg-footer">
+  <!-- Mobile shape: horizontal bottom toolbar in pg-footer's bottom row -->
+  <nav class="mobile">…</nav>
+</div>
+```
+
+The orientation rule still applies: each shape **MUST** fit the orientation of the slot it lives in. What's flexible is *which slot a concept lives in at a given breakpoint*.
+
+Slots whose children don't participate at the current breakpoint collapse to zero. At desktop, `<nav class="mobile">` inside `pg-footer` is hidden, `pg-footer` has no other children, and its grid row disappears.
+
+### Responsive viewport classes
+
+Three additive classes control what participates at each breakpoint:
+
+```html
+<element class="mobile">          <!-- < 480px only -->
+<element class="tablet">          <!-- 480px – 1024px only -->
+<element class="desktop">         <!-- ≥ 1024px only -->
+<element class="mobile tablet">   <!-- < 1024px (combined range) -->
+<element>                         <!-- always visible (no class) -->
+```
+
+Default (no class) is always on. Adding any class restricts the element to matching viewports. Combine classes to express ranges as unions.
+
+These classes work on any element, at any granularity, regardless of its native display type. Use them on whole page slots, on individual children, on text inside a button. The system flips the element to its natural display when it should appear; authors do not specify `display: block` or `display: grid` per case.
+
+A button that swaps icon-only on mobile, label-only on tablet, and shows both on desktop:
+
+```html
+<button aria-label="Save">
+  <span class="mobile desktop" aria-hidden="true">💾</span>
+  <span class="tablet desktop">Save</span>
+</button>
+```
+
+At mobile only the icon participates, at tablet only the label, at desktop both — an icon-plus-label button without authoring three buttons.
+
+**Cascade rule.** A viewport class controls its element's `display` via `revert-layer !important`. That rule beats any `display` declaration on the same element from inline `@scope`, layout primitive classes, or per-instance styles. Authors **MUST NOT** put a layout primitive class (`.row`, `.column`, `.grid`, `.flank`, `.hero`, etc.) on the same element as a viewport class — the layout primitive's `display` will be silently overridden and the element will lay out with its native default. Wrap the content in a child element and put the layout primitive on the wrapper instead. (See "Inline @scope discipline" for the analogous rule for `@scope` blocks.)
+
+### The coverage rule
+
+Viewport classes partition the viewport range. Authors **SHOULD** cover the full range when gating an element: a `.mobile`-only element disappears at tablet and desktop, leaving a hole in the design unless something else fills the slot. Think in partitions, not in isolated additions.
+
+Most layouts settle into one of two shapes.
+
+**Two-way split** — common, lower cost. One version persists across two of the three breakpoints, another takes the third.
+
+```html
+<!-- Persistent on desktop, drawer on mobile + tablet -->
+<nav id="nav" class="desktop">…</nav>
+<div id="nav-drawer" popover class="drawer left mobile tablet">…</div>
+```
+
+**Three-way split** — a different shape per breakpoint, all sharing the slot's grid track.
+
+```html
+<!-- Drawer on mobile, narrow icon rail on tablet, full sidebar on desktop -->
+<nav class="pg-navigation">
+  <section class="desktop">…full sidebar with text labels…</section>
+  <section class="tablet">…narrow icon-only rail, same vertical orientation…</section>
+</nav>
+<div id="nav-drawer" popover class="drawer left mobile">…drawer shape…</div>
+```
+
+Both desktop and tablet variants are vertical and live in `pg-navigation`'s grid track — different internal layouts of the same slot. A variant that needs a different orientation (a horizontal nav strip at tablet width) does not belong in `pg-navigation`; it moves to `pg-header` or another slot whose track supports that shape, and `pg-navigation` collapses at that breakpoint.
+
+If you find yourself writing `.mobile` without a counterpart for tablet and desktop, ask: what fills this slot at those sizes?
+
+### The duplication pattern
+
+When a page slot needs to look different at different viewports, author each shape and let viewport classes pick which is live.
+
+**Two-way case.** The slot carries the viewport class; the drawer covers the other breakpoints with duplicated content.
+
+```html
+<body class="page surface">
+  <div class="pg-header">
+    <span class="brand">stick.css</span>
+  </div>
+
+  <nav class="pg-navigation desktop">
+    <!-- nav content -->
+  </nav>
+
+  <main class="pg-main">…</main>
+
+  <!-- HUD overlay with FAB trigger, mobile + tablet only -->
+  <div class="hud" style="position: fixed; inset: 0; pointer-events: none">
+    <button class="↙ icon-btn mobile tablet"
+            style="margin: 1rem"
+            aria-label="Open navigation"
+            onclick="document.getElementById('nav-drawer').showModal()">☰</button>
+  </div>
+
+  <dialog id="nav-drawer" class="drawer left hero surface">
+    <!-- nav content (duplicated, with internal hero layout) -->
+    <div class="top">…search…</div>
+    <div class="main">…links…</div>
+    <div class="bottom">…user info…</div>
+  </dialog>
+</body>
+```
+
+On desktop, the `pg-navigation` is in its grid track and the FAB is hidden. On smaller screens, the slot is hidden (its track collapses), the FAB appears in the `↙` corner of the page-level HUD, and tapping it opens the modal drawer. The drawer composes `.drawer` (positioning + animation), `.hero` (internal three-region layout — search at top, scrolling links in middle, user info pinned at bottom), and `.surface` (paint).
+
+**Three-way case.** The slot holds multiple persistent shapes nested inside it, gated by viewport classes. The drawer covers the remaining breakpoint.
+
+```html
+<nav class="pg-navigation">
+  <section class="desktop">
+    <!-- full sidebar with text labels -->
+  </section>
+  <section class="tablet">
+    <!-- narrow icon-only rail, same vertical orientation -->
+  </section>
+</nav>
+
+<div id="nav-drawer" popover class="drawer left mobile">
+  <!-- drawer shape -->
+</div>
+```
+
+Each variant typically wants its own internal layout. Use inline `@scope` on a wrapper `<div>` (never on `:scope` of the viewport-gated element — see "Inline @scope discipline"):
+
+```html
+<nav class="pg-navigation">
+  <section class="desktop">
+    <style>
+      @scope {
+        :scope > div {
+          display: grid;
+          grid-template:
+            "header header header" auto
+            "icon   aside  meta"   1fr
+            "footer footer f-meta" auto /
+             auto   1fr   auto;
+          block-size: 100%;
+        }
+        :scope > div > header { grid-area: header }
+        /* …rules for the rest of the shape… */
+      }
+    </style>
+    <div>
+      <header>…</header>
+      <svg>…</svg>
+      <aside>…</aside>
+    </div>
+  </section>
+
+  <section class="tablet">
+    <style>
+      @scope {
+        :scope > div { /* narrow vertical icon rail */ }
+        :scope > div > svg { /* icon sizing */ }
+      }
+    </style>
+    <div>…</div>
+  </section>
+</nav>
+```
+
+The viewport classes gate participation; the wrapper `<div>` carries the layout; everything inside is classless and selected by structure. Delete a `<section>`, its styles delete with it.
+
+**Source order.** Drawers **SHOULD** be placed after the page slots, not nested inside a slot. They live in the top layer (`<dialog>`) or as positioned popovers, so they don't need a place in the grid — keep them physically separate from the page slots they're paired with.
+
+### Drawers
+
+Two flavors, distinguished by element type and chosen by intent.
+
+**Modal drawer — `<dialog class="drawer ...">`**
+
+Use when the drawer demands full attention: navigation, confirmations, focused tasks. Opens with `showModal()`, has a dim backdrop, traps focus, makes the page underneath inert.
+
+```html
+<dialog class="drawer left">…</dialog>
+
+<button onclick="document.querySelector('dialog.drawer.left').showModal()">
+  open nav
+</button>
+```
+
+**Non-modal drawer — `<div popover class="drawer ...">`**
+
+Use when the user needs to keep working on the page while the drawer is open. The canonical case: a form that references content elsewhere on the page — the user fills the form in the drawer while reading the page underneath. Opens via `popovertarget` on a trigger button (no JavaScript needed) or `element.showPopover()`.
+
+```html
+<div id="filters" popover class="drawer right">…</div>
+
+<button popovertarget="filters">open filters</button>
+```
+
+**Choosing between them:** if the page should be inert while the drawer is open, use `<dialog>`. If the user needs the page as context, use `popover`. Animation and positioning are identical; only modality differs.
+
+### Drawer positions and sizing
+
+```html
+<dialog class="drawer left">    <!-- slides from left, full height, narrow side rail -->
+<dialog class="drawer right">   <!-- slides from right, full height, narrow side rail -->
+<dialog class="drawer top">     <!-- slides from top, full width, short -->
+<dialog class="drawer bottom">  <!-- slides from bottom, full width, short -->
+```
+
+The same classes apply to `popover` drawers. Override sizing per-instance:
+
+```html
+<dialog class="drawer bottom" style="block-size: 75svh">
+```
+
+## Components
+
+### Button
+
+```html
+<button class="btn">Action</button>
+<button class="icon-btn"><svg>…</svg></button>  <!-- square, icon-only -->
+```
+
+For a chromatic primary CTA, set `--bg`:
+
+```html
+<button class="btn" style="--bg: var(--cfg-bg-loud); --fg: -1; border-color: transparent">
+  Save
+</button>
+```
+
+### Tag
+
+Labeled chip. Two modes via element type:
+
+```html
+<!-- Static label (always vivid) -->
+<span class="tag">NEW</span>
+<span class="tag suc">live</span>
+
+<!-- Toggle (button + aria-pressed) -->
+<button class="tag" aria-pressed="false">filter</button>
+<!-- aria-pressed="false" → off (transparent dim)
+     aria-pressed="true"  → on (vivid, same as static) -->
+```
+
+### Tabs
+
+```html
+<!-- Segmented pill (default) -->
+<div class="tabs" role="tablist">
+  <button role="tab" aria-selected="true">First</button>
+  <button role="tab" aria-selected="false">Second</button>
+</div>
+
+<!-- Underline variant -->
+<div class="tabs underline" role="tablist">
+  <button role="tab" aria-selected="true">First</button>
+  <button role="tab" aria-selected="false">Second</button>
+</div>
+```
+
+Tab click handler (vanilla JS, generic across all tab groups):
+
+```html
+<script>
+  document.querySelectorAll('.tabs').forEach(group => {
+    const buttons = group.querySelectorAll('button');
+    buttons.forEach(btn => btn.addEventListener('click', () =>
+      buttons.forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'))));
+  });
+</script>
+```
+
+### Card
+
+```html
+<div class="card">…</div>   <!-- quiet border (var(--border)) -->
+<div class="Card">…</div>   <!-- louder border (var(--Border)) -->
+```
+
+Combine with `.surface` for cards that paint their own background:
+
+```html
+<div class="card surface">…</div>
+<div class="Card surface">…</div>
+```
+
+### Input
+
+```html
+<input class="input" type="text">
+<select class="input">…</select>
+<textarea class="input"></textarea>
+```
+
+Inside a `<form>`, inputs auto-stretch to full width. Inside a `<fieldset>` within a form, inputs arrange side-by-side as flex children:
+
+```html
+<form>
+  <input class="input">                   <!-- full width -->
+  <fieldset>
+    <div><label>First</label><input class="input"></div>
+    <div><label>Last</label><input class="input"></div>
+  </fieldset>                              <!-- 50/50 row -->
+</form>
+```
+
+### Check / radio
+
+```html
+<input class="check" type="checkbox">
+<input class="radio" type="radio" name="x">
+```
+
+### Avatar
+
+```html
+<span class="avatar">MD</span>           <!-- displays initials in serif -->
+<span class="avatar" style="--type: 1">  <!-- larger -->
+<span class="avatar" style="--hue-shift: 90">  <!-- different chromatic family -->
+```
+
+### Crumbs
+
+```html
+<nav class="crumbs">
+  <a href="#">Home</a>
+  <a href="#">Section</a>
+  <span aria-current="page">Current</span>
+</nav>
+```
+
+Auto-renders separators between children.
+
+### Link
+
+For chromatic in-prose anchors:
+
+```html
+<a class="link" href="#">read more</a>
+```
+
+### Progress
+
+```html
+<progress value="65" max="100"></progress>  <!-- determinate -->
+<progress></progress>                         <!-- indeterminate (pulses) -->
+```
+
+### kbd
+
+Keyboard key markers:
+
+```html
+<p>Press <kbd>⌘K</kbd> to search.</p>
+```
+
+### hr
+
+```html
+<hr>  <!-- horizontal divider in border tone -->
+```
+
+## Text flow utilities
+
+Two small classes for text behavior, sometimes useful in layout contexts:
+
+```html
+<span class="nowrap">never wraps</span>
+<span class="truncate">overflow ellipsized…</span>
+```
+
+`.truncate` requires a constrained width to do anything visible — most useful inside grid cells, flex children with `min-inline-size: 0`, or fixed-width containers.
+
+## Authoring layouts
+
+The order of preference for any layout work:
+
+1. **Page layout + composition primitives.** Use `body.page` for application roots, and `.row`, `.column`, `.spread`, `.split`, `.lcr`, `.tmb`, `.flank`, `.grid`, `.hud`, `.hud-grid`, `.hero`, `.stack` for everything inside. Primitives cover ~99% of layouts. They're stateless, predictable, and read at a glance — `<div class="spread">` tells the next reader what's happening without anyone opening a `<style>` block.
+
+2. **Inline `@scope`** for two cases: atomic refinements that generalize within the section, or genuinely complex components where co-locating styles with structure makes the component easier to work on. If primitives can express the layout, `@scope` is unnecessary.
+
+3. **Global classes** only for genuinely reusable components. The same `@scope` block in three places is the signal to lift it into a real component.
+
+### Inline @scope discipline
+
+Four rules.
+
+**1. Authors MUST NOT set display, visibility, or other participation-affecting properties on `:scope`.** The scope root's display belongs to the parent context — which may be set by a viewport class like `.mobile`/`.tablet`/`.desktop`, and viewport class rules carry `!important` to win against `@scope`. Fighting them creates a silent cascade conflict: the `@scope` rule loses, the element renders with its default display, and layout breaks in non-obvious ways. Put layout `display` on a wrapper child instead:
+
+```html
+<div class="tablet">
+  <style>
+    @scope {
+      :scope > div {
+        display: grid;
+        grid-template:
+          "title    actions" auto
+          "summary  detail"  1fr
+          "footer   footer"  auto /
+           1fr      auto;
+        gap: 1rem;
+      }
+      :scope > div > h2       { grid-area: title }
+      :scope > div > .actions { grid-area: actions }
+      :scope > div > .summary { grid-area: summary }
+      :scope > div > .detail  { grid-area: detail }
+      :scope > div > footer   { grid-area: footer }
+    }
+  </style>
+  <div>
+    <h2>…</h2>
+    <div class="actions">…</div>
+    <div class="summary">…</div>
+    <div class="detail">…</div>
+    <footer>…</footer>
+  </div>
+</div>
+```
+
+The wrapper `<div>` carries the grid; the outer element handles participation. One extra DOM node, no cascade fight.
+
+**2. Use grid-template-areas.** When reaching for `display: grid`, authors **SHOULD** prefer named areas over numeric tracks:
+
+```css
+:scope > div {
+  display: grid;
+  grid-template:
+    "title    title    actions" auto
+    "summary  detail   detail"  1fr
+    "footer   footer   footer"  auto /
+     12rem    1fr      auto;
+}
+```
+
+The template pictures the layout. Anyone reading sees the shape immediately, without mentally mapping `grid-row: 2 / 3; grid-column: 1 / 2` back to a spatial picture.
+
+**3. Target by structure, not by invented class names.** Inside `@scope`, prefer semantic tags and structural selectors — `:scope > div > h2`, `:scope > div > footer`, `:scope > ul > li > a`, `:scope > .row` — over adding `class="title"` to markup just to style it. The CSS reads as a description of the structure. When the scope contains layout primitives, target those — `.row`, `.column`, `.grid` are already meaningful names.
+
+**4. Keep scopes small.** A good `@scope` block reaches one or two levels deep at most — `:scope > div > h2` is fine; `:scope > section > article > div > .x` is a smell. When simple `> tag` selectors no longer suffice, break the scope up: wrap a child in its own element with its own `<style>` block, or extract a component.
+
+```html
+<!-- Good: small scope, simple targets, semantic structure -->
+<section>
+  <style>
+    @scope {
+      :scope > div { display: flex; flex-direction: column; gap: 0.75rem }
+      :scope > div > h2 { --type: 1 }
+      :scope > div > .grid { --grid-min: 16rem }
+    }
+  </style>
+  <div>
+    <h2>Recent accounts</h2>
+    <div class="grid">…</div>
+  </div>
+</section>
+
+<!-- Bad: scope too large, reaching across multiple structural layers -->
+<section>
+  <style>
+    @scope {
+      :scope > div > div.row > .Card > .hud > .↖ { --type: -2 }
+    }
+  </style>
+  …
+</section>
+```
+
+In the bad example, the long selector chain is the smell — each level of nesting is a candidate for its own scope, or the whole thing wants a real component. Composition primitives often resolve this: if the inner pattern is `Card + hud + label`, lifting structure into the markup (with primitives) makes the styling unnecessary.
+
+## Theme attributes
+
+Set on `<html>` or any ancestor:
+
+```html
+<html data-ui-theme="light">     <!-- or "dark" -->
+<html data-ui-motion="off">      <!-- or "on" or "debug" (10x slow) -->
+<html data-ui-type="md">         <!-- or "sm" or "lg" -->
+```
+
+Toggling the theme attribute is enough — the formula recomputes everything.
+
+## Charts
+
+stick.css's color formula paints HTML and SVG through the same channel: `--fg` drives `currentColor` on `<svg>`, `<g>`, `<path>`, and on `<span>`, `<div>`, `<p>` alike. Chart geometry can be SVG and chart text can be HTML, sharing one theme, hue, and contrast model. Theme switches, hue rotation, and dark mode propagate through both in one pass.
+
+The practical consequence: don't fight to put text inside SVG. SVG is for paths, lines, and shapes. Text — labels, legend entries, value annotations, axis titles — goes in HTML, positioned with `.hud` slots or absolute positioning, styled with `--type` and `--fg` like any other text on the page.
+
+### Conventions
+
+**Geometry in SVG, text in HTML.** Authors **SHOULD** keep SVG to vector paths, strokes, and fills. Text-shaped content is an HTML element overlaid via `.hud` or absolutely positioned.
+
+**Color series via `--fg` and `--hue-shift` per `<g>`.** Each data series gets its own `<g>` with `--fg` (intensity) and optionally `--hue-shift` (hue offset from brand). The geometry uses `stroke="currentColor"` or `fill="currentColor"`. A muted baseline is `--fg: -0.4`; a vivid foreground series is `--fg: 0.9`; a hue-shifted forecast or comparison series adds `--hue-shift: 200`.
+
+**Grid lines via `var(--border)`.** Reference lines use `stroke="var(--border)"`. They're chrome, not data, and shouldn't compete for visual weight.
+
+**Threshold and "today" markers via `var(--Border)`.** A vertical line marking the data/forecast boundary, a target value, or a phase change uses `var(--Border)` (the louder border token) with `stroke-dasharray` for distinctness.
+
+**Legend on the chart, in the best corner.** Use `.hud`'s nine slots to pin the legend in whichever corner is empty for your data — `↘` for an upward-trending line chart, `↗` for downward. Only move the legend off the chart when it won't fit; on-chart legends make the figure scan as one unit.
+
+**Legend swatches MUST be filled blocks, not lines.** A swatch is a small filled square (`0.9em × 0.9em`, `background: currentColor`, `border-radius: 0.25em`). Thin lines disappear at low contrast, in print, and at small sizes; filled blocks survive all three. Set `--fg` (and `--hue-shift` if needed) on the swatch; `background: currentColor` paints it correctly.
+
+**Legend text in high contrast.** Set `--fg: -1` on the legend container so text reads as default body ink regardless of the chart card's surface chroma.
+
+### Minimal chart shape
+
+```html
+<div class="hud">
+  <svg viewBox="0 0 600 200" preserveAspectRatio="none">
+    <!-- Grid -->
+    <g stroke="var(--border)" stroke-width="1">
+      <line x1="0" y1="50"  x2="600" y2="50"/>
+      <line x1="0" y1="100" x2="600" y2="100"/>
+      <line x1="0" y1="150" x2="600" y2="150"/>
+    </g>
+    <!-- Series A: muted baseline -->
+    <g style="--fg: -0.4" stroke="currentColor" stroke-width="1.5" fill="none">
+      <path d="…"/>
+    </g>
+    <!-- Series B: vivid primary -->
+    <g style="--fg: 0.9" stroke="currentColor" stroke-width="2.5" fill="none">
+      <path d="…"/>
+    </g>
+    <!-- Series C: hue-shifted forecast (dashed) -->
+    <g style="--hue-shift: 200; --fg: 0.9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="6 5" fill="none">
+      <path d="…"/>
+    </g>
+    <!-- Today marker -->
+    <line x1="400" y1="0" x2="400" y2="200" stroke="var(--Border)" stroke-width="1" stroke-dasharray="2 4"/>
+  </svg>
+
+  <!-- Legend pinned to bottom-right (HTML, not SVG) -->
+  <div class="↘ surface column" style="--depth: 2; --fg: -1; --gap: 0.35rem; padding: 0.5em 0.7em; border: 1px solid var(--border); border-radius: var(--cfg-radius); align-items: flex-start">
+    <div class="row" style="--gap: 0.5rem; align-items: center">
+      <div style="--fg: 0.9; inline-size: 0.9em; block-size: 0.9em; background: currentColor; border-radius: 0.25em"></div>
+      <span>Sales</span>
+    </div>
+    <div class="row" style="--gap: 0.5rem; align-items: center">
+      <div style="--hue-shift: 200; --fg: 0.9; inline-size: 0.9em; block-size: 0.9em; background: currentColor; border-radius: 0.25em"></div>
+      <span>Forecast</span>
+    </div>
+    <div class="row" style="--gap: 0.5rem; align-items: center">
+      <div style="--fg: -0.4; inline-size: 0.9em; block-size: 0.9em; background: currentColor; border-radius: 0.25em"></div>
+      <span>Last year</span>
+    </div>
+  </div>
+</div>
+```
+
+The chart card paints its own surface (`.surface` on the wrapper), the legend paints its own surface a step deeper (`--depth: 2`) so it reads as a chip on top of the chart. Theme switching, hue rotation, and dark mode all propagate through both the SVG paths and the HTML legend with no extra wiring.
+
+## Common recipes
+
+### KPI row with hud anchors
+
+A row of three KPI cards, one `@scope` block carrying the shared typography. `.grid` handles wrapping, `.Card.surface.hud` is the per-card composition. Each card's hue-shift gives it its own chromatic identity without a class name.
+
+```html
+<div class="grid" style="--grid-min: 14rem">
+  <style>
+    @scope {
+      :scope .Card { padding: 1rem; min-block-size: 6.5rem }
+      :scope .↖ { --type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600 }
+      :scope .•  { --type: 3; font-family: var(--font-display) }
+    }
+  </style>
+  <div class="Card surface hud">
+    <span class="↖">Revenue</span>
+    <span class="↗"><span class="tag suc">+12.4%</span></span>
+    <span class="•">$284k</span>
+  </div>
+  <div class="Card surface hud" style="--hue-shift: 90">
+    <span class="↖">Orders</span>
+    <span class="↗"><span class="tag inf">live</span></span>
+    <span class="•">1,847</span>
+  </div>
+  <div class="Card surface hud" style="--hue-shift: 200">
+    <span class="↖">Avg ticket</span>
+    <span class="↗"><span class="tag wrn">−3.1%</span></span>
+    <span class="•">$153</span>
+  </div>
+</div>
+```
+
+### Multi-line chart with legend
+
+Worked example following the conventions in **Charts**: grid in `var(--border)`, three series with `--fg`/`--hue-shift`, a today marker in `var(--Border)`, and an HTML legend pinned to `↘` with filled-square swatches.
+
+```html
+<div class="hud surface" style="block-size: 16rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--cfg-radius)">
+  <svg viewBox="0 0 600 200" preserveAspectRatio="none" style="inline-size: 100%; block-size: 100%">
+    <!-- Grid -->
+    <g stroke="var(--border)" stroke-width="1">
+      <line x1="0" y1="50"  x2="600" y2="50"/>
+      <line x1="0" y1="100" x2="600" y2="100"/>
+      <line x1="0" y1="150" x2="600" y2="150"/>
+    </g>
+    <!-- Last year (muted) -->
+    <g style="--fg: -0.4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 0,158 C 60,150 100,160 160,150 S 260,140 320,142 S 440,130 500,120 S 580,110 600,108"/>
+    </g>
+    <!-- Sales (vivid, ends at today) -->
+    <g style="--fg: 0.9" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 0,170 C 50,160 90,165 140,140 S 220,105 280,110 S 360,72 400,70"/>
+    </g>
+    <!-- Forecast (hue-shifted, dashed, starts at today) -->
+    <g style="--hue-shift: 200; --fg: 0.9" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5">
+      <path d="M 400,70 C 440,58 480,60 520,42 S 580,28 600,22"/>
+    </g>
+    <!-- Today marker -->
+    <line x1="400" y1="0" x2="400" y2="200" stroke="var(--Border)" stroke-width="1" stroke-dasharray="2 4"/>
+  </svg>
+
+  <div class="↘ surface column" style="--depth: 2; --fg: -1; --gap: 0.35rem; padding: 0.5em 0.7em; border: 1px solid var(--border); border-radius: var(--cfg-radius); align-items: flex-start">
+    <div class="row" style="--gap: 0.5rem; align-items: center">
+      <div style="--fg: 0.9; inline-size: 0.9em; block-size: 0.9em; background: currentColor; border-radius: 0.25em"></div>
+      <span>Sales</span>
+    </div>
+    <div class="row" style="--gap: 0.5rem; align-items: center">
+      <div style="--hue-shift: 200; --fg: 0.9; inline-size: 0.9em; block-size: 0.9em; background: currentColor; border-radius: 0.25em"></div>
+      <span>Forecast</span>
+    </div>
+    <div class="row" style="--gap: 0.5rem; align-items: center">
+      <div style="--fg: -0.4; inline-size: 0.9em; block-size: 0.9em; background: currentColor; border-radius: 0.25em"></div>
+      <span>Last year</span>
+    </div>
+  </div>
+</div>
+```
+
+### Form with mixed full-width and side-by-side inputs
+
+```html
+<form class="column">
+  <div>
+    <label>Name</label>
+    <input class="input">
+  </div>
+  <fieldset>
+    <div><label>First</label><input class="input"></div>
+    <div><label>Last</label><input class="input"></div>
+  </fieldset>
+</form>
+```
+
+### Drawer with trigger — modal and non-modal
+
+Modal drawer (`<dialog>`) opens with `showModal()` and dims the page. Non-modal drawer (`<div popover>`) opens via the `popovertarget` attribute (no JS) and lets the user keep working on the page.
+
+```html
+<!-- Modal — full attention -->
+<button class="icon-btn"
+        onclick="document.querySelector('dialog.drawer.bottom').showModal()">
+  <svg>…</svg>
+</button>
+<dialog class="drawer bottom surface column" style="block-size: 75svh">
+  …
+</dialog>
+
+<!-- Non-modal — page stays interactive -->
+<button popovertarget="filters">Filters</button>
+<div id="filters" popover class="drawer right surface column">
+  …
+</div>
+```
+
+**With internal chrome.** When a drawer needs its own header / scrolling body / footer (e.g. a navigation drawer with a search bar pinned at the top, scrolling links in the middle, and user info pinned at the bottom), compose `.drawer` with `.hero`. The drawer handles positioning and animation; the hero handles internal layout.
+
+```html
+<dialog id="nav-drawer" class="drawer left hero surface">
+  <div class="top">…search input + close button…</div>
+  <div class="main">…scrolling list of nav links…</div>
+  <div class="bottom">…user info…</div>
+</dialog>
+```
+
+`.drawer` doesn't set `display`, so it composes cleanly with `.hero`'s grid template. The hero's `.main` slot scrolls; `.top` and `.bottom` pin.
+
+### Nav migrating across slots
+
+A single nav, three shapes, three slots. At desktop the vertical sidebar lives in `pg-navigation`. At tablet a horizontal pill bar lives inside `pg-header`. At mobile a thumb-reachable bottom toolbar lives inside `pg-footer`. Exactly one shape participates at each breakpoint.
+
+```html
+<div class="pg-header">
+  <span class="brand">stick.css</span>
+
+  <nav class="tablet">
+    <a href="#" aria-current="page">Overview</a>
+    <a href="#">Accounts</a>
+    <!-- … -->
+  </nav>
+</div>
+
+<nav class="pg-navigation desktop">
+  <ul>
+    <li><a href="#" aria-current="page">Overview</a></li>
+    <li><a href="#">Accounts</a></li>
+    <!-- … -->
+  </ul>
+</nav>
+
+<main class="pg-main">…</main>
+
+<div class="pg-footer">
+  <nav class="mobile">
+    <a href="#" aria-current="page" aria-label="Overview"><span class="ic">⌂</span><span class="lb">Home</span></a>
+    <a href="#" aria-label="Accounts"><span class="ic">◉</span><span class="lb">Accounts</span></a>
+    <!-- … -->
+  </nav>
+</div>
+```
+
+Each `<nav>` carries its own scoped style block describing its shape. Slots whose only content is hidden at the current breakpoint collapse to zero — at desktop, `pg-footer`'s row collapses because `<nav class="mobile">` is `display: none`.
+
+### Section with grid-template-areas
+
+When a section's internal layout doesn't fit any composition primitive, reach for `@scope` with named grid areas. The grid lives on a wrapper `<div>` (never on `:scope` — see "Inline @scope discipline"), and the rules below it just place each child into a named slot.
+
+```html
+<section>
+  <style>
+    @scope {
+      :scope > div {
+        display: grid;
+        grid-template:
+          "title    title    actions" auto
+          "summary  detail   detail"  1fr
+          "footer   footer   footer"  auto /
+           12rem    1fr      auto;
+        gap: 1rem;
+      }
+      :scope > div > h2       { grid-area: title }
+      :scope > div > .actions { grid-area: actions }
+      :scope > div > .summary { grid-area: summary }
+      :scope > div > .detail  { grid-area: detail }
+      :scope > div > footer   { grid-area: footer }
+    }
+  </style>
+  <div>
+    <h2>Order #4218</h2>
+    <div class="actions row">…</div>
+    <div class="summary column">…</div>
+    <div class="detail">…</div>
+    <footer class="row">…</footer>
+  </div>
+</section>
+```
+
+Children are targeted by tag (`> div > h2`, `> div > footer`) or by composition primitive (`> div > .actions`, `> div > .summary`) — no invented class names. The wrapper `<div>` is purely structural; the outer `<section>` can carry semantic role, viewport class, or anything else without conflicting with the grid.
+
+**Scaling for `pg-main`.** This template is a fixed three-column grid (`12rem 1fr auto`) — fine in a sidebar or a known-width container, but a component that lives in `pg-main` has to handle the full mobile-to-desktop range. Put `container-type` and the responsive `@container` rules on the wrapper:
+
+```css
+:scope > div {
+  container-type: inline-size;
+  display: grid;
+  grid-template:
+    "title    actions" auto
+    "summary  summary" auto
+    "detail   detail"  1fr
+    "footer   footer"  auto /
+     1fr      auto;
+  gap: 1rem;
+}
+@container (inline-size > 32rem) {
+  :scope > div {
+    grid-template:
+      "title    title    actions" auto
+      "summary  detail   detail"  1fr
+      "footer   footer   footer"  auto /
+       12rem    1fr      auto;
+  }
+}
+```
+
+The narrow template stacks summary above detail; the wide template moves summary to a left sidebar. Container queries respond to the component's own width, so the same component renders correctly whether `pg-main` is 320px or 1400px wide.
+
+## What NOT to do
+
+Hard rules. Authors **MUST NOT**:
+
+- Write color hex codes or `oklch(...)` / `rgb(...)` directly. Use the token system; for a specific color, use `--hue-lock` or `--hue-shift`.
+- Override `--_*` tokens. The underscore prefix marks internal state; only the public API is supported.
+- Assign `var(--border)` or `var(--Border)` directly. Both are derived from each element's `--bg` by the formula.
+- Color SVG via `--bg`. SVG paints through `currentColor`, which derives from `--fg`. Strokes, fills, and `<line>` all use `--fg`.
+- Set `display`, `visibility`, or other participation-affecting properties on `:scope`. Wrap content in a `<div>` and target `:scope > div` instead. (See "Inline @scope discipline".)
+- Put a layout primitive class (`.row`, `.column`, `.grid`, `.flank`, `.hero`, etc.) on the same element as a viewport class (`.mobile`, `.tablet`, `.desktop`). Viewport classes carry `!important` and silently override the primitive's `display`. Wrap content in a child element and put the primitive on the wrapper.
+- Set inline `padding` on `pg-*` slots. The `.page` rule provides `padding: var(--gap)` on every slot, scaled with the fluid gap formula. If a particular slot needs different padding, set it from CSS with a more specific selector — not inline per-instance.
+
+## Anti-patterns to recognize
+
+Smells. Each one is a sign that a different tool fits the job better:
+
+- Reaching for `<style>@scope` when a composition primitive (`.row`, `.spread`, `.tmb`, `.grid`, `.hud`, `.hero`) would do.
+- Long selector chains inside `@scope` like `:scope > div > .x > .y > .z` — the scope is too large; break it into smaller scopes or extract a component.
+- Numeric `grid-row`/`grid-column` inside `@scope` grids — `grid-template-areas` is self-documenting.
+- Inventing `class="title"` or `class="actions"` inside an `@scope` block — target semantic tags (`:scope > div > h2`, `:scope > div > footer`) or existing primitives.
+- Setting `font-size` in pixels or rems — use `--type`.
+- Setting `padding` or `gap` to specific values when a primitive's default would do — let the system breathe.
+- `--bg: -1` to "force transparency" — use `--bg: 0`. Negative values clamp to 0; reading the source becomes confusing.
+- Hardcoded borders like `1px solid #ccc` — use `var(--border)` or `var(--Border)`.
+- Fighting the depth cascade. If nested surfaces don't render as expected, set `--depth` explicitly rather than restructuring DOM.
+- Building tab logic from scratch — use `.tabs` with `aria-selected`.
+- Building drawers from scratch — use `<dialog class="drawer ...">` (modal) or `<div popover class="drawer ...">` (non-modal).
+- Reinventing components that already exist. Compose from primitives first.
+
+## Summary card
+
+```
+COLOR        --bg [0,1]      --fg [-1,1]       --hue, --hue-shift, --hue-lock
+TYPE         --type (int)    var(--font-ui|display|mono)
+SPACING      --gap (fluid clamp+pow, ramps at projector/TV scale; override per-instance with static value)
+SURFACE      .surface        --depth (override)
+LAYOUT       .row .column .split .spread .lcr .tmb .flank .grid .hud .hud-grid .hero .stack
+PAGE LAYOUT  body.page + .pg-banner .pg-header .pg-subheader
+                          .pg-navigation-header .pg-navigation .pg-navigation-footer
+                          .pg-main-header .pg-main .pg-main-footer
+                          .pg-aside .pg-footer  (opt-in via pg-* class; only pg-main is required)
+HERO PANEL   .hero with .top .bottom .left .right .main (drawers, modals, split panes)
+DRAWERS      dialog.drawer.{l|r|t|b} (modal) — div[popover].drawer.{l|r|t|b} (non-modal)
+COMPONENTS   .btn .icon-btn .tag .tabs(.underline) .card .Card .input .check .radio .avatar .crumbs .link
+SEMANTIC     .suc .inf .wrn .dgr .bw
+RESPONSIVE   .mobile .tablet .desktop (additive)
+THEME        [data-ui-theme] [data-ui-motion] [data-ui-type]
+INK BORDER   var(--border) var(--Border)
+SVG COLOR    stroke="currentColor" — always paints from --fg (use --hue-shift or --hue-lock on <g> for per-series variety)
+```
+
+That's the system. Stop here, start building.

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en" data-ui-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mental model — stick.css</title>
+<meta name="description" content="The three formulas behind stick.css: color, type, and space. With live demos.">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@ddd1642/css/style.css">
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.1/bundles/datastar.js"></script>
+
+<style>
+  :root { --hue: 18 }
+</style>
+</head>
+
+<body id="page" class="page surface">
+
+  <!-- ── pg-header ──────────────────────────────────────── -->
+  <div class="pg-header flank-end" style="border-block-end: 1px solid var(--border)">
+    <a href="/" style="--type: 1; font-family: var(--font-display); color: inherit; text-decoration: none">stick.css</a>
+    <div class="row">
+      <a class="btn" href="https://github.com/Deufel/css" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+
+  <!-- ── pg-subheader ───────────────────────────────────── -->
+  <div class="pg-subheader" style="--bg: 0.08; --type: -1; border-block-end: 1px solid var(--border)">
+    <nav class="crumbs">
+      <a href="/docs/">Documentation</a>
+      <span aria-current="page">Mental model</span>
+    </nav>
+  </div>
+
+  <!-- ── pg-navigation-header ───────────────────────────── -->
+  <div class="pg-navigation-header tablet desktop" style="border-inline-end: 1px solid var(--border); border-block-end: 1px solid var(--border)">
+    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">Documentation</span>
+  </div>
+
+  <!-- ── pg-navigation ──────────────────────────────────── -->
+  <nav class="pg-navigation tablet desktop" style="inline-size: 14rem; border-inline-end: 1px solid var(--border)">
+    <style>
+      @scope {
+        :scope > .column { --gap: 0.15rem }
+        :scope > .column > a {
+          padding: 0.45rem 0.6rem;
+          border-radius: 0.4rem;
+          text-decoration: none;
+          color: inherit;
+        }
+        :scope > .column > a:hover { --bg: 0.15 }
+        :scope > .column > a[aria-current="page"] { --bg: 0.25; --fg: -1 }
+      }
+    </style>
+    <div class="column">
+      <a href="/docs/" data-on:click="@get('/docs/')">Home</a>
+      <a href="/docs/mental-model/" aria-current="page">Mental model</a>
+      <a href="/docs/color/" data-on:click="@get('/docs/color/')">Color</a>
+      <a href="/docs/type/" data-on:click="@get('/docs/type/')">Type</a>
+      <a href="/docs/surfaces/" data-on:click="@get('/docs/surfaces/')">Surfaces</a>
+      <a href="/docs/layout-primitives/" data-on:click="@get('/docs/layout-primitives/')">Layout primitives</a>
+      <a href="/docs/page-layout/" data-on:click="@get('/docs/page-layout/')">Page layout</a>
+      <a href="/docs/components/" data-on:click="@get('/docs/components/')">Components</a>
+      <a href="/docs/authoring/" data-on:click="@get('/docs/authoring/')">Authoring</a>
+      <a href="/docs/charts/" data-on:click="@get('/docs/charts/')">Charts</a>
+      <a href="/docs/recipes/" data-on:click="@get('/docs/recipes/')">Recipes</a>
+      <a href="/docs/anti-patterns/" data-on:click="@get('/docs/anti-patterns/')">What NOT to do</a>
+      <a href="/docs/summary/" data-on:click="@get('/docs/summary/')">Summary</a>
+      <a href="/docs/llms.txt">llms.txt</a>
+    </div>
+  </nav>
+
+  <!-- ── pg-navigation-footer ───────────────────────────── -->
+  <div class="pg-navigation-footer tablet desktop" style="--type: -1.5; --fg: -0.4; border-inline-end: 1px solid var(--border); border-block-start: 1px solid var(--border)">
+    <span>v0.1 · <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">source</a></span>
+  </div>
+
+  <!-- ── pg-main-header ─────────────────────────────────── -->
+  <div class="pg-main-header" style="border-block-end: 1px solid var(--border)">
+    <h1 style="--type: 2; font-family: var(--font-display); margin: 0">Mental model</h1>
+  </div>
+
+  <!-- ── pg-main ────────────────────────────────────────── -->
+  <main class="pg-main column" style="--gap: 2rem"
+        data-signals="{bg: 0.4, fg: -1, hue: 18, typeStep: 0, _gap: ''}"
+        data-on:load__window="$_gap = getComputedStyle(document.documentElement).getPropertyValue('--gap').trim()"
+        data-on:resize__window="$_gap = getComputedStyle(document.documentElement).getPropertyValue('--gap').trim()">
+
+    <p style="--type: 0; max-inline-size: 60ch; margin: 0">
+      Three formulas drive the system: one for color, one for type, one for space.
+      Set tokens with intent on any element, the system computes the rendered result.
+      Adjust the controls below to see each formula respond.
+    </p>
+
+    <!-- ── COLOR ──────────────────────────────────────── -->
+    <section class="column" id="color" style="--gap: 1rem">
+      <h2 style="--type: 1; font-family: var(--font-display); margin: 0">Color</h2>
+
+      <p style="margin: 0; max-inline-size: 60ch">
+        Two independent axes. <code>--bg</code> ranges from 0 (transparent) to 1
+        (loud chromatic) and controls surface presence. <code>--fg</code> ranges
+        from -1 (full neutral contrast) through 0 (invisible) to 1 (vivid
+        chromatic) and controls ink. <code>--hue</code> rotates the entire formula.
+      </p>
+
+      <div class="grid" style="--grid-min: 18rem; align-items: start">
+
+        <!-- Controls -->
+        <div class="column" style="--gap: 1rem">
+          <div class="column" style="--gap: 0.4rem">
+            <div class="flank-end">
+              <label for="bg-slider"><code>--bg</code></label>
+              <span data-text="$bg.toFixed(2)" style="--type: -0.5; --fg: -0.5; font-family: var(--font-mono)"></span>
+            </div>
+            <input id="bg-slider" type="range" min="0" max="1" step="0.05" data-bind:bg style="inline-size: 100%">
+          </div>
+
+          <div class="column" style="--gap: 0.4rem">
+            <div class="flank-end">
+              <label for="fg-slider"><code>--fg</code></label>
+              <span data-text="$fg.toFixed(2)" style="--type: -0.5; --fg: -0.5; font-family: var(--font-mono)"></span>
+            </div>
+            <input id="fg-slider" type="range" min="-1" max="1" step="0.05" data-bind:fg style="inline-size: 100%">
+          </div>
+
+          <div class="column" style="--gap: 0.4rem">
+            <div class="flank-end">
+              <label for="hue-slider"><code>--hue</code></label>
+              <span data-text="$hue + '°'" style="--type: -0.5; --fg: -0.5; font-family: var(--font-mono)"></span>
+            </div>
+            <input id="hue-slider" type="range" min="0" max="360" step="1" data-bind:hue style="inline-size: 100%">
+          </div>
+        </div>
+
+        <!-- Live preview -->
+        <div data-style="{'--bg': $bg, '--fg': $fg, '--hue': $hue}"
+             style="padding: 2rem; border-radius: 0.6rem; border: 1px solid var(--border); min-block-size: 9rem"
+             class="column">
+          <span style="--type: -2; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">Surface</span>
+          <span style="--type: 1.5; font-family: var(--font-display)">Sample text</span>
+          <span style="--type: -0.5">Body copy uses the same formula.</span>
+        </div>
+      </div>
+
+      <p style="margin: 0; max-inline-size: 60ch; --type: -0.5; --fg: -0.5">
+        The OKLCH formula behind these tokens is hidden inside the system.
+        Authors write intent (a number between 0 and 1) and the system
+        computes the rendered color. Theme switches, dark mode, and
+        contrast flipping happen through the same formula.
+      </p>
+    </section>
+
+    <!-- ── TYPE ───────────────────────────────────────── -->
+    <section class="column" id="type" style="--gap: 1rem">
+      <h2 style="--type: 1; font-family: var(--font-display); margin: 0">Type</h2>
+
+      <p style="margin: 0; max-inline-size: 60ch">
+        One ratio drives the scale. <code>--type</code> takes integer steps
+        (0 is body, positive is bigger, negative is smaller). Letter-spacing
+        and line-height adjust automatically — bigger text gets tighter spacing.
+      </p>
+
+      <div class="grid" style="--grid-min: 18rem; align-items: start">
+
+        <!-- Slider -->
+        <div class="column" style="--gap: 1rem">
+          <div class="column" style="--gap: 0.4rem">
+            <div class="flank-end">
+              <label for="type-slider"><code>--type</code></label>
+              <span data-text="$typeStep" style="--type: -0.5; --fg: -0.5; font-family: var(--font-mono)"></span>
+            </div>
+            <input id="type-slider" type="range" min="-2" max="3" step="0.5" data-bind:typeStep style="inline-size: 100%">
+          </div>
+        </div>
+
+        <!-- Live preview -->
+        <div data-style="{'--type': $typeStep}"
+             style="padding: 1.5rem; border-radius: 0.6rem; border: 1px solid var(--border); min-block-size: 9rem; display: flex; align-items: center">
+          The quick brown fox jumps over the lazy dog.
+        </div>
+      </div>
+
+      <h3 style="--type: 0.5; margin: 0.5rem 0 0">The full scale</h3>
+
+      <div class="column" style="--gap: 0.6rem; padding: 1rem; border-radius: 0.6rem; border: 1px solid var(--border)">
+        <p style="--type: 3; font-family: var(--font-display); margin: 0">type 3 — display heading</p>
+        <p style="--type: 2; font-family: var(--font-display); margin: 0">type 2 — page title</p>
+        <p style="--type: 1; margin: 0">type 1 — section title</p>
+        <p style="--type: 0; margin: 0">type 0 — body text (default)</p>
+        <p style="--type: -0.5; margin: 0">type −0.5 — slightly smaller</p>
+        <p style="--type: -1; margin: 0">type −1 — secondary text</p>
+        <p style="--type: -1.5; margin: 0">type −1.5 — captions</p>
+        <p style="--type: -2; margin: 0; text-transform: uppercase; letter-spacing: 0.08em">type −2 — micro labels</p>
+      </div>
+
+      <p style="margin: 0; max-inline-size: 60ch; --type: -0.5; --fg: -0.5">
+        Type doesn't cascade. Set <code>--type</code> on each element that needs
+        sizing; children don't inherit the parent's value. The non-cascading
+        behavior is intentional — it keeps text rhythm local and predictable.
+      </p>
+    </section>
+
+    <!-- ── SPACE ──────────────────────────────────────── -->
+    <section class="column" id="space" style="--gap: 1rem">
+      <h2 style="--type: 1; font-family: var(--font-display); margin: 0">Space</h2>
+
+      <p style="margin: 0; max-inline-size: 60ch">
+        <code>--gap</code> is fluid. The system value uses a <code>clamp</code>
+        with a cubic curve over viewport width — the gap stays tight (around
+        4–8 pixels) across the full phone-to-desktop range and only ramps up
+        at projector and TV scale.
+      </p>
+
+      <pre style="margin: 0; padding: 1rem; --bg: 0.05; border-radius: 0.5rem; overflow-x: auto; --type: -0.5; max-inline-size: 100%"><code>--gap: clamp(
+    0.25rem,
+    calc(0.25rem + 1.75rem * pow(100vi / 3000px, 3)),
+    2rem
+);</code></pre>
+
+      <div class="column" style="--gap: 0.75rem; padding: 1.5rem; border-radius: 0.6rem; border: 1px solid var(--border)">
+        <div class="flank-end">
+          <span style="--type: -1; --fg: -0.5">Current resolved value at this viewport width</span>
+          <span data-text="$_gap" style="--type: 0.5; font-family: var(--font-mono); --fg: -1"></span>
+        </div>
+
+        <div class="row" style="--gap: var(--gap)">
+          <div style="--bg: 0.4; padding: 1rem 1.5rem; border-radius: 0.4rem">A</div>
+          <div style="--bg: 0.4; padding: 1rem 1.5rem; border-radius: 0.4rem">B</div>
+          <div style="--bg: 0.4; padding: 1rem 1.5rem; border-radius: 0.4rem">C</div>
+        </div>
+
+        <p style="margin: 0; --type: -1; --fg: -0.5">
+          Resize the window to see the gap respond. Per-instance overrides
+          (<code>style="--gap: 0.4rem"</code>) opt out of the fluid behavior.
+        </p>
+      </div>
+
+      <p style="margin: 0; max-inline-size: 60ch; --type: -0.5; --fg: -0.5">
+        Layout primitives (<code>.row</code>, <code>.column</code>,
+        <code>.grid</code>, etc.) read <code>--gap</code> for spacing between
+        siblings. The page layout reads it for slot padding. One token, two jobs,
+        one curve.
+      </p>
+    </section>
+
+    <!-- ── Closing ────────────────────────────────────── -->
+    <section class="column" style="--gap: 0.75rem">
+      <p style="margin: 0; max-inline-size: 60ch">
+        These three formulas plus a layout system are the whole library.
+        Everything else is the parts list.
+      </p>
+      <div class="row">
+        <a class="btn" href="/docs/layout-primitives/" data-on:click="@get('/docs/layout-primitives/')">Layout primitives →</a>
+        <a class="btn" href="/docs/page-layout/" data-on:click="@get('/docs/page-layout/')">Page layout →</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── pg-aside ───────────────────────────────────────── -->
+  <aside class="pg-aside desktop" style="inline-size: 16rem; border-inline-start: 1px solid var(--border)">
+    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">On this page</span>
+    <div class="column" style="--gap: 0.4rem; --type: -0.5">
+      <a href="#color" style="color: inherit; text-decoration: none">Color</a>
+      <a href="#type" style="color: inherit; text-decoration: none">Type</a>
+      <a href="#space" style="color: inherit; text-decoration: none">Space</a>
+    </div>
+  </aside>
+
+  <!-- ── pg-footer ──────────────────────────────────────── -->
+  <div class="pg-footer flank-end" style="--type: -1.5; --fg: -0.4; border-block-start: 1px solid var(--border)">
+    <span>© 2026 stick.css</span>
+    <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">github.com/Deufel/css</a>
+  </div>
+
+</body>
+</html>
