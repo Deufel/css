@@ -8,6 +8,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@ddd1642/css/style.css">
 <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.1/bundles/datastar.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Deufel/toolbox@latest/js/highlight.js"></script>
 
 <style>
   :root { --hue: 18 }
@@ -211,7 +212,7 @@
         at projector and TV scale.
       </p>
 
-      <pre style="margin: 0; padding: 1rem; --bg: 0.05; border-radius: 0.5rem; overflow-x: auto; --type: -0.5; max-inline-size: 100%"><code>--gap: clamp(
+      <pre style="margin: 0; padding: 1rem; --bg: 0.05; border-radius: 0.5rem; overflow-x: auto; --type: -0.5; max-inline-size: 100%"><code class="css">--gap: clamp(
     0.25rem,
     calc(0.25rem + 1.75rem * pow(100vi / 3000px, 3)),
     2rem
@@ -272,6 +273,70 @@
     <span>© 2026 stick.css</span>
     <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">github.com/Deufel/css</a>
   </div>
+
+  <!-- ── HUD overlay with mobile FAB ─────────────────────── -->
+  <div class="hud" style="position: fixed; inset: 0; pointer-events: none">
+    <button class="↙ icon-btn mobile"
+            style="margin: 1rem"
+            aria-label="Open navigation"
+            onclick="document.getElementById('nav-drawer').showModal()">☰</button>
+  </div>
+
+  <!-- ── Nav drawer (modal, mobile only) ─────────────────── -->
+  <dialog id="nav-drawer" class="drawer left hero surface">
+    <style>
+      @scope {
+        :scope > .top {
+          padding: var(--gap);
+          border-block-end: 1px solid var(--border);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        :scope > .top > span {
+          --type: 1;
+          font-family: var(--font-display);
+        }
+        :scope > .main {
+          padding: var(--gap);
+          --gap: 0.15rem;
+        }
+        :scope > .main > a {
+          display: block;
+          padding: 0.55rem 0.7rem;
+          border-radius: 0.4rem;
+          text-decoration: none;
+          color: inherit;
+        }
+        :scope > .main > a:hover { --bg: 0.15 }
+        :scope > .main > a[aria-current="page"] { --bg: 0.25; --fg: -1 }
+      }
+    </style>
+
+    <div class="top">
+      <span>stick.css</span>
+      <button class="icon-btn"
+              aria-label="Close navigation"
+              onclick="document.getElementById('nav-drawer').close()">✕</button>
+    </div>
+
+    <div class="main column">
+      <a href="../">Home</a>
+      <a href="./" aria-current="page">Mental model</a>
+      <a href="../color/">Color</a>
+      <a href="../type/">Type</a>
+      <a href="../surfaces/">Surfaces</a>
+      <a href="../layout-primitives/">Layout primitives</a>
+      <a href="../page-layout/">Page layout</a>
+      <a href="../components/">Components</a>
+      <a href="../authoring/">Authoring</a>
+      <a href="../charts/">Charts</a>
+      <a href="../recipes/">Recipes</a>
+      <a href="../anti-patterns/">What NOT to do</a>
+      <a href="../summary/">Summary</a>
+      <a href="../llms.txt">llms.txt</a>
+    </div>
+  </dialog>
 
 </body>
 </html>

@@ -8,6 +8,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@ddd1642/css/style.css">
 <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.1/bundles/datastar.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Deufel/toolbox@latest/js/highlight.js"></script>
 
 <style>
   :root { --hue: 18 }
@@ -218,7 +219,7 @@
         matter — the grid template assigns each slot to its named area.
       </p>
 
-<pre class="code"><code>&lt;body class="page surface"&gt;
+<pre class="code"><code class="html">&lt;body class="page surface"&gt;
   &lt;div class="pg-banner"&gt;…&lt;/div&gt;
   &lt;div class="pg-header"&gt;…&lt;/div&gt;
   &lt;div class="pg-subheader"&gt;…&lt;/div&gt;
@@ -336,7 +337,7 @@
         leaking into the layout.
       </p>
 
-<pre class="code"><code>&lt;body class="page surface"&gt;
+<pre class="code"><code class="html">&lt;body class="page surface"&gt;
   &lt;main class="pg-main"&gt;…&lt;/main&gt;
 
   &lt;!-- These don't get a grid area; they live outside
@@ -364,7 +365,7 @@
         Authors don't write inline padding on slots.
       </p>
 
-<pre class="code"><code>.page {
+<pre class="code"><code class="css">.page {
   &gt; [class^="pg-"] { padding: var(--gap) }
   /* … grid template and per-slot grid-area assignments … */
 }</code></pre>
@@ -408,7 +409,7 @@
         "everywhere except mobile."
       </p>
 
-<pre class="code"><code>&lt;!-- Visible only at desktop --&gt;
+<pre class="code"><code class="html">&lt;!-- Visible only at desktop --&gt;
 &lt;aside class="pg-aside desktop"&gt;…&lt;/aside&gt;
 
 &lt;!-- Visible at tablet and desktop, hidden at mobile --&gt;
@@ -441,7 +442,7 @@
         wrapper.
       </p>
 
-<pre class="code"><code>&lt;!-- Wrong — .column is silently overridden --&gt;
+<pre class="code"><code class="html">&lt;!-- Wrong — .column is silently overridden --&gt;
 &lt;nav class="pg-navigation column tablet desktop"&gt;
   &lt;a href="..."&gt;…&lt;/a&gt;
 &lt;/nav&gt;
@@ -489,7 +490,7 @@
         opens the drawer at the breakpoints where the slot is hidden.
       </p>
 
-<pre class="code"><code>&lt;body class="page surface"&gt;
+<pre class="code"><code class="html">&lt;body class="page surface"&gt;
   &lt;nav class="pg-navigation desktop"&gt;
     &lt;!-- nav content --&gt;
   &lt;/nav&gt;
@@ -527,7 +528,7 @@
         viewport classes. The drawer covers the remaining breakpoint.
       </p>
 
-<pre class="code"><code>&lt;nav class="pg-navigation"&gt;
+<pre class="code"><code class="html">&lt;nav class="pg-navigation"&gt;
   &lt;section class="desktop"&gt;
     &lt;!-- full sidebar with text labels --&gt;
   &lt;/section&gt;
@@ -562,7 +563,7 @@
         traps focus, makes the page underneath inert.
       </p>
 
-<pre class="code"><code>&lt;dialog class="drawer left"&gt;…&lt;/dialog&gt;
+<pre class="code"><code class="html">&lt;dialog class="drawer left"&gt;…&lt;/dialog&gt;
 
 &lt;button onclick="document.querySelector('dialog.drawer.left').showModal()"&gt;
   open nav
@@ -576,7 +577,7 @@
         <code>element.showPopover()</code>.
       </p>
 
-<pre class="code"><code>&lt;div id="filters" popover class="drawer right"&gt;…&lt;/div&gt;
+<pre class="code"><code class="html">&lt;div id="filters" popover class="drawer right"&gt;…&lt;/div&gt;
 
 &lt;button popovertarget="filters"&gt;open filters&lt;/button&gt;</code></pre>
 
@@ -628,6 +629,70 @@
     <span>© 2026 stick.css</span>
     <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">github.com/Deufel/css</a>
   </div>
+
+  <!-- ── HUD overlay with mobile FAB ─────────────────────── -->
+  <div class="hud" style="position: fixed; inset: 0; pointer-events: none">
+    <button class="↙ icon-btn mobile"
+            style="margin: 1rem"
+            aria-label="Open navigation"
+            onclick="document.getElementById('nav-drawer').showModal()">☰</button>
+  </div>
+
+  <!-- ── Nav drawer (modal, mobile only) ─────────────────── -->
+  <dialog id="nav-drawer" class="drawer left hero surface">
+    <style>
+      @scope {
+        :scope > .top {
+          padding: var(--gap);
+          border-block-end: 1px solid var(--border);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        :scope > .top > span {
+          --type: 1;
+          font-family: var(--font-display);
+        }
+        :scope > .main {
+          padding: var(--gap);
+          --gap: 0.15rem;
+        }
+        :scope > .main > a {
+          display: block;
+          padding: 0.55rem 0.7rem;
+          border-radius: 0.4rem;
+          text-decoration: none;
+          color: inherit;
+        }
+        :scope > .main > a:hover { --bg: 0.15 }
+        :scope > .main > a[aria-current="page"] { --bg: 0.25; --fg: -1 }
+      }
+    </style>
+
+    <div class="top">
+      <span>stick.css</span>
+      <button class="icon-btn"
+              aria-label="Close navigation"
+              onclick="document.getElementById('nav-drawer').close()">✕</button>
+    </div>
+
+    <div class="main column">
+      <a href="../">Home</a>
+      <a href="../mental-model/">Mental model</a>
+      <a href="../color/">Color</a>
+      <a href="../type/">Type</a>
+      <a href="../surfaces/">Surfaces</a>
+      <a href="../layout-primitives/">Layout primitives</a>
+      <a href="./" aria-current="page">Page layout</a>
+      <a href="../components/">Components</a>
+      <a href="../authoring/">Authoring</a>
+      <a href="../charts/">Charts</a>
+      <a href="../recipes/">Recipes</a>
+      <a href="../anti-patterns/">What NOT to do</a>
+      <a href="../summary/">Summary</a>
+      <a href="../llms.txt">llms.txt</a>
+    </div>
+  </dialog>
 
 </body>
 </html>
