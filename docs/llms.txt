@@ -55,7 +55,7 @@ Set the theme on `<html>`:
 
 **Spacing:** `--gap` is a fluid token (rem-based, scales with viewport via a `pow()` curve). Used by all layout primitives and by `.page`'s slot padding. Override per-instance with a static value when fixed spacing is wanted.
 
-**Structure:** wrap content regions in `.surface` to make them paint. Compose layouts from `.row .column .split .spread .lcr .tmb .flank .grid .hud .hud-grid .hero .stack`. Use `body.page` for application root layouts (eleven `pg-*` slots: banner, header, subheader, navigation column with its own header/footer, main column with its own header/footer, aside, page footer).
+**Structure:** wrap content regions in `.surface` to make them paint (depth auto-cascades from nesting; use `.surface-0` through `.surface-3` to pin a stage explicitly). Compose layouts from `.row .column .split .spread .lcr .tmb .flank .grid .hud .hud-grid .hero .stack`. Use `body.page` for application root layouts (eleven `pg-*` slots: banner, header, subheader, navigation column with its own header/footer, main column with its own header/footer, aside, page footer).
 
 That's the whole system. Everything below is detail.
 
@@ -191,15 +191,40 @@ A surface is a region that paints its own background. Wrap content regions in `.
 </body>
 ```
 
-**Depth cascades automatically.** Surfaces nested inside other surfaces get progressively darker (in light mode) or lighter (in dark mode). The leaf surface — the one the user is focused on — is brightest.
+**Depth cascades automatically.** Surfaces nested inside other surfaces get progressively darker (in light mode) or lighter (in dark mode). The leaf surface — the one the user is focused on — is brightest. The framework infers depth from nesting via `:has()` and assigns each surface a `--depth` value from 0 (leaf) to 3 (deepest body).
 
-You can override depth manually when needed:
+### Explicit stage variants
+
+When you need a specific stage regardless of nesting, use `.surface-0` through `.surface-3`:
 
 ```html
-<div class="surface" style="--depth: 2">  <!-- force this surface 2 stages deeper -->
+<div class="surface-0">  <!-- pinned to leaf brightness -->
+<div class="surface-1">  <!-- pinned to one step deeper -->
+<div class="surface-2">  <!-- pinned to two steps deeper -->
+<div class="surface-3">  <!-- pinned to deepest stage -->
 ```
 
-This is useful for overlays, legends, or nested chips that should read as "stepped down" from their container.
+Each variant paints like `.surface` but pins `--depth` to its number. Use these when:
+
+- An overlay or legend should read as visually "stepped down" from its container regardless of where it's nested
+- A surface needs the same brightness across different nesting contexts (e.g. cards in a grid that should all paint identically whether or not their parent is a surface)
+- You want the leaf-bright look on a surface that happens to contain other surfaces (use `.surface-0`)
+
+**Variants stay outside the auto-cascade.** A bare `.surface` containing only a `.surface-2` does not infer itself as a parent in the `:has()` chain — the variant is invisible to inference. This means explicit stages don't pollute the depth of their ancestors. Pick one staging mode per region for predictable results.
+
+```html
+<!-- Auto-cascade: leaf is brightest, depths inferred -->
+<div class="surface">
+  <div class="surface">…</div>           <!-- leaf, stage 0 -->
+</div>
+
+<!-- Explicit: each surface pinned -->
+<div class="surface-0">
+  <div class="surface-2">…</div>         <!-- stage 2 (parent stays at 0) -->
+</div>
+```
+
+`.surface` and `.surface-N` are interchangeable for paint behavior. The difference is whether the surface participates in `:has()`-based depth inference (bare `.surface` does, variants don't).
 
 ## Layout primitives
 
