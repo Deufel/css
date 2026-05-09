@@ -385,6 +385,14 @@ Each slot has a default role. Defaults, not requirements — content can live wh
 
 `pg-main`'s width varies across breakpoints — 320px on mobile, 1400px on desktop, depending on which sibling slots are present. Components authored for `pg-main` **MUST** scale across that range. Sidebars and drawers can rely on fixed widths because their tracks are bounded; `pg-main` cannot. When a component in `pg-main` has a non-trivial internal layout, wrap it in a `@container` query so it responds to its own width rather than the viewport.
 
+#### Aligned chrome rows
+
+The chrome rows above `pg-main` (the row holding `pg-navigation-header` and `pg-main-header`) and below `pg-main` (the row holding `pg-navigation-footer` and `pg-main-footer`) are aligned across columns. Each row is sized by the tallest content in any column at that vertical position. This is intentional — it produces a coherent chrome strip that reads as one band across the page, which is what most application UIs want.
+
+The pattern works best when the navigation column and main column want their headers (or footers) at the same baseline, which is the typical application case. Use the slots in tandem: a search input in `pg-navigation-header` paired with a tabs strip in `pg-main-header`, both at the same height; a user info bar in `pg-navigation-footer` paired with a status row in `pg-main-footer`.
+
+When you need truly independent column chrome — a tall header in the nav column with no header in main, for example — `body.page` is not the right primitive. Compose `.hero` inside `pg-navigation` (or `pg-main`) instead. The column then owns its own internal three-region grid and is decoupled from siblings, at the cost of stepping outside the page-level chrome alignment.
+
 #### Migrating content across slots
 
 The slots are named tracks with fixed orientations, not containers that own a kind of content. A single concept can be authored across multiple slots — one shape per slot, each gated by a viewport class — and exactly one shape participates at any given breakpoint. A navigation can be a vertical sidebar in `pg-navigation` at desktop, a horizontal pill bar in `pg-header` at tablet, and a thumb-reachable bottom toolbar in `pg-footer` at mobile.

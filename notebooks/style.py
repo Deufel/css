@@ -572,6 +572,7 @@ def _(mo):
         );
       }
 
+
       /* Surface ramp — only surfaces compute --_surf-l. Descendants
          inherit, so chips/text/buttons anchor their chroma ramp to
          whatever surface they're sitting in. */
@@ -591,10 +592,17 @@ def _(mo):
       .surface:has(.surface .surface)                   { --depth: 2 }
       .surface:has(.surface .surface .surface)          { --depth: 3 }
 
+      .stage-0 { --depth: 0 }
+      .stage-1 { --depth: 1 }
+      .stage-2 { --depth: 2 }
+      .stage-3 { --depth: 3 }
+
       /* Paint: surfaces always paint their bg. Non-surfaces paint only
          when --bg > 0 (--_bg-chromatic acts as the alpha gate). */
-      :where(*)              { background-color: oklch(from var(--_bg) l c h / var(--_bg-chromatic)) }
-      :where(body, .surface) { background-color: var(--_bg) }
+      :where(*)                { background-color: oklch(from var(--_bg) l c h / var(--_bg-chromatic)) }
+      :where(body, .surface )  { background-color: var(--_bg) }
+      :where([class^="stage"]) { background-color: var(--_bg) }
+
 
       :where(svg) { color: currentColor }
 
@@ -616,6 +624,32 @@ def _(mo):
       :where(.hoverable):hover {
         --_interact-bg: var(--cfg-hover-bg-shift);
       }
+    }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Color (in utility)
+
+    ```css
+    @layer utility.layout {
+      /* (existing utilities — .nowrap, .truncate, .tr, .select-all unchanged) */
+
+      /* Surface depth offsets — step relative to the rendered stage
+         (whether inferred via :has() or set explicitly via .surface-N).
+         Clamps to [0, 3] so out-of-range offsets don't break the ramp.
+         Only meaningful on elements that participate in the surface ramp. */
+      .step-up    { --depth: max(0, calc(var(--depth) - 1)) }
+      .step-up-2  { --depth: max(0, calc(var(--depth) - 2)) }
+      .step-up-3  { --depth: max(0, calc(var(--depth) - 3)) }
+
+      .step-down    { --depth: min(3, calc(var(--depth) + 1)) }
+      .step-down-2  { --depth: min(3, calc(var(--depth) + 2)) }
+      .step-down-3  { --depth: min(3, calc(var(--depth) + 3)) }
     }
     ```
     """)
@@ -986,6 +1020,7 @@ def _(mo):
       }
 
 
+      .read   { max-inline-size: 65ch; margin-inline: auto; }
       .column { display: flex; flex-direction: column; gap: var(--gap) }
       .row    { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--gap); align-items: center }
 
@@ -1367,7 +1402,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### tabs - box
+    ### tabs - box / underline
 
     ```css
     @layer component.simple {
@@ -1814,19 +1849,17 @@ def _(mo):
        utility.exceptions — buffer layer; intentionally near-empty
        utility.important — !important rules for cascade-immune cases
        ============================================================ */
-
     @layer utility.layout {
-        :where(.nowrap)   { white-space: nowrap }
-        :where(.truncate) {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Print mode adjustments — generic enough to live here. */
-        @media print {
-            :where(body) { min-height: 0 }
-        }
+      :where(.nowrap)   { white-space: nowrap; }
+      :where(.truncate) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      :where(.tr) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      :where(.tr:is(:hover, :focus, :focus-within)) {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        overflow-wrap: anywhere;
+      }
+      :where(.select-all) { -webkit-user-select: all; user-select: all; }
     }
 
     @layer utility.exceptions {

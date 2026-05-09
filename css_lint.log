@@ -1,0 +1,24 @@
+@PROPERTIES
+
+LAYERS
+    1. reset.fix                    ✓
+    2. reset.opinion                ✓
+    3. core.color                   ✓
+    4. core.type                    ✓
+    5. theme                        ✓
+    6. layout.page                  ✓
+    7. layout.composition           ✓
+    8. component.base               ✓
+    9. component.simple             ✓
+   10. component.complex            ✓
+   11. utility.layout               ✓
+   12. utility.exceptions           ✓
+   13. utility.important            ✓
+
+VARIABLES
+  declared: 63  referenced: 73
+  unreferenced: --font-display, --font-mono
+
+ISSUES
+  [ERR] .tmp_style.css:1154 transition without --cfg-motion
+  [ERR] .tmp_style.css:1184 transition without --cfg-motion

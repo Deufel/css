@@ -3,263 +3,148 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>stick.css — a small, formula-driven CSS design system</title>
-<meta name="description" content="A CSS design system organized around three formulas — color, type, space — and a small set of layout primitives.">
+<title>stick.css</title>
+<meta name="description" content="A CSS design system. Tokens, layout primitives, components.">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@59e7f79/css/style.css">
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@4f4a255/css/style.css">
 <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.1/bundles/datastar.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/Deufel/toolbox@latest/js/highlight.js"></script>
 
-<style>
-  :root { --hue: 18 }
-</style>
 </head>
 
 <body id="page" class="page surface">
 
+  <!-- ── pg-banner ──────────────────────────────────────── -->
+  <div class="pg-banner flank-end" style="--hue-shift: 30; --bg: 0.55; --fg: -1; --type: -0.5">
+    <span><strong>Unreleased software</strong> — APIs may change without notice.</span>
+    <button class="icon-btn"
+            aria-label="Dismiss"
+            onclick="this.parentElement.remove()">✕</button>
+  </div>
+
   <!-- ── pg-header ──────────────────────────────────────── -->
-  <div class="pg-header flank-end" style="border-block-end: 1px solid var(--border)">
-    <a href="./" style="--type: 1; font-family: var(--font-display); color: inherit; text-decoration: none">stick.css</a>
+  <div class="pg-header flank-end">
     <div class="row">
+      <h1 style="--type: 3;">CSS</h1>
+      <div class="tabs underline" role="tablist">
+        <button role="tab" aria-selected="true"  onclick="location.href='./about/'">About</button>
+        <button role="tab" aria-selected="false" onclick="location.href='./guide/'">Guide</button>
+        <button role="tab" aria-selected="false" onclick="location.href='./docs/'">Docs</button>
+        <button role="tab" aria-selected="false" onclick="location.href='./demo/'">Demo</button>
+      </div>
+    </div>
+
+    <div class="row"
+         data-signals="{theme: 'light', typeIdx: 0, hue: 18}"
+         data-effect="document.documentElement.setAttribute('data-ui-theme', $theme); document.documentElement.style.setProperty('--hue', $hue); document.documentElement.style.setProperty('--type', ['-0.25', '0', '0.25'][$typeIdx])">
+
       <a class="btn" href="https://github.com/Deufel/css" target="_blank" rel="noopener">GitHub</a>
+
+      <button class="icon-btn"
+              aria-label="Cycle color palette"
+              data-on:click="$hue = ($hue + 30) % 360"
+              title="Cycle color palette">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+      </button>
+
+      <button class="icon-btn"
+              aria-label="Toggle theme"
+              data-on:click="$theme = $theme === 'light' ? 'dark' : 'light'"
+              title="Toggle theme">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+      </button>
+
+      <button class="icon-btn"
+              aria-label="Cycle text size"
+              data-on:click="$typeIdx = ($typeIdx + 1) % 3"
+              title="Cycle text size">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 16 2.536-7.328a1.02 1.02 1 0 1 1.928 0L22 16"/><path d="M15.697 14h5.606"/><path d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"/><path d="M3.304 13h6.392"/></svg>
+      </button>
     </div>
-  </div>
-
-  <!-- ── pg-subheader (empty on home; carries breadcrumb on subpages) ── -->
-
-  <!-- ── pg-navigation-header ───────────────────────────── -->
-  <div class="pg-navigation-header tablet desktop" style="border-inline-end: 1px solid var(--border); border-block-end: 1px solid var(--border)">
-    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">Documentation</span>
-  </div>
-
-  <!-- ── pg-navigation ──────────────────────────────────── -->
-  <nav class="pg-navigation tablet desktop" style="inline-size: 14rem; border-inline-end: 1px solid var(--border)">
-    <style>
-      @scope {
-        :scope > .column { --gap: 0.15rem }
-        :scope > .column > a {
-          padding: 0.45rem 0.6rem;
-          border-radius: 0.4rem;
-          text-decoration: none;
-          color: inherit;
-        }
-        :scope > .column > a:hover { --bg: 0.15 }
-        :scope > .column > a[aria-current="page"] { --bg: 0.25; --fg: -1 }
-      }
-    </style>
-    <div class="column">
-      <a href="./" aria-current="page">Home</a>
-      <a href="mental-model/">Mental model</a>
-      <a href="color/">Color</a>
-      <a href="type/">Type</a>
-      <a href="surfaces/">Surfaces</a>
-      <a href="layout-primitives/">Layout primitives</a>
-      <a href="page-layout/">Page layout</a>
-      <a href="components/">Components</a>
-      <a href="authoring/">Authoring</a>
-      <a href="charts/">Charts</a>
-      <a href="recipes/">Recipes</a>
-      <a href="anti-patterns/">What NOT to do</a>
-      <a href="summary/">Summary</a>
-      <a href="llms.txt">llms.txt</a>
-    </div>
-  </nav>
-
-  <!-- ── pg-navigation-footer ───────────────────────────── -->
-  <div class="pg-navigation-footer tablet desktop" style="--type: -1.5; --fg: -0.4; border-inline-end: 1px solid var(--border); border-block-start: 1px solid var(--border)">
-    <span>v0.1 · <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">source</a></span>
-  </div>
-
-  <!-- ── pg-main-header ─────────────────────────────────── -->
-  <div class="pg-main-header" style="border-block-end: 1px solid var(--border)">
-    <h1 style="--type: 2; font-family: var(--font-display); margin: 0">stick.css</h1>
   </div>
 
   <!-- ── pg-main ────────────────────────────────────────── -->
-  <main class="pg-main column" style="--gap: 1.5rem">
-
-    <p style="--type: 0; max-inline-size: 60ch; margin: 0">
-      A CSS design system organized around three formulas — color, type, space —
-      and a small set of layout primitives. Set tokens on any element, compose
-      layouts from declarative classes, ship.
-    </p>
-
-    <section class="column" style="--gap: 0.5rem">
-      <h2 style="--type: 0; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin: 0">The three formulas</h2>
-
-      <div class="column" style="--gap: 1rem; max-inline-size: 60ch">
-        <p style="margin: 0">
-          <strong style="--fg: -1">Color</strong> comes from one OKLCH formula. Set
-          <code>--bg</code> for surface presence, <code>--fg</code> for ink contrast,
-          and <code>--hue</code> for identity. Themes, dark mode, and contrast
-          flip automatically.
-        </p>
-        <p style="margin: 0">
-          <strong style="--fg: -1">Type</strong> comes from one ratio.
-          Set <code>--type</code> per element. Integer steps, body is 0,
-          line-height and letter-spacing adjust automatically.
-        </p>
-        <p style="margin: 0">
-          <strong style="--fg: -1">Space</strong> comes from one fluid token.
-          <code>--gap</code> stays tight across phone-to-desktop widths and
-          ramps at projector scale. Layout primitives use it; the page layout
-          uses it for slot padding.
-        </p>
+  <main class="pg-main">
+    <article class="read card" style="height: stretch;">
+        <style> @scope{ pre {line-height:1;} } </style>
+      <h2 style="--type: 2"> 1. Setup</h2>
+      <div class="Card surface">
+<pre style=";white-space: pre-wrap; overflow-wrap: anywhere"><code class="html" style="--type: -2">&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@&lt;commit&gt;/css/style.css"&gt;</code></pre>
       </div>
-    </section>
 
-    <section class="column" style="--gap: 0.75rem">
-      <h2 style="--type: 0; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin: 0">Install</h2>
-
-      <p style="margin: 0; max-inline-size: 60ch">Add the link tag to your HTML:</p>
-
-      <pre style="margin: 0; padding: 1rem; --bg: 0.05; border-radius: 0.5rem; overflow-x: auto; --type: -0.5"><code class="html">&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Deufel/toolbox@ddd1642/css/style.css"&gt;</code></pre>
-
-      <p style="margin: 0; --type: -1; --fg: -0.5; max-inline-size: 60ch">
-        That's the whole installation. No build step, no configuration file,
-        no JavaScript required for styling.
-      </p>
-    </section>
-
-    <section class="column" style="--gap: 0.75rem">
-      <h2 style="--type: 0; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin: 0">Where to go next</h2>
-
-      <div class="grid" style="--grid-min: 16rem">
-        <style>
-          @scope {
-            :scope > a {
-              text-decoration: none;
-              color: inherit;
-            }
-            :scope > a > .Card {
-              padding: 1rem;
-              block-size: 100%;
-            }
-            :scope > a > .Card:hover { --bg: 0.06 }
-            :scope > a > .Card > .heading {
-              --type: 0.5;
-              font-family: var(--font-display);
-              margin: 0 0 0.4rem;
-            }
-            :scope > a > .Card > .body {
-              margin: 0;
-              --type: -0.5;
-              --fg: -0.5;
-            }
-          }
-        </style>
-
-        <a href="mental-model/">
-          <div class="Card surface">
-            <p class="heading">Mental model</p>
-            <p class="body">Sixty seconds on the formulas. Live demos for color, type, and space.</p>
-          </div>
-        </a>
-
-        <a href="layout-primitives/">
-          <div class="Card surface">
-            <p class="heading">Layout primitives</p>
-            <p class="body">.row, .column, .grid, .hero, and the rest of the composition kit.</p>
-          </div>
-        </a>
-
-        <a href="page-layout/">
-          <div class="Card surface">
-            <p class="heading">Page layout</p>
-            <p class="body">body.page with eleven slots, viewport gating, drawers.</p>
-          </div>
-        </a>
-
-        <a href="llms.txt">
-          <div class="Card surface">
-            <p class="heading">llms.txt</p>
-            <p class="body">Plain text reference for LLM tools. Same content, no chrome.</p>
-          </div>
-        </a>
+      <h2 style="--type: 2">2. API</h2>
+      <p><strong>Color</strong></p>
+      <div class="Card surface">
+      <pre><code class="css" style="--type: -2;">--bg: 0;          /* [ 0, 1]    surface chroma                   */
+--fg: -1;         /* [-1, 0]    ink contrast                     */
+                  /* [ 0, 1]    ink chrmoa                       */
+--hue: 18;        /* [ 0, 360]  set on :root for brand           */
+--hue-shift: 0;   /* [ 0, 360]  local rotation off the brand hue */
+--hue-lock: 145;  /* [ 0, 360]  absolute hue, ignores brand      */
+</code></pre>
       </div>
-    </section>
 
-  </main>
+<p><strong>Type</strong></p>
+      <div class="Card surface">
+<pre><code class="css" style="--type: -2">--type: 0;             /* integer steps; 0 = body; does not cascade */ </code></pre>
+      </div>
 
-  <!-- ── pg-aside (desktop only — empty on home) ─────────── -->
-  <aside class="pg-aside desktop" style="inline-size: 16rem; border-inline-start: 1px solid var(--border)">
-    <span style="--type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600">On this page</span>
-    <div class="column" style="--gap: 0.4rem; --type: -0.5">
-      <a href="#three-formulas" style="color: inherit; text-decoration: none">The three formulas</a>
-      <a href="#install" style="color: inherit; text-decoration: none">Install</a>
-      <a href="#next" style="color: inherit; text-decoration: none">Where to go next</a>
+      <p><strong>Space</strong></p>
+      <div class="Card surface">
+<pre><code class="css" style="--type: -2">--gap: clamp(...);     /* fluid token; used by layout primitives    */
+</code></pre>
+      </div>
+
+      <p><strong>Surfaces.</strong></p>
+      <div class="Card surface">
+<pre><code class="css" style="--type: -2">.surface               /* paints; depth cascades on nesting         */
+</code></pre>
+      </div>
+
+      <p><strong>Layout primitives.</strong></p>
+      <div class="Card surface">
+<pre><code class="css" style="--type: -2">.row    .column    .split    .spread
+.lcr    .tmb       .flank    .flank-end
+.grid   .stack     .frame    .read
+.hud    .hud-grid  .hero
+</code></pre>
+      </div>
+
+      <p><strong>Page.</strong></p>
+      <div class="Card surface">
+<pre><code class="css" style="--type: -2">body.page              /* eleven slots:                              */
+  .pg-banner           /*   site-wide announcements                  */
+  .pg-header           /*   primary chrome                           */
+  .pg-subheader        /*   secondary chrome                         */
+  .pg-navigation       /*   nav column (internal header/footer)      */
+  .pg-main             /*   main column (internal header/footer)     */
+  .pg-aside            /*   secondary context                        */
+  .pg-footer           /*   dock                                     */
+</code></pre>
+      </div>
+
+      <p><strong>Viewport.</strong></p>
+      <div class="Card surface">
+<pre><code class="css" style="--type: -2">.mobile  .tablet  .desktop  /* gate participation; cover full range */
+</code></pre>
+      </div>
+
+    <div class="split" style="margin-top:auto;">
+      <a class="btn" href="#page">← Back to top</a>
+      <a class="btn" href="./guide/">Getting started →</a>
     </div>
-  </aside>
 
+        </main>
   <!-- ── pg-footer ──────────────────────────────────────── -->
-  <div class="pg-footer flank-end" style="--type: -1.5; --fg: -0.4; border-block-start: 1px solid var(--border)">
+  <div class="pg-footer flank-end" style="--type: -1.5; --fg: -0.4">
     <span>© 2026 stick.css</span>
     <a href="https://github.com/Deufel/css" target="_blank" rel="noopener" style="color: inherit">github.com/Deufel/css</a>
   </div>
-
-  <!-- ── HUD overlay with mobile FAB ─────────────────────── -->
-  <div class="hud" style="position: fixed; inset: 0; pointer-events: none">
-    <button class="↙ icon-btn mobile"
-            style="margin: 1rem"
-            aria-label="Open navigation"
-            onclick="document.getElementById('nav-drawer').showModal()">☰</button>
-  </div>
-
-  <!-- ── Nav drawer (modal, mobile only) ─────────────────── -->
-  <dialog id="nav-drawer" class="drawer left hero surface">
-    <style>
-      @scope {
-        :scope > .top {
-          padding: var(--gap);
-          border-block-end: 1px solid var(--border);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        :scope > .top > span {
-          --type: 1;
-          font-family: var(--font-display);
-        }
-        :scope > .main {
-          padding: var(--gap);
-          --gap: 0.15rem;
-        }
-        :scope > .main > a {
-          display: block;
-          padding: 0.55rem 0.7rem;
-          border-radius: 0.4rem;
-          text-decoration: none;
-          color: inherit;
-        }
-        :scope > .main > a:hover { --bg: 0.15 }
-        :scope > .main > a[aria-current="page"] { --bg: 0.25; --fg: -1 }
-      }
-    </style>
-
-    <div class="top">
-      <span>stick.css</span>
-      <button class="icon-btn"
-              aria-label="Close navigation"
-              onclick="document.getElementById('nav-drawer').close()">✕</button>
-    </div>
-
-    <div class="main column">
-      <a href="./" aria-current="page">Home</a>
-      <a href="mental-model/">Mental model</a>
-      <a href="color/">Color</a>
-      <a href="type/">Type</a>
-      <a href="surfaces/">Surfaces</a>
-      <a href="layout-primitives/">Layout primitives</a>
-      <a href="page-layout/">Page layout</a>
-      <a href="components/">Components</a>
-      <a href="authoring/">Authoring</a>
-      <a href="charts/">Charts</a>
-      <a href="recipes/">Recipes</a>
-      <a href="anti-patterns/">What NOT to do</a>
-      <a href="summary/">Summary</a>
-      <a href="llms.txt">llms.txt</a>
-    </div>
-  </dialog>
 
 </body>
 </html>
