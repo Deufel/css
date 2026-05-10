@@ -22,23 +22,14 @@ Add the CDN link to your HTML:
 
 Use a commit hash during development (always fresh) or a tag for production.
 
-Set your brand identity in a single `:root` block:
-
-```html
-<style>
-  :root {
-    --hue: 18;                    /* brand hue 0-360 */
-    --cfg-color-loud-c-light: 0.32;  /* punch in light mode */
-    --cfg-color-loud-c-dark: 0.30;
-  }
-</style>
-```
 
 Set the theme on `<html>`:
 
 ```html
 <html data-ui-theme="light">  <!-- or "dark" -->
 ```
+
+note if not present will fall back to system perference in this way the "system" mode is to have neither present
 
 ## The mental model (60 seconds)
 
@@ -47,13 +38,15 @@ Set the theme on `<html>`:
 - `--fg` (-1 to 1) — ink contrast. -1 = neutral high contrast, 0 = dim, 1 = vivid chromatic.
 
 **Hue:**
-- `--hue` — base brand hue, set on `:root`
-- `--hue-shift` — local rotation, used for variety
-- `--hue-lock` — overrides everything, used for semantic colors
+- `--hue` — base brand hue, set anywhere and will cascade down the dom (a --hue set on root change base hue for whole page)
+- `--hue-shift` — local rotation, used for variety (very usefull for charts)
+- `--hue-lock` — overrides everything, used for semantic colors (or usefull for specific sub tree reflows (ie make this section a warning) will flow down DOM and "wins" over all hue or hue-shift)
 
 **Type:** `--type` integer steps. 0 = body, positive = bigger, negative = smaller.
+note: works on all numbers but keep integer for a uniform ui
 
-**Spacing:** `--gap` is a fluid token (rem-based, scales with viewport via a `pow()` curve). Used by all layout primitives and by `.page`'s slot padding. Override per-instance with a static value when fixed spacing is wanted.
+**Spacing:** `--gap` is a fluid token (rem-based, scales with viewport via a `pow()` curve). Used by all layout primitives and by `.page`'s slot padding.
+  note: recommendation use em for text based spacing (in conjunction with --type typically); and var(--gap) for everything else.
 
 **Structure:** wrap content regions in `.surface` to make them paint (depth auto-cascades from nesting; use `.surface-0` through `.surface-3` to pin a stage explicitly). Compose layouts from `.row .column .split .spread .lcr .tmb .flank .grid .hud .hud-grid .hero .stack`. Use `body.page` for application root layouts (eleven `pg-*` slots: banner, header, subheader, navigation column with its own header/footer, main column with its own header/footer, aside, page footer).
 
@@ -63,7 +56,7 @@ That's the whole system. Everything below is detail.
 
 ### --bg [0, 1]
 
-Surface presence. On non-surface elements, `--bg: 0` is transparent — the inherited surface shows through. As `--bg` rises, the element paints with progressively more chromatic surface.
+Surface presence. On non-surface elements, `--bg: 0` is surface color. As `--bg` rises, the element paints with progressively more chromatic surface.
 
 ```html
 <div style="--bg: 0">         <!-- transparent on parent surface -->
@@ -74,6 +67,8 @@ Surface presence. On non-surface elements, `--bg: 0` is transparent — the inhe
 ```
 
 The surface always paints regardless of `--bg`. Other elements only paint when `--bg > 0`.
+
+note: multi element content lives on a surface iff it is related. you only use --bg (chroma boosted) background to style single purpose elements like a button, or a tag. And in rare cases a hero ect. 
 
 ### --fg [-1, 1]
 
@@ -114,10 +109,9 @@ Three ways to set color identity.
 <span class="inf">  <!-- blue: info, neutral status -->
 <span class="wrn">  <!-- yellow: warning -->
 <span class="dgr">  <!-- red: danger, error, alert -->
-<span class="bw">   <!-- grayscale: zero chroma -->
+<span class="bw">   <!-- grayscale: zero chroma removes chroma down helpfull in some cases -->
 ```
 
-These set `--hue-lock` (and for `.bw`, the loud chroma) so the element renders in that semantic color regardless of brand hue.
 
 ### Border tokens (derived)
 
@@ -148,7 +142,7 @@ SVG strokes and fills color through `currentColor`. The `<svg>` element's `color
 <g style="--hue-shift: 200; --fg: 0.8" stroke="currentColor">
 ```
 
-Authors **MUST** color SVG via `--fg`. `--bg` is the background axis and does not propagate through `currentColor`; using it for strokes or fills produces nothing useful and breaks theme switching. Negative `--fg` for neutral lines (grids, baselines), positive `--fg` for chromatic ink (data lines, accents). Use `--hue-shift` or `--hue-lock` on the `<g>` to vary color per series.
+Authors **MUST** color SVG via `--fg`. `--bg` is the background axis and does not propagate through `currentColor`; using it for strokes or fills produces nothing useful. Negative `--fg` for neutral lines (grids, baselines), positive `--fg` for chromatic ink (data lines, accents). Use `--hue-shift` or `--hue-lock` to vary color per series.
 
 ## Type system
 
@@ -169,13 +163,6 @@ Letter-spacing and line-height adjust automatically — bigger text gets tighter
 
 `--type` does not cascade. Set it on each element that needs sizing; children do not inherit the parent's `--type`.
 
-### Font tokens
-
-```html
-<span style="font-family: var(--font-ui)">       <!-- system sans (default for body) -->
-<span style="font-family: var(--font-display)">  <!-- editorial serif for titles -->
-<span style="font-family: var(--font-mono)">     <!-- monospace -->
-```
 
 ## Surfaces
 
@@ -198,19 +185,21 @@ A surface is a region that paints its own background. Wrap content regions in `.
 When you need a specific stage regardless of nesting, use `.surface-0` through `.surface-3`:
 
 ```html
-<div class="surface-0">  <!-- pinned to leaf brightness -->
-<div class="surface-1">  <!-- pinned to one step deeper -->
-<div class="surface-2">  <!-- pinned to two steps deeper -->
-<div class="surface-3">  <!-- pinned to deepest stage -->
+<div class="surface-0">  <!-- stage-0 -->
+<div class="surface-1">  <!-- stage-1 -->
+<div class="surface-2">  <!-- stage-2 -->
+<div class="surface-3">  <!-- stage-3 -->
 ```
 
 Each variant paints like `.surface` but pins `--depth` to its number. Use these when:
 
 - An overlay or legend should read as visually "stepped down" from its container regardless of where it's nested
 - A surface needs the same brightness across different nesting contexts (e.g. cards in a grid that should all paint identically whether or not their parent is a surface)
-- You want the leaf-bright look on a surface that happens to contain other surfaces (use `.surface-0`)
+- You want the stage-0 look on a surface that happens to contain other surfaces (use `.surface-0`)
 
 **Variants stay outside the auto-cascade.** A bare `.surface` containing only a `.surface-2` does not infer itself as a parent in the `:has()` chain — the variant is invisible to inference. This means explicit stages don't pollute the depth of their ancestors. Pick one staging mode per region for predictable results.
+
+note: surface-0 is most prominant content on the page and surface-4 is the least (can be thought of in theater terms of stage-0 .. 3 in terms of aurdience proximity)
 
 ```html
 <!-- Auto-cascade: leaf is brightest, depths inferred -->
@@ -231,6 +220,8 @@ Each variant paints like `.surface` but pins `--depth` to its number. Use these 
 Stateless containers that arrange children. No opinions about what the children are.
 
 ### Flow
+
+NOTE: do not over use these ei you do not need to use a column every where that is typically a default state. use intentionally
 
 ```html
 <div class="row">      <!-- horizontal flex with wrap, gap absorbs slack -->
@@ -466,6 +457,8 @@ Default (no class) is always on. Adding any class restricts the element to match
 These classes work on any element, at any granularity, regardless of its native display type. Use them on whole page slots, on individual children, on text inside a button. The system flips the element to its natural display when it should appear; authors do not specify `display: block` or `display: grid` per case.
 
 A button that swaps icon-only on mobile, label-only on tablet, and shows both on desktop:
+
+NOTE: see how this will efforless let the icon participate on mobile and desktop (underthe hood it works via a fallback so display type is always correct)
 
 ```html
 <button aria-label="Save">
