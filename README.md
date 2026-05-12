@@ -187,6 +187,24 @@ Pinned stages stay outside the auto-cascade — a `.stage-2` inside a bare `.sta
 
 Pick one staging mode per region. Mixing auto-cascade and pinned stages in the same subtree produces inconsistent results.
 
+### Glass
+
+Add `.glass` to any stage to make it translucent. The surface paints at reduced opacity and a backdrop blur kicks in. Composes with `.stage` and `.stage-N` normally — the alpha flows through the formula and everything downstream (borders, depth ramp, hue) keeps working.
+
+```html
+<div class="stage glass">…</div>             <!-- translucent stage -->
+<div class="stage-2 glass">…</div>           <!-- pinned + translucent -->
+```
+
+Tune transparency per instance with `--cfg-color-alpha`:
+
+```html
+<div class="stage glass" style="--cfg-color-alpha: 0.35">…</div>   <!-- more transparent -->
+<div class="stage glass" style="--cfg-color-alpha: 0.85">…</div>   <!-- subtle -->
+```
+
+Use for sticky chrome over scrolling content, modal overlays, drawers over the page, or any context where you want the surface present but not blocking visual context. Text contrast continues to work because the foreground formula reads the surface lightness, not its alpha.
+
 ## SVG
 
 SVG paints through `currentColor`, which derives from `--fg`. Any SVG element using `stroke="currentColor"` or `fill="currentColor"` participates in the system — theme switches, hue rotation, and contrast flipping propagate automatically.
@@ -518,6 +536,18 @@ For a drawer with its own header, scrolling body, and footer, compose with `.her
 ```
 
 `.drawer` handles positioning and animation; `.hero` handles internal layout. They compose cleanly.
+
+For a drawer that lets the page behind it show through, add `.glass`:
+
+```html
+<dialog id="filters" class="drawer right hero stage glass">
+  <div class="top">…filter title + close…</div>
+  <div class="main">…controls…</div>
+  <div class="bottom">…apply / reset buttons…</div>
+</dialog>
+```
+
+The drawer slides in over the page, backdrop-filter blurs what's behind it, and the surface paints translucently. Especially useful for non-modal popover drawers where the page underneath is visible context.
 
 Drawers **SHOULD** live as direct children of `<body>`, not nested inside page slots — they exist in the top layer (or as positioned popovers) and don't need a place in the grid.
 ## Components
@@ -952,7 +982,7 @@ Hard rules and common smells. Each one signals that a different tool fits the jo
 ```
 COLOR        --bg [0,1]      --fg [-1,1]       --hue, --hue-shift, --hue-lock
 SCALE        --type (local)  --scale (regional)
-STAGE        .stage          .stage-0 .. .stage-3 (explicit)
+STAGE        .stage          .stage-0 .. .stage-3 (explicit)  .glass (translucent)
 LAYOUT       .row .column .split .spread .lcr .tmb .flank .grid
              .hud-overlay .hud-grid .hero .frame
 PAGE LAYOUT  body.page + .pg-banner .pg-header .pg-subheader
