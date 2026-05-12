@@ -933,17 +933,22 @@ def _(mo):
         & > .pg-header            { grid-area: h;  }
         & > .pg-subheader         { grid-area: s;  }
         & > .pg-navigation-header { grid-area: nh; }
-        & > .pg-navigation        { grid-area: n;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+        & > .pg-navigation        { grid-area: n;  overflow-y: auto;  min-height: 0; }
         & > .pg-navigation-footer { grid-area: nf; }
         & > .pg-main-header       { grid-area: mh; }
         & > .pg-main              { grid-area: m;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
         & > .pg-main-footer       { grid-area: mf; }
-        & > .pg-aside             { grid-area: a;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+        & > .pg-aside             { grid-area: a;  overflow-y: auto;  min-height: 0; }
         & > .pg-footer            { grid-area: f;  }
       }
     }
     ```
     """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -1658,7 +1663,7 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ### hr
-
+    .vf limitied to flex i think..
     ```css
     @layer component.simple {
       /* hr — horizontal divider. Painted from --border to match the
@@ -1669,6 +1674,14 @@ def _(mo):
         border-block-start: 1px solid var(--border);
         margin-block: 1em;
         inline-size: 100%;
+      }
+      hr.vr {
+        inline-size: 0;
+        border: 0;
+        border-inline-start: 1px solid var(--border);
+        margin-inline: calc(0.25 * 1lh);
+        margin-block: 0;
+        align-self: stretch;
       }
     }
     ```
@@ -1684,12 +1697,12 @@ def _(mo):
     ```css
     @layer component.simple {
       .card {
-        padding: var(--gap);
+        padding: calc(0.25 * 1lh);
         border: 1px solid var(--border);
         border-radius: var(--cfg-radius);
       }
       .Card {
-        padding: var(--gap);
+        padding: calc(0.25 * 1lh);
         border: 1px solid var(--Border);
         border-radius: var(--cfg-radius);
       }
@@ -1830,6 +1843,95 @@ def _(mo):
         }
       }
     }
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Component.complex
+
+    ```css
+     /* ════════════════════════════════════════════════════════════
+         component.complex — .modal primitive
+
+         Centered focused-attention dialog. Subtle fade + slight scale
+         for an unobtrusive but felt open/close animation.
+
+         Pure CSS. Composes with .hero, .stage, .glass like .drawer does.
+         Works as both <dialog> (modal, with backdrop) and <div popover>
+         (non-modal), distinguished by element type — same convention as
+         .drawer.
+
+         The animation uses only transform and opacity — composite-only,
+         GPU-accelerated, smooth even with rich content inside.
+         ════════════════════════════════════════════════════════════ */
+      @layer component.complex {
+
+        .modal {
+          --_dur: calc(var(--cfg-motion) * 0.22s);
+
+          /* Open-state geometry */
+          position: fixed;
+          inset-block-start: 50%;
+          inset-inline-start: 50%;
+          margin: 0;
+          max-block-size: 85svh;
+          max-inline-size: none;
+          inline-size: min(600px, 90vw);
+          block-size: auto;
+          padding: 0;
+          overflow: hidden;
+          border: 1px solid var(--border);
+          border-radius: 0.6rem;
+
+          /* Open state — full size, fully visible */
+          transform: translate(-50%, -50%) scale(1);
+          transform-origin: center center;
+          opacity: 1;
+
+          /* Animation — composite-only properties */
+          transition:
+            transform calc(var(--_dur) * 1.1) cubic-bezier(0.16, 1, 0.3, 1),  /* ease-out-expo, slight overshoot feel */
+            opacity   var(--_dur)              ease-out,
+            display   var(--_dur)              allow-discrete,
+            overlay   var(--_dur)              allow-discrete;
+          will-change: transform, opacity;
+
+          /* Closed state — slightly smaller, slightly translucent, slightly lifted */
+          &:not(:is([open], :popover-open)) {
+            opacity: 0;
+            transform: translate(-50%, calc(-50% + 8px)) scale(0.96);
+          }
+
+          @starting-style {
+            &:is([open], :popover-open) {
+              opacity: 0;
+              transform: translate(-50%, calc(-50% + 8px)) scale(0.96);
+            }
+          }
+        }
+
+        /* Backdrop dim — only for <dialog>.modal (modal interaction) */
+        dialog.modal {
+          --_dim: oklch(0% 0 0 / 0.5);
+
+          &::backdrop {
+            background: var(--_dim);
+            transition:
+              background-color var(--_dur) ease-out,
+              display          var(--_dur) allow-discrete,
+              overlay          var(--_dur) allow-discrete;
+          }
+          &:not([open])::backdrop { background: oklch(0% 0 0 / 0); }
+          @starting-style {
+            &[open]::backdrop { background: oklch(0% 0 0 / 0); }
+          }
+        }
+      }
+
     ```
     """)
     return
