@@ -250,11 +250,6 @@ def _(mo):
     @property --cfg-radius { syntax: "<length>"; inherits: true; initial-value: 6px }
     @property --cfg-motion { syntax: "<number>"; inherits: true; initial-value: 1 }
 
-
-
-    /* Layout */
-    @property --gap { syntax: "<length>"; inherits: true; initial-value: 8px }
-
     ```
     """)
     return
@@ -746,7 +741,6 @@ def _(mo):
 
           /* Geometry & motion */
           --cfg-radius: 6px;
-          --gap: 0.75rem;
 
           /* Fonts */
           --font-ui:    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
@@ -919,9 +913,9 @@ def _(mo):
           "b  b  b" auto
           "h  h  h" auto
           "s  s  s" auto
-          "nh mh a" auto
+          "n  mh a" auto
           "n  m  a" 1fr
-          "nf mf a" auto
+          "n  mf a" auto
           "f  f  f" auto /
           auto 1fr auto;
         height: 100svh;
@@ -931,15 +925,13 @@ def _(mo):
 
         & > .pg-banner            { grid-area: b;  }
         & > .pg-header            { grid-area: h;  }
-        & > .pg-subheader         { grid-area: s;  }
-        & > .pg-navigation-header { grid-area: nh; }
+        & > .pg-subheader         { grid-area: s;  padding-block:0; }
         & > .pg-navigation        { grid-area: n;  overflow-y: auto;  min-height: 0; }
-        & > .pg-navigation-footer { grid-area: nf; }
         & > .pg-main-header       { grid-area: mh; }
         & > .pg-main              { grid-area: m;  overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
         & > .pg-main-footer       { grid-area: mf; }
         & > .pg-aside             { grid-area: a;  overflow-y: auto;  min-height: 0; }
-        & > .pg-footer            { grid-area: f;  }
+        & > .pg-footer            { grid-area: f;  padding-block:0; }
       }
     }
     ```
@@ -1558,17 +1550,26 @@ def _(mo):
     ### breadcrumbs
 
     ```css
-     /* crumbs — breadcrumb trail. <a> for clickable steps,
-         <span aria-current="page"> for the current page. Separators
-         are rendered via ::before, painted with --border so they sit
-         quieter than the crumb labels.                                  */
+    /* crumbs — breadcrumb trail. <a> for clickable steps,
+       <span aria-current="page"> for the current page. Separators
+       are rendered via ::before, painted with --border so they sit
+       quieter than the crumb labels.
+
+       Separator is set via --sep (default "/"). Override per-instance:
+         <nav class="crumbs" style="--sep: '>'">…</nav>
+         <nav class="crumbs" style="--sep: '|'">…</nav>
+         <nav class="crumbs" style="--sep: '\\'">…</nav>   backslash, escaped
+         <nav class="crumbs" style="--sep: '›'">…</nav>    any glyph works
+       Value must be a quoted string — `content` won't accept it otherwise.  */
 
     @layer component.simple {
       .crumbs {
+        --sep: "/";
+
         display: inline-flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 0.5em;
+        gap: calc(0.25 * 1lh);
 
         & > * {
           --type: -1;
@@ -1585,8 +1586,8 @@ def _(mo):
           font-weight: 600;
         }
         & > * + *::before {
-          content: "/";
-          margin-inline-end: 0.5em;
+          content: var(--sep);
+          margin-inline-end: calc(0.25 * 1lh);
           color: var(--border);
         }
       }
