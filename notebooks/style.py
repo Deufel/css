@@ -1154,9 +1154,9 @@ def _(mo):
 
         & > .top    { grid-area: t; }
         & > .bottom { grid-area: b; }
-        & > .left   { grid-area: l; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+        & > .left   { grid-area: l; overflow-y: auto; min-height: 0; }
         & > .main   { grid-area: m; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
-        & > .right  { grid-area: r; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+        & > .right  { grid-area: r; overflow-y: auto; min-height: 0; }
       }
 
     }
@@ -1174,55 +1174,81 @@ def _(mo):
     ```css
     @layer layout.composition{
 
-      /* ── .hud-grid — nine distinct cells, chrome+content ───── */
-        .hud-overlay {
-            display: grid;
-            grid-template-areas: "hud";
-            height: 100%;
-            pointer-events: none;
+      /* ── .hud-overlay — fills parent, stacks 9 positions in one cell ───── */
+      .hud-overlay {
+          display: grid;
+          grid-template-areas: "hud";
+          height: 100%;
+          pointer-events: none;
 
-            & > * {
+          & > * {
               grid-area: hud;
               justify-self: center;
               align-self: center;
               pointer-events: auto;
-            }
+          }
 
-            & > .↖ { justify-self: start;  align-self: start  }
-            & > .↑ { justify-self: center; align-self: start  }
-            & > .↗ { justify-self: end;    align-self: start  }
-            & > .← { justify-self: start;  align-self: center }
-            & > .• { justify-self: center; align-self: center }
-            & > .→ { justify-self: end;    align-self: center }
-            & > .↙ { justify-self: start;  align-self: end    }
-            & > .↓ { justify-self: center; align-self: end    }
-            & > .↘ { justify-self: end;    align-self: end    }
+          & > .↖ { justify-self: start;  align-self: start  }
+          & > .↑ { justify-self: center; align-self: start  }
+          & > .↗ { justify-self: end;    align-self: start  }
+          & > .← { justify-self: start;  align-self: center }
+          & > .• { justify-self: center; align-self: center }
+          & > .→ { justify-self: end;    align-self: center }
+          & > .↙ { justify-self: start;  align-self: end    }
+          & > .↓ { justify-self: center; align-self: end    }
+          & > .↘ { justify-self: end;    align-self: end    }
+      }
+
+      /* ── .hud-page — full-viewport overlay, stacks 9 positions ───── */
+      .hud-page {
+          position: fixed;
+          inset: 0;
+          display: grid;
+          grid-template-areas: "hud";
+          pointer-events: none;
+          z-index: 1;
+
+          & > * {
+              grid-area: hud;
+              justify-self: center;
+              align-self: center;
+              pointer-events: auto;
+          }
+
+          & > .↖ { justify-self: start;  align-self: start  }
+          & > .↑ { justify-self: center; align-self: start  }
+          & > .↗ { justify-self: end;    align-self: start  }
+          & > .← { justify-self: start;  align-self: center }
+          & > .• { justify-self: center; align-self: center }
+          & > .→ { justify-self: end;    align-self: center }
+          & > .↙ { justify-self: start;  align-self: end    }
+          & > .↓ { justify-self: center; align-self: end    }
+          & > .↘ { justify-self: end;    align-self: end    }
       }
 
       /* ── .hud-grid — nine distinct cells, chrome+content ───── */
       .hud-grid {
-            display: grid;
-            grid-template:
-              "↖ ↑ ↗" auto
-              "← • →" 1fr
-              "↙ ↓ ↘" auto /
-              auto 1fr auto;
-            height: 100%;
-            overflow: hidden;
+          display: grid;
+          grid-template:
+            "↖ ↑ ↗" auto
+            "← • →" 1fr
+            "↙ ↓ ↘" auto /
+            auto 1fr auto;
+          height: 100%;
+          overflow: hidden;
 
-            & > .↖ { grid-area: ↖; }
-            & > .↑ { grid-area: ↑; }
-            & > .↗ { grid-area: ↗; }
-            & > .← { grid-area: ←; overflow-y: auto; scrollbar-gutter: stable; }
-            & > .• { grid-area: •; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
-            & > .→ { grid-area: →; overflow-y: auto; scrollbar-gutter: stable; }
-            & > .↙ { grid-area: ↙; }
-            & > .↓ { grid-area: ↓; }
-            & > .↘ { grid-area: ↘; }
+          & > .↖ { grid-area: ↖; }
+          & > .↑ { grid-area: ↑; }
+          & > .↗ { grid-area: ↗; }
+          & > .← { grid-area: ←; overflow-y: auto; scrollbar-gutter: stable; }
+          & > .• { grid-area: •; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
+          & > .→ { grid-area: →; overflow-y: auto; scrollbar-gutter: stable; }
+          & > .↙ { grid-area: ↙; }
+          & > .↓ { grid-area: ↓; }
+          & > .↘ { grid-area: ↘; }
       }
 
     }
-
     ```
     """)
     return
@@ -1694,22 +1720,46 @@ def _(mo):
     .vf limitied to flex i think..
     ```css
     @layer component.simple {
-      /* hr — horizontal divider. Painted from --border to match the
-         quiet-tone band used throughout.                                */
+      /* hr — divider. Defaults to horizontal; .vr flips to vertical.
+         Works automatically inside flex/grid parents via align-self/justify-self stretch. */
       hr {
-        block-size: 0;
         border: 0;
-        border-block-start: 1px solid var(--border);
-        margin-block: 1em;
+        background: var(--border);
+        block-size: 1px;
         inline-size: 100%;
+        margin-block: 1em;
+        margin-inline: 0;
       }
+
       hr.vr {
-        inline-size: 0;
-        border: 0;
-        border-inline-start: 1px solid var(--border);
-        margin-inline: calc(0.25 * 1lh);
+        block-size: auto;
+        inline-size: 1px;
+        min-block-size: 1lh;
         margin-block: 0;
+        margin-inline: calc(0.25 * 1lh);
         align-self: stretch;
+        justify-self: stretch;
+      }
+
+      /* hr.text — divider with a centered label.
+         Usage: <hr class="text" data-text="OR"> */
+      hr.text {
+        /* reset the background-line approach; we draw lines via gradient */
+        background: linear-gradient(var(--border), var(--border)) center / 100% 1px no-repeat;
+        block-size: 1lh;
+        inline-size: 100%;
+        display: grid;
+        place-items: center;
+        overflow: visible;        /* let the label sit on top */
+      }
+
+      hr.text::after {
+        content: attr(data-text);
+        background: var(--bg);    /* mask the line behind the text */
+        padding-inline: calc(0.5 * 1lh);
+        color: var(--color);
+        font-size: 0.875em;       /* slightly smaller than body */
+        line-height: 1;
       }
     }
     ```
