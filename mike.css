@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v2.0.1 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v2.0.1/mike.css
+   mike.css v2.1.0 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v2.1.0/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -560,6 +560,30 @@
      page) never capture a shape query. (.block, in composition, carries
      the same containment and answers both names.) */
   :where(.cell) { container-name: shape; container-type: size; min-inline-size: 0; min-block-size: 0; overflow: hidden; }
+  /* THE SHAPE TOGGLES (v2.1.0, EventOS gf-615) — the shape as a value a block
+     can USE, not only a gate. Every child of a cell carries a pair per shape
+     and per family: --is-X is guaranteed-invalid (initial) when the cell IS
+     X, so var(--is-X, <value>) takes its fallback; --no-X is the reverse.
+     One declaration picks between two values with no query in the block:
+         flex-direction: var(--is-strip, row) var(--no-strip, column);
+     The pair is set ON the block (the cell's child), so the block's own box
+     reads it, and its parts inherit it. The families: small (spot line rail
+     slip tile strip — the cell carries one figure), tall (rail slip sheet),
+     run (line strip — one row across). The conditions below are the gates'
+     own; a shape is defined here and nowhere in a product. */
+  :where(.cell) > :where(*) { --is-spot: ; --no-spot: initial; --is-line: ; --no-line: initial; --is-rail: ; --no-rail: initial; --is-slip: ; --no-slip: initial; --is-sheet: ; --no-sheet: initial; --is-tile: ; --no-tile: initial; --is-panel: ; --no-panel: initial; --is-strip: ; --no-strip: initial; --is-banner: ; --no-banner: initial; --is-small: ; --no-small: initial; --is-tall: ; --no-tall: initial; --is-run: ; --no-run: initial; }
+  @container shape (width <  2lh) and (height <  2lh) { :where(.cell) > :where(*) { --is-spot: initial; --no-spot: ; } }
+  @container shape (width >= 2lh) and (height <  2lh) { :where(.cell) > :where(*) { --is-line: initial; --no-line: ; } }
+  @container shape (width <  2lh) and (height >= 2lh) { :where(.cell) > :where(*) { --is-rail: initial; --no-rail: ; } }
+  @container shape (aspect-ratio < 7/8) and (2lh <= width < 6lh) { :where(.cell) > :where(*) { --is-slip: initial; --no-slip: ; } }
+  @container shape (aspect-ratio < 7/8) and (width >= 6lh) { :where(.cell) > :where(*) { --is-sheet: initial; --no-sheet: ; } }
+  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 2lh) and (height >= 2lh) and ((width < 6lh) or (height < 6lh)) { :where(.cell) > :where(*) { --is-tile: initial; --no-tile: ; } }
+  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 6lh) and (height >= 6lh) { :where(.cell) > :where(*) { --is-panel: initial; --no-panel: ; } }
+  @container shape (aspect-ratio >= 15/8) and (2lh <= height < 6lh) { :where(.cell) > :where(*) { --is-strip: initial; --no-strip: ; } }
+  @container shape (aspect-ratio >= 15/8) and (height >= 6lh) { :where(.cell) > :where(*) { --is-banner: initial; --no-banner: ; } }
+  @container shape ((width <  2lh) and (height <  2lh)) or ((width >= 2lh) and (height <  2lh)) or ((width <  2lh) and (height >= 2lh)) or ((aspect-ratio < 7/8) and (2lh <= width < 6lh)) or ((7/8 <= aspect-ratio < 15/8) and (width >= 2lh) and (height >= 2lh) and ((width < 6lh) or (height < 6lh))) or ((aspect-ratio >= 15/8) and (2lh <= height < 6lh)) { :where(.cell) > :where(*) { --is-small: initial; --no-small: ; } }
+  @container shape ((width <  2lh) and (height >= 2lh)) or ((aspect-ratio < 7/8) and (2lh <= width < 6lh)) or ((aspect-ratio < 7/8) and (width >= 6lh)) { :where(.cell) > :where(*) { --is-tall: initial; --no-tall: ; } }
+  @container shape ((width >= 2lh) and (height <  2lh)) or ((aspect-ratio >= 15/8) and (2lh <= height < 6lh)) { :where(.cell) > :where(*) { --is-run: initial; --no-run: ; } }
 }
 
 

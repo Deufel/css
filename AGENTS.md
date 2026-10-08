@@ -102,16 +102,27 @@ THE BLOCK: the tag is the component and its only hook — `<blk-kpi>`,
         display: grid; …                                 /* its box */
         & :where(header) { … }                           /* parts, by element */
         &:where([data-ui-state~="armed"]) { … }          /* states, ~= tokens */
-        @container shape (aspect-ratio >= 15/8) { … }    /* arrangement per shape */
+        flex-direction: var(--is-strip, row) var(--no-strip, column);   /* arrangement per shape */
       }
     }
+
+THE SHAPE TOGGLES (v2.1.0) are how a block arranges per shape. The shape
+layer sets a pair on every child of a cell — the block itself, so its own
+box reads them, and its parts inherit them: `--is-X` is guaranteed-invalid
+(`initial`) when the cell IS X, so `var(--is-X, value)` takes its fallback;
+`--no-X` is the reverse. `var(--is-X, A) var(--no-X, B)` is A in X, B
+elsewhere; nest a pair in a fallback for three cases. X is one of the nine
+shapes or a family: `small` (spot line rail slip tile strip — one figure),
+`tall` (rail slip sheet), `run` (line strip — one row across). A product
+writes NO `@container` and NO `display: none` (its test refuses both): the
+shapes are defined once, in the engine, and hiding is the gates' job.
 
 - Parts are semantic elements (header h3 small strong figure ul li time
   mark progress footer …); a part class (.ring .dot .av) means something
   only inside its block.
 - A part lists the shapes it belongs in with the shape classes
   (`<small class="line strip banner">`); the gate layer shows it only
-  there. A block never sets display on a part.
+  there. A block never hides a part and never writes a container query.
 - Knobs for colour and type, inline only where a value is DATA (an
   avatar's hue); helpers only from the closed utility list; state as
   `data-ui-state="a b"` tokens matched `~=`, after native and ARIA
