@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v2.0.0 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v2.0.0/mike.css
+   mike.css v2.0.1 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v2.0.1/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -426,7 +426,7 @@
        frame and its scrolling child clips instead — so corner badges and
        focus rings at the section's edges stop being sheared by the
        section's own scroll box (overflow-y:auto clips BOTH axes). */
-    & > :where(.pg-main:not(.scroll-y)) > :where(section.owns-scroll) { overflow: visible; block-size: 100%; display: flex; flex-direction: column; min-block-size: 0; }
+    & > :where(.pg-main:not(.scroll-y)) > :where(section.owns-scroll) { overflow: visible; block-size: 100%; display: flex; flex-direction: column; min-block-size: 0; scrollbar-gutter: auto; } /* a section that does not scroll reserves no gutter (EventOS feedback #509) */
     & > :where(.pg-main-footer) { grid-area: mf; container-type: inline-size; }
     /* ASIDES ARE CONTENT-SIZED: the flanks are rare, one-off surfaces
        (a specialized widget, a form, a mini list) and auto width
