@@ -89,10 +89,10 @@ cell answers its queries with nothing (Chrome evaluates them at the flex
 base size). A cell is EXACTLY ONE SHAPE, in its own lh so `--type` and
 `--scale` move the boundaries with the text:
 
-    spot  w<2lh h<2lh · line  w≥2lh h<2lh · rail  w<2lh h≥2lh
-    slip | sheet   ratio < 7/8          short side (w)  < 6lh | ≥ 6lh
-    tile | panel   7/8 ≤ ratio < 15/8   min(w,h)        < 6lh | ≥ 6lh
-    strip | banner ratio ≥ 15/8         short side (h)  < 6lh | ≥ 6lh
+    spot  w<3lh h<3lh · line  w≥3lh h<3lh · rail  w<3lh h≥3lh
+    slip | sheet   ratio < 7/8          short side (w)  < 8lh | ≥ 8lh
+    tile | panel   7/8 ≤ ratio < 15/8   min(w,h)        < 8lh | ≥ 8lh
+    strip | banner ratio ≥ 15/8         short side (h)  < 8lh | ≥ 8lh
 
 THE BLOCK: the tag is the component and its only hook — `<blk-kpi>`,
 `<blk-location>`. ONE rule per block in the product's `static/blocks.css`:

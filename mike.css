@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v2.1.1 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v2.1.1/mike.css
+   mike.css v3.0.0 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.0.0/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -539,11 +539,13 @@
    collapses under an auto-height parent.
 
    THE PARTITION (w, h = the cell's content box; lh = the cell's line)
-       spot    w <  2lh and h <  2lh
-       line    w >= 2lh and h <  2lh
-       rail    w <  2lh and h >= 2lh
+       spot    w <  3lh and h <  3lh
+       line    w >= 3lh and h <  3lh
+       rail    w <  3lh and h >= 3lh
      beyond the edges, three ratio families split small | large on their
-     short side at 6lh:
+     short side at 8lh (v3.0.0, EventOS gf-637: 2lh and 6lh were measured too
+     small — a 6lh panel or sheet cannot hold a block's large design; the
+     board's cells live at 7–10lh, so the large shapes now start at 8):
        slip  | sheet     ratio < 7/8          short side = w
        tile  | panel     7/8 <= ratio < 15/8  short side = min(w, h)
        strip | banner    ratio >= 15/8        short side = h
@@ -572,18 +574,18 @@
      run (line strip — one row across). The conditions below are the gates'
      own; a shape is defined here and nowhere in a product. */
   :where(.cell) > :where(*) { --is-spot: ; --no-spot: initial; --is-line: ; --no-line: initial; --is-rail: ; --no-rail: initial; --is-slip: ; --no-slip: initial; --is-sheet: ; --no-sheet: initial; --is-tile: ; --no-tile: initial; --is-panel: ; --no-panel: initial; --is-strip: ; --no-strip: initial; --is-banner: ; --no-banner: initial; --is-small: ; --no-small: initial; --is-tall: ; --no-tall: initial; --is-run: ; --no-run: initial; }
-  @container shape (width <  2lh) and (height <  2lh) { :where(.cell) > :where(*) { --is-spot: initial; --no-spot: ; } }
-  @container shape (width >= 2lh) and (height <  2lh) { :where(.cell) > :where(*) { --is-line: initial; --no-line: ; } }
-  @container shape (width <  2lh) and (height >= 2lh) { :where(.cell) > :where(*) { --is-rail: initial; --no-rail: ; } }
-  @container shape (aspect-ratio < 7/8) and (2lh <= width < 6lh) { :where(.cell) > :where(*) { --is-slip: initial; --no-slip: ; } }
-  @container shape (aspect-ratio < 7/8) and (width >= 6lh) { :where(.cell) > :where(*) { --is-sheet: initial; --no-sheet: ; } }
-  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 2lh) and (height >= 2lh) and ((width < 6lh) or (height < 6lh)) { :where(.cell) > :where(*) { --is-tile: initial; --no-tile: ; } }
-  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 6lh) and (height >= 6lh) { :where(.cell) > :where(*) { --is-panel: initial; --no-panel: ; } }
-  @container shape (aspect-ratio >= 15/8) and (2lh <= height < 6lh) { :where(.cell) > :where(*) { --is-strip: initial; --no-strip: ; } }
-  @container shape (aspect-ratio >= 15/8) and (height >= 6lh) { :where(.cell) > :where(*) { --is-banner: initial; --no-banner: ; } }
-  @container shape ((width <  2lh) and (height <  2lh)) or ((width >= 2lh) and (height <  2lh)) or ((width <  2lh) and (height >= 2lh)) or ((aspect-ratio < 7/8) and (2lh <= width < 6lh)) or ((7/8 <= aspect-ratio < 15/8) and (width >= 2lh) and (height >= 2lh) and ((width < 6lh) or (height < 6lh))) or ((aspect-ratio >= 15/8) and (2lh <= height < 6lh)) { :where(.cell) > :where(*) { --is-small: initial; --no-small: ; } }
-  @container shape ((width <  2lh) and (height >= 2lh)) or ((aspect-ratio < 7/8) and (2lh <= width < 6lh)) or ((aspect-ratio < 7/8) and (width >= 6lh)) { :where(.cell) > :where(*) { --is-tall: initial; --no-tall: ; } }
-  @container shape ((width >= 2lh) and (height <  2lh)) or ((aspect-ratio >= 15/8) and (2lh <= height < 6lh)) { :where(.cell) > :where(*) { --is-run: initial; --no-run: ; } }
+  @container shape (width <  3lh) and (height <  3lh) { :where(.cell) > :where(*) { --is-spot: initial; --no-spot: ; } }
+  @container shape (width >= 3lh) and (height <  3lh) { :where(.cell) > :where(*) { --is-line: initial; --no-line: ; } }
+  @container shape (width <  3lh) and (height >= 3lh) { :where(.cell) > :where(*) { --is-rail: initial; --no-rail: ; } }
+  @container shape (aspect-ratio < 7/8) and (3lh <= width < 8lh) { :where(.cell) > :where(*) { --is-slip: initial; --no-slip: ; } }
+  @container shape (aspect-ratio < 7/8) and (width >= 8lh) { :where(.cell) > :where(*) { --is-sheet: initial; --no-sheet: ; } }
+  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 3lh) and (height >= 3lh) and ((width < 8lh) or (height < 8lh)) { :where(.cell) > :where(*) { --is-tile: initial; --no-tile: ; } }
+  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 8lh) and (height >= 8lh) { :where(.cell) > :where(*) { --is-panel: initial; --no-panel: ; } }
+  @container shape (aspect-ratio >= 15/8) and (3lh <= height < 8lh) { :where(.cell) > :where(*) { --is-strip: initial; --no-strip: ; } }
+  @container shape (aspect-ratio >= 15/8) and (height >= 8lh) { :where(.cell) > :where(*) { --is-banner: initial; --no-banner: ; } }
+  @container shape ((width <  3lh) and (height <  3lh)) or ((width >= 3lh) and (height <  3lh)) or ((width <  3lh) and (height >= 3lh)) or ((aspect-ratio < 7/8) and (3lh <= width < 8lh)) or ((7/8 <= aspect-ratio < 15/8) and (width >= 3lh) and (height >= 3lh) and ((width < 8lh) or (height < 8lh))) or ((aspect-ratio >= 15/8) and (3lh <= height < 8lh)) { :where(.cell) > :where(*) { --is-small: initial; --no-small: ; } }
+  @container shape ((width <  3lh) and (height >= 3lh)) or ((aspect-ratio < 7/8) and (3lh <= width < 8lh)) or ((aspect-ratio < 7/8) and (width >= 8lh)) { :where(.cell) > :where(*) { --is-tall: initial; --no-tall: ; } }
+  @container shape ((width >= 3lh) and (height <  3lh)) or ((aspect-ratio >= 15/8) and (3lh <= height < 8lh)) { :where(.cell) > :where(*) { --is-run: initial; --no-run: ; } }
 }
 
 
@@ -3564,22 +3566,22 @@
 @layer visibility {
   :where(.spot, .line, .rail, .slip, .sheet, .tile, .panel, .strip, .banner) { display: none; }
 
-  /* edges — spot owns the corner, line and rail own the rest of each 2lh band */
-  @container shape (width <  2lh) and (height <  2lh) { :where(.spot) { display: revert-layer; } }
-  @container shape (width >= 2lh) and (height <  2lh) { :where(.line) { display: revert-layer; } }
-  @container shape (width <  2lh) and (height >= 2lh) { :where(.rail) { display: revert-layer; } }
+  /* edges — spot owns the corner, line and rail own the rest of each 3lh band */
+  @container shape (width <  3lh) and (height <  3lh) { :where(.spot) { display: revert-layer; } }
+  @container shape (width >= 3lh) and (height <  3lh) { :where(.line) { display: revert-layer; } }
+  @container shape (width <  3lh) and (height >= 3lh) { :where(.rail) { display: revert-layer; } }
 
   /* vertical family — short side is width */
-  @container shape (aspect-ratio < 7/8) and (2lh <= width < 6lh) { :where(.slip)  { display: revert-layer; } }
-  @container shape (aspect-ratio < 7/8) and (width >= 6lh)       { :where(.sheet) { display: revert-layer; } }
+  @container shape (aspect-ratio < 7/8) and (3lh <= width < 8lh) { :where(.slip)  { display: revert-layer; } }
+  @container shape (aspect-ratio < 7/8) and (width >= 8lh)       { :where(.sheet) { display: revert-layer; } }
 
   /* centre family — short side is min(w, h) */
-  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 2lh) and (height >= 2lh) and ((width < 6lh) or (height < 6lh)) { :where(.tile)  { display: revert-layer; } }
-  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 6lh) and (height >= 6lh)                                      { :where(.panel) { display: revert-layer; } }
+  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 3lh) and (height >= 3lh) and ((width < 8lh) or (height < 8lh)) { :where(.tile)  { display: revert-layer; } }
+  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 8lh) and (height >= 8lh)                                      { :where(.panel) { display: revert-layer; } }
 
   /* horizontal family — short side is height */
-  @container shape (aspect-ratio >= 15/8) and (2lh <= height < 6lh) { :where(.strip)  { display: revert-layer; } }
-  @container shape (aspect-ratio >= 15/8) and (height >= 6lh)       { :where(.banner) { display: revert-layer; } }
+  @container shape (aspect-ratio >= 15/8) and (3lh <= height < 8lh) { :where(.strip)  { display: revert-layer; } }
+  @container shape (aspect-ratio >= 15/8) and (height >= 8lh)       { :where(.banner) { display: revert-layer; } }
 }
 
 /* Keyframes are global by name — outside @layer, like the engine's own. */
