@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.0.0 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.0.0/mike.css
+   mike.css v3.0.1 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.0.1/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3327,15 +3327,19 @@
     & :where(thead th) { --bg: var(--canvas); }
   }
 
-  /* skins — now just anchor re-picks per bank */
+  /* skins — the extremes the system lerps between, re-picked: the surface
+     anchors per bank and the chromatic ink's poles (--fg: 1 lands on the
+     skin's accent; the formula is the root's, unchanged) */
   [data-ui-skin="carbon"] {
     --lt-neg: oklch(89% 0 0); --lt-zero: oklch(99.5% 0 0); --lt-pos: oklch(55.7% 0.243 0); --lt-flip: 0.60;
     --dk-neg: oklch(11% 0 0); --dk-zero: oklch(20% 0 0);   --dk-pos: oklch(64.7% 0.189 0); --dk-flip: 0.85;
+    --fg-chr-d: 0.557; --fg-chr-l: 0.647; --fg-chroma: 0.21;   /* the chromatic ink's extremes: the skin's own accent */
     --cfg-radius: 0px;
   }
   [data-ui-skin="material"] {
     --lt-neg: oklch(87% 0.022 0); --lt-zero: oklch(98.4% 0.013 0); --lt-pos: oklch(49.6% 0.130 0); --lt-flip: 0.62;
     --dk-neg: oklch(9% 0.015 0);  --dk-zero: oklch(18.7% 0.012 0); --dk-pos: oklch(83.5% 0.095 0); --dk-flip: 0.70;
+    --fg-chr-d: 0.496; --fg-chr-l: 0.835; --fg-chroma: 0.11;   /* the chromatic ink's extremes: the skin's own accent */
     --cfg-radius: 16px;
   }
   /* AN EXPLICIT CORNERS CHOICE OUTRANKS A SKIN'S DEFAULT (2026-09-29): the
