@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v2.1.0 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v2.1.0/mike.css
+   mike.css v2.1.1 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v2.1.1/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2556,8 +2556,9 @@
   /* TONE, not lines (gf-24): the sticky head rides a small lift, the
      hovered row washes up one step. Borders stay retired. */
   :where(.roster) :where(tbody tr:hover) :where(td) { --lift: 0.06; background-color: var(--_bg); --surf: var(--_bg); }
-  /* a cell that IS a checkbox centres it — the box is the cell's whole meaning */
-  :where(.roster) :where(td:has(> input[type="checkbox"]:only-child)) { text-align: center; }
+  /* a cell that IS a checkbox lines its box up with the head's select-all
+     (v2.1.1, EventOS feedback #563): at the start, never centred */
+  :where(.roster) :where(td:has(> input[type="checkbox"]:only-child)) { text-align: start; }
   :where(.roster) :where(.center) { vertical-align: middle; }
   :where(.roster) :where(.center) :where(input[type="checkbox"]) { vertical-align: middle; }
   /* the head's controls (gf-24/67): 1lh squares, quiet ink that wakes
