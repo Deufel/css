@@ -95,7 +95,15 @@ base size). A cell is EXACTLY ONE SHAPE, in its own lh so `--type` and
     strip | banner ratio ≥ 15/8         short side (h)  < 8lh | ≥ 8lh
 
 THE BLOCK: the tag is the component and its only hook — `<blk-kpi>`,
-`<blk-location>`. ONE rule per block in the product's own file for it (EventOS: `view/blocks/<name>.css`, served as one `blocks.css`):
+`<blk-location>`. ONE rule per block in the product's own file for it
+(EventOS: `view/blocks/<name>.css`, served as one `blocks.css`). CO-LOCATION
+IS A PAIRING, TESTED (EventOS gf-668/669): the file is named for the tag
+and opens with a head naming every templ that opens it (`/* blk-kpi —
+opened by view/board.templ */`); each such templ names the file in the
+comment of the component that opens it; a templ never styles a block in
+a `<style>`; a file no templ opens is stale. A block is iterated as it is
+built — the block and its file together, on the bench — rather than
+designed from a principles page (Mike, 2026-10-10):
 
     @layer block {
       :where(blk-location) {
