@@ -27,7 +27,7 @@ Twelve layers, declared once; the layer order IS the cascade:
 - `theme` holds every knob's single home; `base` the bare defaults.
 - `composition` the primitives (.row .column .grid .spread .stack .frame …).
 - `block` the components — a `<blk-*>` tag owns one rule; a product's
-  blocks live in the product's own sheet (`static/blocks.css`) in this
+  blocks live in the product's own sheets (a file per block, served as one `blocks.css`) in this
   same layer.
 - `utility` the CLOSED helper list, late so a helper beats a block.
 - `exception` what overrides from outside: skins, radius, standing states
@@ -45,9 +45,9 @@ nothing about a block lives anywhere else — visibility is the one
 exception, by design, because a part declares WHICH shapes it belongs
 in and the gate layer owns the only two states.
 
-Enforcement is Go: the product's `engine_test.go` pins the spine and the
-laws on the committed copy; `blocks_test.go` pins locality on
-`blocks.css`; `view/ratchet_test.go` ratchets inline geometry and the
+Enforcement is Go: the product's `blocks_test.go` pins locality on the
+blocks' files (one rule, one file, one block; `:where()`; the published
+words, flat); `view/ratchet_test.go` ratchets inline geometry and the
 gap ladder in the templates; `prune` reports an engine class no lab
 page wears as UNDEMOED (the fix is a specimen, never a deletion).
 
@@ -95,7 +95,7 @@ base size). A cell is EXACTLY ONE SHAPE, in its own lh so `--type` and
     strip | banner ratio ≥ 15/8         short side (h)  < 8lh | ≥ 8lh
 
 THE BLOCK: the tag is the component and its only hook — `<blk-kpi>`,
-`<blk-location>`. ONE rule per block in the product's `static/blocks.css`:
+`<blk-location>`. ONE rule per block in the product's own file for it (EventOS: `view/blocks/<name>.css`, served as one `blocks.css`):
 
     @layer block {
       :where(blk-location) {
