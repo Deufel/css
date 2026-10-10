@@ -10,3 +10,7 @@ skill in a product).
 A product commits a copy and never edits it in place; a change is a
 commit here, a tag, a copy there. The laws: zero specificity, no
 `!important`, locality — a block's rule holds everything about the block.
+
+## The demo
+
+`demo.html` — the cell, the shape, the block: five short lessons, each live beside the lines that make it. Open it from a clone (it links `mike.css` relatively); no script.

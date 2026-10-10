@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mike.css — the cell, the shape, the block</title>
+<link rel="stylesheet" href="mike.css">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   THE WHOLE DEMO BLOCK. Read it top to bottom; every line is pointed at
+   from the page. A product's blocks live in @layer block, one rule a
+   block, nothing outside the tag.
+   ═══════════════════════════════════════════════════════════════════ */
+@layer block {
+  :where(blk-demo) {
+    /* ① THE BOX — flex, its direction from the TOGGLES (two cases, never
+       more): a run (line · strip) goes across, everything else stacks;
+       a rail writes upright. The box cannot query its own shape, so
+       the toggles are its one tool. */
+    display: flex; inline-size: 100%; block-size: 100%; overflow: hidden;
+    flex-direction: var(--is-run, row) var(--no-run, column);
+    writing-mode:   var(--is-rail, vertical-rl) var(--no-rail, horizontal-tb);
+    align-items: center; justify-content: center; gap: 0 0.5em; text-align: center;
+    border: 1px solid var(--border); border-radius: var(--cfg-radius); padding: 0.25lh 0.5em;
+
+    /* ② A PART ARRANGES BY THE WORD — a style query, one line a case,
+       flat. The engine put --shape on the block; the part reads it. */
+    & > :where(strong) {
+      --type: 3; --fg: -1; line-height: 1.1;
+      @container style(--size: small)  { --type: 2; }
+      @container style(--shape: strip) { --type: 1; }
+      @container style(--shape: line)  { --type: 0; }
+      @container style(--shape: rail)  { --type: 0; }
+      @container style(--shape: spot)  { --type: -2; }
+    }
+
+    /* ③ THE READOUT — nine words, each wearing its shape's GATE CLASS, so
+       the gate layer shows exactly one; and --size read the same way. */
+    & > :where(b) { --fg: 0.85; --type: -1; }
+    & > :where(i) { --type: -2; --fg: -0.5; font-style: normal; --word: "large";
+      @container style(--size: small) { --word: "small"; }
+      &::after { content: "· " var(--word); } }
+
+    /* ④ MORE WHERE THERE IS ROOM — these parts are gated in the HTML; the
+       block only styles them. */
+    & > :where(small) { --type: -2; --fg: -0.6; }
+    & > :where(p) { margin: 0; --type: -1; --fg: -0.7; text-wrap: balance; max-inline-size: 28ch; }
+  }
+
+  /* ⑤ A BLOCK THAT HOLDS CELLS: a grid of two tracks, each a .cell — the
+     inner blocks read their OWN shape; the outer word does not leak in
+     because the engine re-sets --shape on every cell's child. */
+  :where(blk-nest) {
+    display: grid; grid-template-columns: 2.6lh minmax(0, 1fr); gap: var(--gap, 0.25lh);
+    inline-size: 100%; block-size: 100%;
+  }
+
+  /* ── demo chrome (not part of the lesson) ── */
+  :where(.region) { resize: both; inline-size: 24lh; block-size: 9lh; max-inline-size: 100%; border-radius: var(--cfg-radius); }
+  :where(blk-nine) {
+    display: grid; gap: 0.5em;   /* the cells STRETCH to their tracks: that is where their size comes from */
+    grid-template-columns: 2.6lh 6lh 10lh 20lh;
+    grid-template-rows: 2.6lh 5lh 6lh 10lh 12lh;
+  }
+  :where(blk-nine) > :where(.cell) { border-radius: var(--cfg-radius); }
+  :where(.lesson) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1lh; align-items: start; }
+  :where(.lesson pre) { margin: 0; --type: -2; white-space: pre-wrap; }
+}
+</style>
+</head>
+<body class="column" style="--gap: 1.5lh; padding: 1lh; max-inline-size: 110ch; margin-inline: auto;">
+
+<hgroup>
+  <h1 style="--type: 3;">The cell, the shape, the block</h1>
+  <p style="--fg: -0.6;">One mechanism, no script. The page sizes a <strong>cell</strong>; the engine names its <strong>shape</strong>; a <strong>block</strong> inside arranges itself by that name. Resize things on this page and watch the words change.</p>
+</hgroup>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<section class="lesson">
+  <div class="column" style="--gap: 0.5lh;">
+    <h2 style="--type: 1;">1 · The cell is the page's — drag the corner</h2>
+    <div class="cell region">
+      <blk-demo>
+        <b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b>
+        <i></i>
+        <strong>$62.5K</strong>
+        <small class="line rail slip sheet tile panel strip banner">net revenue</small>
+        <p class="sheet panel banner">A large shape has room for a sentence; the small ones show the figure and its word, the spot the figure alone.</p>
+      </blk-demo>
+    </div>
+    <small style="--fg: -0.55;">The cell is a size container named <code>shape</code>. Its size comes from the page — here a resizable box; on a real page a grid track. A cell must be definitely sized: a flex-grown cell reads as zero height.</small>
+  </div>
+  <pre><code>&lt;div class="cell"&gt;      ← the page sizes this
+  &lt;blk-demo&gt;…&lt;/blk-demo&gt; ← the block arranges in it
+&lt;/div&gt;
+
+/* mike.css, core.shape — nine rules, ONE definition */
+:where(.cell) { container-name: shape; container-type: size; }
+@container shape (width &lt; 3lh) and (height &lt; 3lh)
+  { :where(.cell) &gt; :where(*) { --shape: spot; --size: small; … } }
+@container shape (aspect-ratio &gt;= 15/8) and (3lh &lt;= height &lt; 8lh)
+  { :where(.cell) &gt; :where(*) { --shape: strip; --size: small; … } }
+… seven more …
+
+The block is the cell's child, so it CARRIES --shape and
+--size, and every part inside inherits them.</code></pre>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<section class="lesson">
+  <div class="column" style="--gap: 0.5lh;">
+    <h2 style="--type: 1;">2 · A part arranges by the word — flat</h2>
+    <p style="--fg: -0.7;">The figure's size steps per shape. Five cases, five lines, each readable on its own. Before, this was one nested <code>var()</code> five levels deep, and one wrong paren dropped the whole declaration with no error.</p>
+    <small style="--fg: -0.55;">Why a style query and not a size query here: a size query would have to restate "width &lt; 3lh and height &lt; 3lh" — a second definition of spot. The word is read by name, so the definition stays in the engine.</small>
+  </div>
+  <pre><code>&amp; &gt; :where(strong) {
+  --type: 3;
+  @container style(--size: small)  { --type: 2; }
+  @container style(--shape: strip) { --type: 1; }
+  @container style(--shape: line)  { --type: 0; }
+  @container style(--shape: rail)  { --type: 0; }
+  @container style(--shape: spot)  { --type: -2; }
+}
+
+A style query reads the nearest ANCESTOR, never the element
+itself — so a part can ask its block, but the block's own box
+cannot ask itself. The box keeps the two-way toggles:
+
+flex-direction: var(--is-run, row) var(--no-run, column);
+writing-mode:   var(--is-rail, vertical-rl) var(--no-rail, horizontal-tb);
+
+Two cases at most. A third case on the box moves to a part.</code></pre>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<section class="lesson">
+  <div class="column" style="--gap: 0.5lh;">
+    <h2 style="--type: 1;">3 · Showing and hiding is the gate layer's</h2>
+    <p style="--fg: -0.7;">A part lists the shapes it belongs in. The engine's last layer hides every gated part and shows it back only inside a matching cell. A block never writes <code>display: none</code>.</p>
+    <small style="--fg: -0.55;">The readout row at the top of every demo block is nine words, each wearing one gate class — so the gates show you exactly one. That IS the mechanism, demonstrating itself.</small>
+  </div>
+  <pre><code>&lt;b class="spot"&gt;spot&lt;/b&gt;&lt;b class="line"&gt;line&lt;/b&gt; … nine words, one shows
+&lt;small class="line rail slip sheet tile panel strip banner"&gt;net revenue&lt;/small&gt;
+&lt;p class="sheet panel banner"&gt;only where there is room&lt;/p&gt;
+
+/* mike.css, visibility (the last layer) */
+:where(.spot, .line, …, .banner) { display: none; }
+@container shape (width &lt; 3lh) and (height &lt; 3lh)
+  { :where(.spot) { display: revert-layer; } }</code></pre>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<section class="column" style="--gap: 0.5lh;">
+  <h2 style="--type: 1;">4 · The same block in all nine shapes at once</h2>
+  <p style="--fg: -0.7;">Nine cells, sized in <code>lh</code> so each is exactly one shape; the identical <code>&lt;blk-demo&gt;</code> markup in every one. Nothing is measured by the block — the cell's size names the shape, the block answers to the name.</p>
+  <blk-nine>
+    <div class="cell" style="grid-area: 1 / 1;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+    <div class="cell" style="grid-area: 1 / 2 / 2 / 5;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+    <div class="cell" style="grid-area: 2 / 1 / 6 / 2;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+    <div class="cell" style="grid-area: 2 / 2 / 3 / 5;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+    <div class="cell" style="grid-area: 3 / 2;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+    <div class="cell" style="grid-area: 3 / 3 / 5 / 4;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+    <div class="cell" style="grid-area: 3 / 4 / 5 / 5;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+    <div class="cell" style="grid-area: 4 / 2 / 6 / 3;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+    <div class="cell" style="grid-area: 5 / 3 / 6 / 5;"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">A large shape has room for a sentence.</p></blk-demo></div>
+  </blk-nine>
+  <small style="--fg: -0.55;">spot · line · rail are the thin edges (a side under 3lh). Then three ratio families, each small | large on its short side at 8lh: slip | sheet (narrow and tall), tile | panel (near square), strip | banner (wide and short).</small>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<section class="lesson">
+  <div class="column" style="--gap: 0.5lh;">
+    <h2 style="--type: 1;">5 · A block that holds cells — drag this one too</h2>
+    <div class="cell region" style="inline-size: 30lh; block-size: 7lh;">
+      <blk-nest>
+        <div class="cell"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>7</strong><small class="line rail slip sheet tile panel strip banner">days</small></blk-demo></div>
+        <div class="cell"><blk-demo><b class="spot">spot</b><b class="line">line</b><b class="rail">rail</b><b class="slip">slip</b><b class="sheet">sheet</b><b class="tile">tile</b><b class="panel">panel</b><b class="strip">strip</b><b class="banner">banner</b><i></i><strong>$62.5K</strong><small class="line rail slip sheet tile panel strip banner">net revenue</small><p class="sheet panel banner">The inner block reads its own cell, never the outer one.</p></blk-demo></div>
+      </blk-nest>
+    </div>
+    <small style="--fg: -0.55;">The outer cell holds <code>&lt;blk-nest&gt;</code>, a grid of two tracks that are themselves cells. Each inner block reads the shape of ITS cell: the narrow track is a rail or a spot while the wide one is a strip or a line. Nesting is just cells in a block in a cell — the same rule at every level.</small>
+  </div>
+  <pre><code>&lt;div class="cell"&gt;              ← the page's
+  &lt;blk-nest&gt;                    ← a block: a grid of…
+    &lt;div class="cell"&gt;…&lt;/div&gt;   ← …cells (its tracks)
+    &lt;div class="cell"&gt;…&lt;/div&gt;
+  &lt;/blk-nest&gt;
+&lt;/div&gt;
+
+:where(blk-nest) {
+  display: grid; grid-template-columns: 2.6lh minmax(0, 1fr);
+  inline-size: 100%; block-size: 100%;
+}
+
+The engine re-sets --shape on EVERY cell's child, so the
+inner block's word wins over the outer one for everything
+inside it (custom properties inherit, nearest wins).</code></pre>
+</section>
+
+<section class="column" style="--gap: 0.25lh;">
+  <h2 style="--type: 1;">The rules, in one breath</h2>
+  <ol style="--fg: -0.7;">
+    <li>The <strong>cell</strong> is the page's: a grid track or a knob-sized box, definitely sized. Never flex-grown.</li>
+    <li>The <strong>engine</strong> names the shape — nine rules in <code>core.shape</code> set <code>--shape</code> and <code>--size</code> on the cell's child. Defined once.</li>
+    <li>A <strong>part</strong> arranges by <code>@container style(--shape: …)</code>, flat, one line a case.</li>
+    <li>The <strong>block's own box</strong> uses the two-way toggles <code>var(--is-X, a) var(--no-X, b)</code>. Two cases at most; a third moves to a part.</li>
+    <li><strong>Hiding</strong> is the gate classes' — a part lists where it belongs. A block never writes <code>display: none</code>, and never a size container query.</li>
+  </ol>
+</section>
+
+</body>
+</html>
