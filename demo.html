@@ -57,6 +57,45 @@
     inline-size: 100%; block-size: 100%;
   }
 
+  /* ───────── blk-checklist — A LIST WITH A COUNT (gf-661, the first general
+     block): the spot the count; the line the title, the count and the bar
+     across; the rail the count and the bar upright; the tile the title and
+     a ring with the count inside; the slip and up the bar, the caption (done,
+     next) and the items — a strip in columns, the rest a column. The
+     block's own box by the toggles (two levels), every part by the words. ───────── */
+  :where(blk-checklist) {
+    display: flex; inline-size: 100%; block-size: 100%; overflow: hidden;
+    flex-direction: var(--is-rail, row) var(--no-rail, var(--is-run, row) var(--no-run, column));
+    writing-mode: var(--is-rail, vertical-rl) var(--no-rail, horizontal-tb);
+    align-items: var(--is-run, center) var(--no-run, var(--is-rail, center) var(--no-rail, stretch));
+    justify-content: var(--is-spot, center) var(--no-spot, var(--is-rail, center) var(--no-rail, start));
+    gap: var(--is-run, 0 0.6em) var(--no-run, var(--is-rail, 0.6em) var(--no-rail, 0.3lh));
+    padding: var(--is-spot, 0) var(--no-spot, var(--is-run, 0 0.6em) var(--no-run, 0.35lh 0.6em));
+    border: 1px solid var(--border); border-radius: var(--cfg-radius);
+    & > :where(header) { display: flex; align-items: center; gap: 0.5em; min-inline-size: 0;
+      @container style(--shape: slip) { flex-direction: column; align-items: start; gap: 0.2lh; } }
+    & > :where(header) > :where(i) { display: grid; place-items: center; inline-size: 1.4lh; block-size: 1.4lh; flex: none; border-radius: var(--cfg-radius); --bg: 0.25; background: var(--_bg); --fg: 0.85; }
+    & > :where(header) > :where(h3) { margin: 0; --type: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      @container style(--shape: slip) { white-space: normal; } }
+    & :where(strong) { --fg: -1; --type: 0; font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.1; text-align: center; }
+    & > :where(figure) { margin: 0; inline-size: 2.4lh; block-size: 2.4lh; display: grid; place-items: center;
+      & > :where(svg, strong) { grid-area: 1 / 1; }
+      & > :where(svg) { inline-size: 100%; block-size: 100%; }
+      & > :where(strong) { --type: -1; } }
+    & > :where(progress) { flex: none; inline-size: 100%; block-size: 0.35lh;
+      @container style(--shape: line)  { flex: 1 1 0; inline-size: auto; }
+      @container style(--shape: strip) { flex: 1 1 0; inline-size: auto; }
+      @container style(--shape: rail)  { flex: 1 1 0; inline-size: auto; } }
+    & > :where(small) { --type: -1; --fg: -0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    & > :where(ul) { list-style: none; margin: 0; padding: 0; flex: 1 1 0; min-block-size: 0; overflow: hidden auto; scrollbar-width: thin;
+      display: grid; gap: 0.15lh 1.5em; align-content: start;
+      @container style(--shape: strip) { grid-template-columns: repeat(auto-fill, minmax(11em, 1fr)); } }
+    & :where(li) { display: flex; align-items: center; gap: 0.5em; white-space: nowrap; min-inline-size: 0; }
+    & :where(li > input) { flex: none; margin: 0; }
+    & :where(li > s) { --fg: -0.55; }
+    & :where(li > span, li > s) { overflow: hidden; text-overflow: ellipsis; }
+  }
+
   /* ── demo chrome (not part of the lesson) ── */
   :where(.region) { resize: both; inline-size: 24lh; block-size: 9lh; max-inline-size: 100%; border-radius: var(--cfg-radius); }
   :where(blk-nine) {
@@ -197,6 +236,65 @@ Two levels at most (the test refuses a third). More moves to a part.</code></pre
 The engine re-sets --shape on EVERY cell's child, so the
 inner block's word wins over the outer one for everything
 inside it (custom properties inherit, nearest wins).</code></pre>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<section class="column" style="--gap: 0.5lh;">
+  <h2 style="--type: 1;">6 · A general block: the checklist</h2>
+  <p style="--fg: -0.7;">The first block built to be reused anywhere a list of steps lives. One question drove every shape: what must it still say when there is no room? <strong>The count.</strong> So the spot is the count; the line adds the title and a bar; the rail turns them upright; the tile puts the count inside a ring; from the slip up the bar, the caption and the items appear, and a strip sets the items in columns.</p>
+  <blk-nine>
+    <div class="cell" style="grid-area: 1 / 1;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+    <div class="cell" style="grid-area: 1 / 2 / 2 / 5;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+    <div class="cell" style="grid-area: 2 / 1 / 6 / 2;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+    <div class="cell" style="grid-area: 2 / 2 / 3 / 5;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+    <div class="cell" style="grid-area: 3 / 2;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+    <div class="cell" style="grid-area: 3 / 3 / 5 / 4;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+    <div class="cell" style="grid-area: 3 / 4 / 5 / 5;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+    <div class="cell" style="grid-area: 4 / 2 / 6 / 3;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+    <div class="cell" style="grid-area: 5 / 3 / 6 / 5;"><blk-checklist><header class="line slip sheet tile panel strip banner"><i>✓</i><h3>Launch checklist</h3></header><figure class="tile"><svg viewBox="0 0 60 60" role="img" aria-label="5 of 8 done" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"><circle cx="30" cy="30" r="24" style="--fg: -0.2;"/><circle cx="30" cy="30" r="24" stroke-dasharray="94.25 150.80" transform="rotate(-90 30 30)" style="--fg: 1;"/></svg><strong>5/8</strong></figure><strong class="spot line rail">5/8</strong><progress class="line rail slip sheet panel strip banner" value="5" max="8"></progress><small class="slip sheet panel strip banner">5 of 8 done · next: book venue</small><ul class="slip sheet panel strip banner"><li><input type="checkbox" checked aria-label="Lock date"><s>Lock date</s></li><li><input type="checkbox" checked aria-label="Confirm breweries"><s>Confirm breweries</s></li><li><input type="checkbox" checked aria-label="Order glassware"><s>Order glassware</s></li><li><input type="checkbox" checked aria-label="Draft pour list"><s>Draft pour list</s></li><li><input type="checkbox" checked aria-label="Design tasting cards"><s>Design tasting cards</s></li><li><input type="checkbox" aria-label="Book venue"><span>Book venue</span></li><li><input type="checkbox" aria-label="Print signage"><span>Print signage</span></li><li><input type="checkbox" aria-label="Send invites"><span>Send invites</span></li></ul></blk-checklist></div>
+  </blk-nine>
+  <details>
+    <summary style="--fg: -0.6;">The rule — the same text ships in EventOS's blocks.css</summary>
+    <pre><code>  /* ───────── blk-checklist — A LIST WITH A COUNT (gf-661, the first general
+     block): the spot the count; the line the title, the count and the bar
+     across; the rail the count and the bar upright; the tile the title and
+     a ring with the count inside; the slip and up the bar, the caption (done,
+     next) and the items — a strip in columns, the rest a column. The
+     block's own box by the toggles (two levels), every part by the words. ───────── */
+  :where(blk-checklist) {
+    display: flex; inline-size: 100%; block-size: 100%; overflow: hidden;
+    flex-direction: var(--is-rail, row) var(--no-rail, var(--is-run, row) var(--no-run, column));
+    writing-mode: var(--is-rail, vertical-rl) var(--no-rail, horizontal-tb);
+    align-items: var(--is-run, center) var(--no-run, var(--is-rail, center) var(--no-rail, stretch));
+    justify-content: var(--is-spot, center) var(--no-spot, var(--is-rail, center) var(--no-rail, start));
+    gap: var(--is-run, 0 0.6em) var(--no-run, var(--is-rail, 0.6em) var(--no-rail, 0.3lh));
+    padding: var(--is-spot, 0) var(--no-spot, var(--is-run, 0 0.6em) var(--no-run, 0.35lh 0.6em));
+    border: 1px solid var(--border); border-radius: var(--cfg-radius);
+    &amp; &gt; :where(header) { display: flex; align-items: center; gap: 0.5em; min-inline-size: 0;
+      @container style(--shape: slip) { flex-direction: column; align-items: start; gap: 0.2lh; } }
+    &amp; &gt; :where(header) &gt; :where(i) { display: grid; place-items: center; inline-size: 1.4lh; block-size: 1.4lh; flex: none; border-radius: var(--cfg-radius); --bg: 0.25; background: var(--_bg); --fg: 0.85; }
+    &amp; &gt; :where(header) &gt; :where(h3) { margin: 0; --type: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      @container style(--shape: slip) { white-space: normal; } }
+    &amp; :where(strong) { --fg: -1; --type: 0; font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.1; text-align: center; }
+    &amp; &gt; :where(figure) { margin: 0; inline-size: 2.4lh; block-size: 2.4lh; display: grid; place-items: center;
+      &amp; &gt; :where(svg, strong) { grid-area: 1 / 1; }
+      &amp; &gt; :where(svg) { inline-size: 100%; block-size: 100%; }
+      &amp; &gt; :where(strong) { --type: -1; } }
+    &amp; &gt; :where(progress) { flex: none; inline-size: 100%; block-size: 0.35lh;
+      @container style(--shape: line)  { flex: 1 1 0; inline-size: auto; }
+      @container style(--shape: strip) { flex: 1 1 0; inline-size: auto; }
+      @container style(--shape: rail)  { flex: 1 1 0; inline-size: auto; } }
+    &amp; &gt; :where(small) { --type: -1; --fg: -0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    &amp; &gt; :where(ul) { list-style: none; margin: 0; padding: 0; flex: 1 1 0; min-block-size: 0; overflow: hidden auto; scrollbar-width: thin;
+      display: grid; gap: 0.15lh 1.5em; align-content: start;
+      @container style(--shape: strip) { grid-template-columns: repeat(auto-fill, minmax(11em, 1fr)); } }
+    &amp; :where(li) { display: flex; align-items: center; gap: 0.5em; white-space: nowrap; min-inline-size: 0; }
+    &amp; :where(li &gt; input) { flex: none; margin: 0; }
+    &amp; :where(li &gt; s) { --fg: -0.55; }
+    &amp; :where(li &gt; span, li &gt; s) { overflow: hidden; text-overflow: ellipsis; }
+  }</code></pre>
+  </details>
+  <small style="--fg: -0.55;">Read it against the lessons above: ① the box by the toggles, two levels at most; ② the parts by <code>@container style(--shape: …)</code> — the header stacks in a slip, the bar grows in a run, the items go to columns in a strip; ③ what shows where is the markup's gate classes, and the count appears twice in the HTML (inside the ring for the tile, alone for the spot, line and rail) so no part needs to move.</small>
 </section>
 
 <section class="column" style="--gap: 0.25lh;">
