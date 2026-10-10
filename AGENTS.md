@@ -183,6 +183,10 @@ THE GATES (visibility, revert-layer) — three families, three jobs:
   on these ("and-up" is the multi-class idiom `class="medium large"`);
 - shapes: the nine, answered by the nearest `.cell`.
 - `.fine` / `.coarse` gate on pointer type.
+Every gate is `:where()`-wrapped (v3.1.1): zero specificity, so on an
+element wearing two families source order decides (the shape gates sit
+last) — and two gates never AND: ONE FAMILY PER ELEMENT, the second on a
+wrapper.
 Gate classes go on a dedicated wrapper that also carries a layout
 primitive (revert-layer restores the primitive's display, not a default).
 

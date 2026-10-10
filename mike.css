@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.0 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.0/mike.css
+   mike.css v3.1.1 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.1/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3439,9 +3439,15 @@
      change thresholds here, in this layer; there is no override file.
      (The old @layer project — the reserved downstream-consumer slot —
      retired 2026-09-01, per Mike: single-tenant; app components live in
-     this file's components layer like every other component.) */
-  .mobile, .tablet, .desktop           { display: none }
-  @media (width < 576px)               { .mobile  { display: revert-layer } }
+     this file's components layer like every other component.)
+     THE GATES ARE :where()-WRAPPED (v3.1.1, EventOS gf-665): zero
+     specificity like every rule, so an element wearing a device gate
+     and a shape gate is decided by source order (the shape gates sit
+     later). Still ONE FAMILY PER ELEMENT: two gates cannot AND through
+     the cascade — the later family's verdict stands alone; gate the
+     second family on a wrapper. */
+  :where(.mobile, .tablet, .desktop)           { display: none }
+  @media (width < 576px)               { :where(.mobile)  { display: revert-layer } }
   /* the mobile global bar (a .hud) FLOATS over the bottom edge; the LAST
      content region carries the clearance, OUT of the content's own flow:
      a scrolling main grows a ::after scroll-tail (only reachable by
@@ -3462,8 +3468,8 @@
   /* a gated crumb takes its separator with it (gf-407: the home crumb is
      .mobile; its follower's chevron must not stand alone wider) */
   @media (width >= 576px) { :where(.crumbs) > .mobile + :where(a, span)::before { display: none } }
-  @media (576px <= width < 768px)      { .tablet  { display: revert-layer } }
-  @media (width >= 768px)              { .desktop { display: revert-layer } }
+  @media (576px <= width < 768px)      { :where(.tablet)  { display: revert-layer } }
+  @media (width >= 768px)              { :where(.desktop) { display: revert-layer } }
 
   /* [RETIRED 2026-08] the declared aside width: asides are content-
      sized now (containment removed in core.layout), so the auto track
@@ -3484,10 +3490,10 @@
      type (rem is fixed, lh rides the type scale — that skew is why
      10rem broke: labeled-at-sm fell into .small and stacked the foot).
      8rem sits between them with margin on both sides. */
-  .small, .medium, .large              { display: none }
-  @container (width < 8rem)            { .small  { display: revert-layer } }
-  @container (8rem <= width < 20rem)   { .medium { display: revert-layer } }
-  @container (width >= 20rem)          { .large  { display: revert-layer } }
+  :where(.small, .medium, .large)              { display: none }
+  @container (width < 8rem)            { :where(.small)  { display: revert-layer } }
+  @container (8rem <= width < 20rem)   { :where(.medium) { display: revert-layer } }
+  @container (width >= 20rem)          { :where(.large)  { display: revert-layer } }
 
   /* the c-* family — the SAME breakpoints as .mobile/.tablet/.desktop,
      measured against the CONTAINER instead of the viewport. Inside a pg
@@ -3495,10 +3501,10 @@
      nav column eats 140–260px), so region content declares its ranges
      against the surface it actually lives on. pg-main-header and
      pg-main are the query containers (core.layout). */
-  .c-mobile, .c-tablet, .c-desktop     { display: none }
-  @container (width < 576px)           { .c-mobile  { display: revert-layer } }
-  @container (576px <= width < 768px)  { .c-tablet  { display: revert-layer } }
-  @container (width >= 768px)          { .c-desktop { display: revert-layer } }
+  :where(.c-mobile, .c-tablet, .c-desktop)     { display: none }
+  @container (width < 576px)           { :where(.c-mobile)  { display: revert-layer } }
+  @container (576px <= width < 768px)  { :where(.c-tablet)  { display: revert-layer } }
+  @container (width >= 768px)          { :where(.c-desktop) { display: revert-layer } }
 
   /* ORIENTATION and HEIGHT gates (EventOS gf-608) — answered only inside
      a SIZE container (a .block): a width-only .container cannot answer
@@ -3511,9 +3517,9 @@
   @container (height < 10em)           { .c-short { display: revert-layer } }
   @container (height >= 10em)          { .c-tall  { display: revert-layer } }
 
-  .fine, .coarse                       { display: none }
-  @media (pointer: fine)               { .fine   { display: revert-layer } }
-  @media (pointer: coarse)             { .coarse { display: revert-layer } }
+  :where(.fine, .coarse)                       { display: none }
+  @media (pointer: fine)               { :where(.fine)   { display: revert-layer } }
+  @media (pointer: coarse)             { :where(.coarse) { display: revert-layer } }
 
   /* FOCUS MODE chrome-hide — lives here (not in core.layout) so it beats
      component display rules. .crumbs sets display:flex in @layer components,
