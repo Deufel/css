@@ -106,16 +106,32 @@ THE BLOCK: the tag is the component and its only hook — `<blk-kpi>`,
       }
     }
 
-THE SHAPE TOGGLES (v2.1.0) are how a block arranges per shape. The shape
-layer sets a pair on every child of a cell — the block itself, so its own
-box reads them, and its parts inherit them: `--is-X` is guaranteed-invalid
-(`initial`) when the cell IS X, so `var(--is-X, value)` takes its fallback;
-`--no-X` is the reverse. `var(--is-X, A) var(--no-X, B)` is A in X, B
-elsewhere; nest a pair in a fallback for three cases. X is one of the nine
-shapes or a family: `small` (spot line rail slip tile strip — one figure),
-`tall` (rail slip sheet), `run` (line strip — one row across). A product
-writes NO `@container` and NO `display: none` (its test refuses both): the
-shapes are defined once, in the engine, and hiding is the gates' job.
+THE SHAPE, PUBLISHED (v3.1.0): the shape layer sets `--shape` (one of the
+nine words) and `--size` (small | large) on every child of a cell — the
+block — and its parts inherit them. A PART arranges per shape by querying
+them by name, flat, one line a case, nested in the block's rule:
+
+    & > :where(.num) {
+      --type: 3;
+      @container style(--shape: spot) { --type: -2; }
+      @container style(--shape: line) { --type: 0; }
+      @container style(--size: small) { --fg: -1; }
+    }
+
+A style query reads the nearest ancestor, so a part reads its block and
+the block's OWN BOX cannot read itself. For the block's own arrangement
+(its direction, writing mode, padding) the SHAPE TOGGLES (v2.1.0) stay:
+`--is-X` is guaranteed-invalid (`initial`) when the cell IS X, so
+`var(--is-X, value)` takes its fallback; `--no-X` is the reverse;
+`var(--is-X, A) var(--no-X, B)` is A in X, B elsewhere. X is a shape or a
+family: `small` (spot line rail slip tile strip — one figure), `tall`
+(rail slip sheet), `run` (line strip — one row across). TWO CASES AT MOST:
+a third case nests a pair inside a fallback, and a pyramid of fallbacks
+drops its whole declaration on one wrong paren — that is what the
+published words exist to replace (its test refuses a line nested three
+deep). A product writes NO size container query (`@container shape (…)`
+is a second definition of a shape) and NO `display: none`: the shapes
+are defined once, in the engine, and hiding is the gates' job.
 
 - Parts are semantic elements (header h3 small strong figure ul li time
   mark progress footer …); a part class (.ring .dot .av) means something
