@@ -13,12 +13,14 @@
    ═══════════════════════════════════════════════════════════════════ */
 @layer block {
   :where(blk-demo) {
-    /* ① THE BOX — flex, its direction from the TOGGLES (two cases, never
-       more): a run (line · strip) goes across, everything else stacks;
-       a rail writes upright. The box cannot query its own shape, so
-       the toggles are its one tool. */
+    /* ① THE BOX — flex, its direction from the TOGGLES (two levels at
+       most): a run (line · strip) goes across; a rail writes upright and
+       is a run in its own writing mode, so it is a row too (a column
+       would lay its parts side by side along the block axis); everything
+       else stacks. The box cannot query its own shape, so the toggles
+       are its one tool. */
     display: flex; inline-size: 100%; block-size: 100%; overflow: hidden;
-    flex-direction: var(--is-run, row) var(--no-run, column);
+    flex-direction: var(--is-rail, row) var(--no-rail, var(--is-run, row) var(--no-run, column));
     writing-mode:   var(--is-rail, vertical-rl) var(--no-rail, horizontal-tb);
     align-items: center; justify-content: center; gap: 0 0.5em; text-align: center;
     border: 1px solid var(--border); border-radius: var(--cfg-radius); padding: 0.25lh 0.5em;
@@ -126,10 +128,11 @@ A style query reads the nearest ANCESTOR, never the element
 itself — so a part can ask its block, but the block's own box
 cannot ask itself. The box keeps the two-way toggles:
 
-flex-direction: var(--is-run, row) var(--no-run, column);
+flex-direction: var(--is-rail, row)
+                var(--no-rail, var(--is-run, row) var(--no-run, column));
 writing-mode:   var(--is-rail, vertical-rl) var(--no-rail, horizontal-tb);
 
-Two cases at most. A third case on the box moves to a part.</code></pre>
+Two levels at most (the test refuses a third). More moves to a part.</code></pre>
 </section>
 
 <!-- ───────────────────────────────────────────────────────────────── -->
@@ -202,7 +205,7 @@ inside it (custom properties inherit, nearest wins).</code></pre>
     <li>The <strong>cell</strong> is the page's: a grid track or a knob-sized box, definitely sized. Never flex-grown.</li>
     <li>The <strong>engine</strong> names the shape — nine rules in <code>core.shape</code> set <code>--shape</code> and <code>--size</code> on the cell's child. Defined once.</li>
     <li>A <strong>part</strong> arranges by <code>@container style(--shape: …)</code>, flat, one line a case.</li>
-    <li>The <strong>block's own box</strong> uses the two-way toggles <code>var(--is-X, a) var(--no-X, b)</code>. Two cases at most; a third moves to a part.</li>
+    <li>The <strong>block's own box</strong> uses the toggles <code>var(--is-X, a) var(--no-X, b)</code>, nested two levels at most; more moves to a part. A rail writes upright, so its "row" runs down the cell.</li>
     <li><strong>Hiding</strong> is the gate classes' — a part lists where it belongs. A block never writes <code>display: none</code>, and never a size container query.</li>
   </ol>
 </section>

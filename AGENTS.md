@@ -125,11 +125,12 @@ the block's OWN BOX cannot read itself. For the block's own arrangement
 `var(--is-X, value)` takes its fallback; `--no-X` is the reverse;
 `var(--is-X, A) var(--no-X, B)` is A in X, B elsewhere. X is a shape or a
 family: `small` (spot line rail slip tile strip — one figure), `tall`
-(rail slip sheet), `run` (line strip — one row across). TWO CASES AT MOST:
-a third case nests a pair inside a fallback, and a pyramid of fallbacks
-drops its whole declaration on one wrong paren — that is what the
-published words exist to replace (its test refuses a line nested three
-deep). A product writes NO size container query (`@container shape (…)`
+(rail slip sheet), `run` (line strip — one row across). TWO LEVELS AT MOST:
+a pair may nest once inside a fallback (three cases); a third level is
+the pyramid that drops its whole declaration on one wrong paren — that is
+what the published words exist to replace (its test refuses a line nested
+three deep). A rail writes upright, so its row runs down the cell: a rail
+is a row like a run, never a column. A product writes NO size container query (`@container shape (…)`
 is a second definition of a shape) and NO `display: none`: the shapes
 are defined once, in the engine, and hiding is the gates' job.
 
