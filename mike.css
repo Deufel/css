@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.1 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.1/mike.css
+   mike.css v3.1.2 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.2/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3547,9 +3547,18 @@
      white while KEEPING borders — hairline structure, no fill. This is where
      Tufte's asceticism lives without compromising the screen experience. */
   @media print {
+    /* THE PAPER IS LETTER (v3.1.2, EventOS: "optimized for 8½ × 11"): one
+       sheet, half-inch margins. THE CANVAS KEEPS A HEIGHT: a block page
+       makes pg-main auto-high, and a size container inside it (a board's
+       cell) then has no height at all — it printed nothing. The main is
+       let free and a main's cell is given the sheet's height less the
+       head, so its board arranges on paper as it does on a screen. */
+    @page { size: letter; margin: 0.5in; }
     .page {
       display: block; height: auto; overflow: visible;
     }
+    .page > :where(.pg-main) { overflow: visible; block-size: auto; min-block-size: 0; }
+    .page > :where(.pg-main) > :where(section.cell) { block-size: calc(100vh - 4lh); }
     .page > :where(.pg-banner, .pg-header, .pg-subheader, .pg-navigation,
                    .pg-toolbar, .pg-aside, .pg-main-aside, .pg-footer),
     :where(.focus-fab) { display: none; }
@@ -3557,7 +3566,7 @@
     /* surfaces → white; borders stay. Regions and painted components lose
        their fill but keep their outline. */
     :where(.page, .pg-main, .pg-main-header, .pg-main-subheader,
-           .pg-main-footer, .card, table, thead th, .search-box) {
+           .pg-main-footer, .pg-main > section, .card, table, thead th, .search-box) {
       background: none;
       --bg: 0; --lift: initial;
     }
