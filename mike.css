@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.9 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.9/mike.css
+   mike.css v3.1.10 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.10/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3462,7 +3462,6 @@
      relief for the rare control they cover. (v3.1.8 and before padded
      pg-main, the toolbar and the main footer by the bar's height; the
      gap read as a hole once the dock was away.) */
-  }
   /* a gated crumb takes its separator with it (gf-407: the home crumb is
      .mobile; its follower's chevron must not stand alone wider) */
   @media (width >= 576px) { :where(.crumbs) > .mobile + :where(a, span)::before { display: none } }
