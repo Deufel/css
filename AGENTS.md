@@ -175,7 +175,7 @@ Flow primitives: `.row` / `.column` (flex; `.row` centres its items —
 `.spread` (space-between), `.spread-column`, `.lcr`, `.flank`/`.flank-
 start`/`.flank-end`, `.stack` (overlap — one grid area), `.frame` (a box
 at `--ratio`, 16/9 by default, its child filling it), `.oneline`,
-`.nowrap`, `.truncate`, `.grow`, `.fill`, `.center`, `.vr` (an hr stood
+`.nowrap`, `.truncate`, `.grow`, `.fill`, `.far` (pushed to the far end of its row), `.center`, `.vr` (an hr stood
 on end), `section.owns-scroll` (the component-scrolled section every
 full-height roster is built on). `--gap` takes ONLY the ladder's rungs:
 block `0 · 0.25lh · 0.5lh · 1lh`, inline `0.25em · 0.5em · 1em`. THE

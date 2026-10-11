@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.10 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.10/mike.css
+   mike.css v3.1.11 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.11/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2996,6 +2996,11 @@
      auto-min). Chain it from a region's child down to a .scroll-y and
      the INNER surface becomes the scroller instead of the region. */
   :where(.grow) { flex: 1 1 auto; min-block-size: 0; }
+  /* .far — the member pushed to the far end of its row (v3.1.11, EventOS
+     #763): the trash tab at the end of a tab row, a verb at the right of
+     a head. One declaration, where the toast's menu, the combo-box's
+     clear and the list's tag each spelled it on their own. */
+  :where(.far) { margin-inline-start: auto; }
   /* a growing box with an aspect (mini-map) takes the share its column
      has left, not its aspect: beside a sibling card that sets the row,
      it absorbs the difference (EventOS local feedback #28); 3lh keeps
