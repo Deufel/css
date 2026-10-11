@@ -222,7 +222,9 @@ THE DOCK (v3.1.8, after iOS Calendar's bar): a hud whose `.bl` and
 padding, full radius, the quiet edge) holding hud fabs, bare glyphs at
 rest; the hud wearing `data-ui-state="away"` slides its bottom slots
 down past the edge (a translate), and a `.cr` fab is the handle that
-stays.
+stays. The dock takes no clearance: the canvas runs under the pills,
+the handle is the relief; only the toast pile clears it while it is on
+screen (v3.1.9).
 
 Dialogs are native `<dialog class="modal">` opened and closed in HTML —
 `commandfor="<id>" command="show-modal"`, a bare close `command="close"`,

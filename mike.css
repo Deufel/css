@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.8 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.8/mike.css
+   mike.css v3.1.9 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.9/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2985,7 +2985,7 @@
      cluster where a phone hud is on, above the dock where a main footer
      is — HERE, in the slot's own layer: the components-layer copy had
      lost to this padding for as long as it existed */
-  :where(.page:has(> .hud.mobile)) ~ :where(.hud) > :where(.br.toasts) { padding-block-end: 4lh; }
+  :where(.page:has(> .hud.mobile:not([data-ui-state="away"]))) ~ :where(.hud) > :where(.br.toasts) { padding-block-end: 4lh; }
   :where(.page:has(> .pg-main-footer)) ~ :where(.hud) > :where(.br.toasts) { padding-block-end: 9lh; }
   :where(.hud) > :where(.tr, .br):where(.column) { align-items: flex-end; }
   :where(.hud) > :where(.tl, .bl):where(.column) { align-items: flex-start; }
@@ -3457,22 +3457,11 @@
      second family on a wrapper. */
   :where(.mobile, .tablet, .desktop)           { display: none }
   @media (width < 576px)               { :where(.mobile)  { display: revert-layer } }
-  /* the mobile global bar (a .hud) FLOATS over the bottom edge; the LAST
-     content region carries the clearance, OUT of the content's own flow:
-     a scrolling main grows a ::after scroll-tail (only reachable by
-     scrolling — it never squeezes a fitted layout), and when a
-     pg-main-footer exists (the calendar's ribbon) IT takes the padding
-     instead. [was padding on pg-main — it shoved the ribbon offscreen.] */
-  @media (width < 576px) {
-    .page:has(> .hud.mobile) > .pg-main:not(:has(~ .pg-main-footer))::after {
-      content: ""; display: block; flex: 0 0 4lh;
-    }
-    .page:has(> .hud.mobile) > .pg-main-footer { padding-block-end: 4lh; }
-    /* the toolbar rail scrolls too — same clearance, same mechanism
-       (gf-105: its bottom items hid behind the floating bar) */
-    .page:has(> .hud.mobile) > .pg-toolbar::after {
-      content: ""; display: block; flex: 0 0 4lh; block-size: 4lh;
-    }
+  /* THE DOCK TAKES NO CLEARANCE (v3.1.9, EventOS #741 #742): the canvas
+     runs to the bottom edge under the pills — the dock's handle is the
+     relief for the rare control they cover. (v3.1.8 and before padded
+     pg-main, the toolbar and the main footer by the bar's height; the
+     gap read as a hole once the dock was away.) */
   }
   /* a gated crumb takes its separator with it (gf-407: the home crumb is
      .mobile; its follower's chevron must not stand alone wider) */
