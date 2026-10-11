@@ -214,7 +214,9 @@ SERVER-DRIVEN TABLE: truncating cells, the hugging column model, tonal
 head, `.scroll-x`), `.glass` (the surface at `--glass-alpha` over a
 `--glass-blur`; 0.65 a dialog, 0.88 an overlay that must read over
 anything), `.veil` (a glass card over its `.stack` sibling), `.hud`
-(viewport overlay slots t/c/b × l/c/r), `.wash`, `.stress` (the lab's
+(viewport overlay slots t/c/b × l/c/r; THE DOCK: a `.br.toasts` pile
+wearing `data-ui-state="away"` slides off the right edge and back, a
+`.cr` fab its handle — v3.1.5), `.wash`, `.stress` (the lab's
 resize handle, both axes), `.county-map`.
 
 Dialogs are native `<dialog class="modal">` opened and closed in HTML —
