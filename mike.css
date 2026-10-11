@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.7 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.7/mike.css
+   mike.css v3.1.8 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.8/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2972,13 +2972,21 @@
   /* a corner slot used as a STACK of hud triggers: breathing room from the
      viewport edge, tight rhythm between members, members hug the corner. */
   :where(.hud) > :where(.tl, .tr, .bl, .br) { padding: 1lh; gap: var(--gap, 0.5lh); }
+  /* THE DOCK (v3.1.8, EventOS #738, after iOS Calendar's bar): a GLASS
+     corner slot is a PILL — the gutter becomes its margin, the pill wears
+     the padding, the full radius and the quiet edge; its buttons are
+     hud fabs, bare glyphs at rest on the glass. A hud wearing
+     data-ui-state="away" slides its bottom slots down past the edge — a
+     translate, nothing reflows — and a .cr fab is the handle that stays. */
+  :where(.hud) > :where(.bl, .br):where(.glass) { margin: 1lh; padding: 0.15lh 0.35em; gap: 0.25em; border-radius: 999px; border: 1px solid var(--border); box-shadow: 0 0.3lh 1lh oklch(0 0 0 / 0.18); }
+  :where(.hud) > :where(.bl, .br) { transition: translate calc(var(--cfg-motion) * 0.25s) ease; }
+  :where(.hud[data-ui-state="away"]) > :where(.bl, .br) { translate: 0 calc(100% + 1.5lh); visibility: hidden; transition: translate calc(var(--cfg-motion) * 0.25s) ease, visibility 0s calc(var(--cfg-motion) * 0.25s); }
   /* THE TOAST PILE'S CLEARANCE (gf-409, 2026-09-24): above the fab
      cluster where a phone hud is on, above the dock where a main footer
      is — HERE, in the slot's own layer: the components-layer copy had
      lost to this padding for as long as it existed */
   :where(.page:has(> .hud.mobile)) ~ :where(.hud) > :where(.br.toasts) { padding-block-end: 4lh; }
   :where(.page:has(> .pg-main-footer)) ~ :where(.hud) > :where(.br.toasts) { padding-block-end: 9lh; }
-  :where(.page:has(> .pg-footer:not([data-ui-state="away"]))) ~ :where(.hud) > :where(.br.toasts) { padding-block-end: 4lh; }
   :where(.hud) > :where(.tr, .br):where(.column) { align-items: flex-end; }
   :where(.hud) > :where(.tl, .bl):where(.column) { align-items: flex-start; }
 
@@ -3239,20 +3247,6 @@
   }
   .pg-aside       { --bg: -0.6; padding: 0.25lh; }  /* recessed: quieter than pg-main (-0.3) */
   .pg-footer      { --bg:  0.03; padding: 0.25lh; }
-  /* THE DOCK (v3.1.7, EventOS #738): on a touch device the app's bottom
-     bar is the pg-footer track — app-icons in a .spread, the version tag
-     beneath in the unsafe area (the main-footer idiom above, on the
-     global track). Wearing data-ui-state="away" it slides down past the
-     edge and its track closes, so the canvas takes the height; the app's
-     handle (a .cr fab in a hud of its own) brings it back. Nothing inside
-     is removed. */
-  .pg-footer:has(> .nav-version:last-child) { --bg: -0.3; padding: 0.25lh max(1lh, env(safe-area-inset-right)) 0.25lh max(1lh, env(safe-area-inset-left)); display: flex; flex-direction: column; gap: 0.25lh; }
-  .pg-footer > .nav-version {
-    display: flex; align-items: center; justify-content: center;
-    min-block-size: env(safe-area-inset-bottom, 0px); --type: -3; --fg: -0.55;
-  }
-  .pg-footer { max-block-size: 20lh; overflow: hidden; transition: translate calc(var(--cfg-motion) * 0.3s) ease, max-block-size calc(var(--cfg-motion) * 0.3s) ease, padding-block calc(var(--cfg-motion) * 0.3s) ease; }
-  .pg-footer[data-ui-state="away"] { translate: 0 100%; max-block-size: 0; padding-block: 0; visibility: hidden; transition: translate calc(var(--cfg-motion) * 0.3s) ease, max-block-size calc(var(--cfg-motion) * 0.3s) ease, padding-block calc(var(--cfg-motion) * 0.3s) ease, visibility 0s calc(var(--cfg-motion) * 0.3s); }
 
   /* ── the canvas, as PAINT — no spanning element ──────────────────────────
      The toolbar is tertiary navigation FOR the content beside it, so the two

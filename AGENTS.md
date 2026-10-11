@@ -217,11 +217,12 @@ anything), `.veil` (a glass card over its `.stack` sibling), `.hud`
 (viewport overlay slots t/c/b × l/c/r), `.wash`, `.stress` (the lab's
 resize handle, both axes), `.county-map`.
 
-THE DOCK (v3.1.7): on a touch device the app's bottom bar is the
-`.pg-footer` track — app-icons in a `.spread`, the version tag beneath;
-wearing `data-ui-state="away"` it slides down past the edge and its
-track closes; the app's handle is a `.cr` fab in a hud of its own, so it
-stays when the footer is gone.
+THE DOCK (v3.1.8, after iOS Calendar's bar): a hud whose `.bl` and
+`.br` slots are `.glass` — a glass corner slot is a PILL (margin,
+padding, full radius, the quiet edge) holding hud fabs, bare glyphs at
+rest; the hud wearing `data-ui-state="away"` slides its bottom slots
+down past the edge (a translate), and a `.cr` fab is the handle that
+stays.
 
 Dialogs are native `<dialog class="modal">` opened and closed in HTML —
 `commandfor="<id>" command="show-modal"`, a bare close `command="close"`,
