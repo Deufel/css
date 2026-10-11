@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.3 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.3/mike.css
+   mike.css v3.1.4 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.4/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -842,7 +842,7 @@
     display: flex; align-items: center;
     padding-inline: 0.2lh;
     &::file-selector-button {
-      font: inherit; font-weight: 600;
+      font: inherit; font-weight: 600; line-height: 1;   /* v3.1.4: the words fit the button at every --type (EventOS #730: a step down clipped them) */
       block-size: calc(var(--_control-h) - 0.4lh);
       margin-block: calc(0.2lh - 1px);
       padding-inline: 0.9em; margin-inline-end: 0.5lh;
