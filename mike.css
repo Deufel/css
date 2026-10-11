@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.11 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.11/mike.css
+   mike.css v3.1.12 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.12/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1577,6 +1577,8 @@
   :where(.guide-part) {
     display: flex; gap: 0.7em; align-items: start;
     & > :where(svg) { flex: 0 0 auto; margin-block-start: 0.2lh; --fg: -0.45; }
+    /* the words shrink and break, never push the row's verbs out (v3.1.12, EventOS #764) */
+    & > :where(:not(svg)) { min-inline-size: 0; overflow-wrap: anywhere; }
   }
 
   /* ── alert — a standing message with a semantic hue ── */
