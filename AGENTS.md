@@ -318,4 +318,6 @@ PRINT (the media layer, v3.1.2): the sheet is letter with half-inch
 margins; `.page` prints as a block, the main runs auto-high, and a main's
 `section.cell` gets the sheet's height less the head — a size container
 under a block page has no height and printed nothing (EventOS gf-687).
-Every region but pg-main* is stripped, surfaces go white, ink black.
+Every region but pg-main* is stripped — the subheader (the tabs) with
+them — and PAPER TAKES NO ACTION (v3.1.3): no button, popover, crumb
+trail, tab or fab prints; surfaces go white, ink black.

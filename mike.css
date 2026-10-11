@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.2 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.2/mike.css
+   mike.css v3.1.3 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.3/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3560,8 +3560,12 @@
     .page > :where(.pg-main) { overflow: visible; block-size: auto; min-block-size: 0; }
     .page > :where(.pg-main) > :where(section.cell) { block-size: calc(100vh - 4lh); }
     .page > :where(.pg-banner, .pg-header, .pg-subheader, .pg-navigation,
-                   .pg-toolbar, .pg-aside, .pg-main-aside, .pg-footer),
+                   .pg-toolbar, .pg-aside, .pg-main-aside, .pg-footer, .pg-main-subheader),
     :where(.focus-fab) { display: none; }
+    /* PAPER TAKES NO ACTION (v3.1.3, EventOS gf-694): no verb, no menu, no
+       trail, no tab prints — the main header keeps its title, the canvas
+       its facts; the subheader (the tabs) goes with the rails */
+    .page :where(button, [popover], .crumbs, .tabs, .tabs-underline, .fab-1, .fab-2, .fab-3, .hud) { display: none; }
 
     /* surfaces → white; borders stay. Regions and painted components lose
        their fill but keep their outline. */
