@@ -313,3 +313,9 @@ overlays whose content differs per page get `view-transition-name:
 none`. The baked `meta color-scheme` keeps plain document swaps
 dark-to-dark. Restart the app before judging a CSS change: staticfs
 caches assets at boot.
+
+PRINT (the media layer, v3.1.2): the sheet is letter with half-inch
+margins; `.page` prints as a block, the main runs auto-high, and a main's
+`section.cell` gets the sheet's height less the head — a size container
+under a block page has no height and printed nothing (EventOS gf-687).
+Every region but pg-main* is stripped, surfaces go white, ink black.
