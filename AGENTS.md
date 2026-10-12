@@ -153,6 +153,11 @@ are defined once, in the engine, and hiding is the gates' job.
   `data-ui-state="a b"` tokens matched `~=`, after native and ARIA
   state (disabled, aria-pressed, :open); every selector wrapped; no
   `!important`; nothing reaches outside the tag.
+- A block COMPOSES other blocks by giving each a `.cell` of its own in a
+  definite track (never an auto one — containment collapses it): the
+  inner block reads its cell's shape and arranges itself for the room
+  the outer block gives it (EventOS `blk-place`: the weather and the
+  licence in glass cells over the map, the map taking what is left).
 - A block is written FOR THE BENCH FIRST: the product's Layout bench
   (`/admin/layout`) puts one block in a resizable cell with a shape tag
   that names the shape; every shape is looked at before a page wears
