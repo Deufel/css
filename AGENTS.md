@@ -189,7 +189,8 @@ CONTENT LADDER: `.content-1` (a column, 40ch) · `.content-2` (reading,
 take no rung. A width written as a length is a regression.
 
 THE GATES (visibility, revert-layer) — three families, three jobs:
-- viewport: `.mobile .tablet .desktop` (576px / 768px); container
+- viewport: `.mobile .tablet .desktop` (576px / 768px) and `.ultrawide`
+  (1920px and up at an aspect of 2:1 or wider — pixels AND aspect); container
   equivalents `.c-mobile .c-tablet .c-desktop` on the nearest container;
 - density tiers: `.small` (< 8rem) · `.medium` (8–20rem) · `.large`
   (≥ 20rem), measured on the nearest container — a rail's content gates

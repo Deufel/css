@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.14 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.14/mike.css
+   mike.css v3.1.15 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.15/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -40,7 +40,7 @@
                       a region, a chip; blocks inside read ITS shape
      shape classes    spot line rail slip sheet tile panel strip banner —
                       on PARTS, the shapes they appear in (visibility)
-     gates            .mobile .tablet .desktop · .small .medium .large ·
+     gates            .mobile .tablet .desktop .ultrawide · .small .medium .large ·
                       .c-* · .fine .coarse (visibility)
      helpers          .suc .inf .wrn .dgr · .num · .bg · .bw · .glass …
                       (utility — the closed list)
@@ -3466,8 +3466,12 @@
      later). Still ONE FAMILY PER ELEMENT: two gates cannot AND through
      the cascade — the later family's verdict stands alone; gate the
      second family on a wrapper. */
-  :where(.mobile, .tablet, .desktop)           { display: none }
+  :where(.mobile, .tablet, .desktop, .ultrawide) { display: none }
   @media (width < 576px)               { :where(.mobile)  { display: revert-layer } }
+  /* ULTRA-WIDE (v3.1.15, EventOS #803): pixels AND aspect — a 21:9 desk
+     at 1920 and up, never a tall 4K; a member of the viewport family,
+     shown there alone (a control that only matters on such a screen) */
+  @media (width >= 1920px) and (min-aspect-ratio: 2/1) { :where(.ultrawide) { display: revert-layer } }
   /* THE DOCK TAKES NO CLEARANCE (v3.1.9, EventOS #741 #742): the canvas
      runs to the bottom edge under the pills — the dock's handle is the
      relief for the rare control they cover. (v3.1.8 and before padded
