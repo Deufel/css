@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.13 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.13/mike.css
+   mike.css v3.1.14 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.14/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1554,8 +1554,10 @@
     background-color: var(--_bg); --surf: var(--_bg);
     text-decoration: none; color: inherit;
     & :where(a:not(.btn)) { font-weight: 600; text-decoration: none; }
-    /* a member shrinks before it pushes its neighbours out (v3.1.13, EventOS #796) */
+    /* the words shrink before they push a neighbour out (v3.1.13, EventOS
+       #796); a control at the row's end keeps its size (v3.1.14, #797) */
     & > :where(*) { min-inline-size: 0; }
+    & > :where(button, .btn, fieldset, hold-confirm, .tag) { flex: none; }
   }
 
   /* ── .kicker — a tiny uppercase group label above a run of items ── */
