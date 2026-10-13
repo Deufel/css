@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.15 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.15/mike.css
+   mike.css v3.1.16 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.16/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2974,6 +2974,10 @@
   :where(.hud) > :where(.cr) { place-self: center end    }
   :where(.hud) > :where(.bl) { place-self: end start     }
   :where(.hud) > :where(.bc) { place-self: end center    }
+  /* THE DOCK'S HANDLE RIDES AT THE PILLS' HEIGHT (v3.1.16, EventOS #820:
+     "a little difficult to hit on the bottom of the screen"): the centre
+     slot of a mobile hud lifts to the corner pills' middle */
+  :where(.hud.mobile) > :where(.bc) { margin-block-end: 1.2lh; }
   :where(.hud) > :where(.br) { place-self: end end       }
   /* a corner slot used as a STACK of hud triggers: breathing room from the
      viewport edge, tight rhythm between members, members hug the corner. */
