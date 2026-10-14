@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.16 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.16/mike.css
+   mike.css v3.1.17 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.17/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1920,7 +1920,10 @@
       user-select: none; -webkit-user-select: none;
       transition: background-color calc(var(--cfg-motion) * 0.12s) ease;
       & > :where(span) { --type: inherit; --fg: -0.6; }
-      & > :where(input[type="radio"]) { margin: 0; flex: 0 0 auto; outline: none; }
+      /* THE DOT IS HIDDEN (v3.1.17, EventOS #846): the radio is the state
+         and the keyboard's target, the chip is the label — the engine
+         hides it, no .vh needed */
+      & > :where(input:is([type="radio"], [type="checkbox"])) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; outline: none; }
       &:has(:checked) {
         /* the checked chip wears THE ACTIVE STATE (gf-175, per Mike —
            same paint as [data-ui-state="active"]): full-blast accent,
@@ -2001,11 +2004,18 @@
      button padding/height and the segments collapse. */
   :where(.button-group) {
     display: inline-flex;
+    /* A MEMBER IS A BUTTON OR A RADIO (v3.1.17, EventOS #846): the
+       segmented radio's recipe — `<label class="btn"><input type="radio">
+       word</label>`, the dot hidden, the checked member pressed — so a
+       group can be a form control or a signal's switch alike */
+    & > :where(label.btn) { position: relative;
+      & > :where(input:is([type="radio"], [type="checkbox"])) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; outline: none; }
+      &:has(:focus-visible) { outline: 2px solid var(--focus); outline-offset: -2px; z-index: 1; } }
     & > :where(button, .btn) {
       --lift: 0.2; --fg: -0.4;
       border-radius: 0;
       margin-inline-start: -1px;
-      &[aria-pressed="true"] {
+      &:is([aria-pressed="true"], :has(> input:checked)) {
         --lift: initial; --bg: 1; --fg: var(--_sem-ink, -1);
         background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
         position: relative; z-index: 1;

@@ -212,7 +212,10 @@ strips every region but pg-main*, surfaces to white, ink to black.
 `.card` (lifted panel; `.Card` the voiced edge), `.surface` (a lift step
 with no line), `.tag` (pill; pair a hue helper), `.avatar`, `.crumbs`
 (a crumb `<a>` is a bare link), `.tree`, `.tabs` / `.tabs-underline`,
-`.button-group`, `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
+`.button-group` (a member is a button with aria-pressed OR `<label
+class="btn"><input type="radio"> word</label>` — the dot hidden, the
+checked member pressed, v3.1.17; `.tabs` hides its radios the same way,
+no `.vh`), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
 .top, `.glass`), `.modal` (a `.content-*` rung; `.content-1` the confirm,
 `.content-3` the workbench), `.menu` (popover), `.search-box`, `.icon`
 (THE icon-only square — explicit, aria-label required), `.roster` (THE
