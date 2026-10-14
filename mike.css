@@ -2160,7 +2160,7 @@
     -webkit-backdrop-filter: blur(0.7lh) saturate(1.6);
     backdrop-filter: blur(0.7lh) saturate(1.6);
   }
-  /* A LINK WRAPPING A FAB wears the pill's own shape (v3.2.3, EventOS #878):
+  /* A LINK WRAPPING A FAB wears the pill's own shape (v3.2.2, EventOS #878):
      the focus ring is the anchor's, and a square anchor drew a square ring
      around a round button — the anchor is a pill, so its ring curves too */
   :where(a:has(> :where(.fab-1, .fab-2, .fab-3))) { display: inline-block; border-radius: 999px; }
