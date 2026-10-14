@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.1 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.1/mike.css
+   mike.css v3.2.2 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.2/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2160,6 +2160,10 @@
     -webkit-backdrop-filter: blur(0.7lh) saturate(1.6);
     backdrop-filter: blur(0.7lh) saturate(1.6);
   }
+  /* A LINK WRAPPING A FAB wears the pill's own shape (v3.2.2, EventOS #878):
+     the focus ring is the anchor's, and a square anchor drew a square ring
+     around a round button — the anchor is a pill, so its ring curves too */
+  :where(a:has(> :where(.fab-1, .fab-2, .fab-3))) { display: inline-block; border-radius: 999px; }
   /* inside the hud, fabs are uniform circles; the corner-slot padding owns
      the viewport offset, so the fab's own free-floating margin dies. */
   :where(.hud) :where(.fab-1, .fab-2, .fab-3) { inline-size: 2.4lh; block-size: 2.4lh; margin: 0; }
