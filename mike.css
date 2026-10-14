@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.0 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.0/mike.css
+   mike.css v3.2.1 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.1/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1567,7 +1567,11 @@
     border: 1px solid var(--border); border-radius: var(--cfg-radius);
     scrollbar-width: thin;
     scrollbar-color: color-mix(in oklch, var(--border), var(--_ink-n) 40%) transparent;
-    & > :where(table) { border: 0; border-radius: 0; }
+    /* THE SCROLLER PAINTS THE SURFACE (v3.2.1, EventOS #855): a table's own
+       --_bg is opaque and sat over the roster's scroll fade (below) — the
+       root cause of a fade that never showed; inside a scroller the table
+       is transparent and the frame's surface shows through its rows */
+    & > :where(table) { border: 0; border-radius: 0; background-color: transparent; }
   }
 
   /* ── table — booktabs: quiet frame, two vibrant rules, rhythm not lines ── */
@@ -2553,7 +2557,7 @@
      covers, scroll for the shadows — each fade self-erases at its end
      of travel). The translucent black is a SHADOW, not a color. */
   :where(.roster) :where(.scroll-x) {
-    --bg: -0.2; border-radius: var(--cfg-radius);
+    --bg: 0; border-radius: var(--cfg-radius);   /* the rows' own surface: the table under it is transparent (v3.2.1) */
     background-color: var(--_bg);
     background-image:
       linear-gradient(to right, var(--_bg) 40%, transparent),
