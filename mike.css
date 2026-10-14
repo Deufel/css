@@ -1,13 +1,12 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.1.17 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.1.17/mike.css
+   mike.css v3.2.0 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.0/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
      core.color     surfaces and ink as positions on a three-anchor walk
      core.type      the type scale IS the spacing system (lh / em only)
      core.shell     the .page shell: the pg-* regions and their anatomy
-     core.shape     the self-describing cell: a block knows its own shape
      theme          ALL config — every knob has its single home here
      base           bare-element defaults (consumes the cores)
      composition    the layout primitives (.row .column .grid .bento …)
@@ -20,7 +19,7 @@
                     ranks every display a block ever sets
 
    The four cores are orthogonal: each reads nothing from the others
-   (shell and shape read type's lh — the one sanctioned direction).
+   (the shell reads type's lh — the one sanctioned direction).
    Everything from composition down is a CONSUMER and may read all four.
 
    THE THREE LAWS
@@ -28,18 +27,17 @@
      only source order breaks a tie. A specificity fight is a bug.
    2 No !important. Important declarations invert layer order and would
      beat the gates. None, anywhere: paper is a print block in exception.
-   3 Locality. A block's parts, states and shape arrangements nest inside
-     its one rule; nothing about a block lives anywhere else. Visibility
-     is the single exception, by design: a part declares WHICH shapes it
-     belongs in (a class list = a set), and the gate layer owns the only
-     two states, none and revert-layer — so a part may use any display.
+   3 Locality. A block's parts and states nest inside its one rule;
+     nothing about a block lives anywhere else. Visibility is the single
+     exception, by design: a part wears a device or pointer gate, and the
+     gate layer owns the only two states, none and revert-layer — so a
+     part may use any display. A block is ONE layout (v3.2.0): it fills
+     the cell it is handed and never rearranges by the cell's size.
 
    THE VOCABULARY A TEMPLATE MAY USE
      <blk-*>          a block; the tag is the hook
-     .cell            a frame that measures itself (core.shape) — a slot,
-                      a region, a chip; blocks inside read ITS shape
-     shape classes    spot line rail slip sheet tile panel strip banner —
-                      on PARTS, the shapes they appear in (visibility)
+     .cell            a box the page sizes (composition) — a grid track, a
+                      region; a block fills it and never changes its layout
      gates            .mobile .tablet .desktop .ultrawide · .small .medium .large ·
                       .c-* · .fine .coarse (visibility)
      helpers          .suc .inf .wrn .dgr · .num · .bg · .bw · .glass …
@@ -54,12 +52,9 @@
      core.layout → core.shell + composition (split at the primitives)
      components  → block        utility → utility      media → visibility
      skin        → exception    view-transitions → exception
-     + core.shape (new)         + the shape gates (visibility, new)
    Comments inside carried-over sections may still name the old layers.
 
    CAVEATS (to resolve when the templates are migrated)
-   · .icon was the icon-button modifier; the icon SHAPE is therefore
-     named spot. If the modifier is renamed instead, rename the gate.
    · .block (gf-608) is kept as an alias of .cell and also answers the
      old `@container block` name; its body rule stays but any <blk-*>
      child arranges itself and wins.
@@ -67,7 +62,7 @@
      shapes; left in place for existing templates.
    ════════════════════════════════════════════════════════════════════ */
 @layer reset,
-       core.color, core.type, core.shell, core.shape,   /* the four cores — orthogonal, standalone */
+       core.color, core.type, core.shell,               /* the three cores — orthogonal, standalone */
        theme, base,                                      /* all config · bare-element defaults */
        composition, block, utility,                      /* layout primitives · components · call-site helpers */
        exception, visibility;                            /* states, variants, modes · the display gates, last */
@@ -528,67 +523,6 @@
 }
 
 
-/* ════════════════════════════════════════════════════════════════════
-   core.shape — a block knows its own shape.
-
-   Any element marked .cell becomes a size container named `shape`; the
-   parts inside it declare the shapes they belong in (visibility), and
-   blocks arrange themselves per shape with @container shape (…). A cell
-   never measures its own content: size containment ignores it, so a cell
-   takes its size from the layout — a grid track, a region, a chip — and
-   collapses under an auto-height parent.
-
-   THE PARTITION (w, h = the cell's content box; lh = the cell's line)
-       spot    w <  3lh and h <  3lh
-       line    w >= 3lh and h <  3lh
-       rail    w <  3lh and h >= 3lh
-     beyond the edges, three ratio families split small | large on their
-     short side at 8lh (v3.0.0, EventOS gf-637: 2lh and 6lh were measured too
-     small — a 6lh panel or sheet cannot hold a block's large design; the
-     board's cells live at 7–10lh, so the large shapes now start at 8):
-       slip  | sheet     ratio < 7/8          short side = w
-       tile  | panel     7/8 <= ratio < 15/8  short side = min(w, h)
-       strip | banner    ratio >= 15/8        short side = h
-   Exhaustive and disjoint: a cell is exactly one shape. 7/8 and 15/8 are
-   the geometric midpoints between US-letter subdivisions (page 0.773 ·
-   square 1 · ½ page 1.545 · ⅓ page 2.318), so no common page piece sits
-   near a boundary. Thresholds are in lh of the cell itself, so --type
-   and --scale move a cell's boundaries with its text.
-
-   Reads type's lh only. Owns nothing else; the gates live in visibility.
-   ════════════════════════════════════════════════════════════════════ */
-@layer core.shape {
-  /* named, so a block's own containers (the inline-size .container, the
-     page) never capture a shape query. (.block, in composition, carries
-     the same containment and answers both names.) */
-  :where(.cell) { container-name: shape; container-type: size; min-inline-size: 0; min-block-size: 0; overflow: hidden; }
-  /* THE SHAPE, PUBLISHED (v3.1.0): every child of a cell — the block, so
-     its parts inherit — carries `--shape`, one of the nine words, and
-     `--size`, small (spot line rail slip tile strip: the cell holds one
-     figure) or large (sheet panel banner). A part arranges by querying
-     them BY NAME, so the condition is never restated in a product:
-         & > :where(.num) { --type: 3; @container style(--shape: spot) { --type: -2; } }
-     A style query reads the nearest ancestor: a part reads its block, the
-     block's own box cannot read itself — for that the TOGGLES below stay
-     (v2.1.0, EventOS gf-615): `--is-X` is guaranteed-invalid (initial) when
-     the cell IS X, so var(--is-X, value) takes its fallback; `--no-X` the
-     reverse; `var(--is-X, A) var(--no-X, B)` is A in X, B elsewhere. Two
-     cases at most — three nest, and a pyramid of fallbacks is what the
-     published words replace. The families: small (above), tall (rail slip
-     sheet), run (line strip — one row across). Nine rules, each a shape
-     and its families; the gates in visibility restate the nine conditions
-     because `display: revert-layer` must sit in the last layer. */
-  :where(.cell) > :where(*) { --is-spot: ; --no-spot: initial; --is-line: ; --no-line: initial; --is-rail: ; --no-rail: initial; --is-slip: ; --no-slip: initial; --is-sheet: ; --no-sheet: initial; --is-tile: ; --no-tile: initial; --is-panel: ; --no-panel: initial; --is-strip: ; --no-strip: initial; --is-banner: ; --no-banner: initial; --is-small: ; --no-small: initial; --is-tall: ; --no-tall: initial; --is-run: ; --no-run: initial; }
-  @container shape (width <  3lh) and (height <  3lh) { :where(.cell) > :where(*) { --shape: spot; --size: small; --is-spot: initial; --no-spot: ; --is-small: initial; --no-small: ; } }
-  @container shape (width >= 3lh) and (height <  3lh) { :where(.cell) > :where(*) { --shape: line; --size: small; --is-line: initial; --no-line: ; --is-small: initial; --no-small: ; --is-run: initial; --no-run: ; } }
-  @container shape (width <  3lh) and (height >= 3lh) { :where(.cell) > :where(*) { --shape: rail; --size: small; --is-rail: initial; --no-rail: ; --is-small: initial; --no-small: ; --is-tall: initial; --no-tall: ; } }
-  @container shape (aspect-ratio < 7/8) and (3lh <= width < 8lh) { :where(.cell) > :where(*) { --shape: slip; --size: small; --is-slip: initial; --no-slip: ; --is-small: initial; --no-small: ; --is-tall: initial; --no-tall: ; } }
-  @container shape (aspect-ratio < 7/8) and (width >= 8lh) { :where(.cell) > :where(*) { --shape: sheet; --size: large; --is-sheet: initial; --no-sheet: ; --is-tall: initial; --no-tall: ; } }
-  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 3lh) and (height >= 3lh) and ((width < 8lh) or (height < 8lh)) { :where(.cell) > :where(*) { --shape: tile; --size: small; --is-tile: initial; --no-tile: ; --is-small: initial; --no-small: ; } }
-  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 8lh) and (height >= 8lh) { :where(.cell) > :where(*) { --shape: panel; --size: large; --is-panel: initial; --no-panel: ; } }
-  @container shape (aspect-ratio >= 15/8) and (3lh <= height < 8lh) { :where(.cell) > :where(*) { --shape: strip; --size: small; --is-strip: initial; --no-strip: ; --is-small: initial; --no-small: ; --is-run: initial; --no-run: ; } }
-  @container shape (aspect-ratio >= 15/8) and (height >= 8lh) { :where(.cell) > :where(*) { --shape: banner; --size: large; --is-banner: initial; --no-banner: ; } }
-}
 
 
 /* ════════════════════════════════════════════════════════════════════
@@ -1044,7 +978,11 @@
      Inside it the tiers answer by its width and the gates below by its
      orientation and height; a block queries nothing about itself, which
      is why the body is a child. */
-  :where(.block) { display: grid; container-type: size; container-name: block shape; min-inline-size: 0; min-block-size: 0; overflow: hidden; }   /* [mike.css] + shape */
+  /* THE CELL (v3.2.0, EventOS gf-753: the shape layer retired): a size
+     container the page may query — `@container (width < 96ch)` on a block's
+     parent to stack a summary on a phone — never a shape. A block fills it. */
+  :where(.cell) { container-type: size; min-inline-size: 0; min-block-size: 0; overflow: hidden; }
+  :where(.block) { display: grid; container-type: size; container-name: block; min-inline-size: 0; min-block-size: 0; overflow: hidden; }   /* [mike.css] the gf-608 alias */
   :where(.block) > :where(*) { display: flex; flex-direction: column; gap: var(--gap, 0.25lh); min-inline-size: 0; min-block-size: 0; }
   @container block (aspect-ratio > 3/2) { :where(.block) > :where(*) { flex-direction: row; align-items: stretch; } }
   :where(.grid)  { display: grid; gap: var(--gap, 0.25lh); grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min, 16rem)), 1fr)); }
@@ -3476,7 +3414,7 @@
      this file's components layer like every other component.)
      THE GATES ARE :where()-WRAPPED (v3.1.1, EventOS gf-665): zero
      specificity like every rule, so an element wearing a device gate
-     and a shape gate is decided by source order (the shape gates sit
+     and a container tier is decided by source order (the tiers sit
      later). Still ONE FAMILY PER ELEMENT: two gates cannot AND through
      the cascade — the later family's verdict stands alone; gate the
      second family on a wrapper. */
@@ -3608,32 +3546,6 @@
 }
 
 
-/* ════════════════════════════════════════════════════════════════════
-   visibility (shape slice) — the nine shape gates. A part lists the
-   shapes it belongs in; any match lifts the one hide rule, so a class
-   list composes as a union. The cell they answer is the nearest
-   ancestor named `shape` (core.shape).
-   ════════════════════════════════════════════════════════════════════ */
-@layer visibility {
-  :where(.spot, .line, .rail, .slip, .sheet, .tile, .panel, .strip, .banner) { display: none; }
-
-  /* edges — spot owns the corner, line and rail own the rest of each 3lh band */
-  @container shape (width <  3lh) and (height <  3lh) { :where(.spot) { display: revert-layer; } }
-  @container shape (width >= 3lh) and (height <  3lh) { :where(.line) { display: revert-layer; } }
-  @container shape (width <  3lh) and (height >= 3lh) { :where(.rail) { display: revert-layer; } }
-
-  /* vertical family — short side is width */
-  @container shape (aspect-ratio < 7/8) and (3lh <= width < 8lh) { :where(.slip)  { display: revert-layer; } }
-  @container shape (aspect-ratio < 7/8) and (width >= 8lh)       { :where(.sheet) { display: revert-layer; } }
-
-  /* centre family — short side is min(w, h) */
-  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 3lh) and (height >= 3lh) and ((width < 8lh) or (height < 8lh)) { :where(.tile)  { display: revert-layer; } }
-  @container shape (7/8 <= aspect-ratio < 15/8) and (width >= 8lh) and (height >= 8lh)                                      { :where(.panel) { display: revert-layer; } }
-
-  /* horizontal family — short side is height */
-  @container shape (aspect-ratio >= 15/8) and (3lh <= height < 8lh) { :where(.strip)  { display: revert-layer; } }
-  @container shape (aspect-ratio >= 15/8) and (height >= 8lh)       { :where(.banner) { display: revert-layer; } }
-}
 
 /* Keyframes are global by name — outside @layer, like the engine's own. */
 @keyframes vt-blur-out { to   { opacity: 0; filter: blur(6px); } }

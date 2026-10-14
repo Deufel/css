@@ -14,16 +14,15 @@ an engine change is a commit there, a tag, a copy here.
 Twelve layers, declared once; the layer order IS the cascade:
 
     @layer reset,
-           core.color, core.type, core.shell, core.shape,   /* the four cores — orthogonal */
+           core.color, core.type, core.shell,               /* the three cores — orthogonal */
            theme, base,                                      /* ALL config · bare-element defaults */
            composition, block, utility,                      /* layout primitives · components · the closed helper list */
            exception, visibility;                            /* variants, states, modes · the display gates, LAST */
 
 - `core.color` surfaces and ink as positions on a three-anchor walk;
   `core.type` the type scale IS the spacing system (lh/em only);
-  `core.shell` the `.page` shell and its pg-* regions; `core.shape` the
-  self-describing cell. The cores read nothing from each other (shell and
-  shape read type's lh only).
+  `core.shell` the `.page` shell and its pg-* regions. The cores read
+  nothing from each other (the shell reads type's lh only).
 - `theme` holds every knob's single home; `base` the bare defaults.
 - `composition` the primitives (.row .column .grid .spread .stack .frame …).
 - `block` the components — a `<blk-*>` tag owns one rule; a product's
@@ -40,10 +39,11 @@ wrapped; within a layer only source order breaks a tie; a specificity
 fight is a bug to root-cause, never to out-specify. (2) No `!important`,
 anywhere (an important declaration inverts the layers and beats the
 gates; paper is a plain print block in `exception`). (3) Locality: a
-block's parts, states and shape arrangements nest inside its one rule;
-nothing about a block lives anywhere else — visibility is the one
-exception, by design, because a part declares WHICH shapes it belongs
-in and the gate layer owns the only two states.
+block's parts and states nest inside its one rule; nothing about a block
+lives anywhere else — visibility is the one exception, by design, because
+a part wears a device or pointer gate and the gate layer owns the only
+two states. A block is ONE layout (v3.2.0): it never rearranges by its
+cell's size.
 
 Enforcement is Go: the product's `blocks_test.go` pins locality on the
 blocks' files (one rule, one file, one block; `:where()`; the published
@@ -82,86 +82,56 @@ the chrome, pg-main a grid of cells, and a `<blk-*>` in a cell arranges
 itself for the cell it is given. Locality of behaviour and few helpers
 are what let an agent write a stable component.
 
-THE CELL: `.cell` is a size query container named `shape` — a grid
-track, a region, a chip. The layout hands a cell its size; size
-containment collapses it under an auto-height parent, and a flex-grown
-cell answers its queries with nothing (Chrome evaluates them at the flex
-base size). A cell is EXACTLY ONE SHAPE, in its own lh so `--type` and
-`--scale` move the boundaries with the text:
+THE CELL: `.cell` is a size container — a grid track, a region. The
+layout hands a cell its size; size containment collapses it under an
+auto-height parent, and a flex-grown cell answers its queries with
+nothing (Chrome evaluates them at the flex base size). THE PAGE arranges
+its blocks: grid areas on the page's cell, and where a phone must stack
+them ONE width switch in ch on the block's parent — `@container (width <
+96ch)` — never a shape (v3.2.0, EventOS gf-753: the nine-shape layer, its
+toggles and its gate words are retired; a block never rearranged well
+enough to be worth defining nine times).
 
-    spot  w<3lh h<3lh · line  w≥3lh h<3lh · rail  w<3lh h≥3lh
-    slip | sheet   ratio < 7/8          short side (w)  < 8lh | ≥ 8lh
-    tile | panel   7/8 ≤ ratio < 15/8   min(w,h)        < 8lh | ≥ 8lh
-    strip | banner ratio ≥ 15/8         short side (h)  < 8lh | ≥ 8lh
-
-THE BLOCK: the tag is the component and its only hook — `<blk-kpi>`,
+THE BLOCK: the tag is the component and its only hook — `<blk-orders>`,
 `<blk-location>`. ONE rule per block in the product's own file for it
 (EventOS: `view/blocks/<name>.css`, served as one `blocks.css`). CO-LOCATION
 IS A PAIRING, TESTED (EventOS gf-668/669): the file is named for the tag
-and opens with a head naming every templ that opens it (`/* blk-kpi —
+and opens with a head naming every templ that opens it (`/* blk-orders —
 opened by view/board.templ */`); each such templ names the file in the
 comment of the component that opens it; a templ never styles a block in
-a `<style>`; a file no templ opens is stale. A block is iterated as it is
+a `<style>`; a file no templ opens is stale. A block is ONE FLEX LAYOUT
+(EventOS gf-739, Mike 2026-10-13): the title on a hairline with its verbs
+at the right, the content under it, no card; spaced in lh (the unit that
+moves with `--type`), never em; it FILLS whatever container it is handed
+and nothing drops — a narrow container scrolls. It is iterated as it is
 built — the block and its file together, on the bench — rather than
 designed from a principles page (Mike, 2026-10-10):
 
     @layer block {
-      :where(blk-location) {
-        display: grid; …                                 /* its box */
-        & :where(header) { … }                           /* parts, by element */
-        &:where([data-ui-state~="armed"]) { … }          /* states, ~= tokens */
-        flex-direction: var(--is-strip, row) var(--no-strip, column);   /* arrangement per shape */
+      :where(blk-orders) {
+        display: flex; flex-direction: column; gap: 0.25lh; …   /* its box */
+        & > :where(header) { … }                                 /* parts, by element */
+        &:where([data-ui-state~="armed"]) { … }                  /* states, ~= tokens */
       }
     }
-
-THE SHAPE, PUBLISHED (v3.1.0): the shape layer sets `--shape` (one of the
-nine words) and `--size` (small | large) on every child of a cell — the
-block — and its parts inherit them. A PART arranges per shape by querying
-them by name, flat, one line a case, nested in the block's rule:
-
-    & > :where(.num) {
-      --type: 3;
-      @container style(--shape: spot) { --type: -2; }
-      @container style(--shape: line) { --type: 0; }
-      @container style(--size: small) { --fg: -1; }
-    }
-
-A style query reads the nearest ancestor, so a part reads its block and
-the block's OWN BOX cannot read itself. For the block's own arrangement
-(its direction, writing mode, padding) the SHAPE TOGGLES (v2.1.0) stay:
-`--is-X` is guaranteed-invalid (`initial`) when the cell IS X, so
-`var(--is-X, value)` takes its fallback; `--no-X` is the reverse;
-`var(--is-X, A) var(--no-X, B)` is A in X, B elsewhere. X is a shape or a
-family: `small` (spot line rail slip tile strip — one figure), `tall`
-(rail slip sheet), `run` (line strip — one row across). TWO LEVELS AT MOST:
-a pair may nest once inside a fallback (three cases); a third level is
-the pyramid that drops its whole declaration on one wrong paren — that is
-what the published words exist to replace (its test refuses a line nested
-three deep). A rail writes upright, so its row runs down the cell: a rail
-is a row like a run, never a column. A product writes NO size container query (`@container shape (…)`
-is a second definition of a shape) and NO `display: none`: the shapes
-are defined once, in the engine, and hiding is the gates' job.
 
 - Parts are semantic elements (header h3 small strong figure ul li time
   mark progress footer …); a part class (.ring .dot .av) means something
   only inside its block.
-- A part lists the shapes it belongs in with the shape classes
-  (`<small class="line strip banner">`); the gate layer shows it only
-  there. A block never hides a part and never writes a container query.
+- A block never hides a part by the cell's size. A part that must go on
+  a phone wears a VIEWPORT gate (`.tablet.desktop`); a block may ask its
+  own width IN CH (`@container (width < 40ch)`) only when the person
+  says a part must go — never lh, px or an aspect.
 - Knobs for colour and type, inline only where a value is DATA (an
   avatar's hue); helpers only from the closed utility list; state as
   `data-ui-state="a b"` tokens matched `~=`, after native and ARIA
   state (disabled, aria-pressed, :open); every selector wrapped; no
   `!important`; nothing reaches outside the tag.
 - A block COMPOSES other blocks by giving each a `.cell` of its own in a
-  definite track (never an auto one — containment collapses it): the
-  inner block reads its cell's shape and arranges itself for the room
-  the outer block gives it (EventOS `blk-place`: the weather and the
-  licence in glass cells over the map, the map taking what is left).
+  definite track (never an auto one — containment collapses it).
 - A block is written FOR THE BENCH FIRST: the product's Layout bench
-  (`/admin/layout`) puts one block in a resizable cell with a shape tag
-  that names the shape; every shape is looked at before a page wears
-  the block. The lab's Shapes page is the engine's own specimen.
+  (`/admin/layout`) puts one block in ONE region the person resizes;
+  it is looked at wide and narrow before a page wears it.
 
 ## LAYOUT — the shell and the primitives
 
@@ -195,11 +165,10 @@ THE GATES (visibility, revert-layer) — three families, three jobs:
 - density tiers: `.small` (< 8rem) · `.medium` (8–20rem) · `.large`
   (≥ 20rem), measured on the nearest container — a rail's content gates
   on these ("and-up" is the multi-class idiom `class="medium large"`);
-- shapes: the nine, answered by the nearest `.cell`.
 - `.fine` / `.coarse` gate on pointer type.
 Every gate is `:where()`-wrapped (v3.1.1): zero specificity, so on an
-element wearing two families source order decides (the shape gates sit
-last) — and two gates never AND: ONE FAMILY PER ELEMENT, the second on a
+element wearing two families source order decides (the container tiers
+sit last) — and two gates never AND: ONE FAMILY PER ELEMENT, the second on a
 wrapper.
 Gate classes go on a dedicated wrapper that also carries a layout
 primitive (revert-layer restores the primitive's display, not a default).
