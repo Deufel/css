@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.2 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.2/mike.css
+   mike.css v3.2.3 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.3/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1439,7 +1439,7 @@
       border-radius: calc(var(--cfg-radius) * 2.5); corner-shape: squircle;
       transition: translate calc(var(--cfg-motion) * 0.12s) ease, background-color calc(var(--cfg-motion) * 0.12s) ease;
     }
-    &:hover  > :is(svg, .avatar) { translate: 0 -2px; }
+    @media (pointer: fine) { &:hover > :is(svg, .avatar) { translate: 0 -2px; } }   /* the lift is a mouse's (EventOS #884): a thumb never hovers */
     &:active > :is(svg, .avatar) { translate: 0 0; }
     & > small { --type: -2; font-weight: 600; line-height: 1; text-align: center; }
     /* the badge rides the squircle's corner: the tile is the anchor, the
@@ -2133,7 +2133,7 @@
       backdrop-filter  calc(var(--cfg-motion) * 0.12s) ease;
     & > svg { inline-size: 1.2em; block-size: 1.2em; }
     &::before { content: ""; position: absolute; inset: -4px; }   /* static hit-pad */
-    &:hover  { translate: 0 -2px; }
+    @media (pointer: fine) { &:hover { translate: 0 -2px; } }   /* the lift is a mouse's (EventOS #884) */
     &:active { translate: 0 0; }
   }
   :where(.fab-1) {
@@ -2160,7 +2160,7 @@
     -webkit-backdrop-filter: blur(0.7lh) saturate(1.6);
     backdrop-filter: blur(0.7lh) saturate(1.6);
   }
-  /* A LINK WRAPPING A FAB wears the pill's own shape (v3.2.2, EventOS #878):
+  /* A LINK WRAPPING A FAB wears the pill's own shape (v3.2.3, EventOS #878):
      the focus ring is the anchor's, and a square anchor drew a square ring
      around a round button — the anchor is a pill, so its ring curves too */
   :where(a:has(> :where(.fab-1, .fab-2, .fab-3))) { display: inline-block; border-radius: 999px; }
