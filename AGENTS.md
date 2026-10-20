@@ -194,7 +194,9 @@ with no line), `.tag` (pill; pair a hue helper), `.avatar`, `.crumbs`
 `.button-group` (a member is a button with aria-pressed OR `<label
 class="btn"><input type="radio"> word</label>` — the dot hidden, the
 checked member pressed, v3.1.17; `.tabs` hides its radios the same way,
-no `.vh`), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
+no `.vh`), `.range-pair` (two ranges on ONE track — a low and a high
+thumb, the band between them painted from `--lo`/`--hi` percents the page
+stamps; the page keeps the low below the high, v3.2.6), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
 .top, `.glass`), `.modal` (a `.content-*` rung; `.content-1` the confirm,
 `.content-3` the workbench), `.menu` (popover), `.search-box`, `.icon`
 (THE icon-only square — explicit, aria-label required), `.roster` (THE

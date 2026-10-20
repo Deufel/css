@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.5 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.5/mike.css
+   mike.css v3.2.6 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.6/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2065,6 +2065,22 @@
   :where(input[type="range"])::-webkit-slider-runnable-track { block-size: 0.5lh; border-radius: 999px; background-color: var(--_bg); }
   :where(input[type="range"])::-moz-range-track    { block-size: 0.5lh; border-radius: 999px; background-color: var(--_bg); }
   :where(input[type="range"])::-moz-range-progress { block-size: 0.5lh; border-radius: 999px; background-color: var(--_fill-color); }
+  /* .range-pair (v3.2.6, EventOS gf-819): TWO THUMBS ON ONE TRACK — a low
+     and a high range stacked, both tracks transparent, the band between the
+     thumbs painted by the host from --lo and --hi (percents the page
+     stamps); only the thumbs take the pointer, so the one under never
+     blocks the one over. The page keeps the low below the high. */
+  :where(.range-pair) {
+    --bg: 0.15; --_fill-color: color-mix(in oklch, var(--_a-zero), var(--_a-pos) var(--fill, 65%));
+    display: grid; grid-template-areas: "stack"; align-items: center; block-size: 1.3lh; border-radius: 999px;
+    background: linear-gradient(to right, var(--_bg) calc(var(--lo, 0) * 1%), var(--_fill-color) calc(var(--lo, 0) * 1%), var(--_fill-color) calc(var(--hi, 100) * 1%), var(--_bg) calc(var(--hi, 100) * 1%)) no-repeat center / 100% 0.5lh;
+    & > :where(input[type="range"]) { grid-area: stack; margin: 0; pointer-events: none; }
+    & > :where(input[type="range"])::-webkit-slider-runnable-track { background: transparent; }
+    & > :where(input[type="range"])::-moz-range-track { background: transparent; }
+    & > :where(input[type="range"])::-moz-range-progress { background: transparent; }
+    & > :where(input[type="range"])::-webkit-slider-thumb { pointer-events: auto; }
+    & > :where(input[type="range"])::-moz-range-thumb { pointer-events: auto; }
+  }
   :where(input[type="range"])::-webkit-slider-thumb {
     appearance: none; -webkit-appearance: none;
     inline-size: 1.1lh; block-size: 1.1lh; border-radius: 50%;
