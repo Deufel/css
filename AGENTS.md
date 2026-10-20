@@ -68,6 +68,16 @@ Colour is computed, never picked. You never write a hex.
   absolute so steps never compound. Type IS spacing: one step re-rhythms
   text, gaps and control heights. Components never re-type themselves;
   a usage site nudges, through the knob. `--scale` is the regional zoom.
+- THE READABILITY SCALE (v3.2.5): `[data-ui-size="custom"]` reads two px
+  numbers, `--read-floor` (the smallest size the person reads
+  comfortably, step −3) and `--read-ceiling` (the largest they want, step
+  +3), and sets the scale itself — base = √(floor·ceiling), ratio =
+  (ceiling/floor)^(1/6), no viewport fluidity. A phone is read close, a
+  TV from across the room: the setting is the device's, and everything
+  in lh and ch follows it; a layout switch in `ch` on a container then
+  asks how many characters fit at the type this person reads (in
+  `@media`, `ch` ignores the page's font — the switch is a container
+  query).
 - `--focus` and `--border` are the derived token pair every surface
   computes: read them, never redefine them.
 

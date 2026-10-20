@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.4 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.4/mike.css
+   mike.css v3.2.5 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.5/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -636,6 +636,20 @@
   [data-ui-size="md"] { --cfg-type-min: 0.840rem; --cfg-type-max: 0.920rem; --cfg-ratio: 1.125; }  /* denser default · Major2nd */
   [data-ui-size="lg"] { --cfg-type-min: 0.920rem; --cfg-type-max: 1.000rem; --cfg-ratio: 1.200; }  /* roomy · Minor3rd */
   [data-ui-size="xl"] { --cfg-type-min: 1.125rem; --cfg-type-max: 1.250rem; --cfg-ratio: 1.250; }  /* marketing · Major3rd */
+  /* THE READABILITY SCALE (v3.2.5, EventOS gf-818, Mike 2026-10-20: "can the
+     user read this" — a phone is read close, a TV from across the room):
+     the person sets the smallest size they read comfortably, step −3, and
+     the largest they want, step +3 — two px numbers stamped where the
+     setting lives (--read-floor, --read-ceiling) — and the scale sets
+     itself: base = √(floor·ceiling), ratio = (ceiling/floor)^(1/6). No
+     viewport fluidity: the person decided. Everything sized in lh and ch
+     then follows, and a layout switch in ch asks how many characters fit at
+     the type this person reads. */
+  [data-ui-size="custom"] {
+    --cfg-type-min: calc(sqrt(var(--read-floor, 12) * var(--read-ceiling, 32)) * 1px);
+    --cfg-type-max: var(--cfg-type-min);
+    --cfg-ratio: pow(calc(var(--read-ceiling, 32) / var(--read-floor, 12)), calc(1 / 6));
+  }
 
   /* ── font switch — orthogonal to skin; consumers load the webfonts ── */
   [data-ui-font="grotesk"]  { --font-ui:"Hanken Grotesk",system-ui,sans-serif; --font-display:"Hanken Grotesk",sans-serif; --font-mono:"Spline Sans Mono",ui-monospace,monospace; font-family:var(--font-ui); }
