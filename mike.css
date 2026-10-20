@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.6 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.6/mike.css
+   mike.css v3.2.7 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.7/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1826,21 +1826,26 @@
        SINGLE-ROW form work: bare controls share the row, the button
        takes only its own width. */
     :scope > :where(button) { flex: 0 0 auto; align-self: end; } /* on the controls' line, under the labels' row (EventOS feedback #382) */
-    :scope > :where(legend) {
+    /* zero specificity (v3.2.7, EventOS gf-821): a bare :scope and a bare
+       small carried (0,1,1) */
+    :where(:scope) > :where(legend) {
       display: flex; align-items: baseline; gap: 0.5em;
       flex: 1 0 100%;
       --type: 0; --fg: -0.75;
-      & > small {
+      & > :where(small) {
         --type: -1; --fg: -0.8;
         block-size: 1lh; display: flex; align-items: center; line-height: 1;
       }
     }
+    /* THE LEGEND'S STATE SLOT lights for a tone on the fieldset or an
+       invalid field in it — inside the scope, after the slot's rest rule:
+       a scoped rule beats an unscoped one of equal specificity by
+       proximity, so the same two lines outside never won (v3.2.7). The
+       danger hue is the LEGEND's alone (gf-191, per Mike): locking the
+       whole fieldset bled the hue into every sibling field. */
+    :where(:scope:is(.suc, .inf, .wrn, .dgr), :scope:has([aria-invalid="true"])) > :where(legend) > :where(small) { --fg: 1; }
+    :where(:scope:has([aria-invalid="true"])) > :where(legend) { --hue-lock: var(--hue-dgr); }
   }
-  :where(fieldset:is(.suc, .inf, .wrn, .dgr), fieldset:has([aria-invalid="true"])) > :where(legend) > :where(small) { --fg: 1; }
-  /* the danger hue for the LEGEND's state line only (gf-191, per Mike):
-     locking the whole fieldset bled the hue into every sibling field —
-     invisible in one-field fieldsets, glaring in a two-up row. */
-  :where(fieldset:has([aria-invalid="true"])) > :where(legend) { --hue-lock: var(--hue-dgr); }
 
   /* ── segmented radio (.tabs) — real radios in a recessed groove.
      A DIV role=group, NOT fieldset (its anonymous box breaks tile stretch). ── */

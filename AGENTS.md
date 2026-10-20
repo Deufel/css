@@ -43,13 +43,12 @@ block's parts and states nest inside its one rule; nothing about a block
 lives anywhere else — visibility is the one exception, by design, because
 a part wears a device or pointer gate and the gate layer owns the only
 two states. A block is ONE layout (v3.2.0): it never rearranges by its
-cell's size.
-
-Enforcement is Go: the product's `blocks_test.go` pins locality on the
-blocks' files (one rule, one file, one block; `:where()`; the published
-words, flat); `view/ratchet_test.go` ratchets inline geometry and the
-gap ladder in the templates; `prune` reports an engine class no lab
-page wears as UNDEMOED (the fix is a specimen, never a deletion).
+cell's size. Enforcement is Go (EventOS: `engine_test.go` the laws on
+the copy, `blocks_test.go` locality and the arranger rules,
+`view/dialog_test.go` the dialogs and the page shapes,
+`view/ratchet_test.go` inline geometry and the gap ladder; `prune`
+reports an engine class no lab page wears as UNDEMOED — the fix is a
+specimen, never a deletion).
 
 ## THE PAINTER MODEL (colour)
 
@@ -85,42 +84,98 @@ Publisher contract: a region, `.bg`, `.card` or `.surface` paints via
 `background-color: var(--_bg)`. Internal `--_` variables are not the
 API; if you reach for `--_sem-ink` you want `--hue-lock` + `--fg`.
 
-## THE CELL, THE SHAPES, THE BLOCK CONTRACT
+## THE SHELL · THE GATES · THE FRAME · THE PAGE · THE BLOCK
 
-"Each block is able to manage itself" (Mike, 2026-10-08): the shell is
-the chrome, pg-main a grid of cells, and a `<blk-*>` in a cell arranges
-itself for the cell it is given. Locality of behaviour and few helpers
-are what let an agent write a stable component.
+The layout contract, restated by Mike (2026-10-20, EventOS gf-821) after
+the Summary page drifted from it. Five parts, each with one job; a page
+that strays from any of them is the bug.
 
-THE CELL: `.cell` is a size container — a grid track, a region. The
-layout hands a cell its size; size containment collapses it under an
+THE SHELL IS ONE FUNCTION. The product has one shell (EventOS:
+`screenShell(Screen)` in view/layout.templ) that emits the chrome — the
+stacked header (crumbs · title + verbs · filters | actions), the tab
+band, the n3 rail — and then `<main class="pg-main column">` with the
+page's body as its child. Every region it writes is one grid area of
+`.page` (`core.shell`): the two are designed for each other and nothing
+else writes a region. CHROME IS EVERYTHING AROUND THE THING YOU WORK IN;
+pg-main is the thing, the area that expands. A dynamic layout hides
+chrome explicitly — focus mode collapses the grid, a phone's nav is the
+hub and the dock — never by a page's own rule.
+
+THE GATES ARE THE FOUNDATION. The `visibility` layer is last. A gate
+class sets `display: none`, and the matching query sets `display:
+revert-layer`, which hands the element back whatever display a lower
+layer gave it — flex, grid, a block's one-off — so any component is
+turned on and off declaratively, as a union of readable class names:
+`.mobile .tablet .desktop .ultrawide` (viewport), `.c-mobile .c-tablet
+.c-desktop` (the nearest container), `.small .medium .large` (density
+tiers), `.fine .coarse` (pointer — the iOS layouts, the dock). One family
+per element; the second family goes on a wrapper. A part of a block is
+shown or hidden ONLY this way, in the templ — never by the block's own
+`@container` or `@media`.
+
+THE FRAME. `pg-main` never scrolls (`overflow: hidden`, an inline-size
+container). A page's body is ONE `<section>`, in one of two shapes:
+- a FILLING page — `section.cell.owns-scroll`: a size container at 100%
+  height, clipped; the page fits, its blocks own any scrolling;
+- a READING column — `section.column.content-2|3`: natural height, the
+  section scrolls itself (the frame's rule for a lone section).
+Nothing else. A wrapper div, a bare `.column`, a `.grow` on the body are
+the three ways a page has drifted.
+
+THE PAGE ARRANGES. On a filling page the body's one child is the
+ARRANGER — a `<blk-page>` (EventOS: `blk-event`, `blk-report`) whose rule
+is a grid of named areas that fills the cell: `block-size: 100%`, strip
+rows `auto`, the rest `minmax(0, 1fr)`, every area named for the block
+it holds, no `overflow: auto` on the arranger. The page should fit with
+no scrolling; where a thing may run long, its BLOCK scrolls it locally.
+ONE switch, a container query in `ch` on the arranger's parent (the
+cell), stacks the areas when fewer characters fit than the columns need;
+stacked, the rows are `max-content` and the arranger scrolls — the
+honest degradation the engine states for `.rise`. (The Summary is the
+one page allowed to run long; it still has this shape.)
+
+    @layer block {
+      :where(blk-event) {
+        display: grid; block-size: 100%; min-block-size: 0; overflow: hidden; gap: 0.75lh 2em;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-areas: "metrics date weather location" "metrics date contacts location" "orders orders orders orders" "sales sales sales photos";
+        & > :where(*) { min-inline-size: 0; min-block-size: 0; }
+        & > :where(blk-orders) { grid-area: orders; }                     /* … one line a block … */
+        @container (width < 96ch) { overflow-y: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: max-content;
+          grid-template-areas: "metrics" "date" "weather" "location" "contacts" "orders" "sales" "photos"; }
+      }
+    }
+
+THE CELL under it: `.cell` is a size container — a grid track, a region.
+The layout hands a cell its size; size containment collapses it under an
 auto-height parent, and a flex-grown cell answers its queries with
-nothing (Chrome evaluates them at the flex base size). THE PAGE arranges
-its blocks: grid areas on the page's cell, and where a phone must stack
-them ONE width switch in ch on the block's parent — `@container (width <
-96ch)` — never a shape (v3.2.0, EventOS gf-753: the nine-shape layer, its
-toggles and its gate words are retired; a block never rearranged well
-enough to be worth defining nine times).
+nothing (Chrome evaluates them at the flex base size) — a cell is a
+definite track or a region sized by knobs, never flex alone.
 
-THE BLOCK: the tag is the component and its only hook — `<blk-orders>`,
-`<blk-location>`. ONE rule per block in the product's own file for it
-(EventOS: `view/blocks/<name>.css`, served as one `blocks.css`). CO-LOCATION
-IS A PAIRING, TESTED (EventOS gf-668/669): the file is named for the tag
-and opens with a head naming every templ that opens it (`/* blk-orders —
+THE BLOCK. `<blk-name>` is the component and its only hook. ONE FLEX
+LAYOUT, ONE RULE, in the product's own file for it (EventOS:
+`view/blocks/<name>.css`, served as one `blocks.css`, layer `block`,
+every selector `:where()`-wrapped, no `!important`). CO-LOCATION IS A
+PAIRING, TESTED (EventOS gf-668/669): the file is named for the tag and
+opens with a head naming every templ that opens it (`/* blk-orders —
 opened by view/board.templ */`); each such templ names the file in the
 comment of the component that opens it; a templ never styles a block in
-a `<style>`; a file no templ opens is stale. A block is ONE FLEX LAYOUT
-(EventOS gf-739, Mike 2026-10-13): the title on a hairline with its verbs
-at the right, the content under it, no card; spaced in lh (the unit that
-moves with `--type`), never em; it FILLS whatever container it is handed
-and nothing drops — a narrow container scrolls. It is iterated as it is
-built — the block and its file together, on the bench — rather than
-designed from a principles page (Mike, 2026-10-10):
+a `<style>`; a file no templ opens is stale. A block FILLS whatever box
+it is handed, NEVER REARRANGES ITSELF (no `@container`, no `@media` of
+its own — the gates in the templ decide what shows), and gives its
+overflowing part (a list, a table, a chart) `overflow: auto` with
+`min-block-size: 0`: the title on a hairline with its verbs at the right,
+the content under it, no card; spaced in lh (the unit that moves with
+`--type`), never em. It is iterated as it is built — the block and its
+file together, on the bench — rather than designed from a principles
+page (Mike, 2026-10-10):
 
     @layer block {
       :where(blk-orders) {
         display: flex; flex-direction: column; gap: 0.25lh; …   /* its box */
         & > :where(header) { … }                                 /* parts, by element */
+        & > :where(div) { flex: 1 1 auto; min-block-size: 0; overflow: auto; }   /* the part that may run long */
         &:where([data-ui-state~="armed"]) { … }                  /* states, ~= tokens */
       }
     }
@@ -128,20 +183,32 @@ designed from a principles page (Mike, 2026-10-10):
 - Parts are semantic elements (header h3 small strong figure ul li time
   mark progress footer …); a part class (.ring .dot .av) means something
   only inside its block.
-- A block never hides a part by the cell's size. A part that must go on
-  a phone wears a VIEWPORT gate (`.tablet.desktop`); a block may ask its
-  own width IN CH (`@container (width < 40ch)`) only when the person
-  says a part must go — never lh, px or an aspect.
+- A part that must go on a phone wears a VIEWPORT gate (`.tablet
+  .desktop`) or a container gate (`.c-tablet .c-desktop`) in the templ;
+  a block asks its own width in ch only when the person says a part
+  must go — never lh, px or an aspect.
 - Knobs for colour and type, inline only where a value is DATA (an
   avatar's hue); helpers only from the closed utility list; state as
   `data-ui-state="a b"` tokens matched `~=`, after native and ARIA
-  state (disabled, aria-pressed, :open); every selector wrapped; no
-  `!important`; nothing reaches outside the tag.
+  state (disabled, aria-pressed, :open); nothing reaches outside the tag.
 - A block COMPOSES other blocks by giving each a `.cell` of its own in a
   definite track (never an auto one — containment collapses it).
+- FEWEST LINES: the engine's defaults first; a block rule restates
+  nothing the family (`_lined.css`) or the base already says; a repeated
+  fragment is one rule in a shared `_file.css`; a rule that exists to
+  cancel another rule is a bug.
 - A block is written FOR THE BENCH FIRST: the product's Layout bench
   (`/admin/layout`) puts one block in ONE region the person resizes;
   it is looked at wide and narrow before a page wears it.
+
+UNITS AND READABILITY. Space in `lh`, width in `ch`, never `px`. A
+layout switch asks "how many characters fit here at the type this person
+reads", so it is a CONTAINER query in `ch` — in `@container`, `ch`
+follows the container's font and so the person's scale; in `@media` it
+resolves against the browser's initial font and ignores it. Media
+queries stay for the device's own facts: pointer, print, hover. (The
+engine's gate thresholds are still px and rem — a change pending its own
+version.)
 
 ## LAYOUT — the shell and the primitives
 
@@ -168,20 +235,12 @@ CONTENT LADDER: `.content-1` (a column, 40ch) · `.content-2` (reading,
 70ch) · `.content-3` (working, 100ch), in the wearer's own ch; rosters
 take no rung. A width written as a length is a regression.
 
-THE GATES (visibility, revert-layer) — three families, three jobs:
-- viewport: `.mobile .tablet .desktop` (576px / 768px) and `.ultrawide`
-  (1920px and up at an aspect of 2:1 or wider — pixels AND aspect); container
-  equivalents `.c-mobile .c-tablet .c-desktop` on the nearest container;
-- density tiers: `.small` (< 8rem) · `.medium` (8–20rem) · `.large`
-  (≥ 20rem), measured on the nearest container — a rail's content gates
-  on these ("and-up" is the multi-class idiom `class="medium large"`);
-- `.fine` / `.coarse` gate on pointer type.
-Every gate is `:where()`-wrapped (v3.1.1): zero specificity, so on an
-element wearing two families source order decides (the container tiers
-sit last) — and two gates never AND: ONE FAMILY PER ELEMENT, the second on a
-wrapper.
-Gate classes go on a dedicated wrapper that also carries a layout
-primitive (revert-layer restores the primitive's display, not a default).
+THE GATES' LINES (the families are the contract's, above): viewport
+576px / 768px, `.ultrawide` 1920px and up at an aspect of 2:1 or wider;
+the tiers `< 8rem` · `8–20rem` · `≥ 20rem` on the nearest container
+("and-up" is the multi-class idiom `class="medium large"`). A gate goes
+on a wrapper that also carries a layout primitive — revert-layer
+restores the primitive's display, not a default.
 
 Focus mode is a stored pref (`data-ui-state="focus"` on `.page`). Print
 strips every region but pg-main*, surfaces to white, ink to black.
@@ -197,7 +256,7 @@ checked member pressed, v3.1.17; `.tabs` hides its radios the same way,
 no `.vh`), `.range-pair` (two ranges on ONE track — a low and a high
 thumb, the band between them painted from `--lo`/`--hi` percents the page
 stamps; the page keeps the low below the high, v3.2.6), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
-.top, `.glass`), `.modal` (a `.content-*` rung; `.content-1` the confirm,
+.top/.bottom, `.glass`), `.modal` (a `.content-*` rung; `.content-1` the confirm,
 `.content-3` the workbench), `.menu` (popover), `.search-box`, `.icon`
 (THE icon-only square — explicit, aria-label required), `.roster` (THE
 SERVER-DRIVEN TABLE: truncating cells, the hugging column model, tonal
@@ -216,21 +275,61 @@ stays. The dock takes no clearance: the canvas runs under the pills,
 the handle is the relief; only the toast pile clears it while it is on
 screen (v3.1.9).
 
-Dialogs are native `<dialog class="modal">` opened and closed in HTML —
-`commandfor="<id>" command="show-modal"`, a bare close `command="close"`,
-`closedby="any"`; `data-preserve-attr="open"` is MANDATORY on a live
-page (a morph would close it). A verb that posts then closes is
-Datastar's `@post(…); el.closest('dialog').close()`. Menus are
-`popover` + `popovertarget`; a closed `.menu` must be `display:none`.
+Dialogs are native `<dialog class="modal">` at a rung of the content
+ladder, opened in HTML — `commandfor="<id>" command="show-modal"` — and
+closed by their head's × (EventOS `dialogHead`: it closes a modal or a
+popover alike) or a bare `command="close"`; `closedby="any"` and
+`data-preserve-attr="open"` are MANDATORY on a live page (a morph would
+close it; EventOS `view/dialog_test.go` refuses a dialog without them, a
+`.sm`/`.lg` word, or a dialog nested in a form). A verb that posts then
+closes has ONE spelling, `dialogPost(url, form, then…)` — the post, then
+on success the dialog closes; a refusal that answers an error keeps it
+open with what was typed. The foot is `dialogFoot`: Cancel left (a native
+reset), the verb right. `.modal.anchored` sits by `position-area` off its
+opener. Menus are `popover` + `popovertarget`; a closed `.menu` must be
+`display:none`.
 Anatomy glyphs are DECLARED boxes (`width="24" height="24"`); `.icon`
 self-centres. Know what a word IS before composing it: `.sec` is a
 BUTTON voice — on a wrapper it paints a ghost box.
 
-THE FORM CANON: fieldsets own structure; `label → small → control`, the
-small is the STATE slot (never a caption); everything fills the width;
-`--row-width` is a bare number; Datastar submits, handlers answer 204;
-THE EDIT CARD is the one record-form shape (h3 + pencil unlocks, Cancel
-a native reset, Save posts).
+THE FORM CANON (restored 2026-10-20 — the text gf-610 dropped):
+
+- ANATOMY: `<fieldset>` owns the row; `<label>` owns the field as
+  `span` (the word) → `small` (THE STATE SLOT) → the control, in that
+  order, and the engine lays them on a grid: the word and the state on
+  line one, the control full width under. The `small` is ALWAYS present,
+  empty when there is nothing to say (`<small></small>` reserves the
+  line, so a message never shifts the form), and it carries STATE —
+  "saved ✓", "needed", the error — never a caption. A checkbox or radio
+  label is `input` then `span`, its small under the span.
+- A FIELDSET IS ONE ROW: its children share it by `--row-width`, a bare
+  number on each child (`style="--row-width: 3"` beside a 1 — a 3:1
+  split); it does nothing outside a fieldset. A row with one child is a
+  column. `<legend>` names the group; its `small` is the GROUP's state.
+- EVERYTHING FILLS THE WIDTH; a button in a fieldset hugs its word.
+  `required` draws the asterisk — never typed. `[role="form"]` is the
+  formless spelling (a card of controls that posts per change).
+- THE STATE GRAMMAR, the engine's: `aria-invalid="true"` on the control
+  lights the small and rims the field red — the server renders it (the
+  problem judged at render, the message in the small) or a signal
+  patches it as the person types (`data-attr:aria-invalid` +
+  `data-text` on the small, the profile form's loop). A tone on the
+  LABEL (`label.wrn`, `.suc`, `.inf`, `.dgr`) lights its small and rims
+  its control in that tone; a tone on the FIELDSET lights the legend's
+  small. A class on the small itself does nothing — the slot's ink is
+  neutral by design. There is no native-validity hook (`:user-invalid`
+  styles nothing): the browser's bubble is never the message.
+- A REFUSAL ABOUT A FIELD goes to that field's small, not a toast; a
+  refusal about nothing in particular is the toast.
+- THE LOCKED FORM: `form[data-ui-state="locked"]` + `readonly` on the
+  fields — chrome stands down, the action row collapses; the pencil
+  unlocks. THE ACTION ROW is `.spread`, Cancel left (a native reset —
+  the fields fall back to their stored values, no seed strings), the
+  verb right. Datastar submits (`data-on:submit__prevent="@post(…,
+  {contentType: 'form'})"`), handlers answer 204 and the morph re-lands.
+- THE EDIT CARD (EventOS `editCard`) is the one record-form shape: h3 +
+  pencil unlocks, Cancel a native reset, Save posts. The lab's Forms
+  page is the practice bench; every specimen there is the canon.
 
 ## THE NUMBER FAMILY (utility — keep apart from the hue locks)
 
@@ -246,7 +345,7 @@ certainty and time; the axes never collide. Which digits appear is Go
 
 A chart is a Go function returning an SVG string, dropped in with
 `@templ.Raw(...)` (view/chartrender.go holds the general builders and
-the shared helpers — `foLabel`, `hueShift`/`hueStyle`, `ff2`, `scEsc`,
+the shared helpers — `foLabel`, `foLine`, `hueShift`/`hueStyle`, `ff2`, `scEsc`,
 `niceStep`, `chartMax`, `ChartPoint`; page-owned builders import them,
 never copy them). No client library, no canvas, NO COLOUR: every stroke
 and fill is `currentColor`, and `--fg` on the element or its `<g>` is the
@@ -285,6 +384,40 @@ direct label at most), a legend toggle keeps identical content in both
 states, a single series gets no legend, sorted marks wherever order is
 free, ONE axis always — two measures are two charts. Never `<progress>`
 for a chart. The lab's Charts page is the shelf to copy from.
+
+LABELS NEVER COLLIDE (EventOS, 2026-10-19: a long product name wrapped
+inside a 16-unit foreignObject and printed over the next row). A label's
+box is the space it OWNS, never a guess: a row label owns its row's
+height, a column label its column's width (`step`, not a constant), a
+value label the gap to the next mark. A label that must stay on one line
+goes through `foLine` (one line, `.truncate`, the whole text in its
+title); `foLabel` is for short words a builder controls (ticks, figures);
+`foWrapLabel` only where its box has the height for two lines. Size the
+label margin from the data (the longest label, capped — `dotPlotSVG`
+reserves up to two fifths of the width), never a fixed 130. Before a
+builder ships, feed it the longest real label and twenty points and READ
+the PNG; a chart fed by a model or a person gets labels nobody chose.
+
+THE TUFTE RULES (The Visual Display of Quantitative Information — the
+Ask agent's direction carries the same words): above all show the data;
+maximise the data-ink, erase what carries none (no frames, no 3-D, no
+fills behind text, no legend a direct label can replace); a chart earns
+its place only when it shows more than a sentence can — two or three
+numbers go in the sentence or a small table; the title states the
+finding ("Ultra sold the most, $3.39K"), not the axis; label the marks
+directly; several measures of the same items are SMALL MULTIPLES (the
+same labels, the same order, side by side), never one crowded chart;
+integrate words and graphics — the prose says what the chart means, it
+never re-reads the chart's numbers.
+
+LIVE CHARTS (the Ask beta): a model-written SVG with Datastar attributes
+is UNTRUSTED CODE. It never runs in the page's document: `view.LiveFrame`
+puts it in an iframe `sandbox="allow-scripts"` (no same-origin: no
+cookie, no session, no post as the person) with a CSP of no connect, form
+or frame source; the engine and the runtime load inside (the static
+handler answers `Origin: null` for `datastar.js` alone). Inside, the same
+ink ladder and `foreignObject` text apply; motion is CSS transitions on
+transform and opacity driven by signals, under a second.
 
 ## Authoring checklist
 
