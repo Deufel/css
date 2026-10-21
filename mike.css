@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.7 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.7/mike.css
+   mike.css v3.2.8 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.8/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -378,6 +378,13 @@
        inferring density from attributes. */
     & > :where(.pg-navigation)  { grid-area: n;  inline-size: max-content; min-inline-size: var(--pg-navigation-w, 8lh); max-inline-size: calc(2 * var(--pg-navigation-w, 8lh)); container-type: inline-size; overflow-x: clip; overflow-y: auto; min-height: 0; overscroll-behavior: contain; transition: min-inline-size calc(var(--cfg-motion) * 0.2s) ease; }
     & > :where(.pg-toolbar)     { grid-area: t;  inline-size: max-content; min-inline-size: var(--pg-toolbar-w, 8lh); max-inline-size: calc(2 * var(--pg-toolbar-w, 8lh)); container-type: inline-size; overflow-x: clip; overflow-y: auto; min-height: 0; overscroll-behavior: contain; transition: min-inline-size calc(var(--cfg-motion) * 0.2s) ease; }
+    /* THE RAIL COLLAPSES ON A TABLET (v3.2.8, EventOS #1090: an installed app
+       at 625 px kept the labelled rail, a third of the width): under 768px
+       the rail is its icon width whatever the server stamped; the labels
+       drop through the tier gates as when collapsed. */
+    @media (width < 768px) {
+      & > :where(.pg-navigation, .pg-toolbar) { min-inline-size: var(--rail-w-icon); max-inline-size: var(--rail-w-icon); }
+    }
     /* rail children are SHRINK-PROOF (gf-72b): a short screen must
        SCROLL the rail (overflow-y above), never squeeze its groups —
        squeezed groups compress and overlap their content, which read as
