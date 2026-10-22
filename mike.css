@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.9 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.9/mike.css
+   mike.css v3.2.10 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.10/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -556,6 +556,7 @@
     --content-1: min(40ch, 94vw);
     --content-2: min(70ch, 94vw);
     --content-3: min(100ch, 94vw);
+    --content-4: min(150ch, 96vw); /* THE WIDE BENCH (v3.2.10, EventOS #1186): a table of many columns — the held rows, a mapping of a sheet — reads at its width, not the reading rung's */
 
     /* ── engine tuning (plain numbers; ink-pole L pairs are 0–1) ── */
     --fg-ink-d: 0.16; --fg-ink-l: 0.96;   /* neutral ink L on light / dark hosts */
@@ -1650,6 +1651,22 @@
     background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
     & > :where(table) { border: 0; border-radius: 0; }
   }
+
+  /* ── .truncate-reveal — ONE LINE, THE WHOLE ON HOVER (v3.2.10, EventOS
+     #1186, Mike: "everything is forced to one line but on hover that cell
+     will reveal its content"). The text is clipped at one line with the
+     font's own ellipsis at the clip point; hovered or focused within, the
+     box lets go and shows every character IN PLACE — the row grows,
+     nothing floats or overlaps. table.reveal wears it on every cell: a
+     roster that stays one line a row (table-layout: fixed, so a long
+     cell can never widen its column) until the eye lands on a cell. A
+     cell that holds controls reads them as its content: they never
+     clip, they wrap when the cell lets them (white-space: normal). ── */
+  :where(.truncate-reveal) { display: block; max-inline-size: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  :where(.truncate-reveal):is(:hover, :focus-within) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+  :where(table.reveal) { table-layout: fixed; }
+  :where(table.reveal) :where(th, td) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  :where(table.reveal) :where(td):is(:hover, :focus-within) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
 
   /* ── the GUIDE state (gf-262): the one control the set-up walk wants
      clicked next wears a pulsing outline + glow — outline, so nothing
@@ -3061,6 +3078,7 @@
   :where(.content-1) { --content: var(--content-1); }
   :where(.content-2) { --content: var(--content-2); }
   :where(.content-3) { --content: var(--content-3); }
+  :where(.content-4) { --content: var(--content-4); }
   :where(.content-1, .content-2, .content-3) { inline-size: 100%; max-inline-size: var(--content); margin-inline: auto; }
 
   /* (.type-flow is RETIRED, gf-68 — --type inherits natively now; the
