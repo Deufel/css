@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.8 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.8/mike.css
+   mike.css v3.2.9 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.9/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2417,17 +2417,21 @@
      shell hue. Overlay chrome (surface, backdrop, focus trap, animation)
      all comes from .modal; the dialog hosting a .palette re-shapes to a
      top-pinned column frame and hands the padding to the palette rows. ── */
-  /* a modal that holds a tabpanel is a column: the head (identity, tabs)
-     stays put and the panel — .grow.scroll-y in the markup — does the
-     scrolling (feedback #158, 2026-09-24) */
-  /* the tabbed modal is a column while it CLOSES too (EventOS feedback
-     #184): display is held by the discrete transition after [open]
-     drops, so only display may depend on [open] — a direction that
-     dropped with it flipped the fading dialog to a row and its content
-     went skinny mid-fade */
-  :where(.modal:has(> .column > [role="tabpanel"])) { flex-direction: column; overflow: hidden; }
-  :where(.modal[open]:has(> .column > [role="tabpanel"])) { display: flex; }
-  :where(.modal) > :where(.column:has(> [role="tabpanel"])) { flex: 1 1 auto; min-block-size: 0; }
+  /* THE SCROLLING MODAL (v3.2.9, EventOS gf-880): a modal whose column
+     holds a .grow.scroll-y is a column FRAME — whatever stands before the
+     scroller (the head, a site line) and after it (the foot's verbs) stays
+     put, and the scroller alone scrolls. The tabbed modal (feedback #158,
+     2026-09-24) is the first case: its panel wears .grow.scroll-y. The
+     sticky-foot-over-a-glass-surface recipe this replaces let rows show
+     through the verbs. */
+  /* the frame holds while it CLOSES too (EventOS feedback #184): display
+     is held by the discrete transition after [open] drops, so only
+     display may depend on [open] — a direction that dropped with it
+     flipped the fading dialog to a row and its content went skinny
+     mid-fade */
+  :where(.modal:has(> .column > .grow.scroll-y)) { flex-direction: column; overflow: hidden; }
+  :where(.modal[open]:has(> .column > .grow.scroll-y)) { display: flex; }
+  :where(.modal) > :where(.column:has(> .grow.scroll-y)) { flex: 1 1 auto; min-block-size: 0; }
   :where(.modal):has(> .palette) {
     inline-size: min(92vw, 40rem); padding: 0; overflow: hidden;
     margin-block-start: 9vh; margin-block-end: auto;
