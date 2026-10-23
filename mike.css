@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.10 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.10/mike.css
+   mike.css v3.2.11 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.11/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1939,6 +1939,9 @@
       margin: 0; min-block-size: 0;
       font: inherit; font-weight: 400; text-decoration: none; cursor: pointer;
       display: inline-flex; align-items: center; gap: 0.45em;
+      /* ONE LINE, ITS OWN WIDTH (v3.2.11, EventOS #1224): a narrow strip
+         scrolls (.scroll-x); a tab never shrinks into two lines */
+      flex: none; white-space: nowrap;
       padding: 0.35lh 0.8em;
       --lift: initial; --fg: -0.55;
       border-block-end: 2px solid transparent;
