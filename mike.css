@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.11 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.11/mike.css
+   mike.css v3.2.12 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.12/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1109,6 +1109,10 @@
      brand name can run to eighty characters, and a chip that will not
      shrink hands the whole dialog a horizontal scrollbar. */
   :where(combo-box, combo-select, group-pick) > :where(.field) > :where(.tag) { min-inline-size: 0; overflow: hidden; flex: 0 1 auto; }
+  /* the chip carries its own inset (v3.2.12, EventOS #1248): the field
+     around a committed pick keeps a hairline of room, not an input's
+     padding beside the tag's — the chip's words start where typed ones do */
+  :where(combo-box, combo-select, group-pick) > :where(.field) { padding-inline: 0.25em; gap: 0.25em; }
   /* the clear × sits at the END of the field, small — a search bar's
      clear (feedback #20); the chip's glyph is a declared box */
   :where(combo-box, combo-select, group-pick) > :where(.field) > :where([data-cb-clear], [data-gp-clear]) { margin-inline-start: auto; --type: -2; --fg: -0.5; }
@@ -1661,8 +1665,10 @@
      roster that stays one line a row (table-layout: fixed, so a long
      cell can never widen its column) until the eye lands on a cell. A
      cell that holds controls reads them as its content: they never
-     clip, they wrap when the cell lets them (white-space: normal). ── */
-  :where(.truncate-reveal) { display: block; max-inline-size: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+     clip, they wrap when the cell lets them (white-space: normal).
+     --clip-at (v3.2.12, EventOS #1245) is where the one line ends — a
+     memo at 20ch beside its neighbours; the box's own width by default. ── */
+  :where(.truncate-reveal) { display: block; max-inline-size: var(--clip-at, 100%); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   :where(.truncate-reveal):is(:hover, :focus-within) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
   :where(table.reveal) { table-layout: fixed; }
   :where(table.reveal) :where(th, td) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
