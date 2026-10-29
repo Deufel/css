@@ -11,7 +11,8 @@ an engine change is a commit there, a tag, a copy here.
 
 ## ONE file, one spine
 
-Twelve layers, declared once; the layer order IS the cascade:
+Eleven layers, declared once; the layer order IS the cascade (the
+unlayered position makes the file's twelfth):
 
     @layer reset,
            core.color, core.type, core.shell,               /* the three cores — orthogonal */
@@ -255,7 +256,7 @@ class="btn"><input type="radio"> word</label>` — the dot hidden, the
 checked member pressed, v3.1.17; `.tabs` hides its radios the same way,
 no `.vh`), `.range-pair` (two ranges on ONE track — a low and a high
 thumb, the band between them painted from `--lo`/`--hi` percents the page
-stamps; the page keeps the low below the high, v3.2.6), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
+stamps; the page keeps the low below the high, v3.2.6; v3.2.7 the legend at zero specificity), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
 .top/.bottom, `.glass`), `.modal` (a `.content-*` rung; `.content-1` the confirm,
 `.content-3` the workbench), `.menu` (popover), `.search-box`, `.icon`
 (THE icon-only square — explicit, aria-label required), `.roster` (THE
@@ -285,7 +286,16 @@ close it; EventOS `view/dialog_test.go` refuses a dialog without them, a
 closes has ONE spelling, `dialogPost(url, form, then…)` — the post, then
 on success the dialog closes; a refusal that answers an error keeps it
 open with what was typed. The foot is `dialogFoot`: Cancel left (a native
-reset), the verb right. `.modal.anchored` sits by `position-area` off its
+reset), the verb right. A long body scrolls in a `.grow.scroll-y` child of
+the modal's column — THE SCROLLING MODAL (v3.2.9): the head and the foot
+stay, the scroller scrolls; never a sticky foot of the page's own. The
+rungs are content-1 (a confirm) · content-2 (reading, the default) ·
+content-3 (the workbench) · content-4 (THE WIDE BENCH, v3.2.10: a table of
+many columns, min(150ch, 96vw)). A roster of long cells is `table.reveal`
+(v3.2.10): every cell one line, the font's ellipsis at the clip, the whole
+cell in place on hover or focus-within; widths on a `colgroup` from the
+page's own sheet; `.truncate-reveal` is the same on one box (`--clip-at`
+where its one line ends, v3.2.12). `.modal.anchored` sits by `position-area` off its
 opener. Menus are `popover` + `popovertarget`; a closed `.menu` must be
 `display:none`.
 Anatomy glyphs are DECLARED boxes (`width="24" height="24"`); `.icon`
