@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.12 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.12/mike.css
+   mike.css v3.2.13 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.13/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1972,6 +1972,17 @@
       --fg: -0.65; font-weight: 400; padding: 0 0.5em; border-radius: 999px; align-self: center;
       min-inline-size: 1.5em; text-align: center;
     }
+    /* THE SCROLLING STRIP (v3.2.13, EventOS #1289 #1290): a strip that
+       scrolls sideways never scrolls down and never shrinks — the tabs'
+       1px overlap onto the rule made a scroll container of 1px (a
+       vertical scrollbar), and a scroll container in a flex column gives
+       up height (one strip a line short). The rule is painted, not
+       bordered, so nothing overflows; the tabs sit on it. */
+    &:where(.scroll-x) {
+      flex-shrink: 0; border-block-end: 0;
+      background: linear-gradient(var(--border), var(--border)) bottom / 100% 1px no-repeat;
+      & > :where(a, button, [role="tab"]) { margin-block-end: 0; }
+    }
   }
 
   /* icon-only tabs-underline (labels gated away): the item collapses to its
@@ -2017,6 +2028,13 @@
     }
     & > :where(button, .btn):first-child { border-start-start-radius: var(--cfg-radius); border-end-start-radius: var(--cfg-radius); margin-inline-start: 0; }
     & > :where(button, .btn):last-child  { border-start-end-radius: var(--cfg-radius);  border-end-end-radius: var(--cfg-radius); }
+  }
+  /* A FIELD OF BUTTONS (v3.2.13, EventOS #1291): a stepper — a button, a
+     reading, a button — is a .field wearing .button-group; the buttons
+     sit flush on the field's edge, no field padding around them. */
+  :where(.field.button-group) {
+    padding: 0;
+    & > :where(button, .btn) { block-size: 100%; }
   }
 
   /* ── dock button — svg + <small>: icon over a tiny caption, capped box

@@ -295,7 +295,10 @@ many columns, min(150ch, 96vw)). A roster of long cells is `table.reveal`
 (v3.2.10): every cell one line, the font's ellipsis at the clip, the whole
 cell in place on hover or focus-within; widths on a `colgroup` from the
 page's own sheet; `.truncate-reveal` is the same on one box (`--clip-at`
-where its one line ends, v3.2.12). `.modal.anchored` sits by `position-area` off its
+where its one line ends, v3.2.12). A `.tabs-underline.scroll-x` strip
+scrolls sideways only and never shrinks (v3.2.13); a stepper is a
+`.field.button-group`, its buttons flush on the field's edge (v3.2.13).
+`.modal.anchored` sits by `position-area` off its
 opener. Menus are `popover` + `popovertarget`; a closed `.menu` must be
 `display:none`.
 Anatomy glyphs are DECLARED boxes (`width="24" height="24"`); `.icon`
