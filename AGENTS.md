@@ -264,7 +264,10 @@ SERVER-DRIVEN TABLE: truncating cells, the hugging column model, tonal
 head, `.scroll-x` — the roster's horizontal scroller fades its edges; a table inside any scroller is transparent so the fade shows, v3.2.1), `.glass` (the surface at `--glass-alpha` over a
 `--glass-blur`; 0.65 a dialog, 0.88 an overlay that must read over
 anything), `.veil` (a glass card over its `.stack` sibling), `.hud`
-(viewport overlay slots t/c/b × l/c/r), `.wash`, `.stress` (the lab's
+(viewport overlay slots t/c/b × l/c/r; a slot word only places — a
+corner slot that is a `.row` or a `.column` is a stack and takes the
+gutter and the rhythm, a lone member wearing the word keeps its own
+padding, v3.2.14), `.wash`, `.stress` (the lab's
 resize handle, both axes), `.county-map`.
 
 THE DOCK (v3.1.8, after iOS Calendar's bar): a hud whose `.bl` and

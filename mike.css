@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.13 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.13/mike.css
+   mike.css v3.2.14 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.14/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3029,8 +3029,12 @@
   :where(.hud.mobile) > :where(.bc) { margin-block-end: 2.35rlh; translate: 0 50%; }
   :where(.hud) > :where(.br) { place-self: end end       }
   /* a corner slot used as a STACK of hud triggers: breathing room from the
-     viewport edge, tight rhythm between members, members hug the corner. */
-  :where(.hud) > :where(.tl, .tr, .bl, .br) { padding: 1lh; gap: var(--gap, 0.5lh); }
+     viewport edge, tight rhythm between members, members hug the corner.
+     THE STACK IS A .row OR A .column (v3.2.14, EventOS #1285): the slot
+     word alone only PLACES — a lone member wearing it (a tag, an icon
+     button) keeps its own padding; the gutter and the rhythm belong to
+     the slot that holds members. */
+  :where(.hud) > :where(.tl, .tr, .bl, .br):where(.row, .column) { padding: 1lh; gap: var(--gap, 0.5lh); }
   /* THE DOCK (v3.1.8, EventOS #738, after iOS Calendar's bar): a GLASS
      corner slot is a PILL — the gutter becomes its margin, the pill wears
      the padding, the full radius and the quiet edge; its buttons are
