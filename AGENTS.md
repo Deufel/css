@@ -298,7 +298,10 @@ many columns, min(150ch, 96vw)). A roster of long cells is `table.reveal`
 (v3.2.10): every cell one line, the font's ellipsis at the clip, the whole
 cell in place on hover or focus-within; widths on a `colgroup` from the
 page's own sheet; `.truncate-reveal` is the same on one box (`--clip-at`
-where its one line ends, v3.2.12). A `.tabs-underline.scroll-x` strip
+where its one line ends, v3.2.12). A `table.reveal` cell whose text is ONE
+`.truncate-reveal` box shows it whole OVER the rows after it — the cell
+keeps its line, nothing moves (v3.2.15, EventOS #1344); bare text in a
+cell can only grow its row. A `.tabs-underline.scroll-x` strip
 scrolls sideways only and never shrinks (v3.2.13); a stepper is a
 `.field.button-group`, its buttons flush on the field's edge (v3.2.13).
 `.modal.anchored` sits by `position-area` off its
@@ -317,11 +320,17 @@ THE FORM CANON (restored 2026-10-20 — the text gf-610 dropped):
   empty when there is nothing to say (`<small></small>` reserves the
   line, so a message never shifts the form), and it carries STATE —
   "saved ✓", "needed", the error — never a caption. A checkbox or radio
-  label is `input` then `span`, its small under the span.
+  label is `input` then `span`, its small under the span: the line it
+  reserves is a floor, a longer message takes the lines it needs (v3.2.15,
+  EventOS #1348).
 - A FIELDSET IS ONE ROW: its children share it by `--row-width`, a bare
   number on each child (`style="--row-width: 3"` beside a 1 — a 3:1
   split); it does nothing outside a fieldset. A row with one child is a
   column. `<legend>` names the group; its `small` is the GROUP's state.
+- THE ROWS BREATHE: a form's rows — its fieldsets, the head and the action
+  row (`.spread`), a `.tabs` groove, a `details` tail — each breathe 0.35lh
+  after themselves, the last one excepted (v3.2.15, EventOS #1347 #1349;
+  the seam was the fieldset's alone).
 - EVERYTHING FILLS THE WIDTH; a button in a fieldset hugs its word.
   `required` draws the asterisk — never typed. `[role="form"]` is the
   formless spelling (a card of controls that posts per change).
@@ -337,9 +346,10 @@ THE FORM CANON (restored 2026-10-20 — the text gf-610 dropped):
   styles nothing): the browser's bubble is never the message.
 - A REFUSAL ABOUT A FIELD goes to that field's small, not a toast; a
   refusal about nothing in particular is the toast.
-- THE LOCKED FORM: `form[data-ui-state="locked"]` + `readonly` on the
-  fields — chrome stands down, the action row collapses; the pencil
-  unlocks. THE ACTION ROW is `.spread`, Cancel left (a native reset —
+- THE LOCKED FORM (DEPRECATED, EventOS #1350, 2026-11-11 — no new form
+  wears it; the lab shows it under Deprecated): `form[data-ui-state="locked"]`
+  + `readonly` on the fields — chrome stands down, the action row
+  collapses; the pencil unlocks. THE ACTION ROW is `.spread`, Cancel left (a native reset —
   the fields fall back to their stored values, no seed strings), the
   verb right. Datastar submits (`data-on:submit__prevent="@post(…,
   {contentType: 'form'})"`), handlers answer 204 and the morph re-lands.

@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.14 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.14/mike.css
+   mike.css v3.2.15 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.15/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -54,12 +54,11 @@
      skin        → exception    view-transitions → exception
    Comments inside carried-over sections may still name the old layers.
 
-   CAVEATS (to resolve when the templates are migrated)
-   · .block (gf-608) is kept as an alias of .cell and also answers the
-     old `@container block` name; its body rule stays but any <blk-*>
-     child arranges itself and wins.
-   · .c-portrait/.c-landscape/.c-short/.c-tall are superseded by the
-     shapes; left in place for existing templates.
+   CAVEATS RESOLVED (v3.2.15, 2026-11-11, EventOS #1345): the templates
+   are migrated — the .block alias (gf-608, its `@container block` body)
+   and the .c-portrait/.c-landscape/.c-short/.c-tall gates are purged; no
+   template wore them, and a block that turns by its cell's shape is what
+   v3.2.0 retired.
    ════════════════════════════════════════════════════════════════════ */
 @layer reset,
        core.color, core.type, core.shell,               /* the three cores — orthogonal, standalone */
@@ -988,25 +987,17 @@
   }
 
   /* .frame — a box at a ratio its one child fills; --ratio is the knob
-     (16 / 9 by default; a block's cell on the lab bench rides it, gf-608) */
+     (16 / 9 by default) */
   :where(.frame) { aspect-ratio: var(--ratio, 16 / 9); overflow: hidden; & > * { inline-size: 100%; block-size: 100%; object-fit: cover } }
-  /* .block — A SELF-MANAGING CELL (EventOS gf-608, Mike 2026-10-08: "each
-     block is able to manage itself … container queries for portrait or
-     landscape"). The block is a SIZE query container with ONE child, its
-     body: a flex column in portrait, a row in landscape (wider than 3:2)
-     — the words first, the big thing beside them. A block fills the
-     cell a grid track, a .frame or a .stress hands it and never sizes
-     itself: size containment collapses it under an auto-height parent.
-     Inside it the tiers answer by its width and the gates below by its
-     orientation and height; a block queries nothing about itself, which
-     is why the body is a child. */
   /* THE CELL (v3.2.0, EventOS gf-753: the shape layer retired): a size
      container the page may query — `@container (width < 96ch)` on a block's
-     parent to stack a summary on a phone — never a shape. A block fills it. */
+     parent to stack a summary on a phone — never a shape. A block fills it.
+     (v3.2.15, 2026-11-11, EventOS #1345: the .block alias of gf-608 — a
+     size container whose body turned from a column in portrait to a row
+     in landscape — is purged with its `@container block` rule; no
+     template wore it, and a block that rearranges by its cell's shape is
+     what v3.2.0 retired.) */
   :where(.cell) { container-type: size; min-inline-size: 0; min-block-size: 0; overflow: hidden; }
-  :where(.block) { display: grid; container-type: size; container-name: block; min-inline-size: 0; min-block-size: 0; overflow: hidden; }   /* [mike.css] the gf-608 alias */
-  :where(.block) > :where(*) { display: flex; flex-direction: column; gap: var(--gap, 0.25lh); min-inline-size: 0; min-block-size: 0; }
-  @container block (aspect-ratio > 3/2) { :where(.block) > :where(*) { flex-direction: row; align-items: stretch; } }
   :where(.grid)  { display: grid; gap: var(--gap, 0.25lh); grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min, 16rem)), 1fr)); }
   /* .grid > .row-wide — the HERO cell (feedback #67): one child takes the
      whole row at every column count (1 / -1, never a span, so a
@@ -1310,10 +1301,17 @@
     --bg: 0; background: none;
     padding: 0; border: 0; border-radius: 0;
   }
-  /* fieldset RHYTHM (gf-174, per Mike): a group breathes a little
-     after itself — the row's internal 0.25lh gap stays tight, the
-     seam between groups reads. */
-  :where(form, [role="form"]) > :where(fieldset:not(:last-child)) { margin-block-end: 0.35lh; }
+  /* THE FORM'S ROWS BREATHE (gf-174, per Mike): a row breathes a little
+     after itself — the row's internal 0.25lh gap stays tight, the seam
+     between rows reads. A FORM'S ROWS (v3.2.15, 2026-11-11, EventOS
+     #1347 #1349) are its fieldsets, its head and its action row (.spread),
+     a .tabs groove and a details tail: the seam was the fieldset's alone,
+     so a head sat flush on the groove under it and a details on the Save
+     under it. In a bare form the margins collapse with a neighbour's own
+     (an hr's 1lh, a legended groove's 1lh stay as they were); a composed
+     form (.column) adds the seam to its gap, as it always did after a
+     fieldset. */
+  :where(form, [role="form"]) > :where(fieldset, .spread, .tabs, details):where(:not(:last-child)) { margin-block-end: 0.35lh; }
   /* ── LOCKED (gf-175, per Mike) — the READING state of a form. Not
      disabled: ink stays full, the labels stay, but the field chrome
      stands down (values read as text) and controls stop taking input.
@@ -1661,7 +1659,8 @@
      will reveal its content"). The text is clipped at one line with the
      font's own ellipsis at the clip point; hovered or focused within, the
      box lets go and shows every character IN PLACE — the row grows,
-     nothing floats or overlaps. table.reveal wears it on every cell: a
+     nothing floats or overlaps (in a table.reveal cell it lies over the
+     rows instead, v3.2.15 below). table.reveal wears it on every cell: a
      roster that stays one line a row (table-layout: fixed, so a long
      cell can never widen its column) until the eye lands on a cell. A
      cell that holds controls reads them as its content: they never
@@ -1673,6 +1672,25 @@
   :where(table.reveal) { table-layout: fixed; }
   :where(table.reveal) :where(th, td) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   :where(table.reveal) :where(td):is(:hover, :focus-within) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+  /* THE REVEAL LIES OVER (v3.2.15, 2026-11-11, EventOS #1344, Mike: "overflow
+     its block but not cause layout shift on the other table rows"). A row
+     is as tall as its tallest cell's in-flow content and bare text is
+     always in flow (size containment has no effect on a table cell), so a
+     cell of bare text can only grow its row, as above. A cell whose text
+     is ONE .truncate-reveal box reveals that box instead: hovered or
+     focused within, the box leaves the flow and lies over the rows after
+     it — nothing moves. It starts where its text sat (the cell's own
+     padding), takes the cell's width, a lift above the table, under the
+     sticky head; the cell keeps its line by a zero-width strut, so a row
+     whose other cells are empty does not fold under the pointer. */
+  :where(table.reveal) :where(td:has(> .truncate-reveal)) { position: relative; }
+  :where(table.reveal) :where(td:has(> .truncate-reveal):is(:hover, :focus-within))::before { content: "\200b"; }
+  :where(table.reveal) :where(td:has(> .truncate-reveal):is(:hover, :focus-within)) > :where(.truncate-reveal) {
+    position: absolute; inset-block-start: 0; inset-inline: 0; z-index: 1;
+    padding: inherit; max-inline-size: none;
+    white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere;
+    --lift: 0.06; background-color: var(--_bg); outline: 1px solid var(--border); border-radius: var(--cfg-radius);
+  }
 
   /* ── the GUIDE state (gf-262): the one control the set-up walk wants
      clicked next wears a pulsing outline + glow — outline, so nothing
@@ -1831,9 +1849,13 @@
     grid-template-columns: auto 1fr; column-gap: 0.5em; align-items: start;
     & > :where(input) { grid-row: 1; align-self: center; }
     & > :where(span)  { --fg: -0.75; grid-column: 2; }
+    /* the slot RESERVES a line under the word (v3.2.15, 2026-11-11, EventOS
+       #1348): a message longer than its column takes the lines it needs.
+       A fixed 1lh box centred its overflow, so a wrapped message printed
+       over the word above it and the row below (three radios on one row). */
     & > :where(small) {
       --type: -1; --fg: -0.8; grid-column: 2;
-      block-size: 1lh; display: inline-flex; align-items: center; line-height: 1;
+      min-block-size: 1lh; display: inline-flex; align-items: center; line-height: 1;
     }
     &:has([aria-invalid="true"]) {
       & > :where(small) { --hue-lock: var(--hue-dgr); }
@@ -3576,16 +3598,10 @@
   @container (576px <= width < 768px)  { :where(.c-tablet)  { display: revert-layer } }
   @container (width >= 768px)          { :where(.c-desktop) { display: revert-layer } }
 
-  /* ORIENTATION and HEIGHT gates (EventOS gf-608) — answered only inside
-     a SIZE container (a .block): a width-only .container cannot answer
-     them and the gate stays hidden. Landscape is wider than 3:2, the
-     block's own law; tall is 10em and up. */
-  .c-portrait, .c-landscape            { display: none }
-  @container (aspect-ratio <= 3/2)     { .c-portrait  { display: revert-layer } }
-  @container (aspect-ratio > 3/2)      { .c-landscape { display: revert-layer } }
-  .c-short, .c-tall                    { display: none }
-  @container (height < 10em)           { .c-short { display: revert-layer } }
-  @container (height >= 10em)          { .c-tall  { display: revert-layer } }
+  /* (the ORIENTATION and HEIGHT gates of gf-608 — .c-portrait/.c-landscape,
+     .c-short/.c-tall, bare selectors on the zero-specificity debt list —
+     are purged with the .block they answered inside: v3.2.15, 2026-11-11,
+     EventOS #1345; no template wore them.) */
 
   :where(.fine, .coarse)                       { display: none }
   @media (pointer: fine)               { :where(.fine)   { display: revert-layer } }
