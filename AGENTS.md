@@ -161,6 +161,45 @@ one page allowed to run long; it still has this shape.)
       }
     }
 
+THE ARRANGER IS A WORD NOW, AND ITS CHILD IS THE CARD (v3.4.0; Mike,
+2026-11-12: "everything should be built with the goal of fitting on a
+single page and areas will scroll themselves" — on every device, the
+phone "is NOT EXEMPT"; "the card provides the block chrome and the
+container sizing"). The grid a page wrote as a blk of its own is
+`.areas`: it fills the cell and never scrolls, and states one MAP — a
+grid-template: the areas, each row's lines, the columns — for each
+container gate, inline where the page is written: `--c-desktop`,
+`--c-tablet`, `--c-mobile` (768 and 576 px of the frame's CELL, so a
+rail narrows the map and the viewport does not). Most rows are a budget
+(`minmax(0, 6lh)`); ONE row fills (`minmax(0, 1fr)`). A child names its
+area (`--area`). A `.card` that is an `.areas` child is THE CARD: the
+block's chrome and a SIZE CONTAINER, nothing more — `header` (an hgroup:
+the title on one line, a small beside it; then at most two actions,
+plain buttons) · `nav` (a tab strip) · ONE body, which takes what is
+left and scrolls there (a `figure` is fitted, a `dl` is pairs) ·
+`footer`. What the body holds — a blk, a table, a chart — does its
+content alone and measures the card (cq units, ch, the tiers, the
+container gates), never the viewport: a blk in a card writes no head,
+no verbs and no scroller of its own. Every card is on every device: a
+gate shortens a word, it never removes a card. ON THE SMALL MAP A HEADER
+TAKES NO LINE: a card named outright (`aria-label`) does not show its
+title — its content makes it obvious — and its actions lie over its top
+end corner as glass; a card named by its title (`aria-labelledby`)
+keeps it as the label, capitals at step −2 in the hue. The switch is
+the frame's own width (it is a container named `areas`), never a class
+on a card. THE FRAME above is still pg-main and its one section;
+`.areas` is what fills that section (EventOS's lab shows it on a page
+it calls Frame). A page written before v3.4.0 keeps its blk arranger
+until it is moved.
+
+    <section class="cell owns-scroll">
+      <div class="areas" style='--c-desktop: "metrics info map" minmax(0, 6lh) "sales sales prefs" minmax(0, 1fr) / 3fr 4fr 3fr; --c-mobile: …;'>
+        <section class="card" style="--area: metrics;" aria-label="Metrics">
+          <header><hgroup><h3>Metrics</h3></hgroup><button type="button">…</button></header>
+          <dl>…</dl>
+        </section>
+        …
+
 THE CELL under it: `.cell` is a size container — a grid track, a region.
 The layout hands a cell its size; size containment collapses it under an
 auto-height parent, and a flex-grown cell answers its queries with
@@ -180,7 +219,8 @@ it is handed, NEVER REARRANGES ITSELF (no `@container`, no `@media` of
 its own — the gates in the templ decide what shows), and gives its
 overflowing part (a list, a table, a chart) `overflow: auto` with
 `min-block-size: 0`: the title on a hairline with its verbs at the right,
-the content under it, no card; spaced in lh (the unit that moves with
+the content under it, no card (a blk an `.areas` card holds leaves
+even the title and the verbs to the card, v3.4.0); spaced in lh (the unit that moves with
 `--type`), never em. It is iterated as it is built — the block and its
 file together, on the bench — rather than designed from a principles
 page (Mike, 2026-10-10):
@@ -240,7 +280,10 @@ Flow primitives: `.row` / `.column` (flex; `.row` centres its items —
 `.start` to top-align), `.grid` (auto-fit, `--grid-min`), `.split`,
 `.spread` (space-between), `.spread-column`, `.lcr`, `.flank`/`.flank-
 start`/`.flank-end`, `.stack` (overlap — one grid area), `.frame` (a box
-at `--ratio`, 16/9 by default, its child filling it), `.oneline`,
+at `--ratio`, 16/9 by default, its child filling it), `.areas` (the
+page's arranger, v3.4.0: a grid of named areas that fills its cell and
+never scrolls, a map a container gate — `--c-desktop` `--c-tablet`
+`--c-mobile` — its children naming their `--area`), `.oneline`,
 `.nowrap`, `.truncate`, `.grow`, `.fill`, `.far` (pushed to the far end of its row), `.center`, `.vr` (an hr stood
 on end), `section.owns-scroll` (the component-scrolled section every
 full-height roster is built on). `.scroll-x` / `.scroll-y` (and
@@ -265,7 +308,9 @@ strips every region but pg-main*, surfaces to white, ink to black.
 
 ## COMPONENTS (styled semantics + a few words)
 
-`.card` (lifted panel; `.Card` the voiced edge), `.surface` (a lift step
+`.card` (lifted panel; `.Card` the voiced edge; as an `.areas` frame's
+child it is THE CARD — the block's chrome and a size container, v3.4.0,
+see THE PAGE ARRANGES), `.surface` (a lift step
 with no line), `.tag` (pill; pair a hue helper), `.avatar`, `.crumbs`
 (a crumb `<a>` is a bare link), `.tree`, `.tabs` / `.tabs-underline`,
 `.button-group` (a member is a button with aria-pressed OR `<label

@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.3.0 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.3.0/mike.css
+   mike.css v3.4.0 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.0/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -38,6 +38,12 @@
      <blk-*>          a block; the tag is the hook
      .cell            a box the page sizes (composition) — a grid track, a
                       region; a block fills it and never changes its layout
+     .areas           the page's arranger (composition, v3.4.0): a grid of
+                      named areas that fills its cell and never scrolls,
+                      one map a width of the main region
+     .areas > .card   THE CARD (block, v3.4.0): a block's chrome and its
+                      size container — header · nav · ONE body that
+                      scrolls · footer; what it holds measures the card
      gates            .mobile .tablet .desktop .ultrawide · .small .medium .large ·
                       .c-* · .fine .coarse (visibility)
      helpers          .suc .inf .wrn .dgr · .num · .bg · .bw · .glass …
@@ -79,6 +85,12 @@
 /* per-composition rhythm knob (style API); must not leak into nested compositions — unset → guaranteed-invalid → the primitive's own default */
 @property --rise { syntax: "*";        inherits: false }
 /* .rise's cqb share (style API); must not leak into nested sized canvases */
+@property --area { syntax: "*";        inherits: false }
+/* the area an .areas child names (style API); must not leak into what the child holds — a frame nested in a card places its own */
+@property --c-desktop { syntax: "*";   inherits: false }
+@property --c-tablet { syntax: "*";    inherits: false }
+@property --c-mobile { syntax: "*";    inherits: false }
+/* an .areas frame's maps, one a container gate (style API): a grid-template each; must not leak into a frame nested in a card */
 @property --_sem-ink { syntax: "*";        inherits: false }
 /* ════════════════════════════════════════════════════════════════════
    type.css — the TYPE concern. Standalone, orthogonal, complete.
@@ -1035,6 +1047,41 @@
      template wore it, and a block that rearranges by its cell's shape is
      what v3.2.0 retired.) */
   :where(.cell) { container-type: size; min-inline-size: 0; min-block-size: 0; overflow: hidden; }
+  /* .areas — THE PAGE'S ARRANGER (v3.4.0, EventOS gf-1001; Mike
+     2026-11-12: "everything should be built with the goal of fitting on
+     a single page and areas will scroll themselves", the phone "is NOT
+     EXEMPT"; "we also have container gates and that is … what we are
+     using for reflowing the pg-main grid areas"). A grid of named areas
+     that FILLS its cell and never scrolls: what runs long scrolls inside
+     its own area. Before it every page wrote this grid as a blk of its
+     own (blk-event, blk-report); it is one word now.
+       --c-desktop     the MAP: one grid-template — the areas, each row's
+       --c-tablet      lines, the columns — stated where the frame is
+       --c-mobile      written, one for each CONTAINER gate (.c-desktop
+                       from 768px, .c-tablet from 576, .c-mobile under):
+                       the frame's cell is asked, so a rail narrows the
+                       map and the viewport does not. A narrower map
+                       falls back to the wider one. Registered,
+                       non-inheriting: a frame inside a card has its own.
+       --area          a child names its area (registered, non-inheriting).
+       --gap           the rhythm between areas (0.5lh 1.5ch).
+       --dock          what a touch phone's dock covers (3.4lh): the frame
+                       stops short of it — the one viewport fact here.
+     Most rows are a BUDGET (minmax(0, 6lh)); the row that fills is
+     minmax(0, 1fr). The frame is itself a size container NAMED areas:
+     its cards are containers too, so a card's parts could not otherwise
+     ask which map is on. Its size is its cell's (size containment
+     collapses it under an auto-height parent, as a .cell). */
+  :where(.areas) {
+    container: areas / size;
+    display: grid; block-size: 100%; min-block-size: 0; min-inline-size: 0; overflow: hidden;
+    gap: var(--gap, 0.5lh 1.5ch);
+    grid-template: var(--c-desktop);
+    & > :where(*) { grid-area: var(--area, auto); min-inline-size: 0; min-block-size: 0; }
+  }
+  @container (576px <= width < 768px) { :where(.areas) { grid-template: var(--c-tablet, var(--c-desktop)); } }
+  @container (width < 576px)          { :where(.areas) { grid-template: var(--c-mobile, var(--c-tablet, var(--c-desktop))); } }
+  @media (pointer: coarse) and (width < 576px) { :where(.areas) { padding-block-end: var(--dock, 3.4lh); } }
   :where(.grid)  { display: grid; gap: var(--gap, 0.25lh); grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min, 16rem)), 1fr)); }
   /* .grid > .row-wide — the HERO cell (feedback #67): one child takes the
      whole row at every column count (1 / -1, never a span, so a
@@ -3017,6 +3064,107 @@
 
 
 /* ════════════════════════════════════════════════════════════════════
+   block — THE CARD IN A FRAME (v3.4.0, EventOS gf-1001). LAST of the
+   block sections: the card's parts are made of other recipes (a tab
+   strip, a table, a button) and out-order them at zero specificity.
+   ════════════════════════════════════════════════════════════════════ */
+@layer block {
+  /* Mike, 2026-11-12: "the cards really only apply to the content that
+     sits in the pg-main area"; "the cards really should all be container
+     sized, for a predictable fill, and then a card that can nicely scale
+     larger or smaller should be the place that is an auto filling card.
+     The card provides the block chrome and the container sizing (and
+     optional action buttons and other various chrome elements)".
+     A .card that is an .areas' CHILD is that card — a toast, a tile, a
+     panel anywhere else is a .card as it always was. It is a SIZE
+     CONTAINER that takes exactly what its area hands it, so its fill is
+     known before its content is; what it holds (a blk, a table, a chart)
+     does its content alone and measures the card — cqi and cqb, ch, the
+     tiers (.small .medium .large) — never the viewport. One flex column:
+       header   an hgroup (the title on ONE line, ending in an ellipsis;
+                a small beside it — the qualifier) and then its actions,
+                at the end of the line: plain buttons, at most two, the
+                rest behind one menu
+       nav      optional: a tab strip; it keeps its line
+       (body)   the ONE other child: it takes what is left and scrolls
+                there. A figure is fitted to it instead (its svg fills
+                it); a dl is pairs, as many a line as --pair (18ch) fits
+       footer   optional: totals, a pager, a form's verbs; its line
+     A dialog a card holds is none of these and is left alone. */
+  :where(.areas) > :where(.card) {
+    container-type: size; position: relative;
+    display: flex; flex-direction: column; gap: 0.25lh; min-inline-size: 0; min-block-size: 0; overflow: hidden;
+    & > :where(header) {
+      flex: none; display: flex; align-items: center; gap: 0.5em; min-inline-size: 0;
+      & > :where(hgroup) { flex: 1 1 0; min-inline-size: 0; display: flex; align-items: baseline; gap: 0.6em; margin: 0; }
+      & :where(h2, h3, h4) { --type: 1; margin: 0; flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      & > :where(hgroup) > :where(small, p) { --type: -2; --fg: -0.55; margin: 0; flex: 1 1 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      & > :where(button, a, .btn) { flex: none; --type: -2; }   /* an action is small: the header stays about a line */
+    }
+    & > :where(nav) { flex: none; & > :where(:first-child) { margin-inline-start: 0; } }
+    & > :where(footer) {
+      flex: none; display: flex; align-items: center; justify-content: space-between; gap: 0.5em; --type: -1;
+      padding-block-start: 0.2lh; border-block-start: 1px solid var(--border);
+    }
+    & > :where(:not(header, nav, footer, dialog)) { flex: 1 1 0; min-inline-size: 0; min-block-size: 0; overflow: auto; overscroll-behavior: none; }
+    & > :where(figure) { margin: 0; position: relative; overflow: hidden;
+      & > :where(svg) { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; } }
+    & > :where(dl) { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--pair, 18ch)), 1fr)); gap: 0 2ch; align-content: start;
+      & > :where(div) { display: flex; align-items: baseline; justify-content: space-between; gap: 1ch; min-inline-size: 0; }
+      & :where(dt) { --fg: -0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-inline-size: 0; }
+      & :where(dd) { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      & :where(dd) > :where(small) { --type: -2; --fg: -0.55; } }
+  }
+
+  /* THE SMALL MAP — A HEADER TAKES NO LINE (Mike, 2026-11-12: "on mobile
+     a good space saver is to just remove the card titles (most of them
+     are actually obvious) and the edit button can be a glass button
+     overlay; or if you want to keep the titles then at least make them
+     drastically smaller and put them in like all caps type -2 --fg:1").
+     Asked of the FRAME (the container named areas), at the width its
+     small map is chosen at — never of a card, never by a class on one.
+     The card's own NAME decides, and it is ARIA's word, not a new one:
+     · a card named outright (aria-label) has a title its content makes
+       obvious: the title is not shown — the name stays for a reader —
+       and the actions lie over the card's top end corner as GLASS: a
+       glyph in a round, its word gone, its touch target wider than it
+       looks. The rest of the card keeps that corner clear (one action's
+       width, or two's), so no figure sits under it. An action that is
+       only a word keeps the word: such a card keeps its title;
+     · a card named BY ITS TITLE (aria-labelledby — or not named at all)
+       says something its content does not: the title stays, as the
+       label — capitals, step −2, in the hue (--fg: 1) — on one tight
+       line with its qualifier and its actions, quiet. */
+  @container areas (width < 576px) {
+    :where(.areas) > :where(.card[aria-label]) > :where(header) {
+      position: absolute; inset-block-start: 0.2lh; inset-inline-end: 0.35em; z-index: 3; gap: 0.3em;   /* over a table's sticky head (2) */
+      & > :where(hgroup) { display: none; }
+      & > :where(button, a, .btn) {
+        --type: inherit; position: relative; min-inline-size: 1.9em; block-size: 1.9em; min-block-size: 0; padding: 0 0.6em;
+        border: 1px solid var(--border); border-radius: 999px; box-shadow: none;
+        background-color: color-mix(in oklch, var(--_bg) calc(var(--glass-alpha, 0.75) * 100%), transparent);
+        -webkit-backdrop-filter: blur(var(--glass-blur, 0.5lh)); backdrop-filter: blur(var(--glass-blur, 0.5lh));
+        &::after { content: ""; position: absolute; inset: -0.45lh; }   /* the touch target */
+      }
+      & > :where(button, a, .btn):where(:has(> svg)) { padding: 0; inline-size: 1.9em; & > :where(span) { display: none; } }
+      &:where(:has(> :where(button, a, .btn))) ~ :where(:not(footer, dialog)) { padding-inline-end: 2.5em; }
+      &:where(:has(> :where(button, a, .btn) ~ :where(button, a, .btn))) ~ :where(:not(footer, dialog)) { padding-inline-end: 4.7em; }
+    }
+    :where(.areas) > :where(.card:not([aria-label])) > :where(header) {
+      align-items: baseline; gap: 0.6em;
+      & :where(h2, h3, h4, small, p, button, a, .btn) { line-height: 1.2; }
+      & :where(h2, h3, h4) { --type: -2; --fg: 1; text-transform: uppercase; letter-spacing: 0.06em; }
+      & > :where(button, a, .btn) {
+        --type: -2; position: relative; padding: 0; border: 0; background: none; box-shadow: none; min-block-size: 0; block-size: auto;
+        &::after { content: ""; position: absolute; inset: -0.45lh; }
+      }
+      & > :where(button, a, .btn):where(:has(> svg)) > :where(span) { display: none; }
+    }
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
    utility — the colour-owned utilities (late so a call-site helper
    beats a component's own hue/ink).
    ════════════════════════════════════════════════════════════════════ */
@@ -3509,6 +3657,35 @@
   [data-ui-radius="1"] { --cfg-radius: 6px; }
   [data-ui-radius="2"] { --cfg-radius: 12px; }
   [data-ui-radius="3"] { --cfg-radius: 22px; }
+  /* THE LINED LOOK OF A CARD — A DEMONSTRATION (v3.4.0; Mike, 2026-11-12:
+     the two looks are "a guideline not the fundamental requirement, just
+     demonstrating the concept"). Said once above the cards
+     ([data-ui-card="lined"], on the frame's cell): the same card with no
+     surface of its own — its title a small-caps label on a hairline, its
+     action words in the hue. Nothing else of the card changes; no switch
+     is built for it. On the small map the hairline is the card's top
+     edge, since a title there may not be shown. */
+  :where([data-ui-card="lined"]) :where(.areas) > :where(.card) {
+    --bg: inherit; --surf: inherit; --surf-bg: inherit;
+    background-color: transparent; border: 0; border-radius: 0; padding: 0;
+    & > :where(header) {
+      align-items: baseline; padding-block-end: 0.1lh; border-block-end: 1px solid var(--border);
+      & :where(h2, h3, h4) { --type: -2; --fg: -0.5; text-transform: uppercase; letter-spacing: 0.06em; font-weight: inherit; }
+      & > :where(button, a, .btn) {
+        --type: -2; --fg: 1; padding: 0; border: 0; background: none; box-shadow: none; min-block-size: 0; block-size: auto; inline-size: auto;
+        -webkit-backdrop-filter: none; backdrop-filter: none;
+        text-decoration: underline dotted; text-underline-offset: 0.2em; font-weight: inherit;
+      }
+    }
+    & > :where(footer) { border-block-start-style: dotted; }
+  }
+  @container areas (width < 576px) {
+    :where([data-ui-card="lined"]) :where(.areas) > :where(.card) {
+      padding-block-start: 0.2lh; border-block-start: 1px solid var(--border);
+      & > :where(header) { padding-block-end: 0; border-block-end: 0; }
+    }
+  }
+
 }
 
 
