@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.17 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.17/mike.css
+   mike.css v3.3.0 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.3.0/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -91,16 +91,25 @@
    PUBLIC API:
      --type   the step, INHERITED (gf-68): set it on an element or a
               container — the subtree follows unless an element sets its
-              own. Canonical steps are ints −2…+5 (h1=5 … h6=0,
-              small=−1); the scale is continuous, so fractional steps are
-              legal (the system uses −0.5 itself). Absolute, never
-              compounding: −1 inside −1 is still −1.
+              own. SEVEN STEPS, −3 … +3 (v3.3.0): h1=3, h2=2, h3=1,
+              h4–h6=0, p=−1, small=−2, sub/sup=−3; bare text and
+              controls stand at 0. The scale is continuous, so
+              fractional steps are legal (the system uses −0.5 itself).
+              Absolute, never compounding: −1 inside −1 is still −1.
+   THE SCALE (v3.3.0) is two book ends — the size of step −3 and of
+   step +3, unitless px (--cfg-type-floor, --cfg-type-ceiling): the base
+   is √(floor·ceiling), a step its (ceiling/floor)^(1/6). A [data-ui-size]
+   is a pair. THE POWER (--cfg-fluid-*) scales the base by the screen —
+   the lesser of its width and its height over their references, to one
+   exponent below the reference and another above it.
    PUBLIC OUTPUTS:
      --_font-size   the resolved, unfloored size. Components may read it
                     for the iOS floor idiom:
                     font-size: max(16px, var(--_font-size))
                     and for a box that keeps the step while the element's
                     own text is set smaller (the avatar riding a .nav-item)
+     --_step        the element's step as a multiple of the base —
+                    (ceiling/floor)^(--type/6), the ratio to its step
      --_control-h   THE shared control height — resolved per element
                     against its OWN unfloored size, so every set-height
                     control lands on one height at a given --type.
@@ -154,8 +163,8 @@
      link has no box of its own, so its ring took no corner. It takes a
      control's in proportion — --cfg-radius is the corner of a box
      --cfg-control-lead ems tall, so a box one em tall (a link's glyph box)
-     gets that share of it — at the link's OWN size, pow(--cfg-ratio,
-     --type) being the factor that sizes its font and its line: a small
+     gets that share of it — at the link's OWN size, --_step being
+     the factor that sizes its font and its line: a small
      link rounds less, radius 0 stays square, radius 3 is a pill as a
      button is (the drawn ring's corner is the radius plus the offset). The
      offset is a tenth of the line, clear of the glyphs at every step. A
@@ -163,7 +172,7 @@
      its own corner in a later layer and keeps it. */
   :where(a:focus-visible) {
     outline-offset: 0.1lh;
-    border-radius: calc(var(--cfg-radius) * pow(var(--cfg-ratio), var(--type)) / var(--cfg-control-lead));
+    border-radius: calc(var(--cfg-radius) * var(--_step) / var(--cfg-control-lead));
   }
   :where(body) { overflow-wrap: break-word; overscroll-behavior: none; }
   :where(p, li) { text-wrap: pretty; }
@@ -249,17 +258,24 @@
    ════════════════════════════════════════════════════════════════════ */
 @layer core.type {
   :where(*) {
-    /* modular scale — ONE ratio, applied at BOTH viewport endpoints.
-       Fluidity comes from the min/max BASE sizes growing across the
-       viewport, NOT from differing ratios — a given --type is a fixed
-       multiple of body at every width. pow() takes the raw step, so
-       −1/−2 fall on the same ratio 0/+1/+2 climb on. */
-    --_t-min: calc(var(--cfg-type-min) * pow(var(--cfg-ratio), var(--type)));
-    --_t-max: calc(var(--cfg-type-max) * pow(var(--cfg-ratio), var(--type)));
-    --_font-size: clamp( min(var(--_t-min), var(--_t-max)),
-      calc( var(--_t-min) + (var(--_t-max) - var(--_t-min))
-        * (100vi - var(--cfg-fluid-min-vp)) / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp)) ),
-      max(var(--_t-min), var(--_t-max)) );
+    /* THE SCALE, FROM TWO BOOK ENDS (v3.3.0, EventOS gf-1000, Mike
+       2026-11-12: "a small, Med, Lg that will have some reasonable book
+       ends"): the floor is step −3 and the ceiling step +3, so the base
+       is √(floor·ceiling) and a step (ceiling/floor)^(1/6) — --_step is
+       this element's step as a multiple of the base. pow() takes the
+       raw step, so −1/−2 fall on the same ratio +1/+2 climb on. */
+    --_step: pow(calc(var(--cfg-type-ceiling) / var(--cfg-type-floor)), calc(var(--type) / 6));
+    /* THE POWER (his word: "a power math for auto scaling across
+       devices"): the screen is the LESSER of its width and its height
+       over their references — a wide, short screen gets no more type
+       than its lines hold — and the base takes that to one exponent
+       below the reference (--cfg-fluid-k-down) and another above it
+       (--cfg-fluid-k-up); --cfg-fluid 0 holds the scale still (a
+       device's own pair). A length over a length is a number. */
+    --_screen: min(calc(100vi / var(--cfg-fluid-ref-w)), calc(100vb / var(--cfg-fluid-ref-h)));
+    --_font-size: calc(sqrt(var(--cfg-type-floor) * var(--cfg-type-ceiling)) * 1px * var(--_step)
+      * pow(min(var(--_screen), 1), calc(var(--cfg-fluid-k-down) * var(--cfg-fluid)))
+      * pow(max(var(--_screen), 1), calc(var(--cfg-fluid-k-up) * var(--cfg-fluid))));
     font-size: var(--_font-size);
 
     /* THE shared control height — per element, off its OWN unfloored
@@ -634,15 +650,23 @@
    ════════════════════════════════════════════════════════════════════ */
 @layer theme {
   :root {
-    /* the scale shape. Default = "md": type 0 ≈ 14.5px phone / 15.5px
-       desktop — just under 16px, so editable fields lean on the
-       input-only font floor to dodge iOS focus-zoom. */
-    --cfg-type-min: 0.90625rem;
-    --cfg-type-max: 0.96875rem;
-    --cfg-ratio: 1.2;
+    /* THE SCALE'S BOOK ENDS, px without the unit: step −3 and step +3.
+       The default is "md", 9 and 24 — step 0 = √216 ≈ 14.7px, just
+       under 16px, so editable fields lean on the input-only font floor
+       to dodge iOS focus-zoom. */
+    --cfg-type-floor: 9;
+    --cfg-type-ceiling: 24;
     --cfg-control-lead: 2.06;          /* line-box 1.5 + 2×0.28 vertical padding */
-    --cfg-fluid-min-vp: 375px;
-    --cfg-fluid-max-vp: 1280px;
+    /* THE POWER: the reference screen (the laptop the product was drawn
+       on), and the two exponents. k-down 0.075 lands step 0 on 13.4px
+       at a 375px phone; k-up 0 holds every larger screen at the
+       reference's type until it is tuned (1 = the type grows as the
+       screen does, and a big screen reads as the laptop, zoomed). */
+    --cfg-fluid: 1;
+    --cfg-fluid-ref-w: 1280px;
+    --cfg-fluid-ref-h: 760px;
+    --cfg-fluid-k-down: 0.075;
+    --cfg-fluid-k-up: 0;
 
     /* optical weight */
     --cfg-wght-base: 400; --cfg-wght-step: 90; --cfg-wght-max: 850;
@@ -652,25 +676,21 @@
     --font-display: "Roboto", system-ui, sans-serif;
   }
 
-  /* ── size switch — reshapes the scale (base + ratio) ── */
-  [data-ui-size="sm"] { --cfg-type-min: 0.780rem; --cfg-type-max: 0.840rem; --cfg-ratio: 1.125; }  /* dense · Major2nd */
-  [data-ui-size="md"] { --cfg-type-min: 0.840rem; --cfg-type-max: 0.920rem; --cfg-ratio: 1.125; }  /* denser default · Major2nd */
-  [data-ui-size="lg"] { --cfg-type-min: 0.920rem; --cfg-type-max: 1.000rem; --cfg-ratio: 1.200; }  /* roomy · Minor3rd */
-  [data-ui-size="xl"] { --cfg-type-min: 1.125rem; --cfg-type-max: 1.250rem; --cfg-ratio: 1.250; }  /* marketing · Major3rd */
+  /* ── size switch — a size IS a pair of book ends (v3.3.0; the pairs
+     are EventOS's to tune on its Type page) ── */
+  [data-ui-size="sm"] { --cfg-type-floor: 8;  --cfg-type-ceiling: 22; --cfg-fluid: 1; }
+  [data-ui-size="md"] { --cfg-type-floor: 9;  --cfg-type-ceiling: 24; --cfg-fluid: 1; }
+  [data-ui-size="lg"] { --cfg-type-floor: 9;  --cfg-type-ceiling: 28; --cfg-fluid: 1; }
+  [data-ui-size="xl"] { --cfg-type-floor: 11; --cfg-type-ceiling: 36; --cfg-fluid: 1; }  /* marketing */
   /* THE READABILITY SCALE (v3.2.5, EventOS gf-818, Mike 2026-10-20: "can the
      user read this" — a phone is read close, a TV from across the room):
-     the person sets the smallest size they read comfortably, step −3, and
-     the largest they want, step +3 — two px numbers stamped where the
-     setting lives (--read-floor, --read-ceiling) — and the scale sets
-     itself: base = √(floor·ceiling), ratio = (ceiling/floor)^(1/6). No
-     viewport fluidity: the person decided. Everything sized in lh and ch
-     then follows, and a layout switch in ch asks how many characters fit at
-     the type this person reads. */
-  [data-ui-size="custom"] {
-    --cfg-type-min: calc(sqrt(var(--read-floor, 12) * var(--read-ceiling, 32)) * 1px);
-    --cfg-type-max: var(--cfg-type-min);
-    --cfg-ratio: pow(calc(var(--read-ceiling, 32) / var(--read-floor, 12)), calc(1 / 6));
-  }
+     the person sets the smallest size they read comfortably and the
+     largest they want — two px numbers stamped where the setting lives
+     (--read-floor, --read-ceiling) — and they ARE the book ends. No
+     power: the person decided, for this device. Everything sized in lh
+     and ch then follows, and a layout switch in ch asks how many
+     characters fit at the type this person reads. */
+  [data-ui-size="custom"] { --cfg-type-floor: var(--read-floor, 12); --cfg-type-ceiling: var(--read-ceiling, 32); --cfg-fluid: 0; }
 
   /* ── font switch — orthogonal to skin; consumers load the webfonts ── */
   [data-ui-font="grotesk"]  { --font-ui:"Hanken Grotesk",system-ui,sans-serif; --font-display:"Hanken Grotesk",sans-serif; --font-mono:"Spline Sans Mono",ui-monospace,monospace; font-family:var(--font-ui); }
@@ -710,13 +730,16 @@
    ════════════════════════════════════════════════════════════════════ */
 @layer base {
   /* PIN the root: the scale drives everything BELOW html; html stays a
-     fixed 16px so `rem` never shifts and cfg-type-min applies ONCE. */
+     fixed 16px so `rem` never shifts and the book ends apply ONCE. */
   :where(html) { font-family: var(--font-ui); font-size: 100%; }
 
-  :where(h1) { --type: 5 } :where(h2) { --type: 4 } :where(h3) { --type: 3 }
-  :where(h4) { --type: 2 } :where(h5) { --type: 1 } :where(h6) { --type: 0 }
-  :where(h6) { font-weight: 600; }   /* step 0 = body weight; nudge so it reads as a heading */
-  :where(small) { --type: -1 }
+  /* THE ELEMENT'S STEP (v3.3.0, Mike 2026-11-12: "H1 should be type: 3,
+     H2 should be 2 and h3 = 1, (h4, h5 and h6 = 0), P = -1, small = -2
+     and super / sub = -3"): seven steps, so the two book ends are the
+     smallest and the largest text an element takes by itself. */
+  :where(h1) { --type: 3 } :where(h2) { --type: 2 } :where(h3) { --type: 1 }
+  :where(h4, h5, h6) { --type: 0; font-weight: 600; }   /* step 0 = body weight; nudged so each reads as a heading */
+  :where(p) { --type: -1 } :where(small) { --type: -2 } :where(sub, sup) { --type: -3 }
   :where(b, strong) { font-weight: 700; }
   :where(code, kbd, samp, pre) { font-family: var(--font-mono); }
 }

@@ -68,20 +68,30 @@ Colour is computed, never picked. You never write a hex.
   absolute so steps never compound. Type IS spacing: one step re-rhythms
   text, gaps and control heights. Components never re-type themselves;
   a usage site nudges, through the knob.
+- THE SCALE IS TWO BOOK ENDS (v3.3.0): seven steps, −3 … +3, between the
+  size of step −3 and of step +3 — `--cfg-type-floor`, `--cfg-type-ceiling`,
+  px without the unit; the base is √(floor·ceiling), a step
+  (ceiling/floor)^(1/6). Elements take: h1 3, h2 2, h3 1, h4–h6 0 (at
+  weight 600), p −1, small −2, sub/sup −3; bare text and controls 0.
+  `[data-ui-size]` is a pair: sm 8–22, md 9–24 (the default), lg 9–28, xl
+  11–36. `--_step` is an element's step as a multiple of the base.
+- THE POWER (v3.3.0): the base scales by the screen — the lesser of its
+  width over `--cfg-fluid-ref-w` (1280px) and its height over
+  `--cfg-fluid-ref-h` (760px) — to `--cfg-fluid-k-down` (0.075) below the
+  reference and `--cfg-fluid-k-up` (0) above it. `--cfg-fluid: 0` holds
+  the scale still.
 - THE READABILITY SCALE (v3.2.5): `[data-ui-size="custom"]` reads two px
   numbers, `--read-floor` (the smallest size the person reads
-  comfortably, step −3) and `--read-ceiling` (the largest they want, step
-  +3), and sets the scale itself — base = √(floor·ceiling), ratio =
-  (ceiling/floor)^(1/6), no viewport fluidity. A phone is read close, a
-  TV from across the room: the setting is the device's, and everything
-  in lh and ch follows it; a layout switch in `ch` on a container then
-  asks how many characters fit at the type this person reads (in
-  `@media`, `ch` ignores the page's font — the switch is a container
-  query).
+  comfortably) and `--read-ceiling` (the largest they want), as the book
+  ends, with no power: the person decided, for this device. A phone is
+  read close, a TV from across the room; everything in lh and ch
+  follows, and a layout switch in `ch` on a container then asks how many
+  characters fit at the type this person reads (in `@media`, `ch`
+  ignores the page's font — the switch is a container query).
 - `--focus` and `--border` are the derived token pair every surface
   computes: read them, never redefine them. A focused link (a box with no
   corner of its own) rings at a control's corner in proportion to its own
-  type — `--cfg-radius × pow(--cfg-ratio, --type) / --cfg-control-lead`,
+  type — `--cfg-radius × --_step / --cfg-control-lead`,
   offset a tenth of its line; radius 0 stays square (v3.2.17, EventOS #1313).
 
 Publisher contract: a region, `.bg`, `.card` or `.surface` paints via
