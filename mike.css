@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.15 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.15/mike.css
+   mike.css v3.2.16 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.16/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -45,7 +45,7 @@
      state            data-ui-state="…" tokens, matched ~= ; native and
                       ARIA state first (disabled, aria-pressed, :open)
      engine           --hue --hue-shift --hue-lock --bg --lift --fg
-                      --type --scale --gap — inline where a value is data
+                      --type --gap — inline where a value is data
 
    DERIVATION: a mechanical re-layering of system.css (2026-10-08) — every
    rule body carried verbatim, re-homed on the new spine:
@@ -95,11 +95,12 @@
               small=−1); the scale is continuous, so fractional steps are
               legal (the system uses −0.5 itself). Absolute, never
               compounding: −1 inside −1 is still −1.
-     --scale  regional zoom, inherits.
    PUBLIC OUTPUTS:
      --_font-size   the resolved, unfloored size. Components may read it
                     for the iOS floor idiom:
                     font-size: max(16px, var(--_font-size))
+                    and for a box that keeps the step while the element's
+                    own text is set smaller (the avatar riding a .nav-item)
      --_control-h   THE shared control height — resolved per element
                     against its OWN unfloored size, so every set-height
                     control lands on one height at a given --type.
@@ -107,8 +108,8 @@
    ORTHOGONALITY: this file reads nothing from colour or layout.
    REGISTRATION: one. --type must not inherit (a step means the same
    thing everywhere it is set; components opt in per-subtree with the
-   `--type: inherit` idiom). --scale and all config are plain inherited
-   custom properties with their single home in @layer theme.
+   `--type: inherit` idiom). All config is plain inherited custom
+   properties with their single home in @layer theme.
    ════════════════════════════════════════════════════════════════════ */
 /* --type INHERITS (gf-68, canon change): a container's step flows to
    everything below it, the way every author already assumes. Safe because
@@ -239,11 +240,10 @@
        −1/−2 fall on the same ratio 0/+1/+2 climb on. */
     --_t-min: calc(var(--cfg-type-min) * pow(var(--cfg-ratio), var(--type)));
     --_t-max: calc(var(--cfg-type-max) * pow(var(--cfg-ratio), var(--type)));
-    --_font-size: calc(
-      clamp( min(var(--_t-min), var(--_t-max)),
-        calc( var(--_t-min) + (var(--_t-max) - var(--_t-min))
-          * (100vi - var(--cfg-fluid-min-vp)) / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp)) ),
-        max(var(--_t-min), var(--_t-max)) ) * var(--scale) );
+    --_font-size: clamp( min(var(--_t-min), var(--_t-max)),
+      calc( var(--_t-min) + (var(--_t-max) - var(--_t-min))
+        * (100vi - var(--cfg-fluid-min-vp)) / (var(--cfg-fluid-max-vp) - var(--cfg-fluid-min-vp)) ),
+      max(var(--_t-min), var(--_t-max)) );
     font-size: var(--_font-size);
 
     /* THE shared control height — per element, off its OWN unfloored
@@ -618,8 +618,6 @@
    ════════════════════════════════════════════════════════════════════ */
 @layer theme {
   :root {
-    --scale: 1;
-
     /* the scale shape. Default = "md": type 0 ≈ 14.5px phone / 15.5px
        desktop — just under 16px, so editable fields lean on the
        input-only font floor to dodge iOS focus-zoom. */
@@ -1477,20 +1475,20 @@
   }
 
   /* an avatar riding a .nav-item is a GLYPH (gf-21): it takes the item
-     svg's own footprint (1.15em OF THE ITEM), so the rail has ONE glyph
+     svg's own footprint (1.15em at the step), so the rail has ONE glyph
      column — org mark, monogram and icons land on the same axis in both
      densities, and the icon-anatomy rail width fits a mark exactly (the
-     control-height avatar overshot it and clipped). The monogram shrinks
-     via --scale (the engine's zoom knob), and the box DIVIDES the scale
-     back out — em resolves against the element's own scaled font, so
-     1.15em/0.62 at scale 0.62 is exactly 1.15× the item's em. A logo svg
-     scales by the recipe's 70% rule. Placed AFTER the avatar recipe —
-     same layer, zero specificity, source order decides. */
+     control-height avatar overshot it and clipped). The monogram is set
+     at 0.62 of the step and the box keeps the step: both read
+     --_font-size, the size the element's step resolves to before a
+     component sets its own font (v3.2.16, EventOS gf-992 — this retired
+     --scale, a zoom the box had to divide back out). The recipe's
+     aspect-ratio squares the box; a logo svg scales by its 70% rule.
+     Placed AFTER the avatar recipe — same layer, zero specificity,
+     source order decides. */
   :where(.nav-item) > :where(.avatar) {
-    --scale: 0.62;
-    block-size: calc(1.15em / 0.62); inline-size: calc(1.15em / 0.62);
-    min-inline-size: calc(1.15em / 0.62);
-    padding: 0;
+    font-size: calc(var(--_font-size) * 0.62);
+    block-size: calc(var(--_font-size) * 1.15); min-inline-size: calc(var(--_font-size) * 1.15);
     border-radius: max(2px, calc(var(--cfg-radius) - 5px));
   }
   /* a LOGO riding a .nav-item is the same glyph WITHOUT the avatar

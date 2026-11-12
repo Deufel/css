@@ -67,7 +67,7 @@ Colour is computed, never picked. You never write a hex.
 - `--type` is a STEP on the type scale and inherits; the scale is
   absolute so steps never compound. Type IS spacing: one step re-rhythms
   text, gaps and control heights. Components never re-type themselves;
-  a usage site nudges, through the knob. `--scale` is the regional zoom.
+  a usage site nudges, through the knob.
 - THE READABILITY SCALE (v3.2.5): `[data-ui-size="custom"]` reads two px
   numbers, `--read-floor` (the smallest size the person reads
   comfortably, step −3) and `--read-ceiling` (the largest they want, step
