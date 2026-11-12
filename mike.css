@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.2.16 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.16/mike.css
+   mike.css v3.2.17 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.2.17/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -149,6 +149,22 @@
   :where(table) { border-collapse: collapse; }
   :where(summary) { list-style: none; }
   :where(:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+  /* A LINK'S RING (v3.2.17, EventOS #1313, the owner: "somewhat related to
+     the cfg-borderradius scaled by the line height of the element"): a
+     link has no box of its own, so its ring took no corner. It takes a
+     control's in proportion — --cfg-radius is the corner of a box
+     --cfg-control-lead ems tall, so a box one em tall (a link's glyph box)
+     gets that share of it — at the link's OWN size, pow(--cfg-ratio,
+     --type) being the factor that sizes its font and its line: a small
+     link rounds less, radius 0 stays square, radius 3 is a pill as a
+     button is (the drawn ring's corner is the radius plus the offset). The
+     offset is a tenth of the line, clear of the glyphs at every step. A
+     component that gives a link a box (.btn, .nav-item, a menu row) sets
+     its own corner in a later layer and keeps it. */
+  :where(a:focus-visible) {
+    outline-offset: 0.1lh;
+    border-radius: calc(var(--cfg-radius) * pow(var(--cfg-ratio), var(--type)) / var(--cfg-control-lead));
+  }
   :where(body) { overflow-wrap: break-word; overscroll-behavior: none; }
   :where(p, li) { text-wrap: pretty; }
   :where(h1, h2, h3, h4, h5, h6) { text-wrap: balance; }
@@ -1645,7 +1661,7 @@
   }
   :where(.table-scroll) {
     --bg: 0;
-    overflow: auto; overscroll-behavior: contain;
+    overflow: auto; overscroll-behavior: none;   /* it scrolls both axes: it stops at its edge on both, the scroll primitives' rule (v3.2.17, #1359) */
     max-block-size: 24lh;
     border: 1px solid var(--border); border-radius: var(--cfg-radius);
     background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
@@ -2145,12 +2161,22 @@
      and a high range stacked, both tracks transparent, the band between the
      thumbs painted by the host from --lo and --hi (percents the page
      stamps); only the thumbs take the pointer, so the one under never
-     blocks the one over. The page keeps the low below the high. */
+     blocks the one over. The page keeps the low below the high.
+     THE PAIR PARTS AT EITHER END (v3.2.17, EventOS #1370, the pair made a
+     standard): the high thumb lay over the low, so two thumbs met at the
+     top of the track were stuck — the high may not pass below the low, and
+     the low was under it. Past the middle the low rises over the high
+     (both stack at 0, the high over by source order; the low's level is
+     --lo over 100, rounded — 0 below the middle, 1 above), so whichever end
+     they meet at, the thumb that can move is the one on top. A disabled
+     member drains the band with its thumbs. */
   :where(.range-pair) {
     --bg: 0.15; --_fill-color: color-mix(in oklch, var(--_a-zero), var(--_a-pos) var(--fill, 65%));
     display: grid; grid-template-areas: "stack"; align-items: center; block-size: 1.3lh; border-radius: 999px;
     background: linear-gradient(to right, var(--_bg) calc(var(--lo, 0) * 1%), var(--_fill-color) calc(var(--lo, 0) * 1%), var(--_fill-color) calc(var(--hi, 100) * 1%), var(--_bg) calc(var(--hi, 100) * 1%)) no-repeat center / 100% 0.5lh;
-    & > :where(input[type="range"]) { grid-area: stack; margin: 0; pointer-events: none; }
+    &:where(:has(> input:disabled)) { --chroma: 0.15; }
+    & > :where(input[type="range"]) { grid-area: stack; margin: 0; pointer-events: none; z-index: 0; }
+    & > :where(input[type="range"]:first-child) { z-index: calc(var(--lo, 0) / 100); }
     & > :where(input[type="range"])::-webkit-slider-runnable-track { background: transparent; }
     & > :where(input[type="range"])::-moz-range-track { background: transparent; }
     & > :where(input[type="range"])::-moz-range-progress { background: transparent; }
@@ -3095,10 +3121,20 @@
   /* scroll viewports — the axis scrolls; pair with a constrained size (a
      flex/grid track, a max-block-size, etc.) since something must bound the
      box for it to scroll. min-*-size:0 defeats the flex/grid auto-min so it
-     can shrink-and-scroll inside a parent; overscroll-behavior:contain stops
-     scroll-chaining to the page. */
-  :where(.scroll-x) { overflow-x: auto; overscroll-behavior: contain; min-inline-size: 0; }
-  :where(.scroll-y) { overflow-y: auto; overscroll-behavior: contain; min-block-size: 0; scrollbar-gutter: stable; }
+     can shrink-and-scroll inside a parent.
+     THE BOX STOPS AT ITS EDGE (v3.2.17, EventOS #1359 — the owner on an
+     iPhone, a table's box rubber-banding): overscroll-behavior none on the
+     axis the box scrolls, and on that axis only — at the end of its travel
+     it neither bounces nor hands the scroll on to the page. `contain` kept
+     iOS's local bounce, and as a shorthand it claimed both axes: a scroll
+     container ends the chain on every axis it claims, scrollable or not
+     (measured in Chromium), so a page's vertical scroll stopped dead over
+     every .scroll-x table. Claiming the one axis frees the other. A
+     .scroll-y that fits still ends the chain, as contain did — it lives
+     where nothing round it scrolls (a filling page's block, a dialog's
+     body). */
+  :where(.scroll-x) { overflow-x: auto; overscroll-behavior-inline: none; min-inline-size: 0; }
+  :where(.scroll-y) { overflow-y: auto; overscroll-behavior-block: none; min-block-size: 0; scrollbar-gutter: stable; }
 }
 
 

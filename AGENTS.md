@@ -79,7 +79,10 @@ Colour is computed, never picked. You never write a hex.
   `@media`, `ch` ignores the page's font — the switch is a container
   query).
 - `--focus` and `--border` are the derived token pair every surface
-  computes: read them, never redefine them.
+  computes: read them, never redefine them. A focused link (a box with no
+  corner of its own) rings at a control's corner in proportion to its own
+  type — `--cfg-radius × pow(--cfg-ratio, --type) / --cfg-control-lead`,
+  offset a tenth of its line; radius 0 stays square (v3.2.17, EventOS #1313).
 
 Publisher contract: a region, `.bg`, `.card` or `.surface` paints via
 `background-color: var(--_bg)`. Internal `--_` variables are not the
@@ -230,7 +233,11 @@ start`/`.flank-end`, `.stack` (overlap — one grid area), `.frame` (a box
 at `--ratio`, 16/9 by default, its child filling it), `.oneline`,
 `.nowrap`, `.truncate`, `.grow`, `.fill`, `.far` (pushed to the far end of its row), `.center`, `.vr` (an hr stood
 on end), `section.owns-scroll` (the component-scrolled section every
-full-height roster is built on). `--gap` takes ONLY the ladder's rungs:
+full-height roster is built on). `.scroll-x` / `.scroll-y` (and
+`.table-scroll`) STOP AT THEIR EDGE on the axis they scroll —
+`overscroll-behavior: none` on that axis only: no bounce, no hand-off to
+the page, the other axis free (v3.2.17, EventOS #1359; `contain` on both
+axes had held a page's vertical scroll over every `.scroll-x` table). `--gap` takes ONLY the ladder's rungs:
 block `0 · 0.25lh · 0.5lh · 1lh`, inline `0.25em · 0.5em · 1em`. THE
 CONTENT LADDER: `.content-1` (a column, 40ch) · `.content-2` (reading,
 70ch) · `.content-3` (working, 100ch), in the wearer's own ch; rosters
@@ -256,7 +263,7 @@ class="btn"><input type="radio"> word</label>` — the dot hidden, the
 checked member pressed, v3.1.17; `.tabs` hides its radios the same way,
 no `.vh`), `.range-pair` (two ranges on ONE track — a low and a high
 thumb, the band between them painted from `--lo`/`--hi` percents the page
-stamps; the page keeps the low below the high, v3.2.6; v3.2.7 the legend at zero specificity), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
+stamps; the page keeps the low below the high, v3.2.6; v3.2.7 the legend at zero specificity; v3.2.17 the pair parts at either end — past the middle the low thumb lies over the high — and a disabled member drains the band, EventOS #1370), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
 .top/.bottom, `.glass`), `.modal` (a `.content-*` rung; `.content-1` the confirm,
 `.content-3` the workbench), `.menu` (popover), `.search-box`, `.icon`
 (THE icon-only square — explicit, aria-label required), `.roster` (THE
