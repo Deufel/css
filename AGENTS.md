@@ -122,8 +122,10 @@ layer gave it — flex, grid, a block's one-off — so any component is
 turned on and off declaratively, as a union of readable class names:
 `.mobile .tablet .desktop .ultrawide` (viewport), `.c-mobile .c-tablet
 .c-desktop` (the nearest container), `.small .medium .large` (density
-tiers), `.fine .coarse` (pointer — the iOS layouts, the dock). One family
-per element; the second family goes on a wrapper. A part of a block is
+tiers), `.fine .coarse` (pointer — the iOS layouts, the dock),
+`.standalone .browser` (the display mode — the installed app, or a
+browser tab; v3.4.6). One family per element; the second family goes on
+a wrapper. A part of a block is
 shown or hidden ONLY this way, in the templ — never by the block's own
 `@container` or `@media`.
 
@@ -273,19 +275,36 @@ Regions are grid areas on `.page`: pg-banner, pg-header, pg-subheader,
 pg-navigation (n1), pg-toolbar (the n3 rail), pg-main-header, pg-main-
 subheader (tabs, crumbs, strips that must not scroll), pg-main, pg-main-
 aside, pg-main-footer, pg-aside, pg-footer. Set `--bg` on any to repaint.
-THE PERMANENT DOCK (v3.4.2): in an installed app on a touch phone
-(`@media (display-mode: standalone) and (pointer: coarse) and (width <
-576px)`) the phone's dock — `.page > .hud.dock`, two floating glass pills
-in a browser tab — is the shell's last row: a slim bar on the navigation's
-surface (`--cfg-dock-bg`), as tall as `--cfg-dock-inset` = the home
-indicator's inset + `--cfg-dock-curve` (at least `--cfg-dock-min`), its
-controls at the two ends, the middle left to the indicator. The page ends
-above it; the hud and a `.modal` take `--cfg-dock-inset` as their foot (0
-where no permanent dock stands); a drawer covers it. (v3.4.1's status band
-under the device's clock is retired: the system paints that bar.)
+THE PERMANENT DOCK (v3.4.2; every touch device, v3.4.6, EventOS gf-1038:
+"we want the persistent dock on tablet as well … gated on app vs
+browser"): the dock — `.page > .hud.dock`, shown by its own gates
+(EventOS: `.coarse`, a phone or a tablet), two floating glass pills and a
+handle in a browser tab — is, in the installed app (`@media (display-mode:
+standalone)`, no width), the shell's last row ACROSS THE WHOLE WIDTH: the
+navigation ends above it (`grid-row-end: f-start`), and the bar is a slim
+band on the navigation's surface (`--cfg-dock-bg`), as tall as
+`--cfg-dock-inset` = the home indicator's inset + `--cfg-dock-curve`, at
+least `--cfg-dock-min` (an iPhone upright 50px; on its side, an iPad, a
+home button 40px), its controls at the two ends, the middle left to the
+indicator, no handle. The bar's rule decides no display — the dock's
+gates do; what answers the bar from elsewhere (the knob, the navigation's
+end, a frame's clearance, the toasts' foot, a main footer's inset) asks
+the app on a touch pointer, `(display-mode: standalone) and (pointer:
+coarse)`, since it cannot read the dock's gate. The page ends above it;
+the hud and a `.modal` take `--cfg-dock-inset` as their foot (0 where no
+permanent dock stands); a drawer covers it. (v3.4.1's status band under
+the device's clock is retired: the system paints that bar.)
+THE INSTALLED APP (v3.4.6): `.standalone` shows in the installed app
+alone (`display-mode: standalone`, the manifest's display), `.browser`
+everywhere else — a tab, a tab gone full screen; the mode's values, as
+`.fine .coarse` are the pointer's. CSS sees the display mode alone (iOS's
+`navigator.standalone` is a script's); the engine asks "installed" one
+way, `(display-mode: standalone)`, everywhere.
 THE TOUCH TARGET (v3.4.3): `--cfg-touch` (2.75rem, 44 CSS px — Apple's
 HIG figure and WCAG 2.5.5's) is the least recommended target; a hud fab
-and a dock control are exactly that square, one number.
+and a dock control are exactly that square, one number — a permanent
+dock's control stands on the band's foot and takes the band's height
+where the band is less (an iPad's 40px, v3.4.6).
 THE FRAME'S GAP (v3.4.4): an `.areas` frame's gap is the engine's normal
 `--gap`, 0.25lh, as `.row` `.column` `.grid` and `.pg-main` have it (it
 was 0.5lh 1.5ch); a page never writes one on a frame.
@@ -321,6 +340,7 @@ take no rung. A width written as a length is a regression.
 
 THE GATES' LINES (the families are the contract's, above): viewport
 576px / 768px, `.ultrawide` 1920px and up at an aspect of 2:1 or wider;
+the display mode `(display-mode: standalone)` and its complement;
 the tiers `< 8rem` · `8–20rem` · `≥ 20rem` on the nearest container
 ("and-up" is the multi-class idiom `class="medium large"`). A gate goes
 on a wrapper that also carries a layout primitive — revert-layer
@@ -367,9 +387,10 @@ THE DOCK (v3.1.8, after iOS Calendar's bar): a hud whose `.bl` and
 padding, full radius, the quiet edge) holding hud fabs, bare glyphs at
 rest; the hud wearing `data-ui-state="away"` slides its bottom slots
 down past the edge (a translate), and a `.cr` fab is the handle that
-stays. The dock takes no clearance: the canvas runs under the pills,
-the handle is the relief; only the toast pile clears it while it is on
-screen (v3.1.9).
+stays. In a browser tab the dock takes no clearance: the canvas runs
+under the pills, the handle is the relief; only the toast pile clears it
+while it is on screen (v3.1.9). In the installed app it is the shell's
+last row (THE PERMANENT DOCK, under LAYOUT).
 
 Dialogs are native `<dialog class="modal">` at a rung of the content
 ladder, opened in HTML — `commandfor="<id>" command="show-modal"` — and
