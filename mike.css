@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.4.4 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.4/mike.css
+   mike.css v3.4.5 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.5/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3108,10 +3108,16 @@
      known before its content is; what it holds (a blk, a table, a chart)
      does its content alone and measures the card — cqi and cqb, ch, the
      tiers (.small .medium .large) — never the viewport. One flex column:
-       header   an hgroup (the title on ONE line, ending in an ellipsis;
-                a small beside it — the qualifier) and then its actions,
-                at the end of the line: plain buttons, at most two, the
-                rest behind one menu
+       header   an hgroup (the title on ONE line, ending in an ellipsis —
+                step 0 at a heading's weight, a step over the body and
+                under a page's h3, v3.4.5; a small beside it — the
+                qualifier) and then its actions, at the end of the line:
+                plain buttons, at most two, the rest behind one menu. A
+                card named outright (aria-label) whose header is its
+                actions alone — no hgroup — has NO TITLE: at every width
+                the header takes no line and lies over the top end
+                corner (v3.4.5), the body the whole card (a map under its
+                Edit); a card with nothing to act on drops the header
        nav      optional: a tab strip; it keeps its line
        (body)   the ONE other child: it takes what is left and scrolls
                 there. A figure is fitted to it instead (its svg fills
@@ -3124,10 +3130,11 @@
     & > :where(header) {
       flex: none; display: flex; align-items: center; gap: 0.5em; min-inline-size: 0;
       & > :where(hgroup) { flex: 1 1 0; min-inline-size: 0; display: flex; align-items: baseline; gap: 0.6em; margin: 0; }
-      & :where(h2, h3, h4) { --type: 1; margin: 0; flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      & :where(h2, h3, h4) { --type: 0; font-weight: 600; margin: 0; flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* h4's step and weight (v3.4.5, EventOS #1423: "every card that keeps a title should be a smaller title") */
       & > :where(hgroup) > :where(small, p) { --type: -2; --fg: -0.55; margin: 0; flex: 1 1 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       & > :where(button, a, .btn) { flex: none; --type: -2; }   /* an action is small: the header stays about a line */
     }
+    &:where([aria-label]) > :where(header:not(:has(> hgroup))) { position: absolute; inset-block-start: 0.2lh; inset-inline-end: 0.35em; z-index: 3; }   /* NO TITLE (v3.4.5, EventOS #1412): its actions over the top end corner at every width */
     & > :where(nav) { flex: none; & > :where(:first-child) { margin-inline-start: 0; } }
     & > :where(footer) {
       flex: none; display: flex; align-items: center; justify-content: space-between; gap: 0.5em; --type: -1;
@@ -3180,7 +3187,7 @@
     :where(.areas) > :where(.card:not([aria-label])) > :where(header) {
       align-items: baseline; gap: 0.6em;
       & :where(h2, h3, h4, small, p, button, a, .btn) { line-height: 1.2; }
-      & :where(h2, h3, h4) { --type: -2; --fg: 1; text-transform: uppercase; letter-spacing: 0.06em; }
+      & :where(h2, h3, h4) { --type: -2; --fg: 1; text-transform: uppercase; letter-spacing: 0.06em; font-weight: inherit; }   /* the label's own weight, as the lined look's */
       & > :where(button, a, .btn) {
         --type: -2; position: relative; padding: 0; border: 0; background: none; box-shadow: none; min-block-size: 0; block-size: auto;
         &::after { content: ""; position: absolute; inset: -0.45lh; }
@@ -3949,18 +3956,34 @@
     }
     .page > :where(.pg-main) { overflow: visible; block-size: auto; min-block-size: 0; }
     .page > :where(.pg-main) > :where(section.cell) { block-size: calc(100vh - 4lh); }
+    /* THE FRAME ON PAPER (v3.4.5, EventOS #1424: "close but … a more
+       consistent output"): a sheet is not a screen to fit. An .areas frame
+       keeps its map — the areas, the columns — but the frame and its cell
+       grow with what they hold and a row is as tall as its tallest card; a
+       card prints its whole body, never the window it scrolled, still a
+       container across (its tiers and gates ask its width), and never
+       splits at a sheet's edge. */
+    :where(html:has(.page), body:has(.page)) { height: auto; overflow: visible; }   /* the shell's clip is the screen's: a frame runs on to a second sheet */
+    .page > :where(.pg-main) > :where(section.cell:has(> .areas)) { block-size: auto; container-type: inline-size; overflow: visible; }
+    :where(.areas) { container-type: inline-size; block-size: auto; overflow: visible; grid-template-rows: none; grid-auto-rows: auto; }
+    :where(.areas) > :where(.card) { container-type: inline-size; overflow: visible; break-inside: avoid;
+      & > :where(:not(header, nav, footer, dialog)) { flex: none; overflow: visible; }
+      & > :where(figure) > :where(svg) { position: static; block-size: auto; } }   /* a fitted drawing prints at its own aspect */
     .page > :where(.pg-banner, .pg-header, .pg-subheader, .pg-navigation,
                    .pg-toolbar, .pg-aside, .pg-main-aside, .pg-footer, .pg-main-subheader),
     :where(.focus-fab) { display: none; }
     /* PAPER TAKES NO ACTION (v3.1.3, EventOS gf-694): no verb, no menu, no
        trail, no tab prints — the main header keeps its title, the canvas
-       its facts; the subheader (the tabs) goes with the rails */
-    .page :where(button, [popover], .crumbs, .tabs, .tabs-underline, .fab-1, .fab-2, .fab-3, .hud) { display: none; }
+       its facts; the subheader (the tabs) goes with the rails; a segmented
+       control goes with its buttons (v3.4.5) */
+    .page :where(button, [popover], .crumbs, .tabs, .tabs-underline, .button-group, .fab-1, .fab-2, .fab-3, .hud) { display: none; }
 
     /* surfaces → white; borders stay. Regions and painted components lose
-       their fill but keep their outline. */
-    :where(.page, .pg-main, .pg-main-header, .pg-main-subheader,
-           .pg-main-footer, .pg-main > section, .card, table, thead th, .search-box) {
+       their fill but keep their outline — the canvas under them too, and a
+       .surface, which has no outline to keep (v3.4.5: a sheet is white
+       whether or not the browser prints backgrounds). */
+    :where([data-ui-theme], body, .page, .pg-main, .pg-main-header, .pg-main-subheader,
+           .pg-main-footer, .pg-main > section, .card, .surface, table, thead th, .search-box) {
       background: none;
       --bg: 0; --lift: initial;
     }

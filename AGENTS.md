@@ -174,8 +174,11 @@ rail narrows the map and the viewport does not). Most rows are a budget
 (`minmax(0, 6lh)`); ONE row fills (`minmax(0, 1fr)`). A child names its
 area (`--area`). A `.card` that is an `.areas` child is THE CARD: the
 block's chrome and a SIZE CONTAINER, nothing more — `header` (an hgroup:
-the title on one line, a small beside it; then at most two actions,
-plain buttons) · `nav` (a tab strip) · ONE body, which takes what is
+the title on one line, step 0 at a heading's weight since v3.4.5, a
+small beside it; then at most two actions, plain buttons; a card named
+outright whose header is its actions alone has NO TITLE, and at every
+width its actions lie over its top end corner, v3.4.5) · `nav` (a tab
+strip) · ONE body, which takes what is
 left and scrolls there (a `figure` is fitted, a `dl` is pairs) ·
 `footer`. What the body holds — a blk, a table, a chart — does its
 content alone and measures the card (cq units, ch, the tiers, the
@@ -286,6 +289,10 @@ and a dock control are exactly that square, one number.
 THE FRAME'S GAP (v3.4.4): an `.areas` frame's gap is the engine's normal
 `--gap`, 0.25lh, as `.row` `.column` `.grid` and `.pg-main` have it (it
 was 0.5lh 1.5ch); a page never writes one on a frame.
+THE CARD'S TITLE (v3.4.5, EventOS #1423: "every card that keeps a title
+should be a smaller title"): step 0 at 600, h4's step and weight — a
+step over the body, under a page's h3 (it was step 1); the small map's
+label keeps its own weight.
 Rails are min-width, type-derived and SERVER-DRIVEN (`--pg-navigation-w`
 / `--pg-toolbar-w` stamped once on `.page`; collapse is a stored pref,
 labels drop through the tiers). Asides are content-sized. ONE topology:
@@ -320,7 +327,14 @@ on a wrapper that also carries a layout primitive — revert-layer
 restores the primitive's display, not a default.
 
 Focus mode is a stored pref (`data-ui-state="focus"` on `.page`). Print
-strips every region but pg-main*, surfaces to white, ink to black.
+strips every region but pg-main*, surfaces to white, ink to black, and
+no control prints (a `.button-group` with the buttons, v3.4.5). A FRAME
+ON PAPER (v3.4.5, EventOS #1424): an `.areas` keeps its map's areas and
+columns, but it and its cell grow with what they hold, a row as tall as
+its tallest card; a card prints its whole body — never the window it
+scrolled — a fitted figure at its drawing's aspect, and never splits at
+a sheet's edge; the frame runs on to a second sheet. A blk arranger's
+cell keeps the one sheet.
 
 ## COMPONENTS (styled semantics + a few words)
 
