@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.4.2 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.2/mike.css
+   mike.css v3.4.3 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.3/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -719,6 +719,8 @@
 @layer theme {
   :root {
     --cfg-radius: 9px;      /* geometry — consumed by components */
+    --cfg-touch: 2.75rem;   /* the least recommended touch target, 44 CSS px (Apple HIG; WCAG 2.5.5):
+                               a hud fab and a dock control are exactly this wide (v3.4.3, EventOS #1378) */
     --cfg-motion: 1;        /* motion multiplier (a later formal pass) */
     /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010) — the rule is in the
        visibility layer; its knobs have their home here. In an installed
@@ -2390,7 +2392,7 @@
   :where(a:has(> :where(.fab-1, .fab-2, .fab-3))) { display: inline-block; border-radius: 999px; }
   /* inside the hud, fabs are uniform circles; the corner-slot padding owns
      the viewport offset, so the fab's own free-floating margin dies. */
-  :where(.hud) :where(.fab-1, .fab-2, .fab-3) { inline-size: 2.4lh; block-size: 2.4lh; margin: 0; }
+  :where(.hud) :where(.fab-1, .fab-2, .fab-3) { inline-size: var(--cfg-touch); block-size: var(--cfg-touch); margin: 0; }
   /* inside the navigation rail the same: the rail's own rows space the
      controls — the fab's free-floating 1.1lh margin overflowed the
      narrow rail and opened a gap above the theme row (feedback #95) */
@@ -3263,11 +3265,11 @@
   :where(.hud) > :where(.bc) { place-self: end center    }
   /* THE DOCK'S HANDLE RIDES AT THE PILLS' HEIGHT (v3.1.16, EventOS #820:
      "a little difficult to hit on the bottom of the screen"): the centre
-     slot of a mobile hud sits on the corner pills' middle — their margin,
-     padding and half a fab, in the root's lines (v3.2.4, EventOS #1015: a
+     slot of a mobile hud sits on the corner pills' middle — their margin
+     and padding in the root's lines and half a fab, --cfg-touch (v3.4.3; v3.2.4, EventOS #1015: a
      handle at --type -2 measured its own smaller lh and sat low), its own
      centre on that line */
-  :where(.hud.mobile) > :where(.bc) { margin-block-end: 2.35rlh; translate: 0 50%; }
+  :where(.hud.mobile) > :where(.bc) { margin-block-end: calc(1.15rlh + var(--cfg-touch) / 2); translate: 0 50%; }
   :where(.hud) > :where(.br) { place-self: end end       }
   /* a corner slot used as a STACK of hud triggers: breathing room from the
      viewport edge, tight rhythm between members, members hug the corner.
@@ -3897,7 +3899,7 @@
       }
       & > :where(.bc) { display: none; }
       & :where(.fab-1, .fab-2, .fab-3) {
-        inline-size: 2.75rem; block-size: 100%; border-radius: 0;
+        inline-size: var(--cfg-touch); block-size: 100%; border-radius: 0;
         align-items: flex-start; padding-block: 0.3rem 0;
         background-color: transparent; border-color: transparent; box-shadow: none;
       }

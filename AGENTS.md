@@ -280,6 +280,9 @@ controls at the two ends, the middle left to the indicator. The page ends
 above it; the hud and a `.modal` take `--cfg-dock-inset` as their foot (0
 where no permanent dock stands); a drawer covers it. (v3.4.1's status band
 under the device's clock is retired: the system paints that bar.)
+THE TOUCH TARGET (v3.4.3): `--cfg-touch` (2.75rem, 44 CSS px — Apple's
+HIG figure and WCAG 2.5.5's) is the least recommended target; a hud fab
+and a dock control are exactly that square, one number.
 Rails are min-width, type-derived and SERVER-DRIVEN (`--pg-navigation-w`
 / `--pg-toolbar-w` stamped once on `.page`; collapse is a stored pref,
 labels drop through the tiers). Asides are content-sized. ONE topology:
