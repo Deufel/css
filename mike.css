@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.4.3 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.3/mike.css
+   mike.css v3.4.4 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.4/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1088,7 +1088,8 @@
                        falls back to the wider one. Registered,
                        non-inheriting: a frame inside a card has its own.
        --area          a child names its area (registered, non-inheriting).
-       --gap           the rhythm between areas (0.5lh 1.5ch).
+       --gap           the rhythm between areas (0.25lh, the engine's
+                       normal gap; v3.4.4 — it was 0.5lh 1.5ch).
        --dock          what a touch phone's dock covers (3.4lh): the frame
                        stops short of it — the one viewport fact here.
      Most rows are a BUDGET (minmax(0, 6lh)); the row that fills is
@@ -1099,7 +1100,7 @@
   :where(.areas) {
     container: areas / size;
     display: grid; block-size: 100%; min-block-size: 0; min-inline-size: 0; overflow: hidden;
-    gap: var(--gap, 0.5lh 1.5ch);
+    gap: var(--gap, 0.25lh);
     grid-template: var(--c-desktop);
     & > :where(*) { grid-area: var(--area, auto); min-inline-size: 0; min-block-size: 0; }
   }

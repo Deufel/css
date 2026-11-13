@@ -283,6 +283,9 @@ under the device's clock is retired: the system paints that bar.)
 THE TOUCH TARGET (v3.4.3): `--cfg-touch` (2.75rem, 44 CSS px — Apple's
 HIG figure and WCAG 2.5.5's) is the least recommended target; a hud fab
 and a dock control are exactly that square, one number.
+THE FRAME'S GAP (v3.4.4): an `.areas` frame's gap is the engine's normal
+`--gap`, 0.25lh, as `.row` `.column` `.grid` and `.pg-main` have it (it
+was 0.5lh 1.5ch); a page never writes one on a frame.
 Rails are min-width, type-derived and SERVER-DRIVEN (`--pg-navigation-w`
 / `--pg-toolbar-w` stamped once on `.page`; collapse is a stored pref,
 labels drop through the tiers). Asides are content-sized. ONE topology:
