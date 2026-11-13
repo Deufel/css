@@ -270,14 +270,16 @@ Regions are grid areas on `.page`: pg-banner, pg-header, pg-subheader,
 pg-navigation (n1), pg-toolbar (the n3 rail), pg-main-header, pg-main-
 subheader (tabs, crumbs, strips that must not scroll), pg-main, pg-main-
 aside, pg-main-footer, pg-aside, pg-footer. Set `--bg` on any to repaint.
-`.pg-status` (v3.4.1) is not an area: it is the strip under the device's
-status bar — as tall as `env(safe-area-inset-top)` (0 outside an installed
-phone app with a translucent bar), fixed, dark by `--cfg-status-ground`
-because the device's clock is white, the grid starting below it; the hud
-and the top and side drawers start below it too. Its one child is a line
-under the clock (the date), pinned by `--cfg-status-date-x` and
-`--cfg-status-date-y` and shown only where the strip is taller than
-`--cfg-status-room`.
+THE PERMANENT DOCK (v3.4.2): in an installed app on a touch phone
+(`@media (display-mode: standalone) and (pointer: coarse) and (width <
+576px)`) the phone's dock — `.page > .hud.dock`, two floating glass pills
+in a browser tab — is the shell's last row: a slim bar on the navigation's
+surface (`--cfg-dock-bg`), as tall as `--cfg-dock-inset` = the home
+indicator's inset + `--cfg-dock-curve` (at least `--cfg-dock-min`), its
+controls at the two ends, the middle left to the indicator. The page ends
+above it; the hud and a `.modal` take `--cfg-dock-inset` as their foot (0
+where no permanent dock stands); a drawer covers it. (v3.4.1's status band
+under the device's clock is retired: the system paints that bar.)
 Rails are min-width, type-derived and SERVER-DRIVEN (`--pg-navigation-w`
 / `--pg-toolbar-w` stamped once on `.page`; collapse is a stored pref,
 labels drop through the tiers). Asides are content-sized. ONE topology:

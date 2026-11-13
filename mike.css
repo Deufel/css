@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.4.1 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.1/mike.css
+   mike.css v3.4.2 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.2/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -44,9 +44,6 @@
      .areas > .card   THE CARD (block, v3.4.0): a block's chrome and its
                       size container — header · nav · ONE body that
                       scrolls · footer; what it holds measures the card
-     .pg-status       the shell's strip under the device's status bar
-                      (core.shell, v3.4.1): as tall as the top safe area,
-                      painted dark; it may hold one line — the date
      gates            .mobile .tablet .desktop .ultrawide · .small .medium .large ·
                       .c-* · .fine .coarse (visibility)
      helpers          .suc .inf .wrn .dgr · .num · .bg · .bw · .glass …
@@ -400,21 +397,6 @@
       --surf-bg: var(--bg);
     }
 
-    /* THE STATUS BAND (v3.4.1, EventOS gf-1009). Where a page runs under
-       the device's status bar — an installed iPhone app with a translucent
-       bar; env(safe-area-inset-top) is the bar's height and 0 everywhere
-       else — the shell keeps that strip: the grid starts below it (the
-       page is border-box, so its 100svh holds the padding) and .pg-status
-       paints it. The strip is DARK whatever the theme, --cfg-status-ground:
-       iOS draws its clock and its indicators white there and asks no one.
-       Fixed, over the hud and under a launch cover; it takes no tap. ONE
-       LINE may stand in it — the date, under the clock — pinned from the
-       strip's lower edge and from the leading side by two published
-       numbers, and shown only where the strip has the room: its opacity
-       is the inset's excess over --cfg-status-room, clamped, so a short
-       bar (a home-button phone, a tablet, a phone on its side) shows the
-       strip alone. */
-    padding-block-start: var(--cfg-status-inset);
     & > :where(.pg-banner)      { grid-area: b;  container-type: inline-size; }
     & > :where(.pg-header)      { grid-area: h;  container-type: inline-size; }
     & > :where(.pg-subheader)   { grid-area: s;  container-type: inline-size; }
@@ -521,32 +503,17 @@
       background: radial-gradient(55% 55% at 86% 92%, var(--_bg), transparent 74%);
     }
   }
-  /* .pg-status — the strip the page keeps under the device's status bar
-     (v3.4.1; the .page rule above says why and when). Fixed to the
-     viewport's top, as tall as the inset, dark; its one child is the line
-     under the clock. */
-  :where(.pg-status) {
-    position: fixed; inset: 0 0 auto 0; z-index: 2;
-    block-size: var(--cfg-status-inset); overflow: hidden; pointer-events: none;
-    background-color: var(--cfg-status-ground); color: var(--cfg-status-ink);
-    & > :where(*) {
-      position: absolute; inset-block-end: var(--cfg-status-date-y); inset-inline-start: var(--cfg-status-date-x);
-      translate: -50% 0; --type: -3; line-height: 1; white-space: nowrap; color: inherit;
-      font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
-      opacity: clamp(0, calc((var(--cfg-status-inset) - var(--cfg-status-room)) / 1px), 1);
-    }
-  }
   /* .hud — full-viewport overlay; click-through container, interactive
      children. Slot classes: t/c/b row × l/c/r column. Pure positioning —
      no paint — which is why it lives in layout, unlike drawer/modal/menu. */
   :where(.hud) {
-    position: fixed; inset: var(--cfg-status-inset) 0 0 0; display: grid; grid-template-areas: "hud";
+    position: fixed; inset: 0 0 var(--cfg-dock-inset) 0; display: grid; grid-template-areas: "hud";
     pointer-events: none; z-index: 1;
     /* a hud CLEARS THE BANNER (EventOS gf-527, 2026-10-05): the pg-banner
        is the page's top track — one line and its padding — and a fixed
        hud over a page that shows one starts beneath it, or the mark and
        the doors would paint over the words */
-    .page:has(> .pg-banner) ~ & { inset-block-start: calc(1.5lh + var(--cfg-status-inset)); }
+    .page:has(> .pg-banner) ~ & { inset-block-start: 1.5lh; }
     & > :where(*) { grid-area: hud; justify-self: center; align-self: center; pointer-events: auto; }
     /* slot ALIGNMENT lives in @layer utility below: slot classes must beat
        component defaults (e.g. the fab recipe's place-self) — a slot is a
@@ -752,17 +719,29 @@
 @layer theme {
   :root {
     --cfg-radius: 9px;      /* geometry — consumed by components */
-    /* the status band (core.shell, v3.4.1): the strip's height is the
-       device's own; its ground is dark because the device's clock is
-       white; the date's line is pinned by two numbers and shown only
-       where the strip is taller than --cfg-status-room */
-    --cfg-status-inset: env(safe-area-inset-top, 0px);
-    --cfg-status-ground: oklch(0.18 0.01 250);
-    --cfg-status-ink: oklch(1 0 0 / 0.82);
-    --cfg-status-room: 40px;      /* a strip this short holds the clock alone */
-    --cfg-status-date-x: 16.5%;   /* the date's centre from the leading edge: under the clock */
-    --cfg-status-date-y: 5px;     /* its foot above the strip's lower edge */
     --cfg-motion: 1;        /* motion multiplier (a later formal pass) */
+    /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010) — the rule is in the
+       visibility layer; its knobs have their home here. In an installed
+       app on a touch phone the shell's last row is the dock, and it is
+       SLIM: the band where the screen's corners curve in — the home
+       indicator's inset and the curve's rise above it — no more.
+       --cfg-dock-curve  the curve's rise above the inset. CSS has no word
+                         for a screen's corner radius; 16px makes the dock
+                         about 50px on a 34px-inset iPhone, whose corners
+                         are about that round.
+       --cfg-dock-min    the least the dock is: a phone with no inset.
+       --cfg-dock-bg     its surface: the navigation's (the dock is the
+                         phone's rail).
+       DERIVED: --cfg-dock-inset, the dock's height — 0 wherever no
+       permanent dock stands. A surface pinned to the viewport that must
+       not sit under the dock (the hud, a .modal) takes it as its foot. */
+    --cfg-dock-curve: 16px;
+    --cfg-dock-min: 2.5rem;
+    --cfg-dock-bg: -0.8;
+    --cfg-dock-inset: 0px;
+  }
+  @media (display-mode: standalone) and (pointer: coarse) and (width < 576px) {
+    :root { --cfg-dock-inset: max(var(--cfg-dock-min), calc(env(safe-area-inset-bottom, 0px) + var(--cfg-dock-curve))); }
   }
   [data-ui-radius="0"] { --cfg-radius: 0px; }
   [data-ui-radius="1"] { --cfg-radius: 6px; }
@@ -2437,13 +2416,10 @@
     translate: 0 0; opacity: 1;
     &:not(:is([open], :popover-open)) { opacity: 0; translate: var(--_translate-closed); }
     @starting-style { &:is([open], :popover-open) { opacity: 0; translate: var(--_translate-closed); } }
-    /* a drawer from the top or a side starts UNDER the status band (v3.4.1):
-       it is in the top layer, over the band, and its light surface would
-       swallow the device's white clock */
-    &:where(.left)   { --_translate-closed: -100% 0; inset: var(--cfg-status-inset) auto 0 0; inline-size: min(85vw,320px); block-size: calc(100svh - var(--cfg-status-inset)); border-radius: 0 var(--cfg-radius) var(--cfg-radius) 0; }
-    &:where(.right)  { --_translate-closed: 100% 0;  inset: var(--cfg-status-inset) 0 0 auto; inline-size: min(85vw,320px); block-size: calc(100svh - var(--cfg-status-inset)); border-radius: var(--cfg-radius) 0 0 var(--cfg-radius); }
-    &:where(.top)    { --_translate-closed: 0 -100%; inset: var(--cfg-status-inset) 0 auto 0; inline-size: 100vw; block-size: min(85svh,240px); border-radius: 0 0 var(--cfg-radius) var(--cfg-radius); }
-    &:where(.bottom) { --_translate-closed: 0 100%;  inset: auto 0 0 0; inline-size: 100vw; block-size: min(85svh,240px); border-radius: var(--cfg-radius) var(--cfg-radius) 0 0; }
+    &:where(.left)   { --_translate-closed: -100% 0; inset: 0 auto 0 0; inline-size: min(85vw,320px); block-size: 100svh; border-radius: 0 var(--cfg-radius) var(--cfg-radius) 0; }
+    &:where(.right)  { --_translate-closed: 100% 0;  inset: 0 0 0 auto; inline-size: min(85vw,320px); block-size: 100svh; border-radius: var(--cfg-radius) 0 0 var(--cfg-radius); }
+    &:where(.top)    { --_translate-closed: 0 -100%; inset: 0 0 auto 0; inline-size: 100vw; block-size: min(85svh,240px); border-radius: 0 0 var(--cfg-radius) var(--cfg-radius); }
+    &:where(.bottom) { --_translate-closed: 0 100%;  inset: auto 0 0 0; inline-size: 100vw; block-size: min(85svh,240px); padding-block-end: max(0.75lh, env(safe-area-inset-bottom, 0px)); border-radius: var(--cfg-radius) var(--cfg-radius) 0 0; }
   }
   /* THE DIALOG, TOP-PINNED (gf-71): its width is a rung of THE CONTENT
      LADDER — reading (.content-2) by default, .content-1 the focused
@@ -2453,7 +2429,9 @@
      keeps its lower half free for the soft keyboard. */
   :where(.modal) {
     --_dur: calc(var(--cfg-motion) * 0.2s);
-    position: fixed; inset: 0; margin: 4vh auto auto;
+    /* (v3.4.2) the box ends on a permanent dock: its fit-content height
+       stops there; the backdrop is the whole viewport's */
+    position: fixed; inset: 0 0 var(--cfg-dock-inset) 0; margin: 4vh auto auto;
     inline-size: 100%; max-inline-size: var(--content, var(--content-2)); max-block-size: min(85svh, 44rem);
     overflow: auto; overscroll-behavior: contain;
     padding: 0.5lh; border: 0; border-radius: var(--cfg-radius);
@@ -3886,6 +3864,49 @@
   :where(.fine, .coarse)                       { display: none }
   @media (pointer: fine)               { :where(.fine)   { display: revert-layer } }
   @media (pointer: coarse)             { :where(.coarse) { display: revert-layer } }
+
+  /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010, Mike: "make the dock
+     persistent, but … only the height of the curve and below"). In a
+     browser tab a phone's dock is two glass pills floating in a hud
+     (.hud.dock.mobile.coarse, a child of .page) and the canvas runs under
+     them. In the INSTALLED app on that phone the same element is the
+     shell's last row (area f): a slim bar on the navigation's surface, as
+     tall as --cfg-dock-inset — the home indicator's inset and the corner
+     curve's rise. Its two pills dissolve into the bar's two ends, where
+     the curve leaves room, and the middle stays empty over the home
+     indicator; a control is one target wide and the band tall, its glyph
+     held to the band's top, clear of the indicator. The handle goes: a
+     permanent dock is not put away, whatever the stored state. The page
+     ends above it — a frame takes no clearance, the toasts no extra foot,
+     a main footer gives the inset back. Here, after the gates, because it
+     re-decides a gated element's display. */
+  @media (display-mode: standalone) and (pointer: coarse) and (width < 576px) {
+    :where(.page) > :where(.hud.dock) {
+      position: static; inset: auto; z-index: auto; grid-area: f;
+      display: flex; align-items: stretch; justify-content: space-between;
+      block-size: var(--cfg-dock-inset);
+      padding-inline: max(0.75rem, env(safe-area-inset-left, 0px)) max(0.75rem, env(safe-area-inset-right, 0px));
+      pointer-events: auto;
+      --bg: var(--cfg-dock-bg); background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
+      border-block-start: 1px solid var(--border);
+      & > :where(.bl, .br) {
+        display: flex; align-items: stretch; gap: 0; margin: 0; padding: 0;
+        border: 0; border-radius: 0; box-shadow: none; background: none;
+        -webkit-backdrop-filter: none; backdrop-filter: none;
+        translate: none; visibility: visible;
+      }
+      & > :where(.bc) { display: none; }
+      & :where(.fab-1, .fab-2, .fab-3) {
+        inline-size: 2.75rem; block-size: 100%; border-radius: 0;
+        align-items: flex-start; padding-block: 0.3rem 0;
+        background-color: transparent; border-color: transparent; box-shadow: none;
+      }
+    }
+    :where(.areas) { padding-block-end: 0; }
+    :where(.hud) > :where(.br.toasts) { padding-block-end: 1lh; }
+    :where(.pg-main-footer) { padding-block-end: 0.25lh; }
+    :where(.pg-main-footer) > :where(.nav-version) { min-block-size: 0; }
+  }
 
   /* FOCUS MODE chrome-hide — lives here (not in core.layout) so it beats
      component display rules. .crumbs sets display:flex in @layer components,
