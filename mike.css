@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.4.6 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.6/mike.css
+   mike.css v3.4.7 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.7/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2366,6 +2366,19 @@
       border-color     calc(var(--cfg-motion) * 0.12s) ease,
       backdrop-filter  calc(var(--cfg-motion) * 0.12s) ease;
     & > svg { inline-size: 1.2em; block-size: 1.2em; }
+    /* THE CURRENT PAGE (v3.4.7, EventOS gf-1043: "add an active state for
+       the home icon when on the home page keep it small though"): a fab
+       that is the page shown — any truthy aria-current, the nav item's
+       grammar — sets its glyph on a small soft disc, a low tint of its hue
+       a fifth of an em round the glyph, and commits the glyph's ink to the
+       pole as a current nav item and a menu row do. The glyph's own box
+       paints it (a round fill and a spread shadow): nothing moves, the fab
+       keeps its size, in a dock's pill and in the permanent bar alike.
+       (The UA clips a non-root svg, and Safari its shadow with it.) */
+    &:where([aria-current]:not([aria-current="false"])) > :where(svg) {
+      --bg: 0.25; --fg: -1; background-color: var(--_bg); border-radius: 50%;
+      box-shadow: 0 0 0 0.2em var(--_bg); overflow: visible;
+    }
     &::before { content: ""; position: absolute; inset: -4px; }   /* static hit-pad */
     @media (pointer: fine) { &:hover { translate: 0 -2px; } }   /* the lift is a mouse's (EventOS #884) */
     &:active { translate: 0 0; }
@@ -3905,13 +3918,17 @@
      row: area f's row across the whole width — under the navigation too,
      which ends above it — a slim bar on the navigation's surface, as tall
      as --cfg-dock-inset, the home indicator's inset and the corner
-     curve's rise. Its two pills dissolve into the bar's two ends (the
-     hud's own one-cell grid, a slot at each end), where the curve leaves
-     room, and the middle stays empty over the home indicator; a control
-     is one target square standing on the band's foot — the band's height
-     where the band is less (an iPad's 40px) — its glyph held to its top,
-     clear of the indicator. The handle goes: a permanent dock is not
-     put away, whatever the stored state. The bar's rule asks the app
+     curve's rise. Its two pills dissolve (display: contents) and the bar
+     spaces their controls itself, in their order, EVENLY across its width
+     — each as far from its neighbours as from the bar's ends (the side
+     insets', where a device has them), whatever the pills hold, as a
+     browser's toolbar does (v3.4.7, EventOS gf-1043, Mike: "make a dock
+     like this evenly spaced"); a control is one target square standing on
+     the band's foot — the band's height where the band is less (an iPad's
+     40px) — its glyph held to its top, clear of the indicator, a badge on
+     its corner. The pill stays visible: the stored away state's hidden
+     would reach the controls through it. The handle goes: a permanent
+     dock is not put away, whatever the stored state. The bar's rule asks the app
      alone and leaves display to the dock's gates. What answers it from
      elsewhere — the navigation ending above it, a frame taking no
      clearance, the toasts no extra foot, a main footer giving the inset
@@ -3923,19 +3940,15 @@
     :where(.page) > :where(.hud.dock) {
       position: static; inset: auto; z-index: auto; grid-row: f; grid-column: 1 / -1;
       block-size: var(--cfg-dock-inset); grid-template-rows: minmax(0, 1fr);
-      padding-inline: max(0.75rem, env(safe-area-inset-left, 0px)) max(0.75rem, env(safe-area-inset-right, 0px));
+      grid-template-areas: none; grid-auto-flow: column; justify-content: space-evenly;
+      padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
       pointer-events: auto;
       --bg: var(--cfg-dock-bg); background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
       border-block-start: 1px solid var(--border);
-      & > :where(.bl, .br) {
-        display: flex; align-self: stretch; align-items: stretch; gap: 0; margin: 0; padding: 0;
-        border: 0; border-radius: 0; box-shadow: none; background: none;
-        -webkit-backdrop-filter: none; backdrop-filter: none;
-        translate: none; visibility: visible;
-      }
+      & > :where(.bl, .br) { display: contents; visibility: visible; }
       & > :where(.bc) { display: none; }
       & :where(.fab-1, .fab-2, .fab-3) {
-        inline-size: var(--cfg-touch); block-size: min(var(--cfg-touch), 100%); align-self: flex-end; border-radius: 0;
+        inline-size: var(--cfg-touch); block-size: min(var(--cfg-touch), 100%); align-self: end; border-radius: 0;
         align-items: flex-start; padding-block: 0.3rem 0;
         background-color: transparent; border-color: transparent; box-shadow: none;
       }

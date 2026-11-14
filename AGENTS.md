@@ -285,8 +285,12 @@ navigation ends above it (`grid-row-end: f-start`), and the bar is a slim
 band on the navigation's surface (`--cfg-dock-bg`), as tall as
 `--cfg-dock-inset` = the home indicator's inset + `--cfg-dock-curve`, at
 least `--cfg-dock-min` (an iPhone upright 50px; on its side, an iPad, a
-home button 40px), its controls at the two ends, the middle left to the
-indicator, no handle. The bar's rule decides no display — the dock's
+home button 40px), no handle. ITS CONTROLS ARE EVENLY SPACED (v3.4.7,
+EventOS gf-1043, Mike: "make a dock like this evenly spaced"): the pills
+dissolve (`display: contents`) and the bar's grid spaces their controls,
+in order, `space-evenly` — each as far from its neighbours as from the
+bar's ends, whatever the pills hold, as a browser's toolbar does; the
+bar's padding is the side safe-area insets alone. The bar's rule decides no display — the dock's
 gates do; what answers the bar from elsewhere (the knob, the navigation's
 end, a frame's clearance, the toasts' foot, a main footer's inset) asks
 the app on a touch pointer, `(display-mode: standalone) and (pointer:
@@ -390,7 +394,14 @@ down past the edge (a translate), and a `.cr` fab is the handle that
 stays. In a browser tab the dock takes no clearance: the canvas runs
 under the pills, the handle is the relief; only the toast pile clears it
 while it is on screen (v3.1.9). In the installed app it is the shell's
-last row (THE PERMANENT DOCK, under LAYOUT).
+last row (THE PERMANENT DOCK, under LAYOUT). THE CURRENT PAGE (v3.4.7,
+EventOS gf-1043: "an active state for the home icon … keep it small
+though"): a fab that is the page shown wears `aria-current="page"` (any
+truthy value, the nav item's grammar) and sets its glyph on a small soft
+disc — `--bg: 0.25` of its hue a fifth of an em round the glyph, painted by
+the glyph's own box (a round fill and a spread shadow), the ink at the pole
+as a current nav item's — so nothing moves and the fab keeps its size, in a
+pill and in the permanent bar alike.
 
 Dialogs are native `<dialog class="modal">` at a rung of the content
 ladder, opened in HTML — `commandfor="<id>" command="show-modal"` — and
