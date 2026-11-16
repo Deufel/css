@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.4.7 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.7/mike.css
+   mike.css v3.4.8 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.8/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -374,8 +374,11 @@
     height: 100svh; overflow: hidden; overscroll-behavior: none;
 
     /* centered caps the frame on ULTRA-WIDE screens only (2026-09-10, per
-       Mike) — a laptop never sees the margins. */
-    &:where(.centered) { max-inline-size: 1600px; margin-inline: auto; }
+       Mike) — a laptop never sees the margins. THE CAP IS IN THE TYPE
+       (v3.4.8): 109em of the shell's own step 0 is 1600px at the
+       reference, and it grows as the type does — a px cap held a 4K
+       screen's page to a column its larger type no longer fitted. */
+    &:where(.centered) { max-inline-size: 109em; margin-inline: auto; }
 
     /* FOCUS MODE — the SERVER stamps data-ui-state="focus" on .page from
        the stored pref (gf-262; the hidden checkbox is retired): the chrome
@@ -671,14 +674,18 @@
     --cfg-control-lead: 2.06;          /* line-box 1.5 + 2×0.28 vertical padding */
     /* THE POWER: the reference screen (the laptop the product was drawn
        on), and the two exponents. k-down 0.075 lands step 0 on 13.4px
-       at a 375px phone; k-up 0 holds every larger screen at the
-       reference's type until it is tuned (1 = the type grows as the
-       screen does, and a big screen reads as the laptop, zoomed). */
+       at a 375px phone. k-up 0.5 (v3.4.8, EventOS gf-1048, Mike: "on 4k
+       the dynamic type does not grow large enough"): the type grows as
+       the square root of the screen — step 0 is 17.5px at 1920×1080,
+       20.2px at 2560×1440 and 24.8px at 4K — so a bigger screen shows
+       both larger type and more of the page (0 held every larger
+       screen at the laptop's type; 1 is the laptop, zoomed). Never
+       over 1: what fits the reference then fits every larger screen. */
     --cfg-fluid: 1;
     --cfg-fluid-ref-w: 1280px;
     --cfg-fluid-ref-h: 760px;
     --cfg-fluid-k-down: 0.075;
-    --cfg-fluid-k-up: 0;
+    --cfg-fluid-k-up: 0.5;
 
     /* optical weight */
     --cfg-wght-base: 400; --cfg-wght-step: 90; --cfg-wght-max: 850;
@@ -796,6 +803,13 @@
   :where(body) { --bg: -0.5; background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg); min-block-size: 100svh; }
 
   :where(svg) { color: currentColor; }   /* the bridge: SVG ink = engine ink */
+  /* A CHART TAKES THE POWER ONCE (v3.4.8): a drawing with a viewBox is
+     scaled whole by its box, and its box already follows the type — so
+     the words inside it stand at the reference's size in user units,
+     or a large screen's type would be taken twice (a ring's figure
+     outgrew its ring at 4K). The svg itself keeps the power: an icon
+     is sized in its own em. */
+  :where(svg[viewBox]) > :where(*) { --cfg-fluid: 0; }
   /* half a CSS pixel (feedback #138): a constant hairline — one device
      pixel on a dense screen, and never the full-then-faint flicker a
      1px rule shows across DPRs */

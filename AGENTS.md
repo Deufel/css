@@ -78,7 +78,8 @@ Colour is computed, never picked. You never write a hex.
 - THE POWER (v3.3.0): the base scales by the screen — the lesser of its
   width over `--cfg-fluid-ref-w` (1280px) and its height over
   `--cfg-fluid-ref-h` (760px) — to `--cfg-fluid-k-down` (0.075) below the
-  reference and `--cfg-fluid-k-up` (0) above it. `--cfg-fluid: 0` holds
+  reference and `--cfg-fluid-k-up` (0.5 since v3.4.8: the type grows as the
+  square root of a larger screen, 24.8px at 4K) above it. `--cfg-fluid: 0` holds
   the scale still.
 - THE READABILITY SCALE (v3.2.5): `[data-ui-size="custom"]` reads two px
   numbers, `--read-floor` (the smallest size the person reads
