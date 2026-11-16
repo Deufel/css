@@ -68,27 +68,32 @@ Colour is computed, never picked. You never write a hex.
   absolute so steps never compound. Type IS spacing: one step re-rhythms
   text, gaps and control heights. Components never re-type themselves;
   a usage site nudges, through the knob.
-- THE SCALE IS TWO BOOK ENDS (v3.3.0): seven steps, −3 … +3, between the
-  size of step −3 and of step +3 — `--cfg-type-floor`, `--cfg-type-ceiling`,
-  px without the unit; the base is √(floor·ceiling), a step
-  (ceiling/floor)^(1/6). Elements take: h1 3, h2 2, h3 1, h4–h6 0 (at
-  weight 600), p −1, small −2, sub/sup −3; bare text and controls 0.
-  `[data-ui-size]` is a pair: sm 8–22, md 9–24 (the default), lg 9–28, xl
-  11–36. `--_step` is an element's step as a multiple of the base.
-- THE POWER (v3.3.0): the base scales by the screen — the lesser of its
-  width over `--cfg-fluid-ref-w` (1280px) and its height over
-  `--cfg-fluid-ref-h` (760px) — to `--cfg-fluid-k-down` (0.075) below the
-  reference and `--cfg-fluid-k-up` (0.5 since v3.4.8: the type grows as the
-  square root of a larger screen, 24.8px at 4K) above it. `--cfg-fluid: 0` holds
-  the scale still.
-- THE READABILITY SCALE (v3.2.5): `[data-ui-size="custom"]` reads two px
-  numbers, `--read-floor` (the smallest size the person reads
-  comfortably) and `--read-ceiling` (the largest they want), as the book
-  ends, with no power: the person decided, for this device. A phone is
-  read close, a TV from across the room; everything in lh and ch
-  follows, and a layout switch in `ch` on a container then asks how many
-  characters fit at the type this person reads (in `@media`, `ch`
-  ignores the page's font — the switch is a container query).
+- THE SCALE IS STATED AT THREE SCREENS (v3.5.0, after utopia.fyi): a
+  small screen, the design screen and a large screen —
+  `--cfg-type-min-*`, `-mid-*`, `-max-*`, each a width (`-vw`, 360px ·
+  1280px · 3840px), a base (`-base`, step 0 in px without the unit:
+  13.4 · 14.7 · 34) and a ratio (`-ratio`, 1.178 at all three). At an
+  anchor a step is base × ratio^`--type`; between two neighbours it runs
+  in a straight line with the screen's width, outside them it holds.
+  THE SCREEN is its width, or its height × 1.684 (the design screen's
+  1280/760) where that is less, so a wide, short screen takes no more
+  type than its lines hold; `--cfg-type-screen` replaces the reading.
+  Nothing else bounds the type. Elements take: h1 3, h2 2, h3 1, h4–h6 0
+  (at weight 600), p −1, small −2, sub/sup −3; bare text and controls 0.
+- THE SIZE (v3.5.0): `--cfg-type-size` multiplies every step;
+  `[data-ui-size]` sets it — sm 0.9, md 1 (the default), lg 1.1, xl
+  1.35. Everything in lh and ch follows, and a layout switch in `ch` on
+  a container asks how many characters fit at the type in force (in
+  `@media`, `ch` ignores the page's font — the switch is a container
+  query). `--_step` is an element's step as a multiple of step 0 on the
+  design screen.
+- A DRAWING IS DRAWN FOR ONE SCREEN (v3.5.0): inside an `svg` with a
+  `viewBox` a unit is the drawing's, not a px — the box, sized in lh/em,
+  has already taken the screen and the size and scales the whole
+  drawing — so its words are read at the design screen and size 1,
+  whatever the real ones are (`--cfg-type-screen` is the design width
+  there). The `svg` itself keeps the page's type: an icon is sized in
+  its own em.
 - `--focus` and `--border` are the derived token pair every surface
   computes: read them, never redefine them. A focused link (a box with no
   corner of its own) rings at a control's corner in proportion to its own

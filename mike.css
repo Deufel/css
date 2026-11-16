@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.4.8 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.4.8/mike.css
+   mike.css v3.5.0 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.0/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -108,29 +108,34 @@
               controls stand at 0. The scale is continuous, so
               fractional steps are legal (the system uses −0.5 itself).
               Absolute, never compounding: −1 inside −1 is still −1.
-   THE SCALE (v3.3.0) is two book ends — the size of step −3 and of
-   step +3, unitless px (--cfg-type-floor, --cfg-type-ceiling): the base
-   is √(floor·ceiling), a step its (ceiling/floor)^(1/6). A [data-ui-size]
-   is a pair. THE POWER (--cfg-fluid-*) scales the base by the screen —
-   the lesser of its width and its height over their references, to one
-   exponent below the reference and another above it.
+   THE SCALE (v3.5.0) is stated at three screens — a small one, the
+   design screen and a large one (--cfg-type-min-*, -mid-*, -max-*), each
+   a width, a base (step 0, px without the unit) and a ratio, so a step
+   there is base × ratio^--type. Between two neighbours a step runs in a
+   straight line with the screen's width; outside them it holds. THE
+   SCREEN is its width, or its height × 1.684 (the design screen's
+   1280/760) where that is less. THE SIZE (--cfg-type-size, the
+   [data-ui-size] switch) multiplies every step. Nothing else bounds it.
+   A DRAWING IS DRAWN FOR ONE SCREEN: inside an svg with a viewBox a unit
+   is the drawing's, not a px, and the box scales the whole drawing —
+   so its words are read at the design screen and size 1.
    PUBLIC OUTPUTS:
      --_font-size   the resolved, unfloored size. Components may read it
                     for the iOS floor idiom:
                     font-size: max(16px, var(--_font-size))
                     and for a box that keeps the step while the element's
                     own text is set smaller (the avatar riding a .nav-item)
-     --_step        the element's step as a multiple of the base —
-                    (ceiling/floor)^(--type/6), the ratio to its step
+     --_step        the element's step as a multiple of step 0 on the
+                    design screen — its ratio^--type
      --_control-h   THE shared control height — resolved per element
                     against its OWN unfloored size, so every set-height
                     control lands on one height at a given --type.
 
    ORTHOGONALITY: this file reads nothing from colour or layout.
-   REGISTRATION: one. --type must not inherit (a step means the same
-   thing everywhere it is set; components opt in per-subtree with the
-   `--type: inherit` idiom). All config is plain inherited custom
-   properties with their single home in @layer theme.
+   REGISTRATION: one, --type — a number that inherits (gf-68); a step
+   means the same thing everywhere because the scale is absolute. All
+   config is plain inherited custom properties with their single home in
+   @layer theme.
    ════════════════════════════════════════════════════════════════════ */
 /* --type INHERITS (gf-68, canon change): a container's step flows to
    everything below it, the way every author already assumes. Safe because
@@ -270,25 +275,31 @@
    ════════════════════════════════════════════════════════════════════ */
 @layer core.type {
   :where(*) {
-    /* THE SCALE, FROM TWO BOOK ENDS (v3.3.0, EventOS gf-1000, Mike
-       2026-11-12: "a small, Med, Lg that will have some reasonable book
-       ends"): the floor is step −3 and the ceiling step +3, so the base
-       is √(floor·ceiling) and a step (ceiling/floor)^(1/6) — --_step is
-       this element's step as a multiple of the base. pow() takes the
-       raw step, so −1/−2 fall on the same ratio +1/+2 climb on. */
-    --_step: pow(calc(var(--cfg-type-ceiling) / var(--cfg-type-floor)), calc(var(--type) / 6));
-    /* THE POWER (his word: "a power math for auto scaling across
-       devices"): the screen is the LESSER of its width and its height
-       over their references — a wide, short screen gets no more type
-       than its lines hold — and the base takes that to one exponent
-       below the reference (--cfg-fluid-k-down) and another above it
-       (--cfg-fluid-k-up); --cfg-fluid 0 holds the scale still (a
-       device's own pair). A length over a length is a number. */
-    --_screen: min(calc(100vi / var(--cfg-fluid-ref-w)), calc(100vb / var(--cfg-fluid-ref-h)));
-    --_font-size: calc(sqrt(var(--cfg-type-floor) * var(--cfg-type-ceiling)) * 1px * var(--_step)
-      * pow(min(var(--_screen), 1), calc(var(--cfg-fluid-k-down) * var(--cfg-fluid)))
-      * pow(max(var(--_screen), 1), calc(var(--cfg-fluid-k-up) * var(--cfg-fluid))));
+    /* THE SCALE AT THREE SCREENS (v3.5.0, EventOS gf-1048, Mike
+       2026-11-16: "we are essentially just looking to use the
+       https://utopia.fyi/ system"): at each anchor — the small screen,
+       the design screen, the large screen — a step is its base ×
+       its ratio^--type (pow() takes the raw step, so −1/−2 fall on the
+       ratio +1/+2 climb on). THE SCREEN is the width, or the height ×
+       1.684 (the design screen's 1280/760) where that is less — a wide,
+       short screen takes no more type than its lines hold — unless
+       --cfg-type-screen names it (a drawing does, theme). t1 runs 0 → 1
+       from the small screen to the design screen, t2 from the design
+       screen to the large one, each held outside its range (a length
+       over a length is a number), so a step is a straight line between
+       neighbours and flat beyond the ends; --cfg-type-size multiplies
+       it. No floor, no ceiling: the anchors are the scale. */
+    --_screen: var(--cfg-type-screen, min(100vi, 100vb * 1.684));
+    --_t1: clamp(0, (var(--_screen) - var(--cfg-type-min-vw)) / (var(--cfg-type-mid-vw) - var(--cfg-type-min-vw)), 1);
+    --_t2: clamp(0, (var(--_screen) - var(--cfg-type-mid-vw)) / (var(--cfg-type-max-vw) - var(--cfg-type-mid-vw)), 1);
+    --_s-min: calc(var(--cfg-type-min-base) * pow(var(--cfg-type-min-ratio), var(--type)));
+    --_s-mid: calc(var(--cfg-type-mid-base) * pow(var(--cfg-type-mid-ratio), var(--type)));
+    --_s-max: calc(var(--cfg-type-max-base) * pow(var(--cfg-type-max-ratio), var(--type)));
+    --_font-size: calc(var(--cfg-type-size) * 1px * (var(--_s-min) + (var(--_s-mid) - var(--_s-min)) * var(--_t1) + (var(--_s-max) - var(--_s-mid)) * var(--_t2)));
     font-size: var(--_font-size);
+    /* the element's step as a multiple of step 0 on the design screen (a
+       focused link's corner reads it) */
+    --_step: pow(var(--cfg-type-mid-ratio), var(--type));
 
     /* THE shared control height — per element, off its OWN unfloored
        size: height = unfloored font × --cfg-control-lead + 2px border.
@@ -375,8 +386,8 @@
 
     /* centered caps the frame on ULTRA-WIDE screens only (2026-09-10, per
        Mike) — a laptop never sees the margins. THE CAP IS IN THE TYPE
-       (v3.4.8): 109em of the shell's own step 0 is 1600px at the
-       reference, and it grows as the type does — a px cap held a 4K
+       (v3.4.8): 109em of the shell's own step 0 is 1600px on the
+       design screen, and it grows as the type does — a px cap held a 4K
        screen's page to a column its larger type no longer fitted. */
     &:where(.centered) { max-inline-size: 109em; margin-inline: auto; }
 
@@ -665,27 +676,28 @@
    ════════════════════════════════════════════════════════════════════ */
 @layer theme {
   :root {
-    /* THE SCALE'S BOOK ENDS, px without the unit: step −3 and step +3.
-       The default is "md", 9 and 24 — step 0 = √216 ≈ 14.7px, just
-       under 16px, so editable fields lean on the input-only font floor
-       to dodge iOS focus-zoom. */
-    --cfg-type-floor: 9;
-    --cfg-type-ceiling: 24;
+    /* THE THREE SCREENS (v3.5.0, EventOS gf-1048): the small screen (a
+       phone), the design screen (the laptop the product is drawn and
+       tuned on, so every page tuned there keeps fitting) and the large
+       screen (4K), each its width, its base — step 0, px without the
+       unit — and its ratio. The phone and the laptop read the v3.4 type
+       to rounding; a larger screen grows toward the large anchor (Mike,
+       2026-11-16: a large TV and a small phone show about as many lh and
+       ch, read from their distances). Step 0 on the design screen,
+       14.7px, sits just under 16px, so editable fields lean on the
+       input-only font floor to dodge iOS focus-zoom. */
+    --cfg-type-min-vw: 360px;
+    --cfg-type-min-base: 13.4;
+    --cfg-type-min-ratio: 1.178;
+    --cfg-type-mid-vw: 1280px;
+    --cfg-type-mid-base: 14.7;
+    --cfg-type-mid-ratio: 1.178;
+    --cfg-type-max-vw: 3840px;
+    --cfg-type-max-base: 34;
+    --cfg-type-max-ratio: 1.178;
+    /* THE SIZE: a multiplier on every step — the size switch sets it */
+    --cfg-type-size: 1;
     --cfg-control-lead: 2.06;          /* line-box 1.5 + 2×0.28 vertical padding */
-    /* THE POWER: the reference screen (the laptop the product was drawn
-       on), and the two exponents. k-down 0.075 lands step 0 on 13.4px
-       at a 375px phone. k-up 0.5 (v3.4.8, EventOS gf-1048, Mike: "on 4k
-       the dynamic type does not grow large enough"): the type grows as
-       the square root of the screen — step 0 is 17.5px at 1920×1080,
-       20.2px at 2560×1440 and 24.8px at 4K — so a bigger screen shows
-       both larger type and more of the page (0 held every larger
-       screen at the laptop's type; 1 is the laptop, zoomed). Never
-       over 1: what fits the reference then fits every larger screen. */
-    --cfg-fluid: 1;
-    --cfg-fluid-ref-w: 1280px;
-    --cfg-fluid-ref-h: 760px;
-    --cfg-fluid-k-down: 0.075;
-    --cfg-fluid-k-up: 0.5;
 
     /* optical weight */
     --cfg-wght-base: 400; --cfg-wght-step: 90; --cfg-wght-max: 850;
@@ -695,21 +707,21 @@
     --font-display: "Roboto", system-ui, sans-serif;
   }
 
-  /* ── size switch — a size IS a pair of book ends (v3.3.0; the pairs
-     are EventOS's to tune on its Type page) ── */
-  [data-ui-size="sm"] { --cfg-type-floor: 8;  --cfg-type-ceiling: 22; --cfg-fluid: 1; }
-  [data-ui-size="md"] { --cfg-type-floor: 9;  --cfg-type-ceiling: 24; --cfg-fluid: 1; }
-  [data-ui-size="lg"] { --cfg-type-floor: 9;  --cfg-type-ceiling: 28; --cfg-fluid: 1; }
-  [data-ui-size="xl"] { --cfg-type-floor: 11; --cfg-type-ceiling: 36; --cfg-fluid: 1; }  /* marketing */
-  /* THE READABILITY SCALE (v3.2.5, EventOS gf-818, Mike 2026-10-20: "can the
-     user read this" — a phone is read close, a TV from across the room):
-     the person sets the smallest size they read comfortably and the
-     largest they want — two px numbers stamped where the setting lives
-     (--read-floor, --read-ceiling) — and they ARE the book ends. No
-     power: the person decided, for this device. Everything sized in lh
-     and ch then follows, and a layout switch in ch asks how many
-     characters fit at the type this person reads. */
-  [data-ui-size="custom"] { --cfg-type-floor: var(--read-floor, 12); --cfg-type-ceiling: var(--read-ceiling, 32); --cfg-fluid: 0; }
+  /* ── THE SIZE SWITCH multiplies every step (v3.5.0; the sizes are
+     EventOS's to tune on its Type page) — it never bounds the type ── */
+  [data-ui-size="sm"] { --cfg-type-size: 0.9; }
+  [data-ui-size="md"] { --cfg-type-size: 1; }
+  [data-ui-size="lg"] { --cfg-type-size: 1.1; }
+  [data-ui-size="xl"] { --cfg-type-size: 1.35; }  /* marketing */
+  /* A DRAWING IS DRAWN FOR ONE SCREEN (v3.5.0, EventOS gf-1048): a px is
+     a screen's unit, but inside a coordinate system that scales its
+     content — an svg with a viewBox — a unit is the drawing's. The
+     drawing's box is sized in lh/em, so it has already taken the screen
+     and the size, and it scales everything inside with it; the words in
+     it are therefore read at the design screen and size 1, whatever the
+     real ones are — taken twice, a 4K screen's figure outgrew its ring.
+     The svg itself keeps the page's type: an icon is sized in its own em. */
+  :where(svg[viewBox]) > :where(*) { --cfg-type-screen: var(--cfg-type-mid-vw); --cfg-type-size: 1; }
 
   /* ── font switch — orthogonal to skin; consumers load the webfonts ── */
   [data-ui-font="grotesk"]  { --font-ui:"Hanken Grotesk",system-ui,sans-serif; --font-display:"Hanken Grotesk",sans-serif; --font-mono:"Spline Sans Mono",ui-monospace,monospace; font-family:var(--font-ui); }
@@ -780,13 +792,13 @@
    ════════════════════════════════════════════════════════════════════ */
 @layer base {
   /* PIN the root: the scale drives everything BELOW html; html stays a
-     fixed 16px so `rem` never shifts and the book ends apply ONCE. */
+     fixed 16px so `rem` never shifts and the scale applies ONCE. */
   :where(html) { font-family: var(--font-ui); font-size: 100%; }
 
   /* THE ELEMENT'S STEP (v3.3.0, Mike 2026-11-12: "H1 should be type: 3,
      H2 should be 2 and h3 = 1, (h4, h5 and h6 = 0), P = -1, small = -2
-     and super / sub = -3"): seven steps, so the two book ends are the
-     smallest and the largest text an element takes by itself. */
+     and super / sub = -3"): seven steps — −3 and +3 are the smallest
+     and the largest text an element takes by itself. */
   :where(h1) { --type: 3 } :where(h2) { --type: 2 } :where(h3) { --type: 1 }
   :where(h4, h5, h6) { --type: 0; font-weight: 600; }   /* step 0 = body weight; nudged so each reads as a heading */
   :where(p) { --type: -1 } :where(small) { --type: -2 } :where(sub, sup) { --type: -3 }
@@ -803,13 +815,6 @@
   :where(body) { --bg: -0.5; background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg); min-block-size: 100svh; }
 
   :where(svg) { color: currentColor; }   /* the bridge: SVG ink = engine ink */
-  /* A CHART TAKES THE POWER ONCE (v3.4.8): a drawing with a viewBox is
-     scaled whole by its box, and its box already follows the type — so
-     the words inside it stand at the reference's size in user units,
-     or a large screen's type would be taken twice (a ring's figure
-     outgrew its ring at 4K). The svg itself keeps the power: an icon
-     is sized in its own em. */
-  :where(svg[viewBox]) > :where(*) { --cfg-fluid: 0; }
   /* half a CSS pixel (feedback #138): a constant hairline — one device
      pixel on a dense screen, and never the full-then-faint flicker a
      1px rule shows across DPRs */
