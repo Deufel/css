@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.2 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.2/mike.css
+   mike.css v3.5.3 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.3/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -442,12 +442,22 @@
     @media (width < 768px) {
       & > :where(.pg-navigation, .pg-toolbar) { min-inline-size: var(--rail-w-icon); max-inline-size: var(--rail-w-icon); }
     }
-    /* rail children are SHRINK-PROOF (gf-72b): a short screen must
-       SCROLL the rail (overflow-y above), never squeeze its groups —
-       squeezed groups compress and overlap their content, which read as
-       "the icons shrink". Same scroll-safety the toolbar's filling
-       spread-column already declared. */
-    & > :where(.pg-navigation, .pg-toolbar) > * { flex-shrink: 0; }
+    /* THE NAVIGATION RAIL IS THREE PARTS (v3.5.3, EventOS gf-1064: "make this
+       bottom always here and the main part the scrollable area; same for the
+       top"): a head and a foot that never scroll, and between them the one
+       child that takes what is left and scrolls when it must — written as
+       <header> · a div · <footer>, direct children of the nav. The rail does
+       not scroll itself while it has them; a rail without the three keeps
+       the old rule (it scrolls whole). The parts and the middle's children
+       are SHRINK-PROOF (gf-72b): a short screen scrolls the middle, never
+       squeezes its links; a thin scrollbar takes a reserved gutter and
+       moves nothing. The toolbar rail scrolls whole, its one spread-column
+       filling it (below). */
+    & > :where(.pg-toolbar) > * { flex-shrink: 0; }
+    & > :where(.pg-navigation) > :where(header, footer) { flex: none; }
+    & > :where(.pg-navigation:has(> header + :not(footer) + footer)) { overflow-y: clip; }
+    & > :where(.pg-navigation) > :where(header + :not(footer)) { flex: 1 1 0; min-block-size: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+    & > :where(.pg-navigation) > :where(header + :not(footer)) > * { flex-shrink: 0; }
     /* the COLLAPSED width is the ANATOMY (gf-72): glyph (1.15em) +
        item inline padding (0.6em × 2) + rail padding (0.25lh × 2). The
        server stamps --pg-navigation-w / --pg-toolbar-w to this token;
@@ -1033,18 +1043,18 @@
 
 
   /* scrollbars — SCOPED to the things that scroll (moved off `*`) */
-  :where(html, .pg-main, .pg-navigation, .pg-aside, .pg-toolbar, .scroll-x, .scroll-y, pre, textarea) {
+  :where(html, .pg-main, .pg-navigation, .pg-navigation > header + :not(footer), .pg-aside, .pg-toolbar, .scroll-x, .scroll-y, pre, textarea) {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
 
   /* smooth scrolling — the scroll containers, not just html: anchor jumps
      (the n3 landmark rail) scroll pg-main. Reduced-motion gets instant. */
-  :where(html, .pg-main, .pg-navigation, .pg-aside, .pg-toolbar) {
+  :where(html, .pg-main, .pg-navigation, .pg-navigation > header + :not(footer), .pg-aside, .pg-toolbar) {
     scroll-behavior: smooth;
   }
   @media (prefers-reduced-motion: reduce) {
-    :where(html, .pg-main, .pg-navigation, .pg-aside, .pg-toolbar) {
+    :where(html, .pg-main, .pg-navigation, .pg-navigation > header + :not(footer), .pg-aside, .pg-toolbar) {
       scroll-behavior: auto;
     }
   }

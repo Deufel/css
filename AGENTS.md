@@ -337,7 +337,11 @@ step over the body, under a page's h3 (it was step 1); the small map's
 label keeps its own weight.
 Rails are min-width, type-derived and SERVER-DRIVEN (`--pg-navigation-w`
 / `--pg-toolbar-w` stamped once on `.page`; collapse is a stored pref,
-labels drop through the tiers). Asides are content-sized. ONE topology:
+labels drop through the tiers). THE NAVIGATION RAIL IS THREE PARTS (v3.5.3,
+EventOS gf-1064): `nav.pg-navigation` written `<header>` · a div ·
+`<footer>` — the head and the foot never scroll, the one child between
+them takes what is left and scrolls (a reserved thin gutter, contained);
+the rail itself does not scroll. The toolbar rail scrolls whole. Asides are content-sized. ONE topology:
 no alternate grids at narrow widths — a region that cannot fit gates
 itself and its track collapses.
 
