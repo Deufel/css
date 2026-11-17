@@ -118,8 +118,10 @@ page's body as its child. Every region it writes is one grid area of
 `.page` (`core.shell`): the two are designed for each other and nothing
 else writes a region. CHROME IS EVERYTHING AROUND THE THING YOU WORK IN;
 pg-main is the thing, the area that expands. A dynamic layout hides
-chrome explicitly — focus mode collapses the grid, a phone's nav is the
-hub and the dock — never by a page's own rule. THE PAGE'S TITLE (v3.5.1,
+chrome explicitly — focus mode collapses the grid; a phone's nav is, in
+a browser tab, the header's menu button and the navigation in a drawer
+(EventOS gf-1085), and in the installed app the hub and the dock — never
+by a page's own rule. THE PAGE'S TITLE (v3.5.1,
 EventOS #1438) is one line and at most half its row (50cqi of the
 header), the font's ellipsis past that; the shell writes its whole text
 in its `title` attribute, and where the device hovers, the heading
@@ -135,8 +137,16 @@ turned on and off declaratively, as a union of readable class names:
 .c-desktop` (the nearest container), `.small .medium .large` (density
 tiers), `.fine .coarse` (pointer — the iOS layouts, the dock),
 `.standalone .browser` (the display mode — the installed app, or a
-browser tab; v3.4.6). One family per element; the second family goes on
-a wrapper. A part of a block is
+browser tab; v3.4.6). THE VIEWPORT FAMILY ASKS WHICH DEVICE, BY EITHER
+SIDE (v3.5.10): a screen under 576px wide OR tall is a phone's —
+`.mobile` shows there, `.tablet` and `.desktop` only from 576px of
+height — so a phone on its side takes every phone variant a template
+states. One family per element; the second family goes on a wrapper —
+the display mode excepted (v3.5.9): its two words have no rest state,
+they only TAKE OUT (`.standalone` everywhere but the app, `.browser` in
+the app) and stand last, so one of them beside one other family ANDs on
+the same element: `class="mobile browser"` is a phone's width in a tab,
+`class="coarse standalone"` a touch device in the app. A part of a block is
 shown or hidden ONLY this way, in the templ — never by the block's own
 `@container` or `@media`.
 
@@ -230,6 +240,36 @@ until it is moved.
         </section>
         …
 
+THE SHORT-WIDE SCREEN (v3.5.10, EventOS gf-1086: "a layout strategy for
+… a somewhat smaller device that is in landscape mode … just as much for
+the app mode as it is the browser mode"). A phone on its side passes the
+tablet's or the desk's WIDTH gate while its height holds a phone's lines
+(the type reads it by its height: 18 to 21 lines of the body, where the
+design screen holds 34), so the chrome that stood in rows took a third
+of it. THE RULE: a screen has rows or it has columns, and the chrome
+stands on the axis it has to spare. ONE CONDITION — at least 576px wide
+and under 576px tall, the phone's own line asked of the height — and
+each layer answers it once. THE GATES: a phone on its side is still a
+phone (above), so the rail is gated off and every phone variant holds.
+THE SHELL keeps its regions and their order and turns two rows into
+columns: the main header and the tabs share ONE row (the tabs at its
+end, at most half of it, scrolling sideways past that; the subheader is
+no query container there), and the dock's row is the dock's COLUMN —
+area d on the trailing edge, `--cfg-dock-side` wide: the device's
+trailing inset and, in the installed app, the same two pills on it,
+turned. No region names the column. The page stands inside the leading
+and bottom insets, on the main's surface; a second rail is its icon
+width. THE FRAME: a cell that is wide and short (the same condition,
+asked of the cell — a small tablet or a short window too) takes
+`--c-short` where a page states one and the width's own map where it
+does not: more columns than rows, the rows sharing the height (fr),
+every card still on it. A roster needs none: the shell's rows are its
+gain. THE OVERLAYS: a `.modal` and the hud end on the dock's column and
+stand inside the leading inset; a drawer's padding on the edge it hangs
+from is the device's inset where that is more. UNCHANGED: a phone
+upright is under 576px wide; a tablet and a desk — an iPad on its side
+is 768px tall — keep the rail, the header's rows and the dock's row.
+
 THE CELL under it: `.cell` is a size container — a grid track, a region.
 The layout hands a cell its size; size containment collapses it under an
 auto-height parent, and a flex-grown cell answers its queries with
@@ -303,10 +343,19 @@ aside, pg-main-footer, pg-aside, pg-footer. Set `--bg` on any to repaint.
 THE PERMANENT DOCK (v3.4.2; every touch device, v3.4.6, EventOS gf-1038:
 "we want the persistent dock on tablet as well … gated on app vs
 browser"): the dock — `.page > .hud.dock`, shown by its own gates
-(EventOS: `.coarse`, a phone or a tablet), two floating glass pills and a
-handle in a browser tab — is, in the installed app (`@media (display-mode:
-standalone)`, no width), the shell's last row ACROSS THE WHOLE WIDTH: the
-navigation ends above it (`grid-row-end: f-start`), no handle. IT IS THE
+(EventOS: `.coarse.standalone`, a touch device — a phone or a tablet at
+any width — in the installed app alone, gf-1085; a dock that shows in a
+browser tab is two floating glass pills and a handle) — is, in the
+installed app (`@media (display-mode: standalone)`, no width), the
+shell's last row ACROSS THE WHOLE WIDTH. THE DOCK'S ROW IS ITS OWN
+(v3.5.9, EventOS gf-1085: "in a dock not overlaying on the page and the
+toolbar"): area `d`, the last row of the shell's map across every
+column, and NO REGION NAMES IT — the navigation, the toolbar, the main
+and its footer, the asides and the footer end above it by the map
+itself, a region added later too; nothing is told to end above the dock,
+and focus mode's map ends on the same row. On a short-wide screen
+(v3.5.10) the same area is the trailing COLUMN and the pills stand in
+it, turned (THE SHORT-WIDE SCREEN, above). No handle. IT IS THE
 SAME TWO PILLS (v3.5.4, EventOS gf-1065, Mike, after iOS Calendar's
 toolbar: "I want this kind of dock"): the browser's glass pills (THE
 DOCK, under COMPONENTS), one at each end of the row in the hud's own
@@ -323,19 +372,23 @@ the row; a fab that is the page shown is filled whole at the pole, its
 glyph in the pole's ink (`--bg: 1; --fg: -1`, v3.5.8).
 v3.4.7's evenly spaced bar (its pills dissolved) and the
 navigation's band it stood on are retired. The bar's rule decides no display — the dock's
-gates do; what answers the bar from elsewhere (the knob, the navigation's
-end, a frame's clearance, the toasts' foot, a main footer's inset) asks
+gates do; what answers the bar from elsewhere (the knob, a frame's
+clearance, the toasts' foot, a main footer's inset) asks
 the app on a touch pointer, `(display-mode: standalone) and (pointer:
 coarse)`, since it cannot read the dock's gate. The page ends above it;
 the hud and a `.modal` take `--cfg-dock-inset` as their foot (0 where no
-permanent dock stands); a drawer covers it. (v3.4.1's status band under
+permanent dock stands) and `--cfg-dock-side` as their trailing edge (0
+but on a short-wide screen); a drawer, modal over the whole screen,
+covers it. (v3.4.1's status band under
 the device's clock is retired: the system paints that bar.)
 THE INSTALLED APP (v3.4.6): `.standalone` shows in the installed app
 alone (`display-mode: standalone`, the manifest's display), `.browser`
 everywhere else — a tab, a tab gone full screen; the mode's values, as
 `.fine .coarse` are the pointer's. CSS sees the display mode alone (iOS's
 `navigator.standalone` is a script's); the engine asks "installed" one
-way, `(display-mode: standalone)`, everywhere.
+way, `(display-mode: standalone)`, everywhere. The mode's words only
+take out (v3.5.9, THE GATES above): the one family that ANDs with
+another on the same element.
 THE TOUCH TARGET (v3.4.3): `--cfg-touch` (2.75rem, 44 CSS px — Apple's
 HIG figure and WCAG 2.5.5's) is the least recommended target; a hud fab
 and a dock control are exactly that square, one number, in a tab and in
@@ -353,7 +406,13 @@ labels drop through the tiers). THE NAVIGATION RAIL IS THREE PARTS (v3.5.3,
 EventOS gf-1064): `nav.pg-navigation` written `<header>` · a div ·
 `<footer>` — the head and the foot never scroll, the one child between
 them takes what is left and scrolls (a reserved thin gutter, contained);
-the rail itself does not scroll. The toolbar rail scrolls whole. Asides are content-sized. ONE topology:
+the rail itself does not scroll. THE NAVIGATION IN A DRAWER (v3.5.9,
+EventOS gf-1085): a `<nav>` that is a side drawer's child
+(`dialog.drawer.left > nav`) is the same three parts in the drawer's box
+— it fills the drawer, the head and the foot stay, the middle scrolls —
+and a query container (a side drawer's width is declared, as a rail's
+is), so the rail's own markup, tier gates and all, stands in it
+unchanged; a fab in it has no free-floating margin. The toolbar rail scrolls whole. Asides are content-sized. ONE topology:
 no alternate grids at narrow widths — a region that cannot fit gates
 itself and its track collapses.
 
@@ -364,7 +423,8 @@ start`/`.flank-end`, `.stack` (overlap — one grid area), `.frame` (a box
 at `--ratio`, 16/9 by default, its child filling it), `.areas` (the
 page's arranger, v3.4.0: a grid of named areas that fills its cell and
 never scrolls, a map a container gate — `--c-desktop` `--c-tablet`
-`--c-mobile`, and `--c-wide` from 1280px (v3.5.5) — its children naming
+`--c-mobile`, `--c-wide` from 1280px (v3.5.5) and `--c-short` for a cell
+576px wide and more and under 576px tall (v3.5.10) — its children naming
 their `--area`), `.oneline`,
 `.nowrap`, `.truncate`, `.grow`, `.fill`, `.far` (pushed to the far end of its row), `.center`, `.vr` (an hr stood
 on end), `section.owns-scroll` (the component-scrolled section every
@@ -379,7 +439,9 @@ CONTENT LADDER: `.content-1` (a column, 40ch) · `.content-2` (reading,
 take no rung. A width written as a length is a regression.
 
 THE GATES' LINES (the families are the contract's, above): viewport
-576px / 768px, `.ultrawide` 1920px and up at an aspect of 2:1 or wider;
+576px / 768px of width, each from 576px of height (under it a screen is
+`.mobile`, v3.5.10), `.ultrawide` 1920px and up at an aspect of 2:1 or
+wider; the short-wide screen `(width >= 576px) and (height < 576px)`;
 the display mode `(display-mode: standalone)` and its complement;
 the tiers `< 8rem` · `8–20rem` · `≥ 20rem` on the nearest container
 ("and-up" is the multi-class idiom `class="medium large"`). A gate goes
@@ -409,7 +471,9 @@ checked member pressed, v3.1.17; `.tabs` hides its radios the same way,
 no `.vh`), `.range-pair` (two ranges on ONE track — a low and a high
 thumb, the band between them painted from `--lo`/`--hi` percents the page
 stamps; the page keeps the low below the high, v3.2.6; v3.2.7 the legend at zero specificity; v3.2.17 the pair parts at either end — past the middle the low thumb lies over the high — and a disabled member drains the band, EventOS #1370), `.nav-item`/`.nav-icon`, `.drawer` (+ .left/.right/
-.top/.bottom, `.glass`), `.modal` (a `.content-*` rung; `.content-1` the confirm,
+.top/.bottom, `.glass`; its padding on the edge it hangs from is the
+device's inset where that is more, v3.5.10; a side drawer's `<nav>` is
+the navigation rail's three parts, v3.5.9), `.modal` (a `.content-*` rung; `.content-1` the confirm,
 `.content-3` the workbench), `.menu` (popover), `.search-box`, `.icon`
 (THE icon-only square — explicit, aria-label required), `.roster` (THE
 SERVER-DRIVEN TABLE: truncating cells, the hugging column model, tonal

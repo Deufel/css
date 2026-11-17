@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.8 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.8/mike.css
+   mike.css v3.5.10 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.10/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -45,7 +45,7 @@
                       size container — header · nav · ONE body that
                       scrolls · footer; what it holds measures the card
      gates            .mobile .tablet .desktop .ultrawide · .small .medium .large ·
-                      .c-* · .fine .coarse (visibility)
+                      .c-* · .fine .coarse · .standalone .browser (visibility)
      helpers          .suc .inf .wrn .dgr · .num · .bg · .bw · .glass …
                       (utility — the closed list)
      state            data-ui-state="…" tokens, matched ~= ; native and
@@ -91,7 +91,8 @@
 @property --c-desktop { syntax: "*";   inherits: false }
 @property --c-tablet { syntax: "*";    inherits: false }
 @property --c-mobile { syntax: "*";    inherits: false }
-/* an .areas frame's maps, one a width of its cell (style API): a grid-template each; must not leak into a frame nested in a card */
+@property --c-short { syntax: "*";     inherits: false }
+/* an .areas frame's maps, one a width of its cell and one for a short-wide cell (style API): a grid-template each; must not leak into a frame nested in a card */
 @property --_sem-ink { syntax: "*";        inherits: false }
 /* ════════════════════════════════════════════════════════════════════
    type.css — the TYPE concern. Standalone, orthogonal, complete.
@@ -372,7 +373,16 @@
        safe for every page: a page with no pg-navigation child leaves the
        "n" column empty, the auto track collapses to 0, and h/s/f span
        the full width exactly as before — public pages and the mobile
-       breakpoint (nav display:none, dock in "f") need no special case. */
+       breakpoint (nav display:none) need no special case.
+       THE DOCK'S ROW IS ITS OWN (v3.5.9, EventOS gf-1085, Mike: "make
+       sure that they are in a dock not overlaying on the page and the
+       toolbar"): area d is the shell's last row across every column, and
+       NO REGION NAMES IT — the navigation, the toolbar, the main and its
+       footer, the asides and the footer all end above it by the map
+       itself, and a region added later does too. The permanent dock
+       (visibility) is the one thing placed there; with nothing in it the
+       auto track is nothing. (v3.4.2 stood the dock in the footer's row,
+       which the navigation's column ran into: it was told to end above.) */
     grid-template:
       "b  b  b  b  b"  auto
       "n  h  h  h  h"  auto
@@ -381,7 +391,8 @@
       "n  ms ms ms a"  auto
       "n  t  m  ma a"  1fr
       "n  t  mf mf a"  auto
-      "n  f  f  f  f"  auto /
+      "n  f  f  f  f"  auto
+      "d  d  d  d  d"  auto /
       auto auto 1fr auto auto;
     height: 100svh; overflow: hidden; overscroll-behavior: none;
 
@@ -394,13 +405,15 @@
 
     /* FOCUS MODE — the SERVER stamps data-ui-state="focus" on .page from
        the stored pref (gf-262; the hidden checkbox is retired): the chrome
-       collapses and the grid becomes a single column of the main rows. */
+       collapses and the grid becomes a single column of the main rows,
+       the dock's row under them (v3.5.9). */
     &:where([data-ui-state="focus"]) {
       grid-template:
         "mh" auto
         "ms" auto
         "m"  1fr
-        "mf" auto / 1fr;
+        "mf" auto
+        "d"  auto / 1fr;
     }
 
     /* regions paint their own surface — set --bg on any pg-* child and it
@@ -439,8 +452,11 @@
     /* THE RAIL COLLAPSES ON A TABLET (v3.2.8, EventOS #1090: an installed app
        at 625 px kept the labelled rail, a third of the width): under 768px
        the rail is its icon width whatever the server stamped; the labels
-       drop through the tier gates as when collapsed. */
-    @media (width < 768px) {
+       drop through the tier gates as when collapsed. A SHORT screen's rail
+       is the same (v3.5.10): under 576px of height a rail that still
+       stands — a product's second rail; its navigation is gated off there
+       — is its icon width, as on a phone held upright. */
+    @media (width < 768px), (height < 576px) {
       & > :where(.pg-navigation, .pg-toolbar) { min-inline-size: var(--rail-w-icon); max-inline-size: var(--rail-w-icon); }
     }
     /* THE NAVIGATION RAIL IS THREE PARTS (v3.5.3, EventOS gf-1064: "make this
@@ -509,6 +525,51 @@
     & > :where(.pg-aside)       { grid-area: a;  overflow-y: auto; min-height: 0; overscroll-behavior: contain; }
     & > :where(.pg-main-aside)  { grid-area: ma; overflow-y: auto; min-height: 0; overscroll-behavior: contain; }
     & > :where(.pg-footer)      { grid-area: f;  container-type: inline-size; }
+
+    /* THE SHORT-WIDE SCREEN (v3.5.10, EventOS gf-1086, Mike: "a layout
+       strategy for the situation when you have a somewhat smaller device
+       that is in landscape mode … just as much for the app mode as it is
+       the browser mode"). THE CONDITION, one question: a screen at least
+       576px wide and under 576px tall — a phone on its side; the phone's
+       own line asked of the height, no new number. Its width passes the
+       tablet's gate and its height holds a phone's lines (the type reads
+       the screen as its height × 1.684 there: about 18 to 27 lines of
+       the body, where a desk holds 34 and a phone upright 37), so rows
+       are what it lacks and columns what it has. THE SAME REGIONS, THE
+       SAME ORDER — two rows of the map turn into columns:
+         · the main header and the main subheader (the tabs) share ONE
+           row, the tabs at its end, at most half of it (the title's own
+           measure), scrolling sideways past that. A cell sized by what it
+           holds cannot be a query container, so the subheader is none
+           here: what it holds asks the page.
+         · the dock's row is the dock's COLUMN: area d is the trailing
+           edge from under the banner to the bottom, --cfg-dock-side wide
+           (theme) — the device's trailing inset, and in the installed
+           app the dock's own width on it. No region names it, as none
+           names the row: nothing lies under the dock.
+       The page stands inside the device's leading and bottom insets (a
+       phone's notch is on a short side here, its home indicator on the
+       long one), on the main's surface, so the bands are the page's own.
+       The navigation's column is the product's to gate (the viewport
+       family reads a short screen as a phone, visibility). Last in the
+       rule, so it holds in focus mode too: the regions focus hides leave
+       their tracks empty. Guarded by the height: a phone upright (under
+       576px wide), a tablet and a desk (576px tall and more) keep the
+       map above. */
+    @media (width >= 576px) and (height < 576px) {
+      grid-template:
+        "b  b  b  b  b  b  b"  auto
+        "n  h  h  h  h  h  d"  auto
+        "n  s  s  s  s  s  d"  auto
+        "n  mh mh ms .  a  d"  auto
+        "n  t  m  m  ma a  d"  1fr
+        "n  t  mf mf mf a  d"  auto
+        "n  f  f  f  f  f  d"  auto /
+        auto auto 1fr auto auto auto var(--cfg-dock-side);
+      padding: 0 0 env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+      --bg: var(--cfg-main-bg); background-color: var(--_bg);
+      & > :where(.pg-main-subheader) { container-type: normal; max-inline-size: 50cqi; display: flex; align-items: flex-end; overflow: auto hidden; overscroll-behavior-x: none; }
+    }
   }
   /* .wash — the page's tint: a static, viewport-fixed UNDERLAY of two soft
      pools in the surface's own colour — the element's --bg resolves the
@@ -532,7 +593,9 @@
      children. Slot classes: t/c/b row × l/c/r column. Pure positioning —
      no paint — which is why it lives in layout, unlike drawer/modal/menu. */
   :where(.hud) {
-    position: fixed; inset: 0 0 var(--cfg-dock-inset) 0; display: grid; grid-template-areas: "hud";
+    /* (v3.5.10) it ends on the dock's column too, and inside the device's
+       leading inset: both nothing but on a short-wide screen */
+    position: fixed; inset: 0 var(--cfg-dock-side) var(--cfg-dock-inset) env(safe-area-inset-left, 0px); display: grid; grid-template-areas: "hud";
     pointer-events: none; z-index: 1;
     /* a hud CLEARS THE BANNER (EventOS gf-527, 2026-10-05): the pg-banner
        is the page's top track — one line and its padding — and a fixed
@@ -784,6 +847,16 @@
        the wearer's, the body's line in each of them. */
     --cfg-dock-foot: max(env(safe-area-inset-bottom, 0px) - 0.75lh, 0.5lh);
     --cfg-dock-inset: 0px;
+    /* THE TRAILING EDGE OF A SHORT-WIDE SCREEN (v3.5.10, EventOS gf-1086)
+       — DERIVED, the shell's last column there (core.shell): nothing on
+       any other screen; on a short-wide one the device's trailing inset;
+       and where the permanent dock stands — the app on a touch pointer —
+       the dock's COLUMN on that inset: a pill's width (the touch square,
+       and half a line for the pill's padding and edge) and half a line
+       of gutter. The dock takes no row there, so --cfg-dock-inset is
+       nothing. What is pinned to the viewport (the hud, a .modal) ends
+       on it as it ends on the row. */
+    --cfg-dock-side: 0px;
     /* THE MAIN'S POSITION (v3.5.6): the surface the main column's regions
        stand on — its header, subheader, body, footer, the toolbar — and
        the permanent dock's row under them, one number */
@@ -791,6 +864,12 @@
   }
   @media (display-mode: standalone) and (pointer: coarse) {
     :root { --cfg-dock-inset: calc(var(--cfg-touch) + 0.5lh + var(--cfg-dock-foot)); }
+  }
+  @media (width >= 576px) and (height < 576px) {
+    :root { --cfg-dock-side: env(safe-area-inset-right, 0px); }
+  }
+  @media (display-mode: standalone) and (pointer: coarse) and (width >= 576px) and (height < 576px) {
+    :root { --cfg-dock-inset: 0px; --cfg-dock-side: calc(var(--cfg-touch) + 1lh + env(safe-area-inset-right, 0px)); }
   }
   [data-ui-radius="0"] { --cfg-radius: 0px; }
   [data-ui-radius="1"] { --cfg-radius: 6px; }
@@ -1144,6 +1223,7 @@
                        part that changes there asks its card, which a
                        wide map makes wide. Registered, non-inheriting: a
                        frame inside a card has its own.
+       --c-short       the map for a short-wide cell (v3.5.10, below).
        --area          a child names its area (registered, non-inheriting).
        --gap           the rhythm between areas (0.25lh, the engine's
                        normal gap; v3.4.4 — it was 0.5lh 1.5ch).
@@ -1164,6 +1244,21 @@
   @container (width >= 1280px)        { :where(.areas) { grid-template: var(--c-wide, var(--c-desktop)); } }
   @container (576px <= width < 768px) { :where(.areas) { grid-template: var(--c-tablet, var(--c-desktop)); } }
   @container (width < 576px)          { :where(.areas) { grid-template: var(--c-mobile, var(--c-tablet, var(--c-desktop))); } }
+  /* THE SHORT MAP (v3.5.10, EventOS gf-1086): the four maps above choose
+     by the cell's WIDTH and budget their rows in lines; a cell that is
+     wide and SHORT — the shell's own condition asked of the frame's cell,
+     576px across and more, under 576px tall — has the columns and not
+     the rows. A page may state --c-short for it: the same cards, more
+     columns, rows that share the height (fr) with a budget only where a
+     card is a few fixed lines; what runs long scrolls in its card, as
+     ever. It falls back to the width's own map, each band restating its
+     chain, so a page that states none is exactly as it was. The cell is
+     asked, not the viewport: a phone on its side, and a small tablet or
+     a short window whose shell keeps its rows. A phone upright never
+     takes it (its cell is under 576px wide: the small map). */
+  @container (width >= 1280px) and (height < 576px)         { :where(.areas) { grid-template: var(--c-short, var(--c-wide, var(--c-desktop))); } }
+  @container (768px <= width < 1280px) and (height < 576px) { :where(.areas) { grid-template: var(--c-short, var(--c-desktop)); } }
+  @container (576px <= width < 768px) and (height < 576px)  { :where(.areas) { grid-template: var(--c-short, var(--c-tablet, var(--c-desktop))); } }
   @media (pointer: coarse) and (width < 576px) { :where(.areas) { padding-block-end: var(--dock, 3.4lh); } }
   :where(.grid)  { display: grid; gap: var(--gap, 0.25lh); grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min, 16rem)), 1fr)); }
   /* .grid > .row-wide — the HERO cell (feedback #67): one child takes the
@@ -2511,6 +2606,38 @@
     &:where(.right)  { --_translate-closed: 100% 0;  inset: 0 0 0 auto; inline-size: min(85vw,320px); block-size: 100svh; border-radius: var(--cfg-radius) 0 0 var(--cfg-radius); }
     &:where(.top)    { --_translate-closed: 0 -100%; inset: 0 0 auto 0; inline-size: 100vw; block-size: min(85svh,240px); border-radius: 0 0 var(--cfg-radius) var(--cfg-radius); }
     &:where(.bottom) { --_translate-closed: 0 100%;  inset: auto 0 0 0; inline-size: 100vw; block-size: min(85svh,240px); padding-block-end: max(0.75lh, env(safe-area-inset-bottom, 0px)); border-radius: var(--cfg-radius) var(--cfg-radius) 0 0; }
+    /* A DRAWER STANDS INSIDE THE DEVICE'S INSETS (v3.5.10, EventOS
+       gf-1086): on the edge it hangs from it runs under the inset — a
+       phone on its side has its notch on a short side and its home
+       indicator on the long one — so its padding there is the inset
+       where the inset is more; nothing where a device has none (a phone
+       upright has no side inset, and its bottom drawer's foot is above).
+       A drawer's heights hold at a phone's height on its side: the side
+       drawers are the viewport's, the top and bottom ones at most 85% of
+       it (.drawer-grow 80%), what is long scrolling inside. */
+    &:where(.left)   { padding-inline-start: max(1em, env(safe-area-inset-left, 0px)); padding-block-end: max(0.75lh, env(safe-area-inset-bottom, 0px)); }
+    &:where(.right)  { padding-inline-end: max(1em, env(safe-area-inset-right, 0px)); padding-block-end: max(0.75lh, env(safe-area-inset-bottom, 0px)); }
+    &:where(.top)    { padding-inline: max(1em, env(safe-area-inset-left, 0px)) max(1em, env(safe-area-inset-right, 0px)); }
+    &:where(.bottom) { padding-inline: max(1em, env(safe-area-inset-left, 0px)) max(1em, env(safe-area-inset-right, 0px)); }
+  }
+  /* THE NAVIGATION IN A DRAWER (v3.5.9, EventOS gf-1085, Mike: "the nav
+     bar basically be the same as the dashboard nav bar but put in a
+     drawer"): a <nav> that is a side drawer's child is the navigation
+     rail's three parts in the drawer's box — written as the rail is,
+     <header> · a div · <footer>: it fills the drawer, the head and the
+     foot never scroll, the one child between them takes what is left and
+     scrolls. A side drawer's width is DECLARED, as a rail's is, so the
+     nav is a query container and what it holds gates on the tiers
+     (.small .medium .large) exactly as it does in the rail: one markup,
+     two places. A fab in it takes the rail's rule — the rows space the
+     controls, never the fab's free-floating margin. */
+  :where(.drawer:where(.left, .right)) > :where(nav) {
+    container-type: inline-size; block-size: 100%; min-block-size: 0;
+    display: flex; flex-direction: column; justify-content: space-between; gap: var(--gap, 0.25lh);
+    & > :where(header, footer) { flex: none; }
+    & > :where(header + :not(footer)) { flex: 1 1 0; min-block-size: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+    & > :where(header + :not(footer)) > * { flex-shrink: 0; }
+    & :where(.fab-1, .fab-2, .fab-3) { margin: 0; }
   }
   /* THE DIALOG, TOP-PINNED (gf-71): its width is a rung of THE CONTENT
      LADDER — reading (.content-2) by default, .content-1 the focused
@@ -2521,8 +2648,12 @@
   :where(.modal) {
     --_dur: calc(var(--cfg-motion) * 0.2s);
     /* (v3.4.2) the box ends on a permanent dock: its fit-content height
-       stops there; the backdrop is the whole viewport's */
-    position: fixed; inset: 0 0 var(--cfg-dock-inset) 0; margin: 4vh auto auto;
+       stops there; the backdrop is the whole viewport's. (v3.5.10) On a
+       short-wide screen the dock is a column: the box ends on that, and
+       stands inside the device's leading inset — both nothing elsewhere.
+       At a phone's height on its side (375px) the box is the viewport
+       less its two margins, about 345px, and scrolls. */
+    position: fixed; inset: 0 var(--cfg-dock-side) var(--cfg-dock-inset) env(safe-area-inset-left, 0px); margin: 4vh auto auto;
     inline-size: 100%; max-inline-size: var(--content, var(--content-2)); max-block-size: calc(100svh - 8vh - var(--cfg-dock-inset));
     overflow: auto; overscroll-behavior: contain;
     padding: 0.5lh; border: 0; border-radius: var(--cfg-radius);
@@ -3656,6 +3787,12 @@
   /* the subheader takes over the divider when present; when IT carries
      the tabs, the underline is the divider */
   .pg-main-header:has(+ .pg-main-subheader) { border-block-end: 0; }
+  /* …except where the two share a row — the short-wide screen (v3.5.10,
+     core.shell): there each draws its own part of the one line, the
+     header under the title, the tabs' underline under the tabs */
+  @media (width >= 576px) and (height < 576px) {
+    .pg-main-header:has(+ .pg-main-subheader) { border-block-end: 1px solid var(--border); }
+  }
   .pg-main-subheader { --bg: var(--cfg-main-bg); padding: 0 0.25lh; border-block-end: 1px solid var(--border); }
   .pg-main-subheader:has(> .tabs-underline) { border-block-end: 0; }
   .pg-main-aside     { --bg: -0.6; padding: 0.25lh; border-inline-start: 1px solid var(--border); }
@@ -3925,9 +4062,20 @@
      and a container tier is decided by source order (the tiers sit
      later). Still ONE FAMILY PER ELEMENT: two gates cannot AND through
      the cascade — the later family's verdict stands alone; gate the
-     second family on a wrapper. */
+     second family on a wrapper. (The display mode is the exception,
+     v3.5.9: its words only take out, so they stand beside one other
+     family — THE MODE'S WORDS, below.) */
+  /* A PHONE ON ITS SIDE IS STILL A PHONE (v3.5.10, EventOS gf-1086): the
+     viewport family asks which DEVICE this is, and a screen under 576px
+     on EITHER side is a phone's — .mobile shows there, .tablet and
+     .desktop only where the screen is also 576px tall and more. So a
+     short-wide screen takes every phone variant a template already
+     states (the rail gated off, a glyph for a word, the phone's menu)
+     and the shell's short-wide map (core.shell) arranges it. A phone
+     upright is under 576px wide and was .mobile before; a tablet and a
+     desk are 576px tall and more and read exactly as before. */
   :where(.mobile, .tablet, .desktop, .ultrawide) { display: none }
-  @media (width < 576px)               { :where(.mobile)  { display: revert-layer } }
+  @media (width < 576px), (height < 576px) { :where(.mobile)  { display: revert-layer } }
   /* ULTRA-WIDE (v3.1.15, EventOS #803): pixels AND aspect — a 21:9 desk
      at 1920 and up, never a tall 4K; a member of the viewport family,
      shown there alone (a control that only matters on such a screen) */
@@ -3939,9 +4087,9 @@
      gap read as a hole once the dock was away.) */
   /* a gated crumb takes its separator with it (gf-407: the home crumb is
      .mobile; its follower's chevron must not stand alone wider) */
-  @media (width >= 576px) { :where(.crumbs) > .mobile + :where(a, span)::before { display: none } }
-  @media (576px <= width < 768px)      { :where(.tablet)  { display: revert-layer } }
-  @media (width >= 768px)              { :where(.desktop) { display: revert-layer } }
+  @media (width >= 576px) and (height >= 576px) { :where(.crumbs) > .mobile + :where(a, span)::before { display: none } }
+  @media (576px <= width < 768px) and (height >= 576px) { :where(.tablet)  { display: revert-layer } }
+  @media (width >= 768px) and (height >= 576px)         { :where(.desktop) { display: revert-layer } }
 
   /* [RETIRED 2026-08] the declared aside width: asides are content-
      sized now (containment removed in core.layout), so the auto track
@@ -3997,9 +4145,21 @@
      engine's one question of "installed": the permanent dock below and
      its knob in the theme ask it in the same words. (CSS sees the display
      mode alone; iOS's navigator.standalone is a script's.) */
-  :where(.standalone, .browser)                { display: none }
-  @media (display-mode: standalone)    { :where(.standalone) { display: revert-layer } }
-  @media not all and (display-mode: standalone) { :where(.browser) { display: revert-layer } }
+  /* THE MODE'S WORDS ONLY TAKE OUT (v3.5.9, EventOS gf-1085: a menu
+     button for a phone's width in a tab, a dock for a touch device in the
+     app). Every other family is none at rest and comes back by
+     revert-layer, so two of them on one element cannot AND — the later
+     family's verdict stands alone. This one, last in the layer, has no
+     rest state: .standalone is taken out everywhere but the installed
+     app, .browser in the installed app, and where neither rule holds the
+     element keeps whatever stood before — its own display, or another
+     family's verdict. So the mode is the ONE family that may stand beside
+     another on the same element, and the two AND: class="mobile browser"
+     is a phone's width in a tab, class="coarse standalone" a touch device
+     in the app. (A gated crumb takes its follower's chevron with it, as
+     the viewport family's does.) */
+  @media not all and (display-mode: standalone) { :where(.standalone) { display: none } :where(.crumbs) > .standalone + :where(a, span)::before { display: none } }
+  @media (display-mode: standalone)             { :where(.browser)    { display: none } :where(.crumbs) > .browser + :where(a, span)::before { display: none } }
 
   /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010, Mike: "make the dock
      persistent, but … only the height of the curve and below"; v3.4.6,
@@ -4007,12 +4167,15 @@
      persistent dock on tablet as well … it should be gated on app vs
      browser"; v3.5.4, EventOS gf-1065, Mike, after iOS Calendar's
      toolbar: "I want this kind of dock"). The dock is .page > .hud.dock,
-     shown by its own gates (EventOS: .coarse, a phone or a tablet). In a
-     browser tab it is two glass pills floating in the hud (THE DOCK, in
-     the slots) and the canvas runs under them. In the INSTALLED app, at
-     any width, the same element is the shell's last row: area f's row
-     across the whole width — under the navigation too, which ends above
-     it — as tall as --cfg-dock-inset, and the SAME TWO PILLS stand in it,
+     shown by its own gates (EventOS: .coarse.standalone — a touch device,
+     a phone or a tablet, in the installed app alone since v3.5.9). In a
+     browser tab a dock that shows there is two glass pills floating in
+     the hud (THE DOCK, in the slots) and the canvas runs under them. In
+     the INSTALLED app, at any width, the same element is the shell's last
+     row: area d (v3.5.9), the row no region names, across the whole width
+     — every region ends above it by the shell's map, the navigation and
+     the toolbar with the page —
+     as tall as --cfg-dock-inset, and the SAME TWO PILLS stand in it,
      one at each end, in the hud's own one-cell grid: each a pill as the
      browser's is, its controls the touch square, as tall as they need; the
      row stands on the main's surface (--cfg-main-bg, v3.5.6: the page's
@@ -4023,15 +4186,16 @@
      in place: the stored away state's translate and hidden would reach it.
      The handle goes: a permanent dock is not put away, whatever the stored
      state. The bar's rule asks the app alone and leaves display to the
-     dock's gates. What answers it from elsewhere — the navigation ending
-     above it, a frame taking no clearance, the toasts no extra foot, a
-     main footer giving the inset back — asks the knob's question, the app
-     on a touch pointer: a rule on another element cannot read the dock's
-     gate, and on a fine pointer no dock stands. Here, after the gates: the
-     bar out-ranks the slot utilities. */
+     dock's gates. What answers it from elsewhere — a frame taking no
+     clearance, the toasts no extra foot, a main footer giving the inset
+     back — asks the knob's question, the app on a touch pointer: a rule
+     on another element cannot read the dock's gate, and on a fine pointer
+     no dock stands. (No region is told to end above the dock: none
+     reaches its row.) Here, after the gates: the bar out-ranks the slot
+     utilities. */
   @media (display-mode: standalone) {
     :where(.page) > :where(.hud.dock) {
-      position: static; inset: auto; z-index: auto; grid-row: f; grid-column: 1 / -1;
+      position: static; inset: auto; z-index: auto; grid-area: d;
       block-size: var(--cfg-dock-inset); grid-template-rows: minmax(0, 1fr);
       padding: 0 env(safe-area-inset-right, 0px) var(--cfg-dock-foot) env(safe-area-inset-left, 0px);
       --bg: var(--cfg-main-bg); background-color: var(--_bg);
@@ -4039,8 +4203,29 @@
       & > :where(.bc) { display: none; }
     }
   }
+  /* ON A SHORT-WIDE SCREEN THE DOCK IS A COLUMN (v3.5.10, EventOS
+     gf-1086: "a layout strategy for … a somewhat smaller device that is
+     in landscape mode"). A phone on its side has no row to spend, so the
+     shell's map stands area d on the trailing edge (core.shell) and the
+     same element fills that column, as wide as --cfg-dock-side: the same
+     two pills, turned — the first at the top, the second at the bottom,
+     each a column of its touch-square controls, centred on the column's
+     own width; the device's trailing inset is the column's padding, the
+     page's bottom inset stands under it. Nothing else changes: the same
+     four controls, the same surface. No region names the column, so
+     nothing lies under the dock here either. Guarded twice: the app
+     alone, and the short-wide screen alone — an iPad on its side is
+     768px tall and keeps the row. */
+  @media (display-mode: standalone) and (width >= 576px) and (height < 576px) {
+    :where(.page) > :where(.hud.dock) {
+      block-size: auto; padding: 0.5lh env(safe-area-inset-right, 0px) 0.5lh 0;
+      & > :where(.bl, .br) { flex-direction: column; margin: 0; padding: 0.35em 0.15lh; justify-self: center; }
+      & > :where(.bl) { align-self: start; }
+      & > :where(.br) { align-self: end; }
+      & > :where(.bl, .br) > :where(.avatar) { margin-block: max(0px, calc((var(--cfg-touch) - var(--_control-h)) / 2)); }
+    }
+  }
   @media (display-mode: standalone) and (pointer: coarse) {
-    :where(.page) > :where(.pg-navigation) { grid-row-end: f-start; }
     :where(.areas) { padding-block-end: 0; }
     :where(.hud) > :where(.br.toasts) { padding-block-end: 1lh; }
     :where(.pg-main-footer) { padding-block-end: 0.25lh; }
