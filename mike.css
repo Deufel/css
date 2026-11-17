@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.1 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.1/mike.css
+   mike.css v3.5.2 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.2/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2957,34 +2957,6 @@
 	   space the SVG reserves. (The color plane needs NO rules
 	   here — pure engine composition, deliberately.) */
 	.chart-host { position: relative; }
-	/* the admin usage heatmap (year grid, Sun-Sat rows; moved
-	   2026-08-28 from an embedded <style> in admin.templ) */
-	/* the cell unit is REM on purpose (gf-184 fix, per Mike: "labels
-	   incorrectly placed"): the labels wear --type: -2, so an em-sized
-	   grid in the labels computed SMALLER than the em-sized heat grid —
-	   months spanned half the graph, day labels drifted off their rows.
-	   rem is the same length for every participant. */
-	.usage-heat { display: grid; grid-template-rows: repeat(7, var(--hc, 0.72rem)); grid-auto-flow: column; grid-auto-columns: var(--hc, 0.72rem); gap: 2px; inline-size: max-content; }
-	.usage-heat-cell { border-radius: 0.15em; }
-	/* the GitHub chrome (gf-182, per Mike + the svg-charts skill's
-	   quieting doctrine): day labels left (Mon/Wed/Fri), month labels
-	   above spanning their weeks, an intensity RAMP legend below —
-	   the swatches reuse the cell recipe, so legend and chart cannot
-	   disagree. The whole figure is max-content inside the card's own
-	   overflow-x scroller: it never squishes, it scrolls. */
-	/* THE CELL FITS (feedback #118, Mike: "better to be small and all
-	   visible than large and have to scroll"): .heat-wrap is the query
-	   container; the cell unit --hc is what 53 weeks and the day labels
-	   need to fit its width, capped at the old 0.72rem and floored where
-	   a cell stops reading — below the floor the wrapper scrolls. */
-	.heat-wrap { container-type: inline-size; overflow-x: auto; padding-block: 0.2lh; }
-	.heat-fig { --hc: clamp(0.34rem, calc((100cqi - 2.6rem - 52 * 2px) / 53), 0.72rem); inline-size: max-content; display: grid; grid-template-columns: auto auto; gap: 0.2lh 0.4em; }
-	.heat-months { grid-column: 2; display: flex; }
-	.heat-month { inline-size: calc(var(--hm-w) * (var(--hc) + 2px)); overflow: hidden; white-space: nowrap; --type: -2; --fg: -0.55; }
-	.heat-days { display: grid; grid-template-rows: repeat(7, var(--hc)); gap: 2px; --type: -2; --fg: -0.55; }
-	.heat-days > span { grid-row: var(--hd-r); line-height: var(--hc); }
-	.heat-legend { grid-column: 2; display: flex; align-items: center; gap: 2px; --type: -2; --fg: -0.55; justify-content: end; }
-	.heat-legend .usage-heat-cell { inline-size: var(--hc); block-size: var(--hc); }
 	.chart-host .chart-title { position: absolute; inset-block-start: 0.5lh; inset-inline-start: 0.8em; }
 	.chart-host .chart-legend { position: absolute; inset-block-start: 0.6lh; inset-inline-end: 0.8em; align-items: end; }
 
