@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.6 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.6/mike.css
+   mike.css v3.5.7 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.7/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2523,7 +2523,7 @@
     /* (v3.4.2) the box ends on a permanent dock: its fit-content height
        stops there; the backdrop is the whole viewport's */
     position: fixed; inset: 0 0 var(--cfg-dock-inset) 0; margin: 4vh auto auto;
-    inline-size: 100%; max-inline-size: var(--content, var(--content-2)); max-block-size: min(85svh, 44rem);
+    inline-size: 100%; max-inline-size: var(--content, var(--content-2)); max-block-size: calc(100svh - 8vh - var(--cfg-dock-inset));
     overflow: auto; overscroll-behavior: contain;
     padding: 0.5lh; border: 0; border-radius: var(--cfg-radius);
     --bg: 0.1; background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
