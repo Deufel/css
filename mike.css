@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.0 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.0/mike.css
+   mike.css v3.5.1 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.1/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -547,11 +547,20 @@
      title+views left, filters+verbs right, sized by need (minmax(0,1fr) /
      auto). Nothing here may ever stack; controls SHRINK instead (the views
      control's labels yield via the container gates, resolved against
-     pg-main-header). flex-wrap was how this became two ragged rows. */
+     pg-main-header). flex-wrap was how this became two ragged rows.
+     THE TITLE IS ONE LINE, AT MOST HALF ITS ROW (v3.5.1, EventOS #1438,
+     Mike: "Max length should be 50% of container then use … for
+     overflow"): the first cell's heading never wraps and never takes more
+     than 50cqi of the header (an inline-size container, so half the row),
+     less where the verbs leave less; past that the font's ellipsis. Its
+     whole text is its title attribute, which a hover lays over the row
+     (THE PAGE'S TITLE in the reveals, block) — the cell is that reveal's
+     box. */
   :where(.pg-main-header) > :where(.spread) {
     display: grid; grid-template-columns: minmax(0, 1fr) auto;
     align-items: center; gap: var(--gap, 0.25lh);
-    & > :where(:first-child) { min-inline-size: 0; }
+    & > :where(:first-child) { min-inline-size: 0; position: relative; }
+    & > :where(:first-child) > :where(h1, h2, h3) { max-inline-size: 50cqi; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   }
   /* the icon rail (a <nav> filling pg-toolbar): tight stack, thin inset.
      (railToolbar's <div class="pg-toolbar"> keeps composition defaults.) */
@@ -1825,6 +1834,23 @@
     padding: inherit; max-inline-size: none;
     white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere;
     --lift: 0.06; background-color: var(--_bg); outline: 1px solid var(--border); border-radius: var(--cfg-radius);
+  }
+  /* THE PAGE'S TITLE (v3.5.1, EventOS #1438, Mike: "show on a hover
+     reveal that does not cause layout shift"). The title row's heading is
+     one line at most half the row (core.shell) and carries its whole text
+     in its title attribute. Where the device hovers, the heading hovered
+     lays that text over the row from where the title starts — one line,
+     as wide as the row at most, on the header's own surface, half an em
+     of it past the last word so what it covers starts clear — and nothing
+     moves: the row keeps its height, the verbs their place, and the
+     pointer passes through to them. A touch device has no hover: the line
+     and its ellipsis stay. */
+  @media (hover: hover) {
+    :where(.pg-main-header) > :where(.spread) > :where(:first-child) > :where(h1, h2, h3):where([title]:hover)::after {
+      content: attr(title); position: absolute; inset-inline-start: 0; inset-block-start: 50%; translate: 0 -50%; z-index: 4;
+      max-inline-size: 100cqi; padding-inline-end: 0.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      background-color: var(--surf); pointer-events: none;
+    }
   }
 
   /* ── the GUIDE state (gf-262): the one control the set-up walk wants
@@ -3155,8 +3181,9 @@
                 card named outright (aria-label) whose header is its
                 actions alone — no hgroup — has NO TITLE: at every width
                 the header takes no line and lies over the top end
-                corner (v3.4.5), the body the whole card (a map under its
-                Edit); a card with nothing to act on drops the header
+                corner (v3.4.5, below), the body the whole card (a map
+                under its Edit); a card with nothing to act on drops the
+                header
        nav      optional: a tab strip; it keeps its line
        (body)   the ONE other child: it takes what is left and scrolls
                 there. A figure is fitted to it instead (its svg fills
@@ -3173,7 +3200,6 @@
       & > :where(hgroup) > :where(small, p) { --type: -2; --fg: -0.55; margin: 0; flex: 1 1 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       & > :where(button, a, .btn) { flex: none; --type: -2; }   /* an action is small: the header stays about a line */
     }
-    &:where([aria-label]) > :where(header:not(:has(> hgroup))) { position: absolute; inset-block-start: 0.2lh; inset-inline-end: 0.35em; z-index: 3; }   /* NO TITLE (v3.4.5, EventOS #1412): its actions over the top end corner at every width */
     & > :where(nav) { flex: none; & > :where(:first-child) { margin-inline-start: 0; } }
     & > :where(footer) {
       flex: none; display: flex; align-items: center; justify-content: space-between; gap: 0.5em; --type: -1;
@@ -3189,6 +3215,44 @@
       & :where(dd) > :where(small) { --type: -2; --fg: -0.55; } }
   }
 
+  /* THE ACTIONS LIE OVER A CARD THAT SHOWS NO TITLE — a card named
+     outright whose header is its actions alone, at every width (v3.4.5,
+     EventOS #1412), and every card named outright on the small map
+     (below). The header takes no line: it lies over the card's top end
+     corner, and its actions are GLASS — a glyph in a round, its word gone,
+     its touch target wider than it looks (at every width since v3.5.1,
+     EventOS #1442). The rest of the card keeps that corner clear: what
+     follows the header is padded at its inline end by --_corner, one
+     action's room or two's — the one length a part reads to stay clear of
+     the actions (a picture's caption does, below). The small map says the
+     same rule again, as it must: a selector cannot ask the frame's width.
+     A PICTURE BLEEDS (v3.5.1, EventOS #1442, Mike: "Remove padding
+     inbetween map and the card here"): a card named outright whose body
+     is a figure — the figure itself, or a block that holds that figure
+     alone — and which shows no title IS that picture: the card drops its
+     padding, the figure runs to its edges and the card's radius clips it,
+     the actions lie over it, and the figure is not padded for them — the
+     words it holds (its figcaption) keep clear of the corner by --_corner
+     instead. Named outright is the card's statement that its content
+     makes its title obvious, a map, a photo; a chart says what it counts
+     in its title (aria-labelledby) and keeps the card's inset, and a card
+     with a shown title keeps its inset under that title. */
+  :where(.areas) > :where(.card[aria-label]:not(:has(> header > hgroup)):has(> figure, > :not(header, nav, footer, dialog) > figure:only-child)) { padding: 0; }
+  :where(.areas) > :where(.card[aria-label]) > :where(header:not(:has(> hgroup))) {
+    position: absolute; inset-block-start: 0.2lh; inset-inline-end: 0.35em; z-index: 3; gap: 0.3em;   /* over a table's sticky head (2) */
+    & > :where(button, a, .btn) {
+      --type: inherit; position: relative; min-inline-size: 1.9em; block-size: 1.9em; min-block-size: 0; padding: 0 0.6em;
+      border: 1px solid var(--border); border-radius: 999px; box-shadow: none;
+      background-color: color-mix(in oklch, var(--_bg) calc(var(--glass-alpha, 0.75) * 100%), transparent);
+      -webkit-backdrop-filter: blur(var(--glass-blur, 0.5lh)); backdrop-filter: blur(var(--glass-blur, 0.5lh));
+      &::after { content: ""; position: absolute; inset: -0.45lh; }   /* the touch target */
+    }
+    & > :where(button, a, .btn):where(:has(> svg)) { padding: 0; inline-size: 1.9em; & > :where(span) { display: none; } }
+    &:where(:has(> :where(button, a, .btn))) ~ :where(*) { --_corner: 2.5em; }
+    &:where(:has(> :where(button, a, .btn) ~ :where(button, a, .btn))) ~ :where(*) { --_corner: 4.7em; }
+    &:where(:has(> :where(button, a, .btn))) ~ :where(:not(footer, dialog, figure, :has(> figure:only-child))) { padding-inline-end: var(--_corner); }
+  }
+
   /* THE SMALL MAP — A HEADER TAKES NO LINE (Mike, 2026-11-12: "on mobile
      a good space saver is to just remove the card titles (most of them
      are actually obvious) and the edit button can be a glass button
@@ -3199,30 +3263,31 @@
      The card's own NAME decides, and it is ARIA's word, not a new one:
      · a card named outright (aria-label) has a title its content makes
        obvious: the title is not shown — the name stays for a reader —
-       and the actions lie over the card's top end corner as GLASS: a
-       glyph in a round, its word gone, its touch target wider than it
-       looks. The rest of the card keeps that corner clear (one action's
-       width, or two's), so no figure sits under it. An action that is
-       only a word keeps the word: such a card keeps its title;
+       and the card shows no title, so its actions lie over it as above
+       (the same rule, said for every card named outright): glass in its
+       top end corner, the rest of the card clear of it, a picture to its
+       edges;
      · a card named BY ITS TITLE (aria-labelledby — or not named at all)
        says something its content does not: the title stays, as the
        label — capitals, step −2, in the hue (--fg: 1) — on one tight
        line with its qualifier and its actions, quiet. */
   @container areas (width < 576px) {
     :where(.areas) > :where(.card[aria-label]) > :where(header) {
-      position: absolute; inset-block-start: 0.2lh; inset-inline-end: 0.35em; z-index: 3; gap: 0.3em;   /* over a table's sticky head (2) */
+      position: absolute; inset-block-start: 0.2lh; inset-inline-end: 0.35em; z-index: 3; gap: 0.3em;
       & > :where(hgroup) { display: none; }
       & > :where(button, a, .btn) {
         --type: inherit; position: relative; min-inline-size: 1.9em; block-size: 1.9em; min-block-size: 0; padding: 0 0.6em;
         border: 1px solid var(--border); border-radius: 999px; box-shadow: none;
         background-color: color-mix(in oklch, var(--_bg) calc(var(--glass-alpha, 0.75) * 100%), transparent);
         -webkit-backdrop-filter: blur(var(--glass-blur, 0.5lh)); backdrop-filter: blur(var(--glass-blur, 0.5lh));
-        &::after { content: ""; position: absolute; inset: -0.45lh; }   /* the touch target */
+        &::after { content: ""; position: absolute; inset: -0.45lh; }
       }
       & > :where(button, a, .btn):where(:has(> svg)) { padding: 0; inline-size: 1.9em; & > :where(span) { display: none; } }
-      &:where(:has(> :where(button, a, .btn))) ~ :where(:not(footer, dialog)) { padding-inline-end: 2.5em; }
-      &:where(:has(> :where(button, a, .btn) ~ :where(button, a, .btn))) ~ :where(:not(footer, dialog)) { padding-inline-end: 4.7em; }
+      &:where(:has(> :where(button, a, .btn))) ~ :where(*) { --_corner: 2.5em; }
+      &:where(:has(> :where(button, a, .btn) ~ :where(button, a, .btn))) ~ :where(*) { --_corner: 4.7em; }
+      &:where(:has(> :where(button, a, .btn))) ~ :where(:not(footer, dialog, figure, :has(> figure:only-child))) { padding-inline-end: var(--_corner); }
     }
+    :where(.areas) > :where(.card[aria-label]:has(> figure, > :not(header, nav, footer, dialog) > figure:only-child)) { padding: 0; }
     :where(.areas) > :where(.card:not([aria-label])) > :where(header) {
       align-items: baseline; gap: 0.6em;
       & :where(h2, h3, h4, small, p, button, a, .btn) { line-height: 1.2; }
@@ -4038,8 +4103,10 @@
     /* PAPER TAKES NO ACTION (v3.1.3, EventOS gf-694): no verb, no menu, no
        trail, no tab prints — the main header keeps its title, the canvas
        its facts; the subheader (the tabs) goes with the rails; a segmented
-       control goes with its buttons (v3.4.5) */
+       control goes with its buttons (v3.4.5); with no verb beside it the
+       title prints whole, as many lines as it takes (v3.5.1) */
     .page :where(button, [popover], .crumbs, .tabs, .tabs-underline, .button-group, .fab-1, .fab-2, .fab-3, .hud) { display: none; }
+    :where(.pg-main-header) > :where(.spread) > :where(:first-child) > :where(h1, h2, h3) { max-inline-size: none; white-space: normal; }
 
     /* surfaces → white; borders stay. Regions and painted components lose
        their fill but keep their outline — the canvas under them too, and a

@@ -119,7 +119,12 @@ page's body as its child. Every region it writes is one grid area of
 else writes a region. CHROME IS EVERYTHING AROUND THE THING YOU WORK IN;
 pg-main is the thing, the area that expands. A dynamic layout hides
 chrome explicitly — focus mode collapses the grid, a phone's nav is the
-hub and the dock — never by a page's own rule.
+hub and the dock — never by a page's own rule. THE PAGE'S TITLE (v3.5.1,
+EventOS #1438) is one line and at most half its row (50cqi of the
+header), the font's ellipsis past that; the shell writes its whole text
+in its `title` attribute, and where the device hovers, the heading
+hovered lays the whole over the row on the header's surface — nothing
+moves, the pointer passes through to the verbs; paper prints it whole.
 
 THE GATES ARE THE FOUNDATION. The `visibility` layer is last. A gate
 class sets `display: none`, and the matching query sets `display:
@@ -185,10 +190,10 @@ block's chrome and a SIZE CONTAINER, nothing more — `header` (an hgroup:
 the title on one line, step 0 at a heading's weight since v3.4.5, a
 small beside it; then at most two actions, plain buttons; a card named
 outright whose header is its actions alone has NO TITLE, and at every
-width its actions lie over its top end corner, v3.4.5) · `nav` (a tab
-strip) · ONE body, which takes what is
-left and scrolls there (a `figure` is fitted, a `dl` is pairs) ·
-`footer`. What the body holds — a blk, a table, a chart — does its
+width its actions lie over its top end corner, v3.4.5, as glass, v3.5.1)
+· `nav` (a tab strip) · ONE body, which
+takes what is left and scrolls there (a `figure` is fitted, a `dl` is
+pairs) · `footer`. What the body holds — a blk, a table, a chart — does its
 content alone and measures the card (cq units, ch, the tiers, the
 container gates), never the viewport: a blk in a card writes no head,
 no verbs and no scroller of its own. Every card is on every device: a
@@ -198,7 +203,15 @@ title — its content makes it obvious — and its actions lie over its top
 end corner as glass; a card named by its title (`aria-labelledby`)
 keeps it as the label, capitals at step −2 in the hue. The switch is
 the frame's own width (it is a container named `areas`), never a class
-on a card. THE FRAME above is still pg-main and its one section;
+on a card. Where the actions lie over, the rest of the card keeps their
+corner clear by `--_corner` (one action's room or two's), the inline
+padding of what follows the header. A PICTURE BLEEDS (v3.5.1, EventOS
+#1442): a card named outright that shows no title and whose body is a
+figure — or a blk that holds that figure alone — is that picture: no
+padding, the figure to the card's edges under its radius, the actions
+over it, and the clearance on the words it holds (a figcaption reads
+`--_corner`), never on the figure. A chart is named by its title and
+keeps the card's inset. THE FRAME above is still pg-main and its one section;
 `.areas` is what fills that section (EventOS's lab shows it on a page
 it calls Frame). A page written before v3.4.0 keeps its blk arranger
 until it is moved.
