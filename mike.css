@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.10 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.10/mike.css
+   mike.css v3.5.11 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.11/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1962,10 +1962,17 @@
      of it past the last word so what it covers starts clear — and nothing
      moves: the row keeps its height, the verbs their place, and the
      pointer passes through to them. A touch device has no hover: the line
-     and its ellipsis stay. */
+     and its ellipsis stay.
+     WHERE THE TITLE STARTS IS THE HEADING'S OWN START (v3.5.11, EventOS
+     gf-1090): the line is the heading's ::before with no inline inset, so
+     it stands at its static position — the start of the heading's text —
+     while the cell stays its containing block (the heading clips, the
+     cell does not). v3.5.1 pinned it to the cell's start; once a menu
+     button stood before the heading (v3.5.9) the line lay over the button
+     and the heading's own tail showed past it ("Metrics cs"). */
   @media (hover: hover) {
-    :where(.pg-main-header) > :where(.spread) > :where(:first-child) > :where(h1, h2, h3):where([title]:hover)::after {
-      content: attr(title); position: absolute; inset-inline-start: 0; inset-block-start: 50%; translate: 0 -50%; z-index: 4;
+    :where(.pg-main-header) > :where(.spread) > :where(:first-child) > :where(h1, h2, h3):where([title]:hover)::before {
+      content: attr(title); position: absolute; inset-inline-start: auto; inset-block-start: 50%; translate: 0 -50%; z-index: 4;
       max-inline-size: 100cqi; padding-inline-end: 0.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       background-color: var(--surf); pointer-events: none;
     }
