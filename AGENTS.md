@@ -300,16 +300,18 @@ browser"): the dock — `.page > .hud.dock`, shown by its own gates
 (EventOS: `.coarse`, a phone or a tablet), two floating glass pills and a
 handle in a browser tab — is, in the installed app (`@media (display-mode:
 standalone)`, no width), the shell's last row ACROSS THE WHOLE WIDTH: the
-navigation ends above it (`grid-row-end: f-start`), and the bar is a slim
-band on the navigation's surface (`--cfg-dock-bg`), as tall as
-`--cfg-dock-inset` = the home indicator's inset + `--cfg-dock-curve`, at
-least `--cfg-dock-min` (an iPhone upright 50px; on its side, an iPad, a
-home button 40px), no handle. ITS CONTROLS ARE EVENLY SPACED (v3.4.7,
-EventOS gf-1043, Mike: "make a dock like this evenly spaced"): the pills
-dissolve (`display: contents`) and the bar's grid spaces their controls,
-in order, `space-evenly` — each as far from its neighbours as from the
-bar's ends, whatever the pills hold, as a browser's toolbar does; the
-bar's padding is the side safe-area insets alone. The bar's rule decides no display — the dock's
+navigation ends above it (`grid-row-end: f-start`), no handle. IT IS THE
+SAME TWO PILLS (v3.5.4, EventOS gf-1065, Mike, after iOS Calendar's
+toolbar: "I want this kind of dock"): the browser's glass pills (THE
+DOCK, under COMPONENTS), one at each end of the row in the hud's own
+one-cell grid, each as tall as its touch-square controls need; the row
+has no surface of its own (the page's shows between the pills) and is
+`--cfg-dock-inset` tall = `--cfg-touch` + 0.5lh (the pill's padding and
+edge) over the bottom inset, a line at least (an iPhone upright about
+88px; on its side, an iPad, a home button about 75px). A pill stands in
+from the side by the side inset and its own inline gutter, and on the
+bottom inset; v3.4.7's evenly spaced bar (its pills dissolved) and the
+navigation's band it stood on are retired. The bar's rule decides no display — the dock's
 gates do; what answers the bar from elsewhere (the knob, the navigation's
 end, a frame's clearance, the toasts' foot, a main footer's inset) asks
 the app on a touch pointer, `(display-mode: standalone) and (pointer:
@@ -325,9 +327,8 @@ everywhere else — a tab, a tab gone full screen; the mode's values, as
 way, `(display-mode: standalone)`, everywhere.
 THE TOUCH TARGET (v3.4.3): `--cfg-touch` (2.75rem, 44 CSS px — Apple's
 HIG figure and WCAG 2.5.5's) is the least recommended target; a hud fab
-and a dock control are exactly that square, one number — a permanent
-dock's control stands on the band's foot and takes the band's height
-where the band is less (an iPad's 40px, v3.4.6).
+and a dock control are exactly that square, one number, in a tab and in
+the installed app alike (v3.5.4).
 THE FRAME'S GAP (v3.4.4): an `.areas` frame's gap is the engine's normal
 `--gap`, 0.25lh, as `.row` `.column` `.grid` and `.pg-main` have it (it
 was 0.5lh 1.5ch); a page never writes one on a frame.
@@ -412,19 +413,21 @@ resize handle, both axes), `.county-map`.
 THE DOCK (v3.1.8, after iOS Calendar's bar): a hud whose `.bl` and
 `.br` slots are `.glass` — a glass corner slot is a PILL (margin,
 padding, full radius, the quiet edge) holding hud fabs, bare glyphs at
-rest; the hud wearing `data-ui-state="away"` slides its bottom slots
+rest — the pill is their glass, a member takes no backdrop of its own
+(v3.5.4: a fab's blur inside the pill's drew a disc of the pill alone round
+each glyph); the hud wearing `data-ui-state="away"` slides its bottom slots
 down past the edge (a translate), and a `.cr` fab is the handle that
 stays. In a browser tab the dock takes no clearance: the canvas runs
 under the pills, the handle is the relief; only the toast pile clears it
-while it is on screen (v3.1.9). In the installed app it is the shell's
-last row (THE PERMANENT DOCK, under LAYOUT). THE CURRENT PAGE (v3.4.7,
+while it is on screen (v3.1.9). In the installed app the same pills stand
+in the shell's last row (THE PERMANENT DOCK, under LAYOUT). THE CURRENT PAGE (v3.4.7,
 EventOS gf-1043: "an active state for the home icon … keep it small
 though"): a fab that is the page shown wears `aria-current="page"` (any
 truthy value, the nav item's grammar) and sets its glyph on a small soft
 disc — `--bg: 0.25` of its hue a fifth of an em round the glyph, painted by
 the glyph's own box (a round fill and a spread shadow), the ink at the pole
 as a current nav item's — so nothing moves and the fab keeps its size, in a
-pill and in the permanent bar alike.
+pill in a tab and in the app alike.
 
 Dialogs are native `<dialog class="modal">` at a rung of the content
 ladder, opened in HTML — `commandfor="<id>" command="show-modal"` — and

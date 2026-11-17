@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.3 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.3/mike.css
+   mike.css v3.5.4 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.4/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -761,34 +761,24 @@
                                a hud fab and a dock control are exactly this wide (v3.4.3, EventOS #1378) */
     --cfg-motion: 1;        /* motion multiplier (a later formal pass) */
     /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010; every touch device,
-       v3.4.6, gf-1038) — the rule is in the visibility layer; its knobs
-       have their home here. In the installed app on a touch device, a
-       phone or a tablet, the shell's last row is the dock, and it is
-       SLIM: the band where the screen's corners curve in — the home
-       indicator's inset and the curve's rise above it — no more.
-       --cfg-dock-curve  the curve's rise above the inset. CSS has no word
-                         for a screen's corner radius; 16px makes the dock
-                         about 50px on a 34px-inset iPhone, whose corners
-                         are about that round; an iPad's 20px inset and
-                         tighter corners come to 36px, under the least.
-       --cfg-dock-min    the least the dock is (40px): a device with no
-                         inset, a phone on its side, an iPad.
-       --cfg-dock-bg     its surface: the navigation's (the dock is the
-                         phone's rail).
-       DERIVED: --cfg-dock-inset, the dock's height — 0 wherever no
-       permanent dock stands: it stands in the installed app (the
-       .standalone gate's question) on a touch pointer (the .coarse
-       gate's, the dock's own — a token on :root cannot read an
-       element's gate, so it asks the gate's question). A surface pinned
-       to the viewport that must not sit under the dock (the hud, a
-       .modal) takes it as its foot. */
-    --cfg-dock-curve: 16px;
-    --cfg-dock-min: 2.5rem;
-    --cfg-dock-bg: -0.8;
+       v3.4.6, gf-1038; its two pills, v3.5.4, gf-1065) — the rule is in
+       the visibility layer; its one number has its home here. In the
+       installed app on a touch device, a phone or a tablet, the shell's
+       last row is the dock: the browser's two glass pills, standing over
+       the home indicator's inset.
+       DERIVED: --cfg-dock-inset, the dock's height — a pill's (the touch
+       square, and half a line for the pill's own padding and edge) over
+       the bottom inset, a line at least; 0 wherever no permanent dock
+       stands: it stands in the installed app (the .standalone gate's
+       question) on a touch pointer (the .coarse gate's, the dock's own — a
+       token on :root cannot read an element's gate, so it asks the gate's
+       question). A surface pinned to the viewport that must not sit under
+       the dock (the hud, a .modal) takes it as its foot; its lines are
+       the wearer's, the body's line in each of them. */
     --cfg-dock-inset: 0px;
   }
   @media (display-mode: standalone) and (pointer: coarse) {
-    :root { --cfg-dock-inset: max(var(--cfg-dock-min), calc(env(safe-area-inset-bottom, 0px) + var(--cfg-dock-curve))); }
+    :root { --cfg-dock-inset: calc(var(--cfg-touch) + 0.5lh + max(env(safe-area-inset-bottom, 0px), 1lh)); }
   }
   [data-ui-radius="0"] { --cfg-radius: 0px; }
   [data-ui-radius="1"] { --cfg-radius: 6px; }
@@ -2410,8 +2400,7 @@
     --lift: initial; --bg: 0.4; --fg: var(--_sem-ink, 0.7);
     border-radius: 999px; font-weight: 650;
     /* NO self-positioning: the hud slot classes (.tl … .br) own placement;
-       the hud default centers a slotless child. (The dock is retired —
-       2026-08 — so .br is the standard home for the trigger stack.) */
+       the hud default centers a slotless child. */
     margin: 1.1lh;
     position: relative;
     transition:
@@ -2428,7 +2417,7 @@
        a fifth of an em round the glyph, and commits the glyph's ink to the
        pole as a current nav item and a menu row do. The glyph's own box
        paints it (a round fill and a spread shadow): nothing moves, the fab
-       keeps its size, in a dock's pill and in the permanent bar alike.
+       keeps its size, in a dock's pill in a tab and in the app alike.
        (The UA clips a non-root svg, and Safari its shadow with it.) */
     &:where([aria-current]:not([aria-current="false"])) > :where(svg) {
       --bg: 0.25; --fg: -1; background-color: var(--_bg); border-radius: 50%;
@@ -3377,8 +3366,14 @@
      the padding, the full radius and the quiet edge; its buttons are
      hud fabs, bare glyphs at rest on the glass. A hud wearing
      data-ui-state="away" slides its bottom slots down past the edge — a
-     translate, nothing reflows — and a .cr fab is the handle that stays. */
-  :where(.hud) > :where(.bl, .br):where(.glass) { margin: 1lh; padding: 0.15lh 0.35em; gap: 0.25em; border-radius: 999px; border: 1px solid var(--border); box-shadow: 0 0.3lh 1lh oklch(0 0 0 / 0.18); }
+     translate, nothing reflows — and a .cr fab is the handle that stays.
+     The installed app's permanent dock stands the same pills in its row
+     (v3.5.4, in the visibility layer). The pill is its members' glass: a
+     member takes no backdrop of its own — a fab's blur inside the pill's
+     drew a disc of the pill alone round every glyph wherever what lay
+     behind the pill was not its own colour (v3.5.4). */
+  :where(.hud) > :where(.bl, .br):where(.glass) { margin: 1lh; padding: 0.15lh 0.35em; gap: 0.25em; border-radius: 999px; border: 1px solid var(--border); box-shadow: 0 0.3lh 1lh oklch(0 0 0 / 0.18);
+    & > :where(*) { -webkit-backdrop-filter: none; backdrop-filter: none; } }
   :where(.hud) > :where(.bl, .br) { transition: translate calc(var(--cfg-motion) * 0.25s) ease; }
   :where(.hud[data-ui-state="away"]) > :where(.bl, .br) { translate: 0 calc(100% + 1.5lh); visibility: hidden; transition: translate calc(var(--cfg-motion) * 0.25s) ease, visibility 0s calc(var(--cfg-motion) * 0.25s); }
   /* THE TOAST PILE'S CLEARANCE (gf-409, 2026-09-24): above the fab
@@ -3977,47 +3972,36 @@
      persistent, but … only the height of the curve and below"; v3.4.6,
      gf-1038: "on ipad we still get the fold down dock we want the
      persistent dock on tablet as well … it should be gated on app vs
-     browser"). The dock is .page > .hud.dock, shown by its own gates
-     (EventOS: .coarse, a phone or a tablet). In a browser tab it is two
-     glass pills floating in the hud and the canvas runs under them. In
-     the INSTALLED app, at any width, the same element is the shell's last
-     row: area f's row across the whole width — under the navigation too,
-     which ends above it — a slim bar on the navigation's surface, as tall
-     as --cfg-dock-inset, the home indicator's inset and the corner
-     curve's rise. Its two pills dissolve (display: contents) and the bar
-     spaces their controls itself, in their order, EVENLY across its width
-     — each as far from its neighbours as from the bar's ends (the side
-     insets', where a device has them), whatever the pills hold, as a
-     browser's toolbar does (v3.4.7, EventOS gf-1043, Mike: "make a dock
-     like this evenly spaced"); a control is one target square standing on
-     the band's foot — the band's height where the band is less (an iPad's
-     40px) — its glyph held to its top, clear of the indicator, a badge on
-     its corner. The pill stays visible: the stored away state's hidden
-     would reach the controls through it. The handle goes: a permanent
-     dock is not put away, whatever the stored state. The bar's rule asks the app
-     alone and leaves display to the dock's gates. What answers it from
-     elsewhere — the navigation ending above it, a frame taking no
-     clearance, the toasts no extra foot, a main footer giving the inset
-     back — asks the knob's question, the app on a touch pointer: a rule
-     on another element cannot read the dock's gate, and on a fine
-     pointer no dock stands. Here, after the gates: the bar out-ranks the
-     slot utilities and a main footer's region paint. */
+     browser"; v3.5.4, EventOS gf-1065, Mike, after iOS Calendar's
+     toolbar: "I want this kind of dock"). The dock is .page > .hud.dock,
+     shown by its own gates (EventOS: .coarse, a phone or a tablet). In a
+     browser tab it is two glass pills floating in the hud (THE DOCK, in
+     the slots) and the canvas runs under them. In the INSTALLED app, at
+     any width, the same element is the shell's last row: area f's row
+     across the whole width — under the navigation too, which ends above
+     it — as tall as --cfg-dock-inset, and the SAME TWO PILLS stand in it,
+     one at each end, in the hud's own one-cell grid: each a pill as the
+     browser's is, its controls the touch square, as tall as they need; the
+     row has no surface of its own, the page's shows between them. A pill
+     stands in from the screen's side by the side inset and its own gutter
+     (the slot's margin, inline), and on the bottom inset — a line where a
+     device has less (a home button, an iPad's 20px). It stays visible and
+     in place: the stored away state's translate and hidden would reach it.
+     The handle goes: a permanent dock is not put away, whatever the stored
+     state. The bar's rule asks the app alone and leaves display to the
+     dock's gates. What answers it from elsewhere — the navigation ending
+     above it, a frame taking no clearance, the toasts no extra foot, a
+     main footer giving the inset back — asks the knob's question, the app
+     on a touch pointer: a rule on another element cannot read the dock's
+     gate, and on a fine pointer no dock stands. Here, after the gates: the
+     bar out-ranks the slot utilities. */
   @media (display-mode: standalone) {
     :where(.page) > :where(.hud.dock) {
       position: static; inset: auto; z-index: auto; grid-row: f; grid-column: 1 / -1;
       block-size: var(--cfg-dock-inset); grid-template-rows: minmax(0, 1fr);
-      grid-template-areas: none; grid-auto-flow: column; justify-content: space-evenly;
-      padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
-      pointer-events: auto;
-      --bg: var(--cfg-dock-bg); background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
-      border-block-start: 1px solid var(--border);
-      & > :where(.bl, .br) { display: contents; visibility: visible; }
+      padding: 0 env(safe-area-inset-right, 0px) max(env(safe-area-inset-bottom, 0px), 1lh) env(safe-area-inset-left, 0px);
+      & > :where(.bl, .br) { margin-block: 0; translate: none; visibility: visible; }
       & > :where(.bc) { display: none; }
-      & :where(.fab-1, .fab-2, .fab-3) {
-        inline-size: var(--cfg-touch); block-size: min(var(--cfg-touch), 100%); align-self: end; border-radius: 0;
-        align-items: flex-start; padding-block: 0.3rem 0;
-        background-color: transparent; border-color: transparent; box-shadow: none;
-      }
     }
   }
   @media (display-mode: standalone) and (pointer: coarse) {
