@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.5 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.5/mike.css
+   mike.css v3.5.6 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.6/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -593,9 +593,10 @@
      the account block keeps ONE height across densities — the icon
      rail's bare avatar occupies the expanded card's natural height (two
      text lines + card padding + hairlines), so collapsing never jumps
-     the foot — and the version tag centers itself in the foot column. */
+     the foot — and the version tag centers itself in its column, the foot's
+     or a page's (v3.5.6: the home page's on a phone). */
   :where(.pg-navigation) :where(.nav-account) { min-block-size: calc(2.7lh + 2px); justify-content: center; }
-  :where(.pg-navigation) :where(.nav-version) { align-self: center; }
+  :where(.nav-version) { align-self: center; }
 
   /* a spread-column filling the toolbar pins its ends to the region's
      full height (sections top, help bottom) and stays scroll-safe. */
@@ -767,19 +768,29 @@
        installed app on a touch device, a phone or a tablet, the shell's
        last row is the dock: the browser's two glass pills, standing over
        the home indicator's inset.
+       --cfg-dock-foot is the gap under the pills: the bottom inset less
+       three quarters of a line — an iPhone's 34px inset is the home
+       indicator's, which ends 13px up, so the pills stand just clear of
+       it, not a whole inset over it (v3.5.6, EventOS gf-1068: "move the
+       dock down a bit") — half a line where a device has less.
        DERIVED: --cfg-dock-inset, the dock's height — a pill's (the touch
        square, and half a line for the pill's own padding and edge) over
-       the bottom inset, a line at least; 0 wherever no permanent dock
+       the foot; 0 wherever no permanent dock
        stands: it stands in the installed app (the .standalone gate's
        question) on a touch pointer (the .coarse gate's, the dock's own — a
        token on :root cannot read an element's gate, so it asks the gate's
        question). A surface pinned to the viewport that must not sit under
        the dock (the hud, a .modal) takes it as its foot; its lines are
        the wearer's, the body's line in each of them. */
+    --cfg-dock-foot: max(env(safe-area-inset-bottom, 0px) - 0.75lh, 0.5lh);
     --cfg-dock-inset: 0px;
+    /* THE MAIN'S POSITION (v3.5.6): the surface the main column's regions
+       stand on — its header, subheader, body, footer, the toolbar — and
+       the permanent dock's row under them, one number */
+    --cfg-main-bg: -0.3;
   }
   @media (display-mode: standalone) and (pointer: coarse) {
-    :root { --cfg-dock-inset: calc(var(--cfg-touch) + 0.5lh + max(env(safe-area-inset-bottom, 0px), 1lh)); }
+    :root { --cfg-dock-inset: calc(var(--cfg-touch) + 0.5lh + var(--cfg-dock-foot)); }
   }
   [data-ui-radius="0"] { --cfg-radius: 0px; }
   [data-ui-radius="1"] { --cfg-radius: 6px; }
@@ -2427,13 +2438,14 @@
        that is the page shown — any truthy aria-current, the nav item's
        grammar — sets its glyph on a small soft disc, a low tint of its hue
        a fifth of an em round the glyph, and commits the glyph's ink to the
-       pole as a current nav item and a menu row do. The glyph's own box
-       paints it (a round fill and a spread shadow): nothing moves, the fab
-       keeps its size, in a dock's pill in a tab and in the app alike.
-       (The UA clips a non-root svg, and Safari its shadow with it.) */
-    &:where([aria-current]:not([aria-current="false"])) > :where(svg) {
-      --bg: 0.25; --fg: -1; background-color: var(--_bg); border-radius: 50%;
-      box-shadow: 0 0 0 0.2em var(--_bg); overflow: visible;
+       pole as a current nav item and a menu row do. The FAB paints it, a
+       gradient disc at its centre (v3.5.6; v3.4.7 drew it as the glyph's
+       fill and spread shadow, and Safari clips a non-root svg's shadow):
+       nothing moves, the fab keeps its size, in a dock's pill in a tab and
+       in the app alike. */
+    &:where([aria-current]:not([aria-current="false"])) {
+      --bg: 0.25; background-image: radial-gradient(circle, var(--_bg) 0.8em, transparent calc(0.8em + 0.5px));
+      & > :where(svg) { --fg: -1; }
     }
     &::before { content: ""; position: absolute; inset: -4px; }   /* static hit-pad */
     @media (pointer: fine) { &:hover { translate: 0 -2px; } }   /* the lift is a mouse's (EventOS #884) */
@@ -3385,7 +3397,14 @@
      drew a disc of the pill alone round every glyph wherever what lay
      behind the pill was not its own colour (v3.5.4). */
   :where(.hud) > :where(.bl, .br):where(.glass) { margin: 1lh; padding: 0.15lh 0.35em; gap: 0.25em; border-radius: 999px; border: 1px solid var(--border); box-shadow: 0 0.3lh 1lh oklch(0 0 0 / 0.18);
-    & > :where(*) { -webkit-backdrop-filter: none; backdrop-filter: none; } }
+    & > :where(*) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+    /* AN AVATAR IN THE PILL (v3.5.6, EventOS gf-1068: "use this for the
+       avatar on the dock … from the user avatar on the side bar") is the
+       rail's own account button, a step up; it keeps its chip and takes a
+       fab's place in the row — the touch square is its width in the rhythm
+       and its hit area */
+    & > :where(.avatar) { --type: 1; position: relative; margin-inline: max(0px, calc((var(--cfg-touch) - var(--_control-h)) / 2));
+      &::before { content: ""; position: absolute; inset: min(0px, calc((var(--_control-h) - var(--cfg-touch)) / 2)); } } }
   :where(.hud) > :where(.bl, .br) { transition: translate calc(var(--cfg-motion) * 0.25s) ease; }
   :where(.hud[data-ui-state="away"]) > :where(.bl, .br) { translate: 0 calc(100% + 1.5lh); visibility: hidden; transition: translate calc(var(--cfg-motion) * 0.25s) ease, visibility 0s calc(var(--cfg-motion) * 0.25s); }
   /* THE TOAST PILE'S CLEARANCE (gf-409, 2026-09-24): above the fab
@@ -3623,12 +3642,12 @@
      background it reads as a third region competing with the nav drawer, and the
      relationship to the tabs above becomes guesswork. Same --bg as pg-main, one
      hairline to separate them, and the two read as one card. */
-  .pg-toolbar     { --bg: -0.3; padding: 0.25lh; border-inline-end: 1px solid var(--border); }
+  .pg-toolbar     { --bg: var(--cfg-main-bg); padding: 0.25lh; border-inline-end: 1px solid var(--border); }
   /* the header's divider is a HAIRLINE (feedback #149, 2026-09-24: back
      at half a pixel once the home lost its search bar; rev 10 had dropped
      the 1px line). Drawn ONCE: when the header carries the tabs-underline,
      that underline IS the divider. */
-  .pg-main-header { --bg: -0.3; padding: 0.25lh; border-block-end: 0.5px solid var(--border); }
+  .pg-main-header { --bg: var(--cfg-main-bg); padding: 0.25lh; border-block-end: 0.5px solid var(--border); }
   .pg-main-header:has(> .tabs-underline) { border-block-end: 0; }
   /* the bottom padding stands down ONLY when the tabs are the header's last
      element (feedback #75, gf-331): the underline needs to sit on the divider
@@ -3637,7 +3656,7 @@
   /* the subheader takes over the divider when present; when IT carries
      the tabs, the underline is the divider */
   .pg-main-header:has(+ .pg-main-subheader) { border-block-end: 0; }
-  .pg-main-subheader { --bg: -0.3; padding: 0 0.25lh; border-block-end: 1px solid var(--border); }
+  .pg-main-subheader { --bg: var(--cfg-main-bg); padding: 0 0.25lh; border-block-end: 1px solid var(--border); }
   .pg-main-subheader:has(> .tabs-underline) { border-block-end: 0; }
   .pg-main-aside     { --bg: -0.6; padding: 0.25lh; border-inline-start: 1px solid var(--border); }
   /* TITLE ROW HEIGHT IS CONSTANT. Without this the row collapses to the title's
@@ -3654,12 +3673,12 @@
     --type: -1;
     min-block-size: var(--_control-h);
   }
-  .pg-main        { --bg: -0.3; padding-inline: 0.25lh; }
+  .pg-main        { --bg: var(--cfg-main-bg); padding-inline: 0.25lh; }
   /* the dock (gf-407 rev 5): a lh of side room, and the safe-area insets
      where the page runs to the phone's rounded corners in app mode
      (viewport-fit=cover) — the home's account and bell must not sit in
      the corner radius */
-  .pg-main-footer { --bg: -0.3; padding: 0.25lh max(1lh, env(safe-area-inset-right)) max(0.25lh, env(safe-area-inset-bottom)) max(1lh, env(safe-area-inset-left)); }
+  .pg-main-footer { --bg: var(--cfg-main-bg); padding: 0.25lh max(1lh, env(safe-area-inset-right)) max(0.25lh, env(safe-area-inset-bottom)) max(1lh, env(safe-area-inset-left)); }
   /* the version tag LIVES IN THE UNSAFE AREA (gf-407 rev 10, Mike: "the
      perfect thing to go in the unsafe area"): a footer that ends in the
      tag drops the inset padding and the tag's box is the inset itself */
@@ -3996,10 +4015,11 @@
      it — as tall as --cfg-dock-inset, and the SAME TWO PILLS stand in it,
      one at each end, in the hud's own one-cell grid: each a pill as the
      browser's is, its controls the touch square, as tall as they need; the
-     row has no surface of its own, the page's shows between them. A pill
+     row stands on the main's surface (--cfg-main-bg, v3.5.6: the page's
+     own showed as a band under the main). A pill
      stands in from the screen's side by the side inset and its own gutter
-     (the slot's margin, inline), and on the bottom inset — a line where a
-     device has less (a home button, an iPad's 20px). It stays visible and
+     (the slot's margin, inline), and on --cfg-dock-foot, just clear of the
+     home indicator. It stays visible and
      in place: the stored away state's translate and hidden would reach it.
      The handle goes: a permanent dock is not put away, whatever the stored
      state. The bar's rule asks the app alone and leaves display to the
@@ -4013,7 +4033,8 @@
     :where(.page) > :where(.hud.dock) {
       position: static; inset: auto; z-index: auto; grid-row: f; grid-column: 1 / -1;
       block-size: var(--cfg-dock-inset); grid-template-rows: minmax(0, 1fr);
-      padding: 0 env(safe-area-inset-right, 0px) max(env(safe-area-inset-bottom, 0px), 1lh) env(safe-area-inset-left, 0px);
+      padding: 0 env(safe-area-inset-right, 0px) var(--cfg-dock-foot) env(safe-area-inset-left, 0px);
+      --bg: var(--cfg-main-bg); background-color: var(--_bg);
       & > :where(.bl, .br) { margin-block: 0; translate: none; visibility: visible; }
       & > :where(.bc) { display: none; }
     }

@@ -311,12 +311,16 @@ SAME TWO PILLS (v3.5.4, EventOS gf-1065, Mike, after iOS Calendar's
 toolbar: "I want this kind of dock"): the browser's glass pills (THE
 DOCK, under COMPONENTS), one at each end of the row in the hud's own
 one-cell grid, each as tall as its touch-square controls need; the row
-has no surface of its own (the page's shows between the pills) and is
-`--cfg-dock-inset` tall = `--cfg-touch` + 0.5lh (the pill's padding and
-edge) over the bottom inset, a line at least (an iPhone upright about
-88px; on its side, an iPad, a home button about 75px). A pill stands in
-from the side by the side inset and its own inline gutter, and on the
-bottom inset; v3.4.7's evenly spaced bar (its pills dissolved) and the
+stands on the main's surface (`--cfg-main-bg`, v3.5.6 — the one number
+the main column's regions share) and is `--cfg-dock-inset` tall =
+`--cfg-touch` + 0.5lh (the pill's padding and edge) over
+`--cfg-dock-foot`, the bottom inset less three quarters of a line, half a
+line at least (v3.5.6, EventOS gf-1068: the pills just clear of the home
+indicator; an iPhone upright about 73px). A pill stands in from the side
+by the side inset and its own inline gutter, and on the foot. An
+`.avatar` in a pill is the account button, a step up, a fab's place in
+the row; a fab that is the page shown paints its disc itself (v3.5.6).
+v3.4.7's evenly spaced bar (its pills dissolved) and the
 navigation's band it stood on are retired. The bar's rule decides no display — the dock's
 gates do; what answers the bar from elsewhere (the knob, the navigation's
 end, a frame's clearance, the toasts' foot, a main footer's inset) asks
