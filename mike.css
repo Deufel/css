@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.7 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.7/mike.css
+   mike.css v3.5.8 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.8/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2433,20 +2433,6 @@
       border-color     calc(var(--cfg-motion) * 0.12s) ease,
       backdrop-filter  calc(var(--cfg-motion) * 0.12s) ease;
     & > svg { inline-size: 1.2em; block-size: 1.2em; }
-    /* THE CURRENT PAGE (v3.4.7, EventOS gf-1043: "add an active state for
-       the home icon when on the home page keep it small though"): a fab
-       that is the page shown — any truthy aria-current, the nav item's
-       grammar — sets its glyph on a small soft disc, a low tint of its hue
-       a fifth of an em round the glyph, and commits the glyph's ink to the
-       pole as a current nav item and a menu row do. The FAB paints it, a
-       gradient disc at its centre (v3.5.6; v3.4.7 drew it as the glyph's
-       fill and spread shadow, and Safari clips a non-root svg's shadow):
-       nothing moves, the fab keeps its size, in a dock's pill in a tab and
-       in the app alike. */
-    &:where([aria-current]:not([aria-current="false"])) {
-      --bg: 0.25; background-image: radial-gradient(circle, var(--_bg) 0.8em, transparent calc(0.8em + 0.5px));
-      & > :where(svg) { --fg: -1; }
-    }
     &::before { content: ""; position: absolute; inset: -4px; }   /* static hit-pad */
     @media (pointer: fine) { &:hover { translate: 0 -2px; } }   /* the lift is a mouse's (EventOS #884) */
     &:active { translate: 0 0; }
@@ -2474,6 +2460,20 @@
                 0 0.25lh 0.5lh oklch(0 0 0 / 0.2);
     -webkit-backdrop-filter: blur(0.7lh) saturate(1.6);
     backdrop-filter: blur(0.7lh) saturate(1.6);
+  }
+  /* THE CURRENT PAGE (v3.4.7, EventOS gf-1043; v3.5.8, gf-1076, Mike: "a
+     better looking active state with a --bg: 1; and fg: -1 … fill out the
+     left dock area"): a fab that is the page shown — any truthy
+     aria-current, the nav item's grammar — IS its fill: the whole fab at
+     the pole, its glyph in the pole's ink, as a current app tile is. In a
+     dock's pill that is the touch square's circle, the pill's own padding
+     an even ring round it; nothing moves and nothing grows. After the
+     three variants: same layer, zero specificity, source order decides.
+     (v3.4.7's small disc on the glyph's box and v3.5.6's gradient disc
+     are retired: Safari clipped the first, the second read as a clipped
+     square.) */
+  :where(.fab-1, .fab-2, .fab-3):where([aria-current]:not([aria-current="false"])) {
+    --bg: 1; --fg: -1; background-color: var(--_bg);
   }
   /* A LINK WRAPPING A FAB wears the pill's own shape (v3.2.2, EventOS #878):
      the focus ring is the anchor's, and a square anchor drew a square ring

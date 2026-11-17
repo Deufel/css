@@ -319,7 +319,8 @@ line at least (v3.5.6, EventOS gf-1068: the pills just clear of the home
 indicator; an iPhone upright about 73px). A pill stands in from the side
 by the side inset and its own inline gutter, and on the foot. An
 `.avatar` in a pill is the account button, a step up, a fab's place in
-the row; a fab that is the page shown paints its disc itself (v3.5.6).
+the row; a fab that is the page shown is filled whole at the pole, its
+glyph in the pole's ink (`--bg: 1; --fg: -1`, v3.5.8).
 v3.4.7's evenly spaced bar (its pills dissolved) and the
 navigation's band it stood on are retired. The bar's rule decides no display — the dock's
 gates do; what answers the bar from elsewhere (the knob, the navigation's
