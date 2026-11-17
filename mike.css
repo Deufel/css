@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.4 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.4/mike.css
+   mike.css v3.5.5 — one file, twelve cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.5/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -87,10 +87,11 @@
 /* .rise's cqb share (style API); must not leak into nested sized canvases */
 @property --area { syntax: "*";        inherits: false }
 /* the area an .areas child names (style API); must not leak into what the child holds — a frame nested in a card places its own */
+@property --c-wide { syntax: "*";      inherits: false }
 @property --c-desktop { syntax: "*";   inherits: false }
 @property --c-tablet { syntax: "*";    inherits: false }
 @property --c-mobile { syntax: "*";    inherits: false }
-/* an .areas frame's maps, one a container gate (style API): a grid-template each; must not leak into a frame nested in a card */
+/* an .areas frame's maps, one a width of its cell (style API): a grid-template each; must not leak into a frame nested in a card */
 @property --_sem-ink { syntax: "*";        inherits: false }
 /* ════════════════════════════════════════════════════════════════════
    type.css — the TYPE concern. Standalone, orthogonal, complete.
@@ -1114,14 +1115,24 @@
      that FILLS its cell and never scrolls: what runs long scrolls inside
      its own area. Before it every page wrote this grid as a blk of its
      own (blk-event, blk-report); it is one word now.
-       --c-desktop     the MAP: one grid-template — the areas, each row's
-       --c-tablet      lines, the columns — stated where the frame is
-       --c-mobile      written, one for each CONTAINER gate (.c-desktop
-                       from 768px, .c-tablet from 576, .c-mobile under):
-                       the frame's cell is asked, so a rail narrows the
-                       map and the viewport does not. A narrower map
-                       falls back to the wider one. Registered,
-                       non-inheriting: a frame inside a card has its own.
+       --c-wide        the MAP: one grid-template — the areas, each row's
+       --c-desktop     lines, the columns — stated where the frame is
+       --c-tablet      written, one for each CONTAINER gate (.c-desktop
+       --c-mobile      from 768px, .c-tablet from 576, .c-mobile under)
+                       and one for a WIDE cell, from 1280px (v3.5.5,
+                       EventOS gf-1066): the frame's cell is asked, so a
+                       rail narrows the map and the viewport does not. A
+                       narrower map falls back to the wider one, and the
+                       wide map to the desk's, so a page that states none
+                       is as it was. 1280px is the design screen's width
+                       (core.type): two thirds of a cell that wide, split
+                       three ways, is about 260px a part — a drawing near
+                       its drawn size — beside a third still a desk
+                       column. The wide map has no gate word: .c-desktop
+                       holds from 768px up, the wide cell included, and a
+                       part that changes there asks its card, which a
+                       wide map makes wide. Registered, non-inheriting: a
+                       frame inside a card has its own.
        --area          a child names its area (registered, non-inheriting).
        --gap           the rhythm between areas (0.25lh, the engine's
                        normal gap; v3.4.4 — it was 0.5lh 1.5ch).
@@ -1139,6 +1150,7 @@
     grid-template: var(--c-desktop);
     & > :where(*) { grid-area: var(--area, auto); min-inline-size: 0; min-block-size: 0; }
   }
+  @container (width >= 1280px)        { :where(.areas) { grid-template: var(--c-wide, var(--c-desktop)); } }
   @container (576px <= width < 768px) { :where(.areas) { grid-template: var(--c-tablet, var(--c-desktop)); } }
   @container (width < 576px)          { :where(.areas) { grid-template: var(--c-mobile, var(--c-tablet, var(--c-desktop))); } }
   @media (pointer: coarse) and (width < 576px) { :where(.areas) { padding-block-end: var(--dock, 3.4lh); } }
@@ -3941,7 +3953,9 @@
      region the available width is the region's, not the window's (the
      nav column eats 140–260px), so region content declares its ranges
      against the surface it actually lives on. pg-main-header and
-     pg-main are the query containers (core.layout). */
+     pg-main are the query containers (core.layout). The frame's wide
+     map (v3.5.5, from 1280px of its cell) has no word here: .c-desktop
+     is open-ended, and inside a card these ask the card. */
   :where(.c-mobile, .c-tablet, .c-desktop)     { display: none }
   @container (width < 576px)           { :where(.c-mobile)  { display: revert-layer } }
   @container (576px <= width < 768px)  { :where(.c-tablet)  { display: revert-layer } }

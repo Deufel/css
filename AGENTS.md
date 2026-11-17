@@ -183,7 +183,13 @@ container sizing"). The grid a page wrote as a blk of its own is
 grid-template: the areas, each row's lines, the columns — for each
 container gate, inline where the page is written: `--c-desktop`,
 `--c-tablet`, `--c-mobile` (768 and 576 px of the frame's CELL, so a
-rail narrows the map and the viewport does not). Most rows are a budget
+rail narrows the map and the viewport does not), and `--c-wide` for a
+cell from 1280px, the design screen's width (v3.5.5, EventOS gf-1066:
+two thirds of it split three ways is a drawing near its drawn size). A
+narrower map falls back to the wider one and the wide map to the desk's,
+so a page that states no wide map is as it was; the wide map has no gate
+word — `.c-desktop` holds from 768px up, and a part that changes on the
+wide map asks its card, which the map makes wide. Most rows are a budget
 (`minmax(0, 6lh)`); ONE row fills (`minmax(0, 1fr)`). A child names its
 area (`--area`). A `.card` that is an `.areas` child is THE CARD: the
 block's chrome and a SIZE CONTAINER, nothing more — `header` (an hgroup:
@@ -353,7 +359,8 @@ start`/`.flank-end`, `.stack` (overlap — one grid area), `.frame` (a box
 at `--ratio`, 16/9 by default, its child filling it), `.areas` (the
 page's arranger, v3.4.0: a grid of named areas that fills its cell and
 never scrolls, a map a container gate — `--c-desktop` `--c-tablet`
-`--c-mobile` — its children naming their `--area`), `.oneline`,
+`--c-mobile`, and `--c-wide` from 1280px (v3.5.5) — its children naming
+their `--area`), `.oneline`,
 `.nowrap`, `.truncate`, `.grow`, `.fill`, `.far` (pushed to the far end of its row), `.center`, `.vr` (an hr stood
 on end), `section.owns-scroll` (the component-scrolled section every
 full-height roster is built on). `.scroll-x` / `.scroll-y` (and
