@@ -136,17 +136,17 @@ turned on and off declaratively, as a union of readable class names:
 `.mobile .tablet .desktop .ultrawide` (viewport), `.c-mobile .c-tablet
 .c-desktop` (the nearest container), `.small .medium .large` (density
 tiers), `.fine .coarse` (pointer — the iOS layouts, the dock),
-`.standalone .browser` (the display mode — the installed app, or a
+`.show-app .show-browser` (the display mode — the installed app, or a
 browser tab; v3.4.6). THE VIEWPORT FAMILY ASKS WHICH DEVICE, BY EITHER
 SIDE (v3.5.10): a screen under 576px wide OR tall is a phone's —
 `.mobile` shows there, `.tablet` and `.desktop` only from 576px of
 height — so a phone on its side takes every phone variant a template
 states. One family per element; the second family goes on a wrapper —
 the display mode excepted (v3.5.9): its two words have no rest state,
-they only TAKE OUT (`.standalone` everywhere but the app, `.browser` in
+they only TAKE OUT (`.show-app` everywhere but the app, `.show-browser` in
 the app) and stand last, so one of them beside one other family ANDs on
-the same element: `class="mobile browser"` is a phone's width in a tab,
-`class="coarse standalone"` a touch device in the app. A part of a block is
+the same element: `class="mobile show-browser"` is a phone's width in a tab,
+`class="coarse show-app"` a touch device in the app. A part of a block is
 shown or hidden ONLY this way, in the templ — never by the block's own
 `@container` or `@media`.
 
@@ -343,7 +343,7 @@ aside, pg-main-footer, pg-aside, pg-footer. Set `--bg` on any to repaint.
 THE PERMANENT DOCK (v3.4.2; every touch device, v3.4.6, EventOS gf-1038:
 "we want the persistent dock on tablet as well … gated on app vs
 browser"): the dock — `.page > .hud.dock`, shown by its own gates
-(EventOS: `.coarse.standalone`, a touch device — a phone or a tablet at
+(EventOS: `.coarse.show-app`, a touch device — a phone or a tablet at
 any width — in the installed app alone, gf-1085; a dock that shows in a
 browser tab is two floating glass pills and a handle) — is, in the
 installed app (`@media (display-mode: standalone)`, no width), the
@@ -381,8 +381,8 @@ permanent dock stands) and `--cfg-dock-side` as their trailing edge (0
 but on a short-wide screen); a drawer, modal over the whole screen,
 covers it. (v3.4.1's status band under
 the device's clock is retired: the system paints that bar.)
-THE INSTALLED APP (v3.4.6): `.standalone` shows in the installed app
-alone (`display-mode: standalone`, the manifest's display), `.browser`
+THE INSTALLED APP (v3.4.6): `.show-app` shows in the installed app
+alone (`display-mode: standalone`, the manifest's display), `.show-browser`
 everywhere else — a tab, a tab gone full screen; the mode's values, as
 `.fine .coarse` are the pointer's. CSS sees the display mode alone (iOS's
 `navigator.standalone` is a script's); the engine asks "installed" one

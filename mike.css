@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.11 — one file, twelve cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.11/mike.css
+   mike.css v3.5.12 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.12/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -15,8 +15,10 @@
      exception      what overrides a block from outside: shipped variants,
                     standing states (data-ui-state), modes (print, focus,
                     view transitions)
-     visibility     the display gates — revert-layer; LAST, so a gate out-
-                    ranks every display a block ever sets
+     visibility     the display gates — revert-layer; after every block, so a
+                    gate out-ranks every display a block ever sets
+     mode           the installed app or a tab — the same form one layer
+                    later, so it ANDs with a display gate
 
    The four cores are orthogonal: each reads nothing from the others
    (the shell reads type's lh — the one sanctioned direction).
@@ -45,7 +47,7 @@
                       size container — header · nav · ONE body that
                       scrolls · footer; what it holds measures the card
      gates            .mobile .tablet .desktop .ultrawide · .small .medium .large ·
-                      .c-* · .fine .coarse · .standalone .browser (visibility)
+                      .c-* · .fine .coarse (visibility) · .show-app .show-browser (mode)
      helpers          .suc .inf .wrn .dgr · .num · .bg · .bw · .glass …
                       (utility — the closed list)
      state            data-ui-state="…" tokens, matched ~= ; native and
@@ -70,7 +72,7 @@
        core.color, core.type, core.shell,               /* the three cores — orthogonal, standalone */
        theme, base,                                      /* all config · bare-element defaults */
        composition, block, utility,                      /* layout primitives · components · call-site helpers */
-       exception, visibility;                            /* states, variants, modes · the display gates, last */
+       exception, visibility, mode;                      /* states, variants, modes · the display gates · app or tab, last */
 
 /* ── registrations — the only @property declarations; everything else is config in theme ── */
 @property --bg { syntax: "<number>"; inherits: false; initial-value: 0 }
@@ -839,7 +841,7 @@
        DERIVED: --cfg-dock-inset, the dock's height — a pill's (the touch
        square, and half a line for the pill's own padding and edge) over
        the foot; 0 wherever no permanent dock
-       stands: it stands in the installed app (the .standalone gate's
+       stands: it stands in the installed app (the .show-app gate's
        question) on a touch pointer (the .coarse gate's, the dock's own — a
        token on :root cannot read an element's gate, so it asks the gate's
        question). A surface pinned to the viewport that must not sit under
@@ -4069,9 +4071,8 @@
      and a container tier is decided by source order (the tiers sit
      later). Still ONE FAMILY PER ELEMENT: two gates cannot AND through
      the cascade — the later family's verdict stands alone; gate the
-     second family on a wrapper. (The display mode is the exception,
-     v3.5.9: its words only take out, so they stand beside one other
-     family — THE MODE'S WORDS, below.) */
+     second family on a wrapper. (The display mode ANDs with any of
+     them: it is the next layer, mode.) */
   /* A PHONE ON ITS SIDE IS STILL A PHONE (v3.5.10, EventOS gf-1086): the
      viewport family asks which DEVICE this is, and a screen under 576px
      on EITHER side is a phone's — .mobile shows there, .tablet and
@@ -4144,37 +4145,13 @@
   @media (pointer: fine)               { :where(.fine)   { display: revert-layer } }
   @media (pointer: coarse)             { :where(.coarse) { display: revert-layer } }
 
-  /* THE INSTALLED APP (v3.4.6, EventOS gf-1038, Mike: "it should be gated
-     on app vs browser"): .standalone shows in the installed app alone —
-     display-mode: standalone, the manifest's display — and .browser
-     everywhere else: a tab, a tab gone full screen. The words are the
-     mode's values, as .fine and .coarse are the pointer's. This is the
-     engine's one question of "installed": the permanent dock below and
-     its knob in the theme ask it in the same words. (CSS sees the display
-     mode alone; iOS's navigator.standalone is a script's.) */
-  /* THE MODE'S WORDS ONLY TAKE OUT (v3.5.9, EventOS gf-1085: a menu
-     button for a phone's width in a tab, a dock for a touch device in the
-     app). Every other family is none at rest and comes back by
-     revert-layer, so two of them on one element cannot AND — the later
-     family's verdict stands alone. This one, last in the layer, has no
-     rest state: .standalone is taken out everywhere but the installed
-     app, .browser in the installed app, and where neither rule holds the
-     element keeps whatever stood before — its own display, or another
-     family's verdict. So the mode is the ONE family that may stand beside
-     another on the same element, and the two AND: class="mobile browser"
-     is a phone's width in a tab, class="coarse standalone" a touch device
-     in the app. (A gated crumb takes its follower's chevron with it, as
-     the viewport family's does.) */
-  @media not all and (display-mode: standalone) { :where(.standalone) { display: none } :where(.crumbs) > .standalone + :where(a, span)::before { display: none } }
-  @media (display-mode: standalone)             { :where(.browser)    { display: none } :where(.crumbs) > .browser + :where(a, span)::before { display: none } }
-
   /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010, Mike: "make the dock
      persistent, but … only the height of the curve and below"; v3.4.6,
      gf-1038: "on ipad we still get the fold down dock we want the
      persistent dock on tablet as well … it should be gated on app vs
      browser"; v3.5.4, EventOS gf-1065, Mike, after iOS Calendar's
      toolbar: "I want this kind of dock"). The dock is .page > .hud.dock,
-     shown by its own gates (EventOS: .coarse.standalone — a touch device,
+     shown by its own gates (EventOS: .coarse.show-app — a touch device,
      a phone or a tablet, in the installed app alone since v3.5.9). In a
      browser tab a dock that shows there is two glass pills floating in
      the hud (THE DOCK, in the slots) and the canvas runs under them. In
@@ -4315,6 +4292,19 @@
     /* let content use the full page width on paper */
     :where(.pg-main) { max-inline-size: none; }
   }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   mode — the installed app or a browser tab (v3.5.12, EventOS gf-1096).
+   The gates' own form, none at rest and back by revert-layer, one layer
+   later: here revert-layer hands the element to the visibility layer's
+   verdict, so class="mobile show-browser" is a phone's width AND a tab.
+   The one question of "installed" is the standalone display mode.
+   ════════════════════════════════════════════════════════════════════ */
+@layer mode {
+  :where(.show-app, .show-browser) { display: none }
+  @media (display-mode: standalone)             { :where(.show-app)     { display: revert-layer } :where(.crumbs) > .show-browser + :where(a, span)::before { display: none } }
+  @media not all and (display-mode: standalone) { :where(.show-browser) { display: revert-layer } :where(.crumbs) > .show-app + :where(a, span)::before { display: none } }
 }
 
 
