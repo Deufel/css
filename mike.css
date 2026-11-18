@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.13 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.13/mike.css
+   mike.css v3.5.14 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.14/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -4152,8 +4152,11 @@
 
   @layer pointer {
   :where(.fine, .coarse)                       { display: none }
-  @media (pointer: fine)               { :where(.fine)   { display: revert-layer } }
-  @media (pointer: coarse)             { :where(.coarse) { display: revert-layer } }
+  /* the two words are exhaustive (v3.5.14): .fine is every pointer that is
+     not coarse, so a device reporting none still gets one of the two; a
+     gated crumb takes its follower's chevron with it, as the viewport's does */
+  @media not all and (pointer: coarse) { :where(.fine)   { display: revert-layer } :where(.crumbs) > .coarse + :where(a, span)::before { display: none } }
+  @media (pointer: coarse)             { :where(.coarse) { display: revert-layer } :where(.crumbs) > .fine + :where(a, span)::before { display: none } }
   }
 
   /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010, Mike: "make the dock
