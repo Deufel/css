@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.12 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.12/mike.css
+   mike.css v3.5.13 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.13/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -4060,6 +4060,14 @@
    to gated copies — redundant on the hidden one, a bug on the shown one.
    ════════════════════════════════════════════════════════════════════ */
 @layer visibility {
+  /* EVERY FAMILY IS ITS OWN LAYER (v3.5.13, EventOS gf-1115): viewport,
+     tier, container and pointer, in that order, with mode after them all.
+     Each is none at rest and back by revert-layer, and revert-layer hands
+     the element to the family before it — so words of DIFFERENT families
+     on one element AND (class="mobile fine" is a phone's width and a
+     mouse), words of ONE family union (class="tablet desktop"). An OR
+     across families is two elements. */
+  @layer viewport, tier, container, pointer;
   /* Breakpoints follow the Bootstrap grid boundaries: phones < 576 ·
      576–768 tablet · ≥768 desktop. THIS FILE IS THE SINGLE SOURCE —
      change thresholds here, in this layer; there is no override file.
@@ -4067,12 +4075,7 @@
      retired 2026-09-01, per Mike: single-tenant; app components live in
      this file's components layer like every other component.)
      THE GATES ARE :where()-WRAPPED (v3.1.1, EventOS gf-665): zero
-     specificity like every rule, so an element wearing a device gate
-     and a container tier is decided by source order (the tiers sit
-     later). Still ONE FAMILY PER ELEMENT: two gates cannot AND through
-     the cascade — the later family's verdict stands alone; gate the
-     second family on a wrapper. (The display mode ANDs with any of
-     them: it is the next layer, mode.) */
+     specificity like every rule. */
   /* A PHONE ON ITS SIDE IS STILL A PHONE (v3.5.10, EventOS gf-1086): the
      viewport family asks which DEVICE this is, and a screen under 576px
      on EITHER side is a phone's — .mobile shows there, .tablet and
@@ -4082,6 +4085,7 @@
      and the shell's short-wide map (core.shell) arranges it. A phone
      upright is under 576px wide and was .mobile before; a tablet and a
      desk are 576px tall and more and read exactly as before. */
+  @layer viewport {
   :where(.mobile, .tablet, .desktop, .ultrawide) { display: none }
   @media (width < 576px), (height < 576px) { :where(.mobile)  { display: revert-layer } }
   /* ULTRA-WIDE (v3.1.15, EventOS #803): pixels AND aspect — a 21:9 desk
@@ -4098,6 +4102,7 @@
   @media (width >= 576px) and (height >= 576px) { :where(.crumbs) > .mobile + :where(a, span)::before { display: none } }
   @media (576px <= width < 768px) and (height >= 576px) { :where(.tablet)  { display: revert-layer } }
   @media (width >= 768px) and (height >= 576px)         { :where(.desktop) { display: revert-layer } }
+  }
 
   /* [RETIRED 2026-08] the declared aside width: asides are content-
      sized now (containment removed in core.layout), so the auto track
@@ -4118,10 +4123,12 @@
      type (rem is fixed, lh rides the type scale — that skew is why
      10rem broke: labeled-at-sm fell into .small and stacked the foot).
      8rem sits between them with margin on both sides. */
+  @layer tier {
   :where(.small, .medium, .large)              { display: none }
   @container (width < 8rem)            { :where(.small)  { display: revert-layer } }
   @container (8rem <= width < 20rem)   { :where(.medium) { display: revert-layer } }
   @container (width >= 20rem)          { :where(.large)  { display: revert-layer } }
+  }
 
   /* the c-* family — the SAME breakpoints as .mobile/.tablet/.desktop,
      measured against the CONTAINER instead of the viewport. Inside a pg
@@ -4131,19 +4138,23 @@
      pg-main are the query containers (core.layout). The frame's wide
      map (v3.5.5, from 1280px of its cell) has no word here: .c-desktop
      is open-ended, and inside a card these ask the card. */
+  @layer container {
   :where(.c-mobile, .c-tablet, .c-desktop)     { display: none }
   @container (width < 576px)           { :where(.c-mobile)  { display: revert-layer } }
   @container (576px <= width < 768px)  { :where(.c-tablet)  { display: revert-layer } }
   @container (width >= 768px)          { :where(.c-desktop) { display: revert-layer } }
+  }
 
   /* (the ORIENTATION and HEIGHT gates of gf-608 — .c-portrait/.c-landscape,
      .c-short/.c-tall, bare selectors on the zero-specificity debt list —
      are purged with the .block they answered inside: v3.2.15, 2026-11-11,
      EventOS #1345; no template wore them.) */
 
+  @layer pointer {
   :where(.fine, .coarse)                       { display: none }
   @media (pointer: fine)               { :where(.fine)   { display: revert-layer } }
   @media (pointer: coarse)             { :where(.coarse) { display: revert-layer } }
+  }
 
   /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010, Mike: "make the dock
      persistent, but … only the height of the curve and below"; v3.4.6,

@@ -141,7 +141,7 @@ browser tab; v3.4.6). THE VIEWPORT FAMILY ASKS WHICH DEVICE, BY EITHER
 SIDE (v3.5.10): a screen under 576px wide OR tall is a phone's —
 `.mobile` shows there, `.tablet` and `.desktop` only from 576px of
 height — so a phone on its side takes every phone variant a template
-states. One family per element; the second family goes on a wrapper —
+states. Each family is its own layer (v3.5.13): words of different families on one element AND, words of one family union; an OR across families is two elements. (Before v3.5.13:
 the display mode excepted (v3.5.9): its two words have no rest state,
 they only TAKE OUT (`.show-app` everywhere but the app, `.show-browser` in
 the app) and stand last, so one of them beside one other family ANDs on
