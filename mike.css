@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.15 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.15/mike.css
+   mike.css v3.5.16 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.16/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3496,6 +3496,11 @@
   /* .oneline — a row that must not wrap (header clusters, icon pairs).
      Composition class: replaces inline flex-wrap styles. */
   :where(.oneline) { flex-wrap: nowrap; }
+
+  /* .no-select — text nobody copies (v3.5.16, EventOS gf-1134): a label
+     under an icon, a caption on a control. A long press or a drag on a
+     touch device does not start a selection in it. */
+  :where(.no-select) { user-select: none; -webkit-user-select: none; }
 
   /* .start — a composition whose items align to the block start (an icon
      beside multi-line text). Replaces inline align-items. */
