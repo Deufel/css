@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.14 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.14/mike.css
+   mike.css v3.5.15 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.15/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2615,6 +2615,7 @@
     &:where(.right)  { --_translate-closed: 100% 0;  inset: 0 0 0 auto; inline-size: min(85vw,320px); block-size: 100svh; border-radius: var(--cfg-radius) 0 0 var(--cfg-radius); }
     &:where(.top)    { --_translate-closed: 0 -100%; inset: 0 0 auto 0; inline-size: 100vw; block-size: min(85svh,240px); border-radius: 0 0 var(--cfg-radius) var(--cfg-radius); }
     &:where(.bottom) { --_translate-closed: 0 100%;  inset: auto 0 0 0; inline-size: 100vw; block-size: min(85svh,240px); padding-block-end: max(0.75lh, env(safe-area-inset-bottom, 0px)); border-radius: var(--cfg-radius) var(--cfg-radius) 0 0; }
+    &:where(.left, .right):where(.wide) { inline-size: min(92vw, 40rem); } /* v3.5.15: a side drawer that holds forms */
     /* A DRAWER STANDS INSIDE THE DEVICE'S INSETS (v3.5.10, EventOS
        gf-1086): on the edge it hangs from it runs under the inset — a
        phone on its side has its notch on a short side and its home
