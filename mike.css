@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.17 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.17/mike.css
+   mike.css v3.5.18 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.18/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2079,6 +2079,20 @@
         content-visibility calc(var(--cfg-motion) * 0.2s) allow-discrete;
     }
     &[open]::details-content { block-size: auto; padding-block: 0.3lh; }
+    /* WHERE auto CANNOT BE INTERPOLATED (v3.5.18, EventOS #1578: Safari) the
+       fold has no height to glide, so its content fades and settles in over
+       the same --cfg-motion time; with motion off it is instant, as above. */
+    @supports not (interpolate-size: allow-keywords) {
+      &::details-content {
+        block-size: auto; opacity: 0; translate: 0 -0.25lh;
+        transition:
+          opacity   calc(var(--cfg-motion) * 0.2s) ease,
+          translate calc(var(--cfg-motion) * 0.2s) ease,
+          padding-block calc(var(--cfg-motion) * 0.2s) ease,
+          content-visibility calc(var(--cfg-motion) * 0.2s) allow-discrete;
+      }
+      &[open]::details-content { opacity: 1; translate: 0 0; @starting-style { opacity: 0; translate: 0 -0.25lh; } }
+    }
   }
 
   /* ── .otable — THE OUTLINE TABLE (gf-386): one grid for a tree with
@@ -2143,7 +2157,7 @@
        over the word above it and the row below (three radios on one row). */
     & > :where(small) {
       --type: -1; --fg: -0.8; grid-column: 2;
-      min-block-size: 1lh; display: inline-flex; align-items: center; line-height: 1;
+      min-block-size: 1lh; display: inline-flex; align-items: flex-start; line-height: 1;
     }
     &:has([aria-invalid="true"]) {
       & > :where(small) { --hue-lock: var(--hue-dgr); }
@@ -2236,6 +2250,29 @@
       }
       &:has(:focus-visible) { outline: 2px solid var(--focus); outline-offset: -2px; }
     }
+  }
+
+  /* ── .tabs.slide — THE CHIP SLIDES (v3.5.18, EventOS #1579: "a sliding
+     animation for the tab state changes that would run through the config
+     motion"): the checked label names itself an anchor and one pseudo
+     wears the active paint over it, gliding to the next on --cfg-motion.
+     Opt-in while it is tried in the lab; without anchor positioning the
+     chip paints itself as ever. ── */
+  @supports (anchor-scope: --tab-on) {
+    :where(.tabs.slide) { anchor-scope: --tab-on; isolation: isolate; }
+    :where(.tabs.slide) > :where(label) { position: relative; z-index: 1; }
+    :where(.tabs.slide) > :where(label):has(:checked) { anchor-name: --tab-on; background-color: transparent; }
+    :where(.tabs.slide)::before {
+      content: ""; position: absolute; position-anchor: --tab-on; z-index: 0;
+      inset-block-start: anchor(top); inset-inline-start: anchor(left);
+      inline-size: anchor-size(width); block-size: anchor-size(height);
+      border-radius: var(--cfg-radius); background-color: var(--_a-pos);
+      transition:
+        inset-inline-start calc(var(--cfg-motion) * 0.18s) ease,
+        inset-block-start  calc(var(--cfg-motion) * 0.18s) ease,
+        inline-size        calc(var(--cfg-motion) * 0.18s) ease;
+    }
+    :where(.tabs.slide):not(:has(:checked))::before { display: none; }
   }
 
   /* ── underline tabs — sit ON a line; the active tab rides it in --focus ── */
@@ -2428,8 +2465,8 @@
        (feedback #108): the generic outline traces the border-radius */
     border-radius: var(--cfg-radius);
   }
-  :where(input[type="range"])::-webkit-slider-runnable-track { block-size: 0.5lh; border-radius: 999px; background-color: var(--_bg); }
-  :where(input[type="range"])::-moz-range-track    { block-size: 0.5lh; border-radius: 999px; background-color: var(--_bg); }
+  :where(input[type="range"])::-webkit-slider-runnable-track { block-size: 0.5lh; border-radius: var(--cfg-radius); background-color: var(--_bg); }
+  :where(input[type="range"])::-moz-range-track    { block-size: 0.5lh; border-radius: var(--cfg-radius); background-color: var(--_bg); }
   :where(input[type="range"])::-moz-range-progress { block-size: 0.5lh; border-radius: 999px; background-color: var(--_fill-color); }
   /* .range-pair (v3.2.6, EventOS gf-819): TWO THUMBS ON ONE TRACK — a low
      and a high range stacked, both tracks transparent, the band between the
@@ -2446,7 +2483,7 @@
      member drains the band with its thumbs. */
   :where(.range-pair) {
     --bg: 0.15; --_fill-color: color-mix(in oklch, var(--_a-zero), var(--_a-pos) var(--fill, 65%));
-    display: grid; grid-template-areas: "stack"; align-items: center; block-size: 1.3lh; border-radius: 999px;
+    display: grid; grid-template-areas: "stack"; align-items: center; block-size: 1.3lh; border-radius: var(--cfg-radius);
     background: linear-gradient(to right, var(--_bg) calc(var(--lo, 0) * 1%), var(--_fill-color) calc(var(--lo, 0) * 1%), var(--_fill-color) calc(var(--hi, 100) * 1%), var(--_bg) calc(var(--hi, 100) * 1%)) no-repeat center / 100% 0.5lh;
     &:where(:has(> input:disabled)) { --chroma: 0.15; }
     & > :where(input[type="range"]) { grid-area: stack; margin: 0; pointer-events: none; z-index: 0; }
@@ -2459,14 +2496,14 @@
   }
   :where(input[type="range"])::-webkit-slider-thumb {
     appearance: none; -webkit-appearance: none;
-    inline-size: 1.1lh; block-size: 1.1lh; border-radius: 50%;
+    inline-size: 1.1lh; block-size: 1.1lh; border-radius: min(50%, var(--cfg-radius));
     background-color: var(--_fill-color);
     border: 2px solid var(--_bg);
     margin-block-start: calc((0.5lh - 1.1lh) / 2);
     cursor: grab;
   }
   :where(input[type="range"])::-moz-range-thumb {
-    inline-size: 1.1lh; block-size: 1.1lh; border-radius: 50%;
+    inline-size: 1.1lh; block-size: 1.1lh; border-radius: min(50%, var(--cfg-radius));
     background-color: var(--_fill-color); border: 2px solid var(--_bg); cursor: grab;
   }
   :where(input[type="range"]):focus-visible::-webkit-slider-thumb { outline: 2px solid var(--focus); outline-offset: 2px; }
