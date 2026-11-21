@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.24 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.24/mike.css
+   mike.css v3.5.25 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.25/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2627,6 +2627,11 @@
      controls — the fab's free-floating 1.1lh margin overflowed the
      narrow rail and opened a gap above the theme row (feedback #95) */
   :where(.pg-navigation) :where(.fab-1, .fab-2, .fab-3) { margin: 0; }
+  /* in the page header (v3.5.25, EventOS gf-1201, #1687): a fab is a dock
+     control standing alone — no free-floating margin, the dock pill's ring
+     its edge */
+  :where(.pg-main-header) :where(.fab-1, .fab-2, .fab-3) { margin: 0; }
+  :where(.pg-main-header) :where(.fab-1) { border-color: var(--border); }
 
   /* ── .hud-pop — a bare anchored surface rising from a hud corner fab: the
      popover box is a transparent positioning frame (the card inside paints).
@@ -4215,8 +4220,8 @@
       & > :where(:first-child) > :where(h1, h2, h3) { --type: 1; font-weight: 700; flex: 0 1 auto; min-inline-size: 0; max-inline-size: none; }
       & > :where(:first-child) > :where(.icon.mobile),
       & > :where(:last-child) :where(button:not(.tag, .avatar), a.btn):not(:where(menu, dialog, [popover]) *) {
-        inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0;
-        border-radius: 999px; border-color: transparent; background-color: transparent; box-shadow: none;
+        inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0; border-radius: 999px; flex: none;
+        &:where(:not(.fab-1)) { border-color: transparent; background-color: transparent; box-shadow: none; }
       }
     }
   }
