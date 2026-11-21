@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.25 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.25/mike.css
+   mike.css v3.5.26 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.26/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3689,6 +3689,13 @@
       &::before, &::after { display: block; block-size: var(--fade); animation-timeline: scroll(nearest block); }
       &::before { inset-block-start: 0; margin-block-end: calc(-1 * var(--fade)); background-image: linear-gradient(to bottom, var(--surf), transparent); }
       &::after { inset-block-end: 0; margin-block-start: calc(-1 * var(--fade)); background-image: linear-gradient(to top, var(--surf), transparent); }
+    }
+    /* a table under a pinned head (v3.5.26, EventOS #1693): the start veil
+       stands BEHIND the head (the head is z 2) and begins under it — the
+       head's height is a cell's line and its padding */
+    :where(.fade):where(.scroll-y):where(:not(.scroll-x)):has(> table > thead) {
+      --head: calc(1.36lh + 1px);
+      &::before { z-index: 1; block-size: calc(var(--head) + var(--fade)); margin-block-end: calc(-1 * (var(--head) + var(--fade))); background-image: linear-gradient(to bottom, var(--surf) var(--head), transparent); }
     }
   }
 }
