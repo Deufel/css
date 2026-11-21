@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.19 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.19/mike.css
+   mike.css v3.5.20 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.20/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -4193,6 +4193,23 @@
   /* a gated crumb takes its separator with it (gf-407: the home crumb is
      .mobile; its follower's chevron must not stand alone wider) */
   @media (width >= 576px) and (height >= 576px) { :where(.crumbs) > .mobile + :where(a, span)::before { display: none } }
+  /* A PHONE'S TITLE ROW (v3.5.20, EventOS gf-1185, Mike: "the same style
+     as the ones in the dock … we don't need to put areas around these"):
+     where the rail is gone the page header's title is a step down and its
+     Menu and its verbs are bare glyphs in the touch square, the app's and
+     a tab's alike. Here, past the hues and the states, so a verb's own
+     surface gives way. */
+  @media (width < 576px), (height < 576px) {
+    :where(.pg-main-header) > :where(.spread) {
+      --gap: 0.3lh;
+      & > :where(:first-child) > :where(h1, h2, h3) { --type: 1; font-weight: 700; }
+      & > :where(:first-child) > :where(.icon.mobile),
+      & > :where(:last-child) :where(button:not(.tag, .avatar), a.btn):not(:where(menu, dialog, [popover]) *) {
+        inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0;
+        border-radius: 999px; border-color: transparent; background-color: transparent; box-shadow: none;
+      }
+    }
+  }
   @media (576px <= width < 768px) and (height >= 576px) { :where(.tablet)  { display: revert-layer } }
   @media (width >= 768px) and (height >= 576px)         { :where(.desktop) { display: revert-layer } }
   }
