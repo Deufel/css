@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.26 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.26/mike.css
+   mike.css v3.5.27 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.27/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2632,6 +2632,12 @@
      its edge */
   :where(.pg-main-header) :where(.fab-1, .fab-2, .fab-3) { margin: 0; }
   :where(.pg-main-header) :where(.fab-1) { border-color: var(--border); }
+  /* a group of them in the header is ONE pill, the dock's (v3.5.27, EventOS:
+     "they should all sit in the same tray … the button outline"): the ring
+     is the group's, drawn inside its box so the row keeps its height, and a
+     control within wears none of its own */
+  :where(.pg-main-header) :where(.row.glass) { padding: 0 0.2em; gap: 0.15em; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--border); flex: none; }
+  :where(.pg-main-header) :where(.row.glass) > :where(.fab-1) { border-color: transparent; }
 
   /* ── .hud-pop — a bare anchored surface rising from a hud corner fab: the
      popover box is a transparent positioning frame (the card inside paints).
