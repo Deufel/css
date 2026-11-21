@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.23 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.23/mike.css
+   mike.css v3.5.24 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.24/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -870,8 +870,9 @@
   @media (width >= 576px) and (height < 576px) {
     :root { --cfg-dock-side: env(safe-area-inset-right, 0px); }
   }
+  /* v3.5.24 (EventOS #1669): the dock's column stands WITHIN the trailing inset, never beside it — a phone on its side reports the island's inset on both edges, and the band beyond the dock stood empty */
   @media (display-mode: standalone) and (pointer: coarse) and (width >= 576px) and (height < 576px) {
-    :root { --cfg-dock-inset: 0px; --cfg-dock-side: calc(var(--cfg-touch) + 1lh + env(safe-area-inset-right, 0px)); }
+    :root { --cfg-dock-inset: 0px; --cfg-dock-side: max(calc(var(--cfg-touch) + 1lh), env(safe-area-inset-right, 0px)); }
   }
   [data-ui-radius="0"] { --cfg-radius: 0px; }
   [data-ui-radius="1"] { --cfg-radius: 6px; }
@@ -3871,6 +3872,10 @@
   /* the shipped region paint — ALL pg-* defaults in ONE home now
      (pg-main-header's stray padding moved here from the grid) */
   .pg-banner      { --bg:  0.4; padding: 0.25lh; }
+  /* on a short-wide screen the banner's surface runs to both edges, its words keeping clear of the insets (v3.5.24, EventOS #1669) */
+  @media (width >= 576px) and (height < 576px) {
+    .pg-banner { margin-inline-start: calc(-1 * env(safe-area-inset-left, 0px)); padding-inline: calc(0.25lh + env(safe-area-inset-left, 0px)) calc(0.25lh + env(safe-area-inset-right, 0px)); }
+  }
   .pg-header      { --bg: -0.8; padding: 0.25lh; }
   .pg-subheader   { --bg: -0.8; padding: 0.15lh 1em; }
   .pg-navigation  { --bg: -0.8; padding: 0.25lh; border-inline-end: 1px solid var(--border); }
@@ -4333,7 +4338,7 @@
      768px tall and keeps the row. */
   @media (display-mode: standalone) and (width >= 576px) and (height < 576px) {
     :where(.page) > :where(.hud.dock) {
-      block-size: auto; padding: 0.5lh env(safe-area-inset-right, 0px) 0.5lh 0;
+      block-size: auto; padding: 0.5lh 0;
       & > :where(.bl, .br) { flex-direction: column; margin: 0; padding: 0.35em 0.15lh; justify-self: center; }
       & > :where(.bl) { align-self: start; }
       & > :where(.br) { align-self: end; }
