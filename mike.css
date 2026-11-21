@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.27 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.27/mike.css
+   mike.css v3.5.28 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.28/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2562,7 +2562,8 @@
      shadows are achromatic by design); the fab-3 glow is the POLE. ── */
   :where(.fab-1, .fab-2, .fab-3) {
     --lift: initial; --bg: 0.4; --fg: var(--_sem-ink, 0.7);
-    border-radius: 999px; font-weight: 650;
+    /* THE PILL'S CORNER follows the corners' knob (v3.5.28, EventOS #1710: "this tray should also follow a scaled radius based on the --cfg-radius … generalise to the dock"): 1.25 of it — square at 0, a full round at the roundest (22px → 27.5px, half a pill's height) — a fab's, a header group's and a dock pill's alike */
+    border-radius: calc(var(--cfg-radius) * 1.25); font-weight: 650;
     /* NO self-positioning: the hud slot classes (.tl … .br) own placement;
        the hud default centers a slotless child. */
     margin: 1.1lh;
@@ -2619,7 +2620,7 @@
   /* A LINK WRAPPING A FAB wears the pill's own shape (v3.2.2, EventOS #878):
      the focus ring is the anchor's, and a square anchor drew a square ring
      around a round button — the anchor is a pill, so its ring curves too */
-  :where(a:has(> :where(.fab-1, .fab-2, .fab-3))) { display: inline-block; border-radius: 999px; }
+  :where(a:has(> :where(.fab-1, .fab-2, .fab-3))) { display: inline-block; border-radius: calc(var(--cfg-radius) * 1.25); }
   /* inside the hud, fabs are uniform circles; the corner-slot padding owns
      the viewport offset, so the fab's own free-floating margin dies. */
   :where(.hud) :where(.fab-1, .fab-2, .fab-3) { inline-size: var(--cfg-touch); block-size: var(--cfg-touch); margin: 0; }
@@ -2636,7 +2637,7 @@
      "they should all sit in the same tray … the button outline"): the ring
      is the group's, drawn inside its box so the row keeps its height, and a
      control within wears none of its own */
-  :where(.pg-main-header) :where(.row.glass) { padding: 0 0.2em; gap: 0.15em; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--border); flex: none; }
+  :where(.pg-main-header) :where(.row.glass) { padding: 0 0.2em; gap: 0.15em; border-radius: calc(var(--cfg-radius) * 1.25); box-shadow: inset 0 0 0 1px var(--border); flex: none; }
   :where(.pg-main-header) :where(.row.glass) > :where(.fab-1) { border-color: transparent; }
 
   /* ── .hud-pop — a bare anchored surface rising from a hud corner fab: the
@@ -3598,7 +3599,7 @@
      member takes no backdrop of its own — a fab's blur inside the pill's
      drew a disc of the pill alone round every glyph wherever what lay
      behind the pill was not its own colour (v3.5.4). */
-  :where(.hud) > :where(.bl, .br):where(.glass) { margin: 1lh; padding: 0.15lh 0.35em; gap: 0.25em; border-radius: 999px; border: 1px solid var(--border); box-shadow: 0 0.3lh 1lh oklch(0 0 0 / 0.18);
+  :where(.hud) > :where(.bl, .br):where(.glass) { margin: 1lh; padding: 0.15lh 0.35em; gap: 0.25em; border-radius: calc(var(--cfg-radius) * 1.25); border: 1px solid var(--border); box-shadow: 0 0.3lh 1lh oklch(0 0 0 / 0.18);
     & > :where(*) { -webkit-backdrop-filter: none; backdrop-filter: none; }
     /* AN AVATAR IN THE PILL (v3.5.6, EventOS gf-1068: "use this for the
        avatar on the dock … from the user avatar on the side bar") is the
@@ -4233,7 +4234,7 @@
       & > :where(:first-child) > :where(h1, h2, h3) { --type: 1; font-weight: 700; flex: 0 1 auto; min-inline-size: 0; max-inline-size: none; }
       & > :where(:first-child) > :where(.icon.mobile),
       & > :where(:last-child) :where(button:not(.tag, .avatar), a.btn):not(:where(menu, dialog, [popover]) *) {
-        inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0; border-radius: 999px; flex: none;
+        inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0; border-radius: calc(var(--cfg-radius) * 1.25); flex: none;
         &:where(:not(.fab-1)) { border-color: transparent; background-color: transparent; box-shadow: none; }
       }
     }
