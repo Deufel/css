@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.20 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.20/mike.css
+   mike.css v3.5.21 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.21/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3655,8 +3655,8 @@
      A roster's scroller fades its inline edges with no word. --fade is the
      veil's reach. ── */
   @supports (animation-timeline: scroll()) {
-    :where(.fade):where(.scroll-x), :where(.fade):where(.scroll-y), :where(.roster) :where(.scroll-x):has(> table:only-child) {
-      --fade: 1.5lh; --surf: var(--_bg);
+    :where(.fade):where(.scroll-x), :where(.fade):where(.scroll-y), :where(.roster) :where(.scroll-x:has(> table:only-child)) {
+      --fade: 1.5lh;   /* the veil is the painted surface the scroller stands on (--surf), never its own --_bg: a scroller rarely paints */
       &::before, &::after {
         content: ""; position: sticky; z-index: 3; pointer-events: none; opacity: 0;
         animation: linear both; animation-timeline: scroll(nearest inline); animation-range: 0 var(--fade);
@@ -3664,7 +3664,7 @@
       &::before { animation-name: fade-veil-in; }
       &::after { animation-name: fade-veil-out; animation-range: calc(100% - var(--fade)) 100%; }
     }
-    :where(.fade):where(.scroll-x), :where(.roster) :where(.scroll-x):has(> table:only-child) {
+    :where(.fade):where(.scroll-x), :where(.roster) :where(.scroll-x:has(> table:only-child)) {
       display: grid; grid-template-columns: minmax(min-content, 1fr); align-content: start; background-image: none;
       & > *, &::before, &::after { grid-area: 1 / 1; }
       /* the track is the content's own width or the box's, whichever is more
@@ -4201,8 +4201,9 @@
      surface gives way. */
   @media (width < 576px), (height < 576px) {
     :where(.pg-main-header) > :where(.spread) {
-      --gap: 0.3lh;
-      & > :where(:first-child) > :where(h1, h2, h3) { --type: 1; font-weight: 700; }
+      --gap: 0.3lh; flex-wrap: nowrap;
+      & > :where(:first-child) { flex: 1 1 0; min-inline-size: 0; }
+      & > :where(:first-child) > :where(h1, h2, h3) { --type: 1; font-weight: 700; flex: 0 1 auto; min-inline-size: 0; max-inline-size: none; }
       & > :where(:first-child) > :where(.icon.mobile),
       & > :where(:last-child) :where(button:not(.tag, .avatar), a.btn):not(:where(menu, dialog, [popover]) *) {
         inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0;
