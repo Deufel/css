@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.21 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.21/mike.css
+   mike.css v3.5.22 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.22/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3270,7 +3270,10 @@
 	/* the grown drawer is a column whose HEAD stays put and whose .grow.scroll-y
 	   child does the scrolling (feedback #155) */
 	.drawer-grow { block-size: auto; max-block-size: 80svh; overflow: hidden; }
-	.drawer-grow[open] { display: flex; flex-direction: column; } /* the UA keeps the closed dialog display: none */
+	.drawer-grow[open], .drawer-grow:popover-open { display: flex; flex-direction: column; } /* the UA keeps the closed dialog display: none; a popover drawer is open by :popover-open (v3.5.22) */
+	/* a long list inside a growing drawer or a menu scrolls in its own column, the surface held to 80svh (v3.5.22, EventOS gf-1191) */
+	:where(.drawer-grow, .menu) > :where(.column:has(> .grow.scroll-y)) { flex: 1 1 auto; min-block-size: 0; }
+	:where(.menu:has(> .column > .grow.scroll-y)) { max-block-size: 80svh; }
 }
 
 
@@ -4310,6 +4313,8 @@
       --bg: var(--cfg-main-bg); background-color: var(--_bg);
       & > :where(.bl, .br) { margin-block: 0; translate: none; visibility: visible; }
       & > :where(.bc) { display: none; }
+      /* the dock's footnote (a version) hangs under the pills' row, in the foot, clear of a three-control pill on a 320px phone (v3.5.22, EventOS) */
+      & > :where(small) { place-self: end center; translate: 0 100%; }
     }
   }
   /* ON A SHORT-WIDE SCREEN THE DOCK IS A COLUMN (v3.5.10, EventOS
