@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.22 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.22/mike.css
+   mike.css v3.5.23 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.23/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1727,8 +1727,7 @@
       border-radius: calc(var(--cfg-radius) * 2.5); corner-shape: squircle;
       transition: translate calc(var(--cfg-motion) * 0.12s) ease, background-color calc(var(--cfg-motion) * 0.12s) ease;
     }
-    @media (pointer: fine) { &:hover > :is(svg, .avatar) { translate: 0 -2px; } }   /* the lift is a mouse's (EventOS #884): a thumb never hovers */
-    &:active > :is(svg, .avatar) { translate: 0 0; }
+    @media (pointer: fine) { &:hover > :is(svg, .avatar) { translate: 0 -2px; } &:active > :is(svg, .avatar) { translate: 0 0; } }   /* the lift is a mouse's (EventOS #884): a thumb never hovers */
     & > small { --type: -2; font-weight: 600; line-height: 1; text-align: center; }
     /* the badge rides the squircle's corner: the tile is the anchor, the
        squircle its full-width top */
@@ -2575,8 +2574,8 @@
       backdrop-filter  calc(var(--cfg-motion) * 0.12s) ease;
     & > svg { inline-size: 1.2em; block-size: 1.2em; }
     &::before { content: ""; position: absolute; inset: -4px; }   /* static hit-pad */
-    @media (pointer: fine) { &:hover { translate: 0 -2px; } }   /* the lift is a mouse's (EventOS #884) */
-    &:active { translate: 0 0; }
+    /* the lift and its press are a mouse's (EventOS #884; v3.5.23, #1664: on touch a press took translate from none to 0 0 — a transition, a promoted layer, the pill's neighbours re-rastered a fraction of a pixel off) */
+    @media (pointer: fine) { &:hover { translate: 0 -2px; } &:active { translate: 0 0; } }
   }
   :where(.fab-1) {
     --fg: var(--_sem-ink, 1);
@@ -3596,6 +3595,8 @@
        and its hit area */
     & > :where(.avatar) { --type: 1; position: relative; margin-inline: max(0px, calc((var(--cfg-touch) - var(--_control-h)) / 2));
       &::before { content: ""; position: absolute; inset: min(0px, calc((var(--_control-h) - var(--cfg-touch)) / 2)); } } }
+  /* two three-control pills on the narrowest phone (v3.5.23, EventOS gf-1193: 341px asked of 320) give up half their margin and their gap */
+  @media (width < 360px) { :where(.hud) > :where(.bl, .br):where(.glass) { margin-inline: 0.5lh; gap: 0; } }
   :where(.hud) > :where(.bl, .br) { transition: translate calc(var(--cfg-motion) * 0.25s) ease; }
   :where(.hud[data-ui-state="away"]) > :where(.bl, .br) { translate: 0 calc(100% + 1.5lh); visibility: hidden; transition: translate calc(var(--cfg-motion) * 0.25s) ease, visibility 0s calc(var(--cfg-motion) * 0.25s); }
   /* THE TOAST PILE'S CLEARANCE (gf-409, 2026-09-24): above the fab
