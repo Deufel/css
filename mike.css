@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.28 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.28/mike.css
+   mike.css v3.5.29 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.29/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2639,6 +2639,8 @@
      control within wears none of its own */
   :where(.pg-main-header) :where(.row.glass) { padding: 0 0.2em; gap: 0.15em; border-radius: calc(var(--cfg-radius) * 1.25); box-shadow: inset 0 0 0 1px var(--border); flex: none; }
   :where(.pg-main-header) :where(.row.glass) > :where(.fab-1) { border-color: transparent; }
+  /* an avatar closing such a group takes the group's corner, so its own does not stand square in a round end (v3.5.29) */
+  :where(.pg-main-header) :where(.row.glass) > :where(.avatar) { border-radius: calc(var(--cfg-radius) * 1.25); }
 
   /* ── .hud-pop — a bare anchored surface rising from a hud corner fab: the
      popover box is a transparent positioning frame (the card inside paints).
@@ -3922,6 +3924,8 @@
      header under the title, the tabs' underline under the tabs */
   @media (width >= 576px) and (height < 576px) {
     .pg-main-header:has(+ .pg-main-subheader) { border-block-end: 1px solid var(--border); }
+    /* the tabs' strip as a fading scroller (v3.5.29, EventOS #1702) is a grid: its tabs keep the foot of the shared row, where the flex line had them */
+    :where(.pg-main-subheader):where(.fade.scroll-x) { align-content: end; }
   }
   .pg-main-subheader { --bg: var(--cfg-main-bg); padding: 0 0.25lh; border-block-end: 1px solid var(--border); }
   .pg-main-subheader:has(> .tabs-underline) { border-block-end: 0; }
