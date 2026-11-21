@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.18 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.18/mike.css
+   mike.css v3.5.19 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.19/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3045,6 +3045,11 @@
      leaving the th for the menu used to vanish the menu (feedback #100) */
   :where(.roster) :where(thead th) :where([data-ui-state="off"]:has(> svg)):has(+ .menu:popover-open) { visibility: visible; }
   :where(.roster) :where(thead th:hover) :where([data-ui-state="off"]:has(> svg)) { visibility: visible; }
+  /* a screen with no hover cannot uncover them: there they stand, quiet
+     (v3.5.19, EventOS #1646 — a first tap only woke the hover) */
+  @media (hover: none) {
+    :where(.roster) :where(thead th) :where([data-ui-state="off"]:has(> svg)) { visibility: visible; --fg: -0.45; }
+  }
   :where(.roster) :where(thead th) :where(.badge) { position: static; translate: none; }
   /* the roster form is PLUMBING, not a panel (gf-67): it stands down
      like a card-hosted form. */
@@ -3635,6 +3640,47 @@
      body). */
   :where(.scroll-x) { overflow-x: auto; overscroll-behavior-inline: none; min-inline-size: 0; }
   :where(.scroll-y) { overflow-y: auto; overscroll-behavior-block: none; min-block-size: 0; scrollbar-gutter: stable; }
+
+  /* ── THE SCROLL FADE (v3.5.19, EventOS #1643) — "more this way": the
+     content fades into the scroller's own surface at an edge exactly while
+     something hides beyond it. Two veils ride ABOVE the content (a hovered
+     row's wash cannot cover them, as it covered the old background
+     shadows), each lit by the scroller's own scroll timeline: opacity
+     alone, no mask, no registered property, no script. A scroller that
+     does not overflow has no active timeline and so no veil. Where scroll
+     timelines are missing the roster keeps its background shadows.
+       .fade on a .scroll-y  — the block edges, any content.
+       .fade on a .scroll-x  — the inline edges; it holds ONE child (a
+                               table, a row), since the veils share its cell.
+     A roster's scroller fades its inline edges with no word. --fade is the
+     veil's reach. ── */
+  @supports (animation-timeline: scroll()) {
+    :where(.fade):where(.scroll-x), :where(.fade):where(.scroll-y), :where(.roster) :where(.scroll-x):has(> table:only-child) {
+      --fade: 1.5lh; --surf: var(--_bg);
+      &::before, &::after {
+        content: ""; position: sticky; z-index: 3; pointer-events: none; opacity: 0;
+        animation: linear both; animation-timeline: scroll(nearest inline); animation-range: 0 var(--fade);
+      }
+      &::before { animation-name: fade-veil-in; }
+      &::after { animation-name: fade-veil-out; animation-range: calc(100% - var(--fade)) 100%; }
+    }
+    :where(.fade):where(.scroll-x), :where(.roster) :where(.scroll-x):has(> table:only-child) {
+      display: grid; grid-template-columns: minmax(min-content, 1fr); align-content: start; background-image: none;
+      & > *, &::before, &::after { grid-area: 1 / 1; }
+      /* the track is the content's own width or the box's, whichever is more
+         (a track whose MINIMUM is the box's stays the box's and strands the
+         veils mid-table); a table sizes to it, not to a percentage of it */
+      & > :where(table) { inline-size: auto; }
+      &::before, &::after { inline-size: var(--fade); }
+      &::before { inset-inline-start: 0; justify-self: start; background-image: linear-gradient(to right, var(--surf), transparent); }
+      &::after { inset-inline-end: 0; justify-self: end; background-image: linear-gradient(to left, var(--surf), transparent); }
+    }
+    :where(.fade):where(.scroll-y):where(:not(.scroll-x)) {
+      &::before, &::after { display: block; block-size: var(--fade); animation-timeline: scroll(nearest block); }
+      &::before { inset-block-start: 0; margin-block-end: calc(-1 * var(--fade)); background-image: linear-gradient(to bottom, var(--surf), transparent); }
+      &::after { inset-block-end: 0; margin-block-start: calc(-1 * var(--fade)); background-image: linear-gradient(to top, var(--surf), transparent); }
+    }
+  }
 }
 
 
@@ -4373,6 +4419,8 @@
 
 
 /* Keyframes are global by name — outside @layer, like the engine's own. */
+@keyframes fade-veil-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-veil-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes vt-blur-out { to   { opacity: 0; filter: blur(6px); } }
 
 @keyframes vt-blur-in { from { opacity: 0; filter: blur(6px); } }
