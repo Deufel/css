@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.31 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.31/mike.css
+   mike.css v3.5.32 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.32/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -642,6 +642,7 @@
       display: flex; flex-direction: column; min-inline-size: 0; max-inline-size: 50cqi; margin: 0;
       & > :where(h1, h2, h3) { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       & > :where(small, p) { --type: -2; --fg: -0.55; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      & > :where(small:first-child) { --fg: 1; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }   /* the overline: what kind of thing the title names (v3.5.32, EventOS #1723) */
     }
   }
   /* the icon rail (a <nav> filling pg-toolbar): tight stack, thin inset.
@@ -1375,6 +1376,9 @@
      around a committed pick keeps a hairline of room, not an input's
      padding beside the tag's — the chip's words start where typed ones do */
   :where(combo-box, combo-select, group-pick) > :where(.field) { padding-inline: 0.25em; gap: 0.25em; }
+  /* a date field is the same family: a trigger and its clear inside one field (v3.5.32, EventOS gf-1219) */
+  :where(date-picker, day-picker) > :where(div) > :where(.field) { padding-inline: 0.25em; gap: 0.25em; }
+  :where(date-picker, day-picker) > :where(div) > :where(.field) > :where(button + button) { margin-inline-start: auto; --type: -2; --fg: -0.5; }
   /* the clear × sits at the END of the field, small — a search bar's
      clear (feedback #20); the chip's glyph is a declared box */
   :where(combo-box, combo-select) > :where(.field) > :where(button) { margin-inline-start: auto; --type: -2; --fg: -0.5; }   /* the chip's clear, by its place — no marker of ours (v3.5.31, EventOS gf-1217) */
@@ -2645,6 +2649,7 @@
      control within wears none of its own */
   :where(.pg-main-header) :where(.row.glass) { padding: 0 0.2em; gap: 0.15em; border-radius: calc(var(--cfg-radius) * 1.25); box-shadow: inset 0 0 0 1px var(--border); flex: none; }
   :where(.pg-main-header) :where(.row.glass) > :where(.fab-1) { border-color: transparent; }
+  :where(.pg-main-header) :where(.row.glass) > :where(.fab-1):hover { translate: none; }   /* a part of the one pill never lifts out of it (v3.5.32, EventOS #1724) */
   /* an avatar closing such a group takes the group's corner, so its own does not stand square in a round end (v3.5.29) */
   :where(.pg-main-header) :where(.row.glass) > :where(.avatar) { border-radius: calc(var(--cfg-radius) * 1.25); }
 
