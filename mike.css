@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.29 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.29/mike.css
+   mike.css v3.5.30 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.30/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -637,6 +637,12 @@
     align-items: center; gap: var(--gap, 0.25lh);
     & > :where(:first-child) { min-inline-size: 0; position: relative; }
     & > :where(:first-child) > :where(h1, h2, h3) { max-inline-size: 50cqi; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* a title with a line under it (v3.5.30, EventOS #1715): an hgroup takes the title's cap, each of its lines one line, the second small and quiet */
+    & > :where(:first-child) > :where(hgroup) {
+      display: flex; flex-direction: column; min-inline-size: 0; max-inline-size: 50cqi; margin: 0;
+      & > :where(h1, h2, h3) { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      & > :where(small, p) { --type: -2; --fg: -0.55; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    }
   }
   /* the icon rail (a <nav> filling pg-toolbar): tight stack, thin inset.
      (railToolbar's <div class="pg-toolbar"> keeps composition defaults.) */
@@ -4236,6 +4242,8 @@
       --gap: 0.3lh; flex-wrap: nowrap;
       & > :where(:first-child) { flex: 1 1 0; min-inline-size: 0; }
       & > :where(:first-child) > :where(h1, h2, h3) { --type: 1; font-weight: 700; flex: 0 1 auto; min-inline-size: 0; max-inline-size: none; }
+      & > :where(:first-child) > :where(hgroup) { flex: 0 1 auto; max-inline-size: none; }
+      & > :where(:first-child) > :where(hgroup) > :where(h1, h2, h3) { --type: 1; font-weight: 700; }
       & > :where(:first-child) > :where(.icon.mobile),
       & > :where(:last-child) :where(button:not(.tag, .avatar), a.btn):not(:where(menu, dialog, [popover]) *) {
         inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0; border-radius: calc(var(--cfg-radius) * 1.25); flex: none;
