@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.30 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.30/mike.css
+   mike.css v3.5.31 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.31/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -1377,7 +1377,7 @@
   :where(combo-box, combo-select, group-pick) > :where(.field) { padding-inline: 0.25em; gap: 0.25em; }
   /* the clear × sits at the END of the field, small — a search bar's
      clear (feedback #20); the chip's glyph is a declared box */
-  :where(combo-box, combo-select, group-pick) > :where(.field) > :where([data-cb-clear], [data-gp-clear]) { margin-inline-start: auto; --type: -2; --fg: -0.5; }
+  :where(combo-box, combo-select) > :where(.field) > :where(button) { margin-inline-start: auto; --type: -2; --fg: -0.5; }   /* the chip's clear, by its place — no marker of ours (v3.5.31, EventOS gf-1217) */
   :where(combo-box, combo-select, group-pick) > :where(.field) > :where(.tag) > :where(span) > :where(svg) { inline-size: 1em; block-size: 1em; flex: 0 0 auto; }
   :where(combo-box, combo-select, group-pick) > :where(.field) > :where(.tag) > :where(span) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* the calculator host paints its own card; it just needs to be a block */
@@ -2805,11 +2805,11 @@
      EventOS gf-535, 2026-10-05; canonical since gf-42, rev 3 gf-470).
      The markup is the whole vocabulary and this rule lays it out by
      nesting:
-       <toast-card class="toast card glass {tone}" data-ui-state="unread|read|leaving">
+       <div class="toast card glass {tone}" data-ui-state="unread|read|leaving">
          <header> glyph · <strong>title · <menu>verbs </header>   one line at rest
          <progress>                                                 optional, the row's bar
          <section> the words · the verb · the age </section>       the fold
-       </toast-card>
+       </div>
      The header's [aria-expanded] (a button in the menu, the SERVER's
      word) opens the fold; the host's ONE state word, stamped by the
      server, paints the dot (unread), quiets (read) or plays the exit
