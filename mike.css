@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.33 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.33/mike.css
+   mike.css v3.5.34 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.34/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -476,6 +476,13 @@
     & > :where(.pg-navigation) > :where(header, footer) { flex: none; }
     & > :where(.pg-navigation:has(> header + :not(footer) + footer)) { overflow-y: clip; }
     & > :where(.pg-navigation) > :where(header + :not(footer)) { flex: 1 1 0; min-block-size: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+    /* THE MIDDLE HOLDS ITS LINKS' FOCUS RINGS (v3.5.34, EventOS #1732: "the
+       focus ring on the main n1 links overflows its track"): a scroller
+       clips at its padding edge, so the ring round a link — drawn outside
+       its box, as the foot's is — was cut. The middle reaches into the
+       rail's own padding (0.25lh, .pg-navigation's) and gives it back as
+       its own: the links stand where they stood, the ring has the room. */
+    & > :where(.pg-navigation) > :where(header + :not(footer)) { margin: -0.25lh; padding: 0.25lh; }
     & > :where(.pg-navigation) > :where(header + :not(footer)) > * { flex-shrink: 0; }
     /* the COLLAPSED width is the ANATOMY (gf-72): glyph (1.15em) +
        item inline padding (0.6em × 2) + rail padding (0.25lh × 2). The
@@ -928,7 +935,7 @@
   /* half a CSS pixel (feedback #138): a constant hairline — one device
      pixel on a dense screen, and never the full-then-faint flicker a
      1px rule shows across DPRs */
-  :where(hr)  { border: 0; block-size: 0.5px; background: var(--border); margin-block: 1lh; }
+  :where(hr)  { border: 0; block-size: 0.5px; background: var(--border); margin-block: 0.5lh; }   /* a line, not a spacer (v3.5.34, EventOS #1734): half a line, none inside a composition */
   /* .vr — THE VERTICAL RULE (EventOS gf-591, Mike 2026-10-07): hr's line
      stood on end, on the inline-start edge of the element that begins a
      new column — a grid area, a flex item — so the seam rides the
