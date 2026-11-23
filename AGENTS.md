@@ -227,7 +227,12 @@ figure — or a blk that holds that figure alone — is that picture: no
 padding, the figure to the card's edges under its radius, the actions
 over it, and the clearance on the words it holds (a figcaption reads
 `--_corner`), never on the figure. A chart is named by its title and
-keeps the card's inset. THE FRAME above is still pg-main and its one section;
+keeps the card's inset. A LONE TABLE BLEEDS (v3.5.33,
+EventOS #1768): a card whose body is one table in a plain holder, under
+its header or alone, drops its padding at the sides and under it — the
+card the table's only frame; a shown title keeps the inset for itself. A
+bordered thing never directly holds a bordered thing; several things in
+a card are borderless tonal surfaces. THE FRAME above is still pg-main and its one section;
 `.areas` is what fills that section (EventOS's lab shows it on a page
 it calls Frame). A page written before v3.4.0 keeps its blk arranger
 until it is moved.

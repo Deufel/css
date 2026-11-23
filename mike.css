@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.32 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.32/mike.css
+   mike.css v3.5.33 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.33/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -3444,6 +3444,20 @@
      in its title (aria-labelledby) and keeps the card's inset, and a card
      with a shown title keeps its inset under that title. */
   :where(.areas) > :where(.card[aria-label]:not(:has(> header > hgroup)):has(> figure, > :not(header, nav, footer, dialog) > figure:only-child)) { padding: 0; }
+  /* A LONE TABLE BLEEDS (v3.5.33, EventOS #1768, Mike: "a singular element
+     should just go to the extents of its area … you want to always avoid a
+     border element then containing a border element"): a card whose body is
+     one table in a plain holder — under its header or alone — IS that
+     table's frame: no padding at the sides or under it, the holder scrolls
+     it; a shown title keeps the card's inset for itself, and a card named
+     outright with no title drops the top too. A holder that is a
+     .scroll-x/.scroll-y draws the table's own frame (the scroller rule) and
+     so is not this card's. */
+  :where(.areas) > :where(.card:has(> :not(header, .scroll-x, .scroll-y):last-child > table:only-child):not(:has(> :not(header) ~ :not(header)))) {
+    padding-inline: 0; padding-block-end: 0;
+    & > :where(header:has(> hgroup)) { padding-inline: 0.5em; }
+    &:where([aria-label]:not(:has(> header > hgroup))) { padding-block-start: 0; }
+  }
   :where(.areas) > :where(.card[aria-label]) > :where(header:not(:has(> hgroup))) {
     position: absolute; inset-block-start: 0.2lh; inset-inline-end: 0.35em; z-index: 3; gap: 0.3em;   /* over a table's sticky head (2) */
     & > :where(button, a, .btn) {
