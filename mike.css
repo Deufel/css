@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.36 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.36/mike.css
+   mike.css v3.5.37 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.37/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -4407,6 +4407,7 @@
       & > :where(.bl, .br) { flex-direction: column; align-items: stretch; justify-self: stretch; }
       & > :where(.bl) { align-self: start; }
       & > :where(.br) { align-self: end; }
+      & > :where(small) { display: none; }   /* the column has no foot for the footnote to hang in (v3.5.37, EventOS #1777) */
       & > :where(.bl, .br) > :where(.nav-icon) {
         flex-direction: row; justify-content: flex-start; gap: 0.5em; border-start-end-radius: 0; border-end-end-radius: 0;
         block-size: auto; min-block-size: min(var(--cfg-touch), 12svh); padding: 0 calc(0.4em + env(safe-area-inset-right, 0px)) 0 0.7em;
