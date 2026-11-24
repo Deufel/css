@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.38 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.38/mike.css
+   mike.css v3.5.39 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.39/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -4385,8 +4385,10 @@
       --lift: initial; --bg: 0; --fg: -0.85;
       aspect-ratio: auto; flex: 0 1 auto; justify-content: center; gap: 0.15em; overflow: visible;
       inline-size: auto; block-size: var(--cfg-touch); min-block-size: 0; min-inline-size: var(--cfg-touch); padding: 0 0.35em;
-      & > :where(small) { --type: -3; font-weight: 500; white-space: nowrap; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
-      & > :where(.avatar) { --type: -2; }
+      /* THE ROW'S TILES ARE THEIR GLYPHS (v3.5.39, EventOS #1782, Mike: "so obvious they do not require labels"): the word stays in the markup, the tile's name, and shows where the dock is a column (below) */
+      & > :where(small) { display: none; --type: -3; font-weight: 500; white-space: nowrap; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
+      & > :where(svg) { inline-size: 1.35em; block-size: 1.35em; }
+      & > :where(.avatar) { --type: -1; }
     }
     & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-dock-corner); }
     & > :where(.br) > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
@@ -4412,7 +4414,9 @@
       & > :where(.bl, .br) > :where(.nav-icon) {
         flex-direction: row; justify-content: flex-start; gap: 0.5em; border-start-end-radius: 0; border-end-end-radius: 0;
         block-size: auto; min-block-size: min(var(--cfg-touch), 12svh); padding: 0 0.4em 0 0.7em;
-        & > :where(small) { --type: -1; font-weight: inherit; }
+        & > :where(small) { display: revert; --type: -1; font-weight: inherit; }
+        & > :where(svg) { inline-size: 1em; block-size: 1em; }
+        & > :where(.avatar) { --type: -2; }
       }
       & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-radius); border-start-end-radius: var(--cfg-dock-corner); }
       & > :where(.br) > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
