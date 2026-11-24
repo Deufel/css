@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.34 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.34/mike.css
+   mike.css v3.5.35 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.35/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -47,7 +47,7 @@
                       size container — header · nav · ONE body that
                       scrolls · footer; what it holds measures the card
      gates            .mobile .tablet .desktop .ultrawide · .small .medium .large ·
-                      .c-* · .fine .coarse (visibility) · .show-app .show-browser (mode)
+                      .c-* · .fine .coarse (visibility) · .show-app .show-browser · .docked .undocked (mode)
      helpers          .suc .inf .wrn .dgr · .num · .bg · .bw · .glass …
                       (utility — the closed list)
      state            data-ui-state="…" tokens, matched ~= ; native and
@@ -877,16 +877,32 @@
        stand on — its header, subheader, body, footer, the toolbar — and
        the permanent dock's row under them, one number */
     --cfg-main-bg: -0.3;
+    /* THE DOCK IS A BAND OF TILES (v3.5.35, EventOS gf-1236, Mike's
+       drawing: Menu · Locate at one end, Add · Search · Alerts · the
+       person at the other, "this guideline"). Its two numbers: the band's
+       position, a tint of the hue under paper tiles, and the corner the
+       two outermost tiles turn toward the screen's own — the control's
+       radius in a browser tab, where the browser's bar is under the
+       band, half a touch square in the installed app, where the device's
+       corner is. WHERE IT STANDS is one question, asked here for the
+       tokens and by the .docked / .undocked gates (mode) for everything
+       else: a touch pointer, in the installed app or on a phone's screen
+       (under 576px on either side) in a browser tab — a tab on a tablet
+       or a desk keeps its title row's controls and has no dock. */
+    --cfg-dock-band: 0.16;
+    --cfg-dock-corner: var(--cfg-radius);
   }
-  @media (display-mode: standalone) and (pointer: coarse) {
+  @media (display-mode: standalone) { :root { --cfg-dock-corner: calc(var(--cfg-touch) / 2); } }
+  @media (pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px)) {
     :root { --cfg-dock-inset: calc(var(--cfg-touch) + 0.5lh + var(--cfg-dock-foot)); }
   }
   @media (width >= 576px) and (height < 576px) {
     :root { --cfg-dock-side: env(safe-area-inset-right, 0px); }
   }
   /* v3.5.24 (EventOS #1669): the dock's column stands WITHIN the trailing inset, never beside it — a phone on its side reports the island's inset on both edges, and the band beyond the dock stood empty */
-  @media (display-mode: standalone) and (pointer: coarse) and (width >= 576px) and (height < 576px) {
-    :root { --cfg-dock-inset: 0px; --cfg-dock-side: max(calc(var(--cfg-touch) + 1lh), env(safe-area-inset-right, 0px)); }
+  /* v3.5.35: the column holds a tile's glyph AND its word, and runs to the screen's edge — the trailing inset is the tiles' own padding */
+  @media (pointer: coarse) and (width >= 576px) and (height < 576px) {
+    :root { --cfg-dock-inset: 0px; --cfg-dock-side: calc(7em + env(safe-area-inset-right, 0px)); }
   }
   [data-ui-radius="0"] { --cfg-radius: 0px; }
   [data-ui-radius="1"] { --cfg-radius: 6px; }
@@ -4336,73 +4352,70 @@
   @media (pointer: coarse)             { :where(.coarse) { display: revert-layer } :where(.crumbs) > .fine + :where(a, span)::before { display: none } }
   }
 
-  /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010, Mike: "make the dock
-     persistent, but … only the height of the curve and below"; v3.4.6,
-     gf-1038: "on ipad we still get the fold down dock we want the
-     persistent dock on tablet as well … it should be gated on app vs
-     browser"; v3.5.4, EventOS gf-1065, Mike, after iOS Calendar's
-     toolbar: "I want this kind of dock"). The dock is .page > .hud.dock,
-     shown by its own gates (EventOS: .coarse.show-app — a touch device,
-     a phone or a tablet, in the installed app alone since v3.5.9). In a
-     browser tab a dock that shows there is two glass pills floating in
-     the hud (THE DOCK, in the slots) and the canvas runs under them. In
-     the INSTALLED app, at any width, the same element is the shell's last
-     row: area d (v3.5.9), the row no region names, across the whole width
-     — every region ends above it by the shell's map, the navigation and
-     the toolbar with the page —
-     as tall as --cfg-dock-inset, and the SAME TWO PILLS stand in it,
-     one at each end, in the hud's own one-cell grid: each a pill as the
-     browser's is, its controls the touch square, as tall as they need; the
-     row stands on the main's surface (--cfg-main-bg, v3.5.6: the page's
-     own showed as a band under the main). A pill
-     stands in from the screen's side by the side inset and its own gutter
-     (the slot's margin, inline), and on --cfg-dock-foot, just clear of the
-     home indicator. It stays visible and
-     in place: the stored away state's translate and hidden would reach it.
-     The handle goes: a permanent dock is not put away, whatever the stored
-     state. The bar's rule asks the app alone and leaves display to the
-     dock's gates. What answers it from elsewhere — a frame taking no
+  /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010; every touch device,
+     v3.4.6, gf-1038; its own row, v3.5.9; a phone's browser tab too,
+     v3.5.35). The dock is .page > .hud.dock, shown by its gate (.docked):
+     the shell's last row, area d, the row no region names, across the
+     whole width — every region ends above it by the shell's map — as
+     tall as --cfg-dock-inset, on --cfg-dock-foot, just clear of the home
+     indicator. What answers it from elsewhere — a frame taking no
      clearance, the toasts no extra foot, a main footer giving the inset
-     back — asks the knob's question, the app on a touch pointer: a rule
-     on another element cannot read the dock's gate, and on a fine pointer
-     no dock stands. (No region is told to end above the dock: none
-     reaches its row.) Here, after the gates: the bar out-ranks the slot
-     utilities. */
-  @media (display-mode: standalone) {
-    :where(.page) > :where(.hud.dock) {
-      position: static; inset: auto; z-index: auto; grid-area: d;
-      block-size: var(--cfg-dock-inset); grid-template-rows: minmax(0, 1fr);
-      padding: 0 env(safe-area-inset-right, 0px) var(--cfg-dock-foot) env(safe-area-inset-left, 0px);
-      --bg: var(--cfg-main-bg); background-color: var(--_bg);
-      & > :where(.bl, .br) { margin-block: 0; translate: none; visibility: visible; }
-      & > :where(.bc) { display: none; }
-      /* the dock's footnote (a version) hangs under the pills' row, in the foot, clear of a three-control pill on a 320px phone (v3.5.22, EventOS) */
-      & > :where(small) { place-self: end center; translate: 0 100%; }
+     back — asks the dock's own question (theme). Here, after the gates:
+     the bar out-ranks the slot utilities. */
+  /* THE TILES (v3.5.35, EventOS gf-1236): the dock's two groups are rows
+     of .nav-icon — the rail's flat tile, a glyph over its word — each a
+     paper tile on the band, a touch square tall and at least as wide; the
+     first tile of the first group and the last of the second turn their
+     outer corner by --cfg-dock-corner. The glass pills of v3.5.4 are the
+     hud's still (THE DOCK, in the slots); the permanent dock no longer
+     wears them. The rule asks no mode: the dock shows by its gate
+     (.docked) and is the shell's last row wherever it shows. */
+  :where(.page) > :where(.hud.dock) {
+    position: static; inset: auto; z-index: auto; grid-area: d;
+    block-size: var(--cfg-dock-inset); grid-template-rows: minmax(0, 1fr);
+    padding: 0 max(0.25lh, env(safe-area-inset-right, 0px)) var(--cfg-dock-foot) max(0.25lh, env(safe-area-inset-left, 0px));
+    --bg: var(--cfg-dock-band); background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
+    & > :where(.bl, .br) { margin: 0; padding: 0; gap: 0.25em; translate: none; visibility: visible; align-self: center; min-inline-size: 0; }
+    & > :where(.bc) { display: none; }
+    /* the dock's footnote (a version) hangs under the tiles' row, in the foot (v3.5.22, EventOS) */
+    & > :where(small) { place-self: end center; translate: 0 100%; }
+    & > :where(.bl, .br) > :where(.nav-icon) {
+      --lift: initial; --bg: 0; --fg: -0.85;
+      aspect-ratio: auto; flex: 0 1 auto; justify-content: center; gap: 0.15em; overflow: visible;
+      inline-size: auto; block-size: var(--cfg-touch); min-block-size: 0; min-inline-size: var(--cfg-touch); padding: 0 0.35em;
+      & > :where(small) { --type: -3; font-weight: 500; white-space: nowrap; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
+      & > :where(.avatar) { --type: -2; }
     }
+    & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-dock-corner); }
+    & > :where(.br) > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
   }
   /* ON A SHORT-WIDE SCREEN THE DOCK IS A COLUMN (v3.5.10, EventOS
      gf-1086: "a layout strategy for … a somewhat smaller device that is
      in landscape mode"). A phone on its side has no row to spend, so the
      shell's map stands area d on the trailing edge (core.shell) and the
      same element fills that column, as wide as --cfg-dock-side: the same
-     two pills, turned — the first at the top, the second at the bottom,
-     each a column of its touch-square controls, centred on the column's
-     own width; the device's trailing inset is the column's padding, the
-     page's bottom inset stands under it. Nothing else changes: the same
-     four controls, the same surface. No region names the column, so
-     nothing lies under the dock here either. Guarded twice: the app
-     alone, and the short-wide screen alone — an iPad on its side is
-     768px tall and keeps the row. */
-  @media (display-mode: standalone) and (width >= 576px) and (height < 576px) {
+     two groups, turned — the first at the top, the second at the bottom,
+     each tile a row now, its glyph and then its word (v3.5.35), running
+     to the screen's edge with the trailing inset as its padding; the
+     corners turned are the column's two outer ones. Guarded by the
+     short-wide screen alone — an iPad on its side is 768px tall and
+     keeps the row. */
+  @media (width >= 576px) and (height < 576px) {
     :where(.page) > :where(.hud.dock) {
-      block-size: auto; padding: 0.5lh 0;
-      & > :where(.bl, .br) { flex-direction: column; margin: 0; padding: 0.35em 0.15lh; justify-self: center; }
+      block-size: auto; padding: 0.25lh 0 0.25lh 0.25lh;
+      & > :where(.bl, .br) { flex-direction: column; align-items: stretch; justify-self: stretch; }
       & > :where(.bl) { align-self: start; }
       & > :where(.br) { align-self: end; }
-      & > :where(.bl, .br) > :where(.avatar) { margin-block: max(0px, calc((var(--cfg-touch) - var(--_control-h)) / 2)); }
+      & > :where(.bl, .br) > :where(.nav-icon) {
+        flex-direction: row; justify-content: flex-start; gap: 0.5em; border-start-end-radius: 0; border-end-end-radius: 0;
+        block-size: auto; min-block-size: min(var(--cfg-touch), 12svh); padding: 0 calc(0.4em + env(safe-area-inset-right, 0px)) 0 0.7em;
+        & > :where(small) { --type: -1; font-weight: inherit; }
+      }
+      & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-radius); border-start-end-radius: var(--cfg-dock-corner); }
+      & > :where(.br) > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
     }
   }
-  @media (display-mode: standalone) and (pointer: coarse) {
+  @media (pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px)) {
     :where(.areas) { padding-block-end: 0; }
     :where(.hud) > :where(.br.toasts) { padding-block-end: 1lh; }
     :where(.pg-main-footer) { padding-block-end: 0.25lh; }
@@ -4497,9 +4510,15 @@
    The one question of "installed" is the standalone display mode.
    ════════════════════════════════════════════════════════════════════ */
 @layer mode {
-  :where(.show-app, .show-browser) { display: none }
+  :where(.show-app, .show-browser, .docked, .undocked) { display: none }
   @media (display-mode: standalone)             { :where(.show-app)     { display: revert-layer } :where(.crumbs) > .show-browser + :where(a, span)::before { display: none } }
   @media not all and (display-mode: standalone) { :where(.show-browser) { display: revert-layer } :where(.crumbs) > .show-app + :where(a, span)::before { display: none } }
+  /* .docked / .undocked — where the permanent dock stands and where it
+     does not (v3.5.35, EventOS gf-1236): the dock's own question (theme,
+     --cfg-dock-inset), so a control that moves into the dock and its
+     copy in the title row are one word each, never a list of modes. */
+  @media (pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px)) { :where(.docked) { display: revert-layer } :where(.crumbs) > .undocked + :where(a, span)::before { display: none } }
+  @media not ((pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px))) { :where(.undocked) { display: revert-layer } :where(.crumbs) > .docked + :where(a, span)::before { display: none } }
 }
 
 

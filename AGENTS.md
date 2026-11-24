@@ -149,6 +149,12 @@ the same element: `class="mobile show-browser"` is a phone's width in a tab,
 `class="coarse show-app"` a touch device in the app. A part of a block is
 shown or hidden ONLY this way, in the templ — never by the block's own
 `@container` or `@media`.
+WHERE THE DOCK STANDS (v3.5.35, EventOS gf-1236): `.docked` and
+`.undocked`, in the mode's layer — a touch pointer, in the installed app
+or on a phone's screen (under 576px on either side) in a browser tab.
+The dock wears `.docked`; a control that moved into it and stays in the
+title row elsewhere wears `.undocked`. The same condition sets
+`--cfg-dock-inset`, so the two can never disagree.
 
 THE FRAME. `pg-main` never scrolls (`overflow: hidden`, an inline-size
 container). A page's body is ONE `<section>`, in one of two shapes:
@@ -345,6 +351,14 @@ Regions are grid areas on `.page`: pg-banner, pg-header, pg-subheader,
 pg-navigation (n1), pg-toolbar (the n3 rail), pg-main-header, pg-main-
 subheader (tabs, crumbs, strips that must not scroll), pg-main, pg-main-
 aside, pg-main-footer, pg-aside, pg-footer. Set `--bg` on any to repaint.
+THE DOCK IS A BAND OF TILES SINCE v3.5.35 (EventOS gf-1236, Mike's
+drawing): what follows describes the row and the column, which stand;
+the "two pills" in it are now two groups of `.nav-icon` tiles — a glyph
+over its word, paper on the band (`--cfg-dock-band`), a touch square
+tall, the two outermost turned by `--cfg-dock-corner` — a short-wide
+screen's column `7em` and the trailing inset wide, each tile a row of
+its glyph and word; and the rule asks no display mode, the `.docked`
+gate shows it.
 THE PERMANENT DOCK (v3.4.2; every touch device, v3.4.6, EventOS gf-1038:
 "we want the persistent dock on tablet as well … gated on app vs
 browser"): the dock — `.page > .hud.dock`, shown by its own gates
