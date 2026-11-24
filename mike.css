@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.35 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.35/mike.css
+   mike.css v3.5.36 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.36/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -4375,7 +4375,8 @@
     block-size: var(--cfg-dock-inset); grid-template-rows: minmax(0, 1fr);
     padding: 0 max(0.25lh, env(safe-area-inset-right, 0px)) var(--cfg-dock-foot) max(0.25lh, env(safe-area-inset-left, 0px));
     --bg: var(--cfg-dock-band); background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
-    & > :where(.bl, .br) { margin: 0; padding: 0; gap: 0.25em; translate: none; visibility: visible; align-self: center; min-inline-size: 0; }
+    /* a group is ONE line (v3.5.36, EventOS gf-1237): a tile too wide wrapped under the others and doubled the band */
+    & > :where(.bl, .br) { margin: 0; padding: 0; gap: 0.25em; translate: none; visibility: visible; align-self: center; min-inline-size: 0; flex-wrap: nowrap; }
     & > :where(.bc) { display: none; }
     /* the dock's footnote (a version) hangs under the tiles' row, in the foot (v3.5.22, EventOS) */
     & > :where(small) { place-self: end center; translate: 0 100%; }
