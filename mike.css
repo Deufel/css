@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.37 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.37/mike.css
+   mike.css v3.5.38 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.38/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -575,7 +575,8 @@
         "n  t  mf mf mf a  d"  auto
         "n  f  f  f  f  f  d"  auto /
         auto auto 1fr auto auto auto var(--cfg-dock-side);
-      padding: 0 0 env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+      /* v3.5.38 (EventOS gf-1242, Mike's drawing: "island on the left sits over the panel, island on the right sits over the labels"): a phone on its side reports the island's inset on BOTH long-edge sides whichever way it lies, so standing inside it gave up two bands of a screen with none to spare — the page runs to both edges and the island lies over what is there */
+      padding: 0 0 env(safe-area-inset-bottom, 0px) 0;
       --bg: var(--cfg-main-bg); background-color: var(--_bg);
       & > :where(.pg-main-subheader) { container-type: normal; max-inline-size: 50cqi; display: flex; align-items: flex-end; overflow: auto hidden; overscroll-behavior-x: none; }
     }
@@ -900,9 +901,9 @@
     :root { --cfg-dock-side: env(safe-area-inset-right, 0px); }
   }
   /* v3.5.24 (EventOS #1669): the dock's column stands WITHIN the trailing inset, never beside it — a phone on its side reports the island's inset on both edges, and the band beyond the dock stood empty */
-  /* v3.5.35: the column holds a tile's glyph AND its word, and runs to the screen's edge — the trailing inset is the tiles' own padding */
+  /* v3.5.35: the column holds a tile's glyph AND its word, and runs to the screen's edge; v3.5.38: no wider for the trailing inset — the island, on that side, lies over the words */
   @media (pointer: coarse) and (width >= 576px) and (height < 576px) {
-    :root { --cfg-dock-inset: 0px; --cfg-dock-side: calc(7em + env(safe-area-inset-right, 0px)); }
+    :root { --cfg-dock-inset: 0px; --cfg-dock-side: 7em; }
   }
   [data-ui-radius="0"] { --cfg-radius: 0px; }
   [data-ui-radius="1"] { --cfg-radius: 6px; }
@@ -3943,7 +3944,7 @@
   .pg-banner      { --bg:  0.4; padding: 0.25lh; }
   /* on a short-wide screen the banner's surface runs to both edges, its words keeping clear of the insets (v3.5.24, EventOS #1669) */
   @media (width >= 576px) and (height < 576px) {
-    .pg-banner { margin-inline-start: calc(-1 * env(safe-area-inset-left, 0px)); padding-inline: calc(0.25lh + env(safe-area-inset-left, 0px)) calc(0.25lh + env(safe-area-inset-right, 0px)); }
+    .pg-banner { padding-inline: calc(0.25lh + env(safe-area-inset-left, 0px)) calc(0.25lh + env(safe-area-inset-right, 0px)); }   /* the page stands at the edge itself since v3.5.38: no margin to take back */
   }
   .pg-header      { --bg: -0.8; padding: 0.25lh; }
   .pg-subheader   { --bg: -0.8; padding: 0.15lh 1em; }
@@ -4410,7 +4411,7 @@
       & > :where(small) { display: none; }   /* the column has no foot for the footnote to hang in (v3.5.37, EventOS #1777) */
       & > :where(.bl, .br) > :where(.nav-icon) {
         flex-direction: row; justify-content: flex-start; gap: 0.5em; border-start-end-radius: 0; border-end-end-radius: 0;
-        block-size: auto; min-block-size: min(var(--cfg-touch), 12svh); padding: 0 calc(0.4em + env(safe-area-inset-right, 0px)) 0 0.7em;
+        block-size: auto; min-block-size: min(var(--cfg-touch), 12svh); padding: 0 0.4em 0 0.7em;
         & > :where(small) { --type: -1; font-weight: inherit; }
       }
       & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-radius); border-start-end-radius: var(--cfg-dock-corner); }
