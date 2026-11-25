@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.39 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.39/mike.css
+   mike.css v3.5.40 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.40/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -4392,6 +4392,29 @@
     }
     & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-dock-corner); }
     & > :where(.br) > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
+    /* THE PLACES (v3.5.40, EventOS gf-1245, Mike's drawing: "the dock
+       becomes 5 places"): a dock whose one group is a <nav> is the
+       product's places and nothing else — its tiles share the band's
+       whole width evenly, each wears its word under its glyph (a place
+       is named; a tool's glyph is its name, v3.5.39), and the place
+       shown — any truthy aria-current, the nav item's grammar — IS its
+       fill: the tile at the pole, its glyph and word in the pole's ink,
+       as the fab's (v3.5.8). The two outermost turn their outer corner
+       as the groups' do. */
+    & > :where(nav) {
+      display: flex; gap: 0.25em; justify-self: stretch; align-self: center; min-inline-size: 0;
+      & > :where(.nav-icon) {
+        --lift: initial; --bg: 0; --fg: -0.85;
+        aspect-ratio: auto; flex: 1 1 0; justify-content: center; gap: 0.15em; overflow: visible;
+        inline-size: auto; block-size: var(--cfg-touch); min-block-size: 0; min-inline-size: 0; padding: 0 0.2em;
+        & > :where(small) { --type: -3; font-weight: 500; white-space: nowrap; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
+        & > :where(svg) { inline-size: 1.35em; block-size: 1.35em; }
+        & > :where(.avatar) { --type: -1; }
+        &:where([aria-current]:not([aria-current="false"])) { --bg: 1; --fg: -1; }
+      }
+      & > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-dock-corner); }
+      & > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
+    }
   }
   /* ON A SHORT-WIDE SCREEN THE DOCK IS A COLUMN (v3.5.10, EventOS
      gf-1086: "a layout strategy for … a somewhat smaller device that is
@@ -4420,6 +4443,18 @@
       }
       & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-radius); border-start-end-radius: var(--cfg-dock-corner); }
       & > :where(.br) > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
+      /* the places, turned (v3.5.40): the column from its top, each tile a row of its glyph and word */
+      & > :where(nav) {
+        flex-direction: column; align-items: stretch; align-self: start;
+        & > :where(.nav-icon) {
+          flex: 0 0 auto; flex-direction: row; justify-content: flex-start; gap: 0.5em; border-start-end-radius: 0; border-end-end-radius: 0;
+          block-size: auto; min-block-size: min(var(--cfg-touch), 12svh); padding: 0 0.4em 0 0.7em;
+          & > :where(small) { --type: -1; font-weight: inherit; }
+          & > :where(svg) { inline-size: 1em; block-size: 1em; }
+          & > :where(.avatar) { --type: -2; }
+        }
+        & > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-radius); border-start-end-radius: var(--cfg-dock-corner); }
+      }
     }
   }
   @media (pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px)) {

@@ -358,7 +358,10 @@ over its word, paper on the band (`--cfg-dock-band`), a touch square
 tall, the two outermost turned by `--cfg-dock-corner` — a short-wide
 screen's column `7em` and the trailing inset wide, each tile a row of
 its glyph and word; and the rule asks no display mode, the `.docked`
-gate shows it.
+gate shows it. THE PLACES (v3.5.40, EventOS gf-1245): a dock whose one
+group is a `<nav>` of `.nav-icon` is the product's places alone — the
+tiles share the band evenly, each its word under its glyph, the one
+shown (`aria-current`) filled at the pole; a tool is never a tile there.
 THE PERMANENT DOCK (v3.4.2; every touch device, v3.4.6, EventOS gf-1038:
 "we want the persistent dock on tablet as well … gated on app vs
 browser"): the dock — `.page > .hud.dock`, shown by its own gates
