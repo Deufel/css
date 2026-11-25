@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.41 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.41/mike.css
+   mike.css v3.5.42 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.42/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2838,7 +2838,7 @@
   :where(.pocket) {
     --_dur: calc(var(--cfg-motion) * 0.2s);
     --_shut: 0 -100%; --_clip-shut: 100% -1lh -1lh; --_clip-open: 0 -1lh -1lh;
-    position: fixed; inset: auto; margin: 0; padding: 0; list-style: none;
+    position: fixed; inset: auto; margin: 0.2lh; padding: 0; list-style: none;   /* a slot of its own, a step off the opener: a straight cut never meets the opener's corners (v3.5.42) */
     position-area: bottom; position-visibility: always;
     min-inline-size: anchor-size(width);
     display: flex; flex-direction: column;
