@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.43 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.43/mike.css
+   mike.css v3.5.44 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.44/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -457,9 +457,12 @@
        drop through the tier gates as when collapsed. A SHORT screen's rail
        is the same (v3.5.10): under 576px of height a rail that still
        stands — a product's second rail; its navigation is gated off there
-       — is its icon width, as on a phone held upright. */
+       — is its icon width, as on a phone held upright. A navigation whose
+       items wear a word under the glyph there states the width the words
+       need, --pg-navigation-w-icon (v3.5.44, EventOS gf-1252, #1787). */
     @media (width < 768px), (height < 576px) {
       & > :where(.pg-navigation, .pg-toolbar) { min-inline-size: var(--rail-w-icon); max-inline-size: var(--rail-w-icon); }
+      & > :where(.pg-navigation) { min-inline-size: var(--pg-navigation-w-icon, var(--rail-w-icon)); max-inline-size: var(--pg-navigation-w-icon, var(--rail-w-icon)); }
     }
     /* THE NAVIGATION RAIL IS THREE PARTS (v3.5.3, EventOS gf-1064: "make this
        bottom always here and the main part the scrollable area; same for the
@@ -853,8 +856,9 @@
        indicator's, which ends 13px up, so the pills stand just clear of
        it, not a whole inset over it (v3.5.6, EventOS gf-1068: "move the
        dock down a bit") — half a line where a device has less.
-       DERIVED: --cfg-dock-inset, the dock's height — a pill's (the touch
-       square, and half a line for the pill's own padding and edge) over
+       DERIVED: --cfg-dock-inset, the dock's height — the touch square, a
+       quarter line over it (the engine's --gap; half a line while the
+       tiles stood on a band, EventOS gf-1252) and
        the foot; 0 wherever no permanent dock
        stands: it stands in the installed app (the .show-app gate's
        question) on a touch pointer (the .coarse gate's, the dock's own — a
@@ -868,9 +872,8 @@
        — DERIVED, the shell's last column there (core.shell): nothing on
        any other screen; on a short-wide one the device's trailing inset;
        and where the permanent dock stands — the app on a touch pointer —
-       the dock's COLUMN on that inset: a pill's width (the touch square,
-       and half a line for the pill's padding and edge) and half a line
-       of gutter. The dock takes no row there, so --cfg-dock-inset is
+       the dock's COLUMN on that inset: the touch square and a quarter
+       line each side. The dock takes no row there, so --cfg-dock-inset is
        nothing. What is pinned to the viewport (the hud, a .modal) ends
        on it as it ends on the row. */
     --cfg-dock-side: 0px;
@@ -878,32 +881,24 @@
        stand on — its header, subheader, body, footer, the toolbar — and
        the permanent dock's row under them, one number */
     --cfg-main-bg: -0.3;
-    /* THE DOCK IS A BAND OF TILES (v3.5.35, EventOS gf-1236, Mike's
-       drawing: Menu · Locate at one end, Add · Search · Alerts · the
-       person at the other, "this guideline"). Its two numbers: the band's
-       position, a tint of the hue under paper tiles, and the corner the
-       two outermost tiles turn toward the screen's own — the control's
-       radius in a browser tab, where the browser's bar is under the
-       band, half a touch square in the installed app, where the device's
-       corner is. WHERE IT STANDS is one question, asked here for the
-       tokens and by the .docked / .undocked gates (mode) for everything
-       else: a touch pointer, in the installed app or on a phone's screen
-       (under 576px on either side) in a browser tab — a tab on a tablet
-       or a desk keeps its title row's controls and has no dock. */
-    --cfg-dock-band: 0.16;
-    --cfg-dock-corner: var(--cfg-radius);
+    /* WHERE THE DOCK STANDS is one question, asked here for the tokens
+       and by the .docked / .undocked gates (mode) for everything else: a
+       touch pointer in the installed app (v3.5.44, EventOS gf-1252, Mike: "the
+       dock only goes in app mode"). A browser tab has none at any size, a
+       phone's included (v3.5.35 stood one there): its title row keeps its
+       controls. The band of v3.5.35 and its two numbers (--cfg-dock-band,
+       --cfg-dock-corner) are retired: the tiles are glyphs on the main's
+       surface. */
   }
-  @media (display-mode: standalone) { :root { --cfg-dock-corner: calc(var(--cfg-touch) / 2); } }
-  @media (pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px)) {
-    :root { --cfg-dock-inset: calc(var(--cfg-touch) + 0.5lh + var(--cfg-dock-foot)); }
+  @media (pointer: coarse) and (display-mode: standalone) {
+    :root { --cfg-dock-inset: calc(var(--cfg-touch) + 0.25lh + var(--cfg-dock-foot)); }
   }
   @media (width >= 576px) and (height < 576px) {
     :root { --cfg-dock-side: env(safe-area-inset-right, 0px); }
   }
   /* v3.5.24 (EventOS #1669): the dock's column stands WITHIN the trailing inset, never beside it — a phone on its side reports the island's inset on both edges, and the band beyond the dock stood empty */
-  /* v3.5.35: the column holds a tile's glyph AND its word, and runs to the screen's edge; v3.5.38: no wider for the trailing inset — the island, on that side, lies over the words */
-  @media (pointer: coarse) and (width >= 576px) and (height < 576px) {
-    :root { --cfg-dock-inset: 0px; --cfg-dock-side: 7em; }
+  @media (pointer: coarse) and (display-mode: standalone) and (width >= 576px) and (height < 576px) {
+    :root { --cfg-dock-inset: 0px; --cfg-dock-side: calc(var(--cfg-touch) + 0.5lh); }
   }
   [data-ui-radius="0"] { --cfg-radius: 0px; }
   [data-ui-radius="1"] { --cfg-radius: 6px; }
@@ -2674,6 +2669,8 @@
   :where(.pg-main-header) :where(.row.glass) { padding: 0 0.2em; gap: 0.15em; border-radius: calc(var(--cfg-radius) * 1.25); box-shadow: inset 0 0 0 1px var(--border); flex: none; }
   :where(.pg-main-header) :where(.row.glass) > :where(.fab-1) { border-color: transparent; }
   :where(.pg-main-header) :where(.row.glass) > :where(.fab-1):hover { translate: none; }   /* a part of the one pill never lifts out of it (v3.5.32, EventOS #1724) */
+  /* a touch-square glyph in the pill is the glyph alone, as a phone's title row has its verbs (v3.5.20; EventOS gf-1252, the app header's Search) */
+  :where(.pg-main-header) :where(.row.glass) > :where(.btn-touch) { border-color: transparent; background-color: transparent; box-shadow: none; }
   /* an avatar closing such a group takes the group's corner, so its own does not stand square in a round end (v3.5.29) */
   :where(.pg-main-header) :where(.row.glass) > :where(.avatar) { border-radius: calc(var(--cfg-radius) * 1.25); }
 
@@ -2854,7 +2851,7 @@
     &:where(.left, .right) { flex-direction: row; min-inline-size: 0; min-block-size: anchor-size(height); }
     &:not(:popover-open) { translate: var(--_shut); clip-path: inset(var(--_clip-shut)); display: none; }
     @starting-style { &:popover-open { translate: var(--_shut); clip-path: inset(var(--_clip-shut)); } }
-    /* a pocket of tiles (v3.5.43, EventOS gf-1250): a .nav-icon in a pocket is the dock's tile — a touch square tall, the pocket's width, its word one line — so a pocket out of a dock tile is a column of the same tiles */
+    /* a pocket of tiles (v3.5.43, EventOS gf-1250): a .nav-icon in a pocket is a touch square tall and the pocket's width, its word one line under its glyph — the dock's tile with its name shown (v3.5.44) */
     & > :where(.nav-icon) {
       aspect-ratio: auto; flex: none; block-size: var(--cfg-touch); min-block-size: 0; min-inline-size: 0;
       & > :where(small) { --type: -3; font-weight: 500; white-space: nowrap; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
@@ -4386,8 +4383,8 @@
   }
 
   /* THE PERMANENT DOCK (v3.4.2, EventOS gf-1010; every touch device,
-     v3.4.6, gf-1038; its own row, v3.5.9; a phone's browser tab too,
-     v3.5.35). The dock is .page > .hud.dock, shown by its gate (.docked):
+     v3.4.6, gf-1038; its own row, v3.5.9; the installed app alone,
+     gf-1252). The dock is .page > .hud.dock, shown by its gate (.docked):
      the shell's last row, area d, the row no region names, across the
      whole width — every region ends above it by the shell's map — as
      tall as --cfg-dock-inset, on --cfg-dock-foot, just clear of the home
@@ -4395,57 +4392,28 @@
      clearance, the toasts no extra foot, a main footer giving the inset
      back — asks the dock's own question (theme). Here, after the gates:
      the bar out-ranks the slot utilities. */
-  /* THE TILES (v3.5.35, EventOS gf-1236): the dock's two groups are rows
-     of .nav-icon — the rail's flat tile, a glyph over its word — each a
-     paper tile on the band, a touch square tall and at least as wide; the
-     first tile of the first group and the last of the second turn their
-     outer corner by --cfg-dock-corner. The glass pills of v3.5.4 are the
-     hud's still (THE DOCK, in the slots); the permanent dock no longer
-     wears them. The rule asks no mode: the dock shows by its gate
-     (.docked) and is the shell's last row wherever it shows. */
+  /* THE TILES ARE GLYPHS (v3.5.44, EventOS gf-1252, Mike: "make the dock icons
+     icon only and remove the contrasting colour from the dock"): the
+     dock stands on the main's own surface, a quarter line over its
+     tiles, and a tile — a .nav-icon of a group (.bl, .br) or of the
+     places (a <nav>, its tiles spread across the row) — is its glyph in
+     the touch square, named by its aria-label; the one shown is the nav
+     item's own fill (any truthy aria-current). The band, its paper tiles
+     and their words (v3.5.35–v3.5.40) are retired. The rule asks no
+     mode: the dock shows by its gate (.docked). */
   :where(.page) > :where(.hud.dock) {
     position: static; inset: auto; z-index: auto; grid-area: d;
     block-size: var(--cfg-dock-inset); grid-template-rows: minmax(0, 1fr);
-    padding: 0 max(0.25lh, env(safe-area-inset-right, 0px)) var(--cfg-dock-foot) max(0.25lh, env(safe-area-inset-left, 0px));
-    --bg: var(--cfg-dock-band); background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
-    /* a group is ONE line (v3.5.36, EventOS gf-1237): a tile too wide wrapped under the others and doubled the band */
+    padding: 0.25lh max(0.25lh, env(safe-area-inset-right, 0px)) var(--cfg-dock-foot) max(0.25lh, env(safe-area-inset-left, 0px));
+    --bg: var(--cfg-main-bg); background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
     & > :where(.bl, .br) { margin: 0; padding: 0; gap: 0.25em; translate: none; visibility: visible; align-self: center; min-inline-size: 0; flex-wrap: nowrap; }
     & > :where(.bc) { display: none; }
     /* the dock's footnote (a version) hangs under the tiles' row, in the foot (v3.5.22, EventOS) */
     & > :where(small) { place-self: end center; translate: 0 100%; }
-    & > :where(.bl, .br) > :where(.nav-icon) {
-      --lift: initial; --bg: 0; --fg: -0.85;
-      aspect-ratio: auto; flex: 0 1 auto; justify-content: center; gap: 0.15em; overflow: visible;
-      inline-size: auto; block-size: var(--cfg-touch); min-block-size: 0; min-inline-size: var(--cfg-touch); padding: 0 0.35em;
-      /* THE ROW'S TILES ARE THEIR GLYPHS (v3.5.39, EventOS #1782, Mike: "so obvious they do not require labels"): the word stays in the markup, the tile's name, and shows where the dock is a column (below) */
-      & > :where(small) { display: none; --type: -3; font-weight: 500; white-space: nowrap; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
+    & > :where(nav) { display: flex; justify-content: space-around; justify-self: stretch; align-self: center; min-inline-size: 0; }
+    & > :where(.bl, .br, nav) > :where(.nav-icon) {
+      flex: none; inline-size: var(--cfg-touch); block-size: var(--cfg-touch); min-block-size: 0; min-inline-size: 0; padding: 0; overflow: visible;
       & > :where(svg) { inline-size: 1.35em; block-size: 1.35em; }
-      & > :where(.avatar) { --type: -1; }
-    }
-    & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-dock-corner); }
-    & > :where(.br) > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
-    /* THE PLACES (v3.5.40, EventOS gf-1245, Mike's drawing: "the dock
-       becomes 5 places"): a dock whose one group is a <nav> is the
-       product's places and nothing else — its tiles share the band's
-       whole width evenly, each wears its word under its glyph (a place
-       is named; a tool's glyph is its name, v3.5.39), and the place
-       shown — any truthy aria-current, the nav item's grammar — IS its
-       fill: the tile at the pole, its glyph and word in the pole's ink,
-       as the fab's (v3.5.8). The two outermost turn their outer corner
-       as the groups' do. */
-    & > :where(nav) {
-      display: flex; gap: 0.25em; justify-self: stretch; align-self: center; min-inline-size: 0;
-      & > :where(.nav-icon) {
-        --lift: initial; --bg: 0; --fg: -0.85;
-        aspect-ratio: auto; flex: 1 1 0; justify-content: center; gap: 0.15em; overflow: visible;
-        inline-size: auto; block-size: var(--cfg-touch); min-block-size: 0; min-inline-size: 0; padding: 0 0.2em;
-        & > :where(small) { --type: -3; font-weight: 500; white-space: nowrap; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
-        & > :where(svg) { inline-size: 1.35em; block-size: 1.35em; }
-        & > :where(.avatar) { --type: -1; }
-        &:where([aria-current]:not([aria-current="false"])) { --bg: 1; --fg: -1; }
-      }
-      & > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-dock-corner); }
-      & > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
     }
   }
   /* ON A SHORT-WIDE SCREEN THE DOCK IS A COLUMN (v3.5.10, EventOS
@@ -4453,55 +4421,28 @@
      in landscape mode"). A phone on its side has no row to spend, so the
      shell's map stands area d on the trailing edge (core.shell) and the
      same element fills that column, as wide as --cfg-dock-side: the same
-     two groups, turned — the first at the top, the second at the bottom,
-     each tile a row now, its glyph and then its word (v3.5.35), running
-     to the screen's edge with the trailing inset as its padding; the
-     corners turned are the column's two outer ones. Guarded by the
+     groups, turned — the first at the top, the second at the bottom, the
+     places down the column — each tile its glyph still. Guarded by the
      short-wide screen alone — an iPad on its side is 768px tall and
      keeps the row. */
   @media (width >= 576px) and (height < 576px) {
     :where(.page) > :where(.hud.dock) {
-      block-size: auto; padding: 0.25lh 0 0.25lh 0.25lh;
-      & > :where(.bl, .br) { flex-direction: column; align-items: stretch; justify-self: stretch; }
+      block-size: auto; padding: 0.25lh;
+      & > :where(.bl, .br, nav) { flex-direction: column; justify-self: center; }
       & > :where(.bl) { align-self: start; }
       & > :where(.br) { align-self: end; }
+      & > :where(nav) { align-self: stretch; }
       & > :where(small) { display: none; }   /* the column has no foot for the footnote to hang in (v3.5.37, EventOS #1777) */
-      & > :where(.bl, .br) > :where(.nav-icon) {
-        flex-direction: row; justify-content: flex-start; gap: 0.5em; border-start-end-radius: 0; border-end-end-radius: 0;
-        block-size: auto; min-block-size: min(var(--cfg-touch), 12svh); padding: 0 0.4em 0 0.7em;
-        & > :where(small) { display: revert; --type: -1; font-weight: inherit; }
-        & > :where(svg) { inline-size: 1em; block-size: 1em; }
-        & > :where(.avatar) { --type: -2; }
-      }
-      & > :where(.bl) > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-radius); border-start-end-radius: var(--cfg-dock-corner); }
-      & > :where(.br) > :where(.nav-icon:last-child)  { border-end-end-radius: var(--cfg-dock-corner); }
-      /* the places, turned (v3.5.40): the column from its top, each tile a row of its glyph and word */
-      & > :where(nav) {
-        flex-direction: column; align-items: stretch; align-self: start;
-        & > :where(.nav-icon) {
-          flex: 0 0 auto; flex-direction: row; justify-content: flex-start; gap: 0.5em; border-start-end-radius: 0; border-end-end-radius: 0;
-          block-size: auto; min-block-size: min(var(--cfg-touch), 12svh); padding: 0 0.4em 0 0.7em;
-          & > :where(small) { --type: -1; font-weight: inherit; }
-          & > :where(svg) { inline-size: 1em; block-size: 1em; }
-          & > :where(.avatar) { --type: -2; }
-        }
-        & > :where(.nav-icon:first-child) { border-end-start-radius: var(--cfg-radius); border-start-end-radius: var(--cfg-dock-corner); }
-      }
+      & > :where(.bl, .br, nav) > :where(.nav-icon) { block-size: min(var(--cfg-touch), 12svh); }
     }
   }
-  @media (pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px)) {
+  @media (pointer: coarse) and (display-mode: standalone) {
     :where(.areas) { padding-block-end: 0; }
     :where(.hud) > :where(.br.toasts) { padding-block-end: 1lh; }
     :where(.pg-main-footer) { padding-block-end: 0.25lh; }
     :where(.pg-main-footer) > :where(.nav-version) { min-block-size: 0; }
-    /* THE BAR (v3.5.43, EventOS gf-1250, Mike: "the permanent top right action buttons become search and profile only … sufficient room to put tabs on the header"): where the dock stands the main header's first row is a .flank-end.docked — the page's tabs in a scroller, then Search and the account. Its rule is the header's one line, the whole width, the tabs standing on it; the title row follows under it. */
-    :where(.pg-main-header:has(> .flank-end.docked)) { border-block-end: 0; }
-    :where(.pg-main-header) > :where(.flank-end.docked) {
-      align-items: stretch; margin-inline: -0.25lh; padding-inline: 0.25lh; border-block-end: 1px solid var(--border);
-      & > :where(:first-child) { align-content: end; margin-block-end: -1px; }
-      & :where(.tabs-underline) { border-block-end-color: transparent; }
-      & > :where(:last-child) > :where(button:not(.avatar)) { inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0; flex: none; border-color: transparent; background-color: transparent; box-shadow: none; }   /* a bare glyph in the touch square, as the phone's title row has its verbs (v3.5.20) */
-    }
+    /* THE APP'S HEADER (v3.5.44, EventOS gf-1252): where the dock stands a main header may draw its one line inside itself — under its opening rows, an hr, or the underline of tabs it holds in a scroller — and then draws none at its foot. Asked here because those rows show where the dock does (their gate); every row is a primitive of its own. */
+    :where(.pg-main-header:has(> hr, > nav > .tabs-underline)) { border-block-end: 0; }
   }
 
   /* FOCUS MODE chrome-hide — lives here (not in core.layout) so it beats
@@ -4596,11 +4537,12 @@
   @media (display-mode: standalone)             { :where(.show-app)     { display: revert-layer } :where(.crumbs) > .show-browser + :where(a, span)::before { display: none } }
   @media not all and (display-mode: standalone) { :where(.show-browser) { display: revert-layer } :where(.crumbs) > .show-app + :where(a, span)::before { display: none } }
   /* .docked / .undocked — where the permanent dock stands and where it
-     does not (v3.5.35, EventOS gf-1236): the dock's own question (theme,
+     does not (v3.5.35, EventOS gf-1236; the installed app alone,
+     gf-1252): the dock's own question (theme,
      --cfg-dock-inset), so a control that moves into the dock and its
      copy in the title row are one word each, never a list of modes. */
-  @media (pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px)) { :where(.docked) { display: revert-layer } :where(.crumbs) > .undocked + :where(a, span)::before { display: none } }
-  @media not ((pointer: coarse) and ((display-mode: standalone) or (width < 576px) or (height < 576px))) { :where(.undocked) { display: revert-layer } :where(.crumbs) > .docked + :where(a, span)::before { display: none } }
+  @media (pointer: coarse) and (display-mode: standalone) { :where(.docked) { display: revert-layer } :where(.crumbs) > .undocked + :where(a, span)::before { display: none } }
+  @media not ((pointer: coarse) and (display-mode: standalone)) { :where(.undocked) { display: revert-layer } :where(.crumbs) > .docked + :where(a, span)::before { display: none } }
 }
 
 

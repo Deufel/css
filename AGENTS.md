@@ -351,21 +351,16 @@ Regions are grid areas on `.page`: pg-banner, pg-header, pg-subheader,
 pg-navigation (n1), pg-toolbar (the n3 rail), pg-main-header, pg-main-
 subheader (tabs, crumbs, strips that must not scroll), pg-main, pg-main-
 aside, pg-main-footer, pg-aside, pg-footer. Set `--bg` on any to repaint.
-THE DOCK IS A BAND OF TILES SINCE v3.5.35 (EventOS gf-1236, Mike's
-drawing): what follows describes the row and the column, which stand;
-the "two pills" in it are now two groups of `.nav-icon` tiles — a glyph
-over its word, paper on the band (`--cfg-dock-band`), a touch square
-tall, the two outermost turned by `--cfg-dock-corner` — a short-wide
-screen's column `7em` and the trailing inset wide, each tile a row of
-its glyph and word; and the rule asks no display mode, the `.docked`
-gate shows it. THE PLACES (v3.5.40, EventOS gf-1245): a dock whose one
-group is a `<nav>` of `.nav-icon` is the product's places alone — the
-tiles share the band evenly, each its word under its glyph, the one
-shown (`aria-current`) filled at the pole; a tool is never a tile there.
-THE BAR (v3.5.43, EventOS gf-1250): where the dock stands the main
-header's first row is a `.flank-end.docked` — the page's tabs in a
-scroller, then the bare tools, each a touch square; its rule is the
-header's one line and the tabs stand on it.
+THE DOCK'S TILES ARE GLYPHS SINCE v3.5.44 (EventOS gf-1252): what follows
+describes the row and the column, which stand; a tile is a `.nav-icon`,
+its glyph in the touch square on the main's own surface, named by its
+`aria-label`, the one shown (`aria-current`) filled; a `<nav>` of them is
+the product's places, spread across the row. The band, its paper tiles
+and their words (v3.5.35–v3.5.40) are retired. IT STANDS IN THE INSTALLED
+APP ALONE, on touch: `.docked` asks `(pointer: coarse) and (display-mode:
+standalone)`, `.undocked` its complement; a browser tab has none at any
+size. A main header there may draw its one line inside itself (an `hr`,
+or the underline of tabs it holds) and then draws none at its foot.
 THE PERMANENT DOCK (v3.4.2; every touch device, v3.4.6, EventOS gf-1038:
 "we want the persistent dock on tablet as well … gated on app vs
 browser"): the dock — `.page > .hud.dock`, shown by its own gates
