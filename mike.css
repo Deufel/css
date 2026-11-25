@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.40 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.40/mike.css
+   mike.css v3.5.41 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.41/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2828,6 +2828,32 @@
       min-inline-size: max(11rem, anchor-size(width));
       position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
     }
+  }
+  /* ── .pocket (v3.5.41, TRIAL, the name is a working one) — a popover that slides
+     out of its opener's edge whole: translate and clip-path run together,
+     so the cut stays on the opener's edge and nothing inside resizes. The
+     side is declared (the opener's foot, or .top .left .right) and never
+     flips: a fallback can move the box but not turn its slide. It is at
+     least the opener's width (its height, out of a side). ── */
+  :where(.pocket) {
+    --_dur: calc(var(--cfg-motion) * 0.2s);
+    --_shut: 0 -100%; --_clip-shut: 100% -1lh -1lh; --_clip-open: 0 -1lh -1lh;
+    position: fixed; inset: auto; margin: 0; padding: 0; list-style: none;
+    position-area: bottom; position-visibility: always;
+    min-inline-size: anchor-size(width);
+    display: flex; flex-direction: column;
+    border-radius: var(--cfg-radius);
+    --bg: 0.12; background-color: var(--_bg); --surf: var(--_bg); --surf-bg: var(--bg);
+    border: 1px solid var(--border);
+    transition: translate var(--_dur) ease-out, clip-path var(--_dur) ease-out,
+                display var(--_dur) allow-discrete, overlay var(--_dur) allow-discrete;
+    translate: 0 0; clip-path: inset(var(--_clip-open));
+    &:where(.top)   { position-area: top;   --_shut: 0 100%;  --_clip-shut: -1lh -1lh 100%;      --_clip-open: -1lh -1lh 0; }
+    &:where(.right) { position-area: right; --_shut: -100% 0; --_clip-shut: -1lh -1lh -1lh 100%; --_clip-open: -1lh -1lh -1lh 0; }
+    &:where(.left)  { position-area: left;  --_shut: 100% 0;  --_clip-shut: -1lh 100% -1lh -1lh; --_clip-open: -1lh 0 -1lh -1lh; }
+    &:where(.left, .right) { flex-direction: row; min-inline-size: 0; min-block-size: anchor-size(height); }
+    &:not(:popover-open) { translate: var(--_shut); clip-path: inset(var(--_clip-shut)); display: none; }
+    @starting-style { &:popover-open { translate: var(--_shut); clip-path: inset(var(--_clip-shut)); } }
   }
 
   /* ── toast — THE NOTIFICATION CARD, ONE SHAPE (the toast contract,
