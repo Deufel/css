@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.42 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.42/mike.css
+   mike.css v3.5.43 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.43/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2829,7 +2829,7 @@
       position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
     }
   }
-  /* ── .pocket (v3.5.41, TRIAL, the name is a working one) — a popover that slides
+  /* ── .pocket (v3.5.41; a word of the engine since v3.5.43, EventOS gf-1250) — a popover that slides
      out of its opener's edge whole: translate and clip-path run together,
      so the cut stays on the opener's edge and nothing inside resizes. The
      side is declared (the opener's foot, or .top .left .right) and never
@@ -2854,6 +2854,12 @@
     &:where(.left, .right) { flex-direction: row; min-inline-size: 0; min-block-size: anchor-size(height); }
     &:not(:popover-open) { translate: var(--_shut); clip-path: inset(var(--_clip-shut)); display: none; }
     @starting-style { &:popover-open { translate: var(--_shut); clip-path: inset(var(--_clip-shut)); } }
+    /* a pocket of tiles (v3.5.43, EventOS gf-1250): a .nav-icon in a pocket is the dock's tile — a touch square tall, the pocket's width, its word one line — so a pocket out of a dock tile is a column of the same tiles */
+    & > :where(.nav-icon) {
+      aspect-ratio: auto; flex: none; block-size: var(--cfg-touch); min-block-size: 0; min-inline-size: 0;
+      & > :where(small) { --type: -3; font-weight: 500; white-space: nowrap; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
+      & > :where(svg) { inline-size: 1.35em; block-size: 1.35em; }
+    }
   }
 
   /* ── toast — THE NOTIFICATION CARD, ONE SHAPE (the toast contract,
@@ -4488,6 +4494,14 @@
     :where(.hud) > :where(.br.toasts) { padding-block-end: 1lh; }
     :where(.pg-main-footer) { padding-block-end: 0.25lh; }
     :where(.pg-main-footer) > :where(.nav-version) { min-block-size: 0; }
+    /* THE BAR (v3.5.43, EventOS gf-1250, Mike: "the permanent top right action buttons become search and profile only … sufficient room to put tabs on the header"): where the dock stands the main header's first row is a .flank-end.docked — the page's tabs in a scroller, then Search and the account. Its rule is the header's one line, the whole width, the tabs standing on it; the title row follows under it. */
+    :where(.pg-main-header:has(> .flank-end.docked)) { border-block-end: 0; }
+    :where(.pg-main-header) > :where(.flank-end.docked) {
+      align-items: stretch; margin-inline: -0.25lh; padding-inline: 0.25lh; border-block-end: 1px solid var(--border);
+      & > :where(:first-child) { align-content: end; margin-block-end: -1px; }
+      & :where(.tabs-underline) { border-block-end-color: transparent; }
+      & > :where(:last-child) > :where(button:not(.avatar)) { inline-size: var(--cfg-touch); block-size: var(--cfg-touch); padding: 0; flex: none; border-color: transparent; background-color: transparent; box-shadow: none; }   /* a bare glyph in the touch square, as the phone's title row has its verbs (v3.5.20) */
+    }
   }
 
   /* FOCUS MODE chrome-hide — lives here (not in core.layout) so it beats

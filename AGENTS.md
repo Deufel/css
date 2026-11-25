@@ -362,6 +362,10 @@ gate shows it. THE PLACES (v3.5.40, EventOS gf-1245): a dock whose one
 group is a `<nav>` of `.nav-icon` is the product's places alone — the
 tiles share the band evenly, each its word under its glyph, the one
 shown (`aria-current`) filled at the pole; a tool is never a tile there.
+THE BAR (v3.5.43, EventOS gf-1250): where the dock stands the main
+header's first row is a `.flank-end.docked` — the page's tabs in a
+scroller, then the bare tools, each a touch square; its rule is the
+header's one line and the tabs stand on it.
 THE PERMANENT DOCK (v3.4.2; every touch device, v3.4.6, EventOS gf-1038:
 "we want the persistent dock on tablet as well … gated on app vs
 browser"): the dock — `.page > .hud.dock`, shown by its own gates
@@ -554,7 +558,14 @@ scrolls sideways only and never shrinks (v3.2.13); a stepper is a
 `.field.button-group`, its buttons flush on the field's edge (v3.2.13).
 `.modal.anchored` sits by `position-area` off its
 opener. Menus are `popover` + `popovertarget`; a closed `.menu` must be
-`display:none`.
+`display:none`. A POCKET (v3.5.41; a word since v3.5.43, EventOS gf-1250) is
+`<menu class="pocket" popover>`, anchored as a menu is: it slides whole
+out of its opener's edge — `translate` and `clip-path` together, no
+opacity, nothing inside resizing — a step off the opener, at least the
+opener's width. Its side is declared, the foot or `.top` `.left`
+`.right`, and never flips. A `.nav-icon` in it is the dock's tile, so a
+pocket out of a dock tile is a column of the same tiles. An opener in a
+pocket opens the next while the first stays; the pockets are siblings.
 Anatomy glyphs are DECLARED boxes (`width="24" height="24"`); `.icon`
 self-centres. Know what a word IS before composing it: `.sec` is a
 BUTTON voice — on a wrapper it paints a ghost box.
