@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.45 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.45/mike.css
+   mike.css v3.5.46 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.46/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -459,10 +459,11 @@
        stands — a product's second rail; its navigation is gated off there
        — is its icon width, as on a phone held upright. A navigation whose
        items wear a word under the glyph there states the width the words
-       need, --pg-navigation-w-icon (v3.5.44, EventOS gf-1252, #1787). */
+       need, --pg-navigation-w-icon (v3.5.44, EventOS gf-1252, #1787); a
+       second rail the same, --pg-toolbar-w-icon (v3.5.46, #1823). */
     @media (width < 768px), (height < 576px) {
-      & > :where(.pg-navigation, .pg-toolbar) { min-inline-size: var(--rail-w-icon); max-inline-size: var(--rail-w-icon); }
       & > :where(.pg-navigation) { min-inline-size: var(--pg-navigation-w-icon, var(--rail-w-icon)); max-inline-size: var(--pg-navigation-w-icon, var(--rail-w-icon)); }
+      & > :where(.pg-toolbar) { min-inline-size: var(--pg-toolbar-w-icon, var(--rail-w-icon)); max-inline-size: var(--pg-toolbar-w-icon, var(--rail-w-icon)); }
     }
     /* THE NAVIGATION RAIL IS THREE PARTS (v3.5.3, EventOS gf-1064: "make this
        bottom always here and the main part the scrollable area; same for the
@@ -2414,8 +2415,9 @@
   }
 
   /* ── dock button — svg + <small>: icon over a tiny caption, capped box
-     (an .app-icon shares the anatomy and keeps its own box, gf-407) ── */
-  :where(button:has(> svg):has(> small), .btn:has(> svg):has(> small)):not(.app-icon) {
+     (an .app-icon shares the anatomy and keeps its own box, gf-407; a
+     .nav-item that is a button is its rail's item, v3.5.46, EventOS #1823) ── */
+  :where(button:has(> svg):has(> small), .btn:has(> svg):has(> small)):where(:not(.app-icon, .nav-item)) {
     flex-direction: column; justify-content: flex-start; gap: 0.1em;
     inline-size: 6.8em; block-size: 3.4em;
     padding: 0.4em 0.3em 0.3em; overflow: hidden;
