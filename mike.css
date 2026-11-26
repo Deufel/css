@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
-   mike.css v3.5.44 — one file, thirteen cascade positions, four engines.
-   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.44/mike.css
+   mike.css v3.5.45 — one file, thirteen cascade positions, four engines.
+   https://github.com/Deufel/css · the CDN: cdn.jsdelivr.net/gh/Deufel/css@v3.5.45/mike.css
 
    THE SPINE (declared once, below; the only place layer order is set)
      reset          the modern reset — no sizes, no colours
@@ -2662,17 +2662,8 @@
      its edge */
   :where(.pg-main-header) :where(.fab-1, .fab-2, .fab-3) { margin: 0; }
   :where(.pg-main-header) :where(.fab-1) { border-color: var(--border); }
-  /* a group of them in the header is ONE pill, the dock's (v3.5.27, EventOS:
-     "they should all sit in the same tray … the button outline"): the ring
-     is the group's, drawn inside its box so the row keeps its height, and a
-     control within wears none of its own */
-  :where(.pg-main-header) :where(.row.glass) { padding: 0 0.2em; gap: 0.15em; border-radius: calc(var(--cfg-radius) * 1.25); box-shadow: inset 0 0 0 1px var(--border); flex: none; }
-  :where(.pg-main-header) :where(.row.glass) > :where(.fab-1) { border-color: transparent; }
-  :where(.pg-main-header) :where(.row.glass) > :where(.fab-1):hover { translate: none; }   /* a part of the one pill never lifts out of it (v3.5.32, EventOS #1724) */
-  /* a touch-square glyph in the pill is the glyph alone, as a phone's title row has its verbs (v3.5.20; EventOS gf-1252, the app header's Search) */
-  :where(.pg-main-header) :where(.row.glass) > :where(.btn-touch) { border-color: transparent; background-color: transparent; box-shadow: none; }
-  /* an avatar closing such a group takes the group's corner, so its own does not stand square in a round end (v3.5.29) */
-  :where(.pg-main-header) :where(.row.glass) > :where(.avatar) { border-radius: calc(var(--cfg-radius) * 1.25); }
+  /* THE HEADER'S TRAY IS RETIRED (v3.5.45, EventOS gf-1259, #1793: "remove tray"): a
+     group of controls in the header stands loose in its row, each its own. */
 
   /* ── .hud-pop — a bare anchored surface rising from a hud corner fab: the
      popover box is a transparent positioning frame (the card inside paints).
@@ -4441,8 +4432,12 @@
     :where(.hud) > :where(.br.toasts) { padding-block-end: 1lh; }
     :where(.pg-main-footer) { padding-block-end: 0.25lh; }
     :where(.pg-main-footer) > :where(.nav-version) { min-block-size: 0; }
-    /* THE APP'S HEADER (v3.5.44, EventOS gf-1252): where the dock stands a main header may draw its one line inside itself — under its opening rows, an hr, or the underline of tabs it holds in a scroller — and then draws none at its foot. Asked here because those rows show where the dock does (their gate); every row is a primitive of its own. */
-    :where(.pg-main-header:has(> hr, > nav > .tabs-underline)) { border-block-end: 0; }
+    /* THE APP'S HEADER (v3.5.44, EventOS gf-1252; the tabs beside the tools, v3.5.45, gf-1259, #1790): where the dock stands a main header may draw its one line inside itself — under its opening rows, an hr, or the foot of the row that holds its tabs in a scroller — and then draws none at its foot. Asked here because those rows show where the dock does (their gate); every row is a primitive of its own. THE TABS' ROW is a .flank-end: the scroller of tabs, then the tools; the rule runs the row's whole foot, the tabs standing on it and the tools centred over it. */
+    :where(.pg-main-header:has(> hr, > .flank-end > nav > .tabs-underline)) { border-block-end: 0; }
+    :where(.pg-main-header) > :where(.flank-end:has(> nav > .tabs-underline)) {
+      align-items: end; background: linear-gradient(var(--border), var(--border)) bottom / 100% 1px no-repeat;
+      & > :where(:last-child) { align-self: center; }
+    }
   }
 
   /* FOCUS MODE chrome-hide — lives here (not in core.layout) so it beats
